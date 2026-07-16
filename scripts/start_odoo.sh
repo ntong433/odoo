@@ -130,4 +130,57 @@ case "$database_initialized" in
         ;;
 esac
 
+bootstrap_modules="${LHI_BOOTSTRAP_MODULES:-lhi_base,lhi_security,lhi_audit,lhi_approval_matrix,lhi_feature_control,lhi_web_shell,lhi_dashboard}"
+if [ -n "$bootstrap_modules" ]; then
+    case "$bootstrap_modules" in
+        *[!A-Za-z0-9_,]*|,*|*,|*,,*)
+            echo \
+                "Odoo startup failed: LHI_BOOTSTRAP_MODULES must be a comma-separated list of module technical names." \
+                >&2
+            exit 1
+            ;;
+    esac
+
+    bootstrap_required="$(
+        PGPASSWORD="$POSTGRES_PASSWORD" \
+            psql \
+            --host="${POSTGRES_HOST:-db}" \
+            --port="${POSTGRES_PORT:-5432}" \
+            --username="$POSTGRES_USER" \
+            --dbname="$POSTGRES_DB" \
+            --no-password \
+            --tuples-only \
+            --no-align \
+            --command="
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM unnest(string_to_array('$bootstrap_modules', ',')) AS requested(name)
+                    LEFT JOIN ir_module_module AS module
+                        ON module.name = requested.name
+                    WHERE module.state IS DISTINCT FROM 'installed'
+                )
+            "
+    )"
+
+    case "$bootstrap_required" in
+        t)
+            echo "Installing the approved LHI foundation module set."
+            python3 /opt/odoo/odoo-bin \
+                -c "$runtime_config" \
+                --init="$bootstrap_modules" \
+                --without-demo=all \
+                --stop-after-init
+            ;;
+        f)
+            echo "Approved LHI foundation modules are already installed."
+            ;;
+        *)
+            echo \
+                "Odoo startup failed: unable to determine the LHI foundation module state." \
+                >&2
+            exit 1
+            ;;
+    esac
+fi
+
 exec python3 /opt/odoo/odoo-bin -c "$runtime_config"

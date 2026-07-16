@@ -281,7 +281,8 @@
     border-radius: $lhi-radius-xl;
     box-shadow: $lhi-shadow-xl;
     z-index: $lhi-z-dialog;
-    width: min(560px, calc(100vw - 2rem));
+    width: calc(100vw - 2rem);
+    max-width: 560px;
     max-height: calc(100vh - 4rem);
     display: flex;
     flex-direction: column;
@@ -339,8 +340,8 @@
         gap: $lhi-space-2;
     }
 
-    &--sm { width: min(420px, calc(100vw - 2rem)); }
-    &--lg { width: min(720px, calc(100vw - 2rem)); }
+    &--sm { max-width: 420px; }
+    &--lg { max-width: 720px; }
 }
 
 @keyframes lhi-dialog-in {

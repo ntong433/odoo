@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { Component, onWillStart, useState } from "@odoo/owl";
+import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { dashboardWidgetRegistry } from "../dashboard_widget_registry";
 
@@ -18,7 +19,7 @@ export class MyTasksWidget extends Component {
         onWillStart(async () => {
             try {
                 this.state.count = await this.orm.searchCount("mail.activity", [
-                    ['user_id', '=', this.env.services.user.userId]
+                    ['user_id', '=', user.userId]
                 ]);
             } catch (e) {
                 console.error("Failed to load tasks", e);
@@ -34,7 +35,7 @@ export class MyTasksWidget extends Component {
             name: 'My Activities / Tasks',
             res_model: 'mail.activity',
             view_mode: 'list,form',
-            domain: [['user_id', '=', this.env.services.user.userId]],
+            domain: [['user_id', '=', user.userId]],
             views: [[false, 'list'], [false, 'form']],
         });
     }

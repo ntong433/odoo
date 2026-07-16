@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
 import { Component, onWillStart, useState } from "@odoo/owl";
+import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { dashboardWidgetRegistry } from "../dashboard_widget_registry";
 
@@ -18,7 +19,7 @@ export class MyApprovalsWidget extends Component {
         onWillStart(async () => {
             try {
                 this.state.count = await this.orm.searchCount("lhi.approval.line", [
-                    ['user_id', '=', this.env.services.user.userId],
+                    ['user_id', '=', user.userId],
                     ['status', '=', 'pending']
                 ]);
             } catch (e) {
@@ -35,7 +36,7 @@ export class MyApprovalsWidget extends Component {
             name: 'My Pending Approvals',
             res_model: 'lhi.approval.line',
             view_mode: 'list,form',
-            domain: [['user_id', '=', this.env.services.user.userId], ['status', '=', 'pending']],
+            domain: [['user_id', '=', user.userId], ['status', '=', 'pending']],
             views: [[false, 'list'], [false, 'form']],
         });
     }

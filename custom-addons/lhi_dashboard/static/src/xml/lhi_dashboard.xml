@@ -17,8 +17,7 @@
             <div t-else="" class="lhi-dashboard__grid">
                 <t t-foreach="state.widgets" t-as="widget" t-key="widget.id">
                     <div t-attf-class="lhi-dashboard__widget-wrapper col-span-{{widget.col_span}}">
-                        <!-- Dynamically render the component based on registry_key -->
-                        <t t-component="widget.registry_key" t-props="{ widgetInfo: widget }" />
+                        <t t-component="widget.component" t-props="{ widgetInfo: widget }" />
                     </div>
                 </t>
             </div>

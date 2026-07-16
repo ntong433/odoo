@@ -2,6 +2,7 @@
 
 import { Component, onWillStart, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
+import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { dashboardWidgetRegistry } from "./dashboard_widget_registry";
 
@@ -9,12 +10,11 @@ const actionRegistry = registry.category("actions");
 
 export class LhiDashboard extends Component {
     static template = "lhi_dashboard.Dashboard";
-    static components = {}; // Will be populated with registry widgets dynamically
 
     setup() {
         this.orm = useService("orm");
         this.actionService = useService("action");
-        this.user = useService("user");
+        this.user = user;
         
         this.state = useState({
             widgets: [],
@@ -39,13 +39,11 @@ export class LhiDashboard extends Component {
             this.state.widgets = userWidgets.map(w => {
                 const component = dashboardWidgetRegistry.get(w.registry_key);
                 if (component) {
-                    // Register locally for this instance to use dynamically
-                    this.constructor.components[w.registry_key] = component;
-                    return { ...w, componentLoaded: true };
+                    return { ...w, component };
                 }
                 console.warn(`Dashboard widget component '${w.registry_key}' not found in registry.`);
-                return { ...w, componentLoaded: false };
-            }).filter(w => w.componentLoaded);
+                return null;
+            }).filter(Boolean);
 
         } catch (error) {
             console.error("Failed to load dashboard widgets", error);

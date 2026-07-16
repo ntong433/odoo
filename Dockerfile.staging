@@ -56,12 +56,14 @@ COPY custom-addons /opt/odoo/custom-addons
 COPY scripts /opt/odoo/scripts
 COPY odoo.conf /etc/odoo/odoo.conf
 
-# Set permissions for volume mountpoints and log files
+# Only runtime data and log directories need to be writable by Odoo. Keeping
+# application source root-owned avoids an expensive recursive chown over the
+# full Odoo tree during every Coolify image build.
 RUN mkdir -p /var/lib/odoo /var/log/odoo && \
     chmod 0755 \
         /opt/odoo/scripts/validate_microsoft_env.sh \
         /opt/odoo/scripts/start_odoo.sh && \
-    chown -R odoo:odoo /opt/odoo /var/lib/odoo /etc/odoo /var/log/odoo
+    chown -R odoo:odoo /var/lib/odoo /var/log/odoo
 
 USER odoo
 

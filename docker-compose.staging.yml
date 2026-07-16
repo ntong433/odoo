@@ -3,16 +3,21 @@ services:
     image: postgres:15
     restart: always
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-lhi_erp}
+      POSTGRES_USER: ${POSTGRES_USER:-odoo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in Coolify protected environment settings}
     volumes:
       - postgres_staging_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test:
+        [
+          "CMD-SHELL",
+          'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"',
+        ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      start_period: 10s
 
   odoo:
     build:
@@ -23,15 +28,22 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    ports:
-      - "${ODOO_PORT}:8069"
-      - "8072:8072"
+    expose:
+      - "8069"
+      - "8072"
     volumes:
       - odoo_staging_data:/var/lib/odoo
     environment:
-      - HOST=db
-      - USER=${POSTGRES_USER}
-      - PASSWORD=${POSTGRES_PASSWORD}
+      - ODOO_MASTER_PASSWORD=${ODOO_MASTER_PASSWORD:?Set ODOO_MASTER_PASSWORD in Coolify protected environment settings}
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=${POSTGRES_DB:-lhi_erp}
+      - POSTGRES_USER=${POSTGRES_USER:-odoo}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in Coolify protected environment settings}
+      - ODOO_WORKERS=${ODOO_WORKERS:-0}
+      - ODOO_MAX_CRON_THREADS=${ODOO_MAX_CRON_THREADS:-2}
+      - ODOO_LOG_LEVEL=${ODOO_LOG_LEVEL:-info}
+      - ODOO_INITIALIZE_DATABASE_IF_EMPTY=${ODOO_INITIALIZE_DATABASE_IF_EMPTY:-true}
       - LHI_ENVIRONMENT=${LHI_ENVIRONMENT:-staging}
       - LHI_PUBLIC_URL=${LHI_PUBLIC_URL:-https://work.lhinigeria.org}
       - ENTRA_REDIRECT_URI=${ENTRA_REDIRECT_URI:-https://work.lhinigeria.org/auth_oauth/signin}
@@ -76,12 +88,20 @@ services:
       - LHI_ENTRA_MAINTENANCE_ALLOWED_CIDRS=${LHI_ENTRA_MAINTENANCE_ALLOWED_CIDRS:-}
       - LHI_ENTRA_TRUST_PROXY_HEADERS=${LHI_ENTRA_TRUST_PROXY_HEADERS:-false}
       - LHI_SHAREPOINT_SPOOL_DIR=${LHI_SHAREPOINT_SPOOL_DIR:-/var/lib/odoo/lhi-sharepoint-spool}
-    command:
-      - /bin/sh
-      - -c
-      - >-
-        /opt/odoo/scripts/validate_microsoft_env.sh --configuration-only &&
-        exec python3 /opt/odoo/odoo-bin -c /etc/odoo/odoo.conf
+    command: ["/opt/odoo/scripts/start_odoo.sh"]
+    labels:
+      - "caddy_0.encode=gzip"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS 'http://127.0.0.1:8069/web/health?db_server_status=1' >/dev/null",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
 
 volumes:
   postgres_staging_data:

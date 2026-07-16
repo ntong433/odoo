@@ -90,6 +90,8 @@ services:
       - LHI_ENTRA_TRUST_PROXY_HEADERS=${LHI_ENTRA_TRUST_PROXY_HEADERS:-false}
       - LHI_SHAREPOINT_SPOOL_DIR=${LHI_SHAREPOINT_SPOOL_DIR:-/var/lib/odoo/lhi-sharepoint-spool}
     command: ["/opt/odoo/scripts/start_odoo.sh"]
+    labels:
+      - "caddy_0.encode=gzip"
     healthcheck:
       test:
         [

@@ -58,7 +58,9 @@ COPY odoo.conf /etc/odoo/odoo.conf
 
 # Set permissions for volume mountpoints and log files
 RUN mkdir -p /var/lib/odoo /var/log/odoo && \
-    chmod 0755 /opt/odoo/scripts/validate_microsoft_env.sh && \
+    chmod 0755 \
+        /opt/odoo/scripts/validate_microsoft_env.sh \
+        /opt/odoo/scripts/start_odoo.sh && \
     chown -R odoo:odoo /opt/odoo /var/lib/odoo /etc/odoo /var/log/odoo
 
 USER odoo

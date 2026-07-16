@@ -1,10 +1,27 @@
-.env
-.env.*
-!.env.example
-lhi-sharepoint-identifiers.env
-*.pem
-*.pfx
-*.key
-.git
+# Send only files used by Dockerfile.dev and Dockerfile.staging. This prevents
+# local virtual environments, nested Git history, filestore data, attachments,
+# and unrelated workspace artifacts from being uploaded to the Coolify builder.
+**
+!Dockerfile.dev
+!Dockerfile.staging
+!.dockerignore
+!odoo.conf
+!odoo/
+!odoo/**
+!custom-addons/
+!custom-addons/**
+!scripts/
+!scripts/**
+
+# Exclude generated and sensitive files even below included directories.
+**/.git
+**/.git/**
+**/.env
+**/.env.*
+**/lhi-sharepoint-identifiers.env
+**/*.pem
+**/*.pfx
+**/*.key
 **/__pycache__
+**/__pycache__/**
 **/*.py[co]

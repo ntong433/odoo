@@ -1,0 +1,133 @@
+#!/bin/sh
+set -eu
+
+runtime_config="${ODOO_RUNTIME_CONFIG:-/tmp/lhi-odoo.conf}"
+
+python3 - "$runtime_config" <<'PY'
+import configparser
+import os
+import re
+import sys
+
+
+runtime_config = sys.argv[1]
+required = (
+    "ODOO_MASTER_PASSWORD",
+    "POSTGRES_DB",
+    "POSTGRES_USER",
+    "POSTGRES_PASSWORD",
+)
+missing = [name for name in required if not os.environ.get(name)]
+if missing:
+    print(
+        "Odoo startup failed: required protected variables are missing: "
+        + ", ".join(missing),
+        file=sys.stderr,
+    )
+    raise SystemExit(1)
+
+single_line_names = (
+    *required,
+    "POSTGRES_HOST",
+    "POSTGRES_PORT",
+    "ODOO_WORKERS",
+    "ODOO_MAX_CRON_THREADS",
+)
+for name in single_line_names:
+    value = os.environ.get(name, "")
+    if "\n" in value or "\r" in value:
+        print(
+            f"Odoo startup failed: {name} must be a single-line value.",
+            file=sys.stderr,
+        )
+        raise SystemExit(1)
+
+database = os.environ["POSTGRES_DB"]
+workers = int(os.environ.get("ODOO_WORKERS", "0"))
+max_cron_threads = int(os.environ.get("ODOO_MAX_CRON_THREADS", "2"))
+if workers < 0 or max_cron_threads < 0:
+    print(
+        "Odoo startup failed: worker counts cannot be negative.",
+        file=sys.stderr,
+    )
+    raise SystemExit(1)
+
+config = configparser.ConfigParser(interpolation=None)
+config.optionxform = str
+config["options"] = {
+    "admin_passwd": os.environ["ODOO_MASTER_PASSWORD"],
+    "db_host": os.environ.get("POSTGRES_HOST", "db"),
+    "db_port": os.environ.get("POSTGRES_PORT", "5432"),
+    "db_user": os.environ["POSTGRES_USER"],
+    "db_password": os.environ["POSTGRES_PASSWORD"],
+    "db_name": database,
+    "dbfilter": f"^{re.escape(database)}$",
+    "list_db": "False",
+    "proxy_mode": "True",
+    "addons_path": "/opt/odoo/odoo/addons,/opt/odoo/custom-addons",
+    "data_dir": "/var/lib/odoo",
+    "logfile": "/var/log/odoo/odoo.log",
+    "log_level": os.environ.get("ODOO_LOG_LEVEL", "info"),
+    "log_handler": ":INFO,odoo.addons.lhi_audit:DEBUG",
+    "workers": str(workers),
+    "max_cron_threads": str(max_cron_threads),
+    "limit_memory_soft": "1610612736",
+    "limit_memory_hard": "2147483648",
+    "limit_time_cpu": "600",
+    "limit_time_real": "1200",
+}
+
+old_umask = os.umask(0o077)
+try:
+    with open(runtime_config, "w", encoding="utf-8") as stream:
+        config.write(stream)
+finally:
+    os.umask(old_umask)
+os.chmod(runtime_config, 0o600)
+PY
+
+/opt/odoo/scripts/validate_microsoft_env.sh --configuration-only
+
+database_initialized="$(
+    PGPASSWORD="$POSTGRES_PASSWORD" \
+        psql \
+        --host="${POSTGRES_HOST:-db}" \
+        --port="${POSTGRES_PORT:-5432}" \
+        --username="$POSTGRES_USER" \
+        --dbname="$POSTGRES_DB" \
+        --no-password \
+        --tuples-only \
+        --no-align \
+        --command="SELECT to_regclass('public.ir_module_module') IS NOT NULL"
+)"
+
+case "$database_initialized" in
+    t)
+        ;;
+    f)
+        case "${ODOO_INITIALIZE_DATABASE_IF_EMPTY:-true}" in
+            true|TRUE|1|yes|YES)
+                echo "Odoo database schema is absent; initializing the base module."
+                python3 /opt/odoo/odoo-bin \
+                    -c "$runtime_config" \
+                    --init=base \
+                    --without-demo=all \
+                    --stop-after-init
+                ;;
+            *)
+                echo \
+                    "Odoo startup failed: the configured database is empty and automatic initialization is disabled." \
+                    >&2
+                exit 1
+                ;;
+        esac
+        ;;
+    *)
+        echo \
+            "Odoo startup failed: unable to determine whether the configured database is initialized." \
+            >&2
+        exit 1
+        ;;
+esac
+
+exec python3 /opt/odoo/odoo-bin -c "$runtime_config"

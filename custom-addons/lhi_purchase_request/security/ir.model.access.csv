@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lhi_budget_line_user,lhi.budget.line.user,model_lhi_budget_line,base.group_user,1,1,1,0
+access_lhi_purchase_request_user,lhi.purchase.request.user,model_lhi_purchase_request,base.group_user,1,1,1,0
+access_lhi_purchase_request_line_user,lhi.purchase.request.line.user,model_lhi_purchase_request_line,base.group_user,1,1,1,0
+access_lhi_purchase_request_admin,lhi.purchase.request.admin,model_lhi_purchase_request,base.group_erp_manager,1,1,1,1
+access_lhi_purchase_request_line_admin,lhi.purchase.request.line.admin,model_lhi_purchase_request_line,base.group_erp_manager,1,1,1,1
+access_lhi_budget_line_admin,lhi.budget.line.admin,model_lhi_budget_line,base.group_erp_manager,1,1,1,1

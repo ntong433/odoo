@@ -1,0 +1,10 @@
+.env
+.env.*
+!.env.example
+lhi-sharepoint-identifiers.env
+*.pem
+*.pfx
+*.key
+.git
+**/__pycache__
+**/*.py[co]

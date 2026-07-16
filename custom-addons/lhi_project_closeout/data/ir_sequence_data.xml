@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_lhi_project_closeout" model="ir.sequence">
+            <field name="name">Project Closeout</field>
+            <field name="code">lhi.project.closeout</field>
+            <field name="prefix">CLO/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

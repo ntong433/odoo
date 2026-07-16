@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_graph_connection_list" model="ir.ui.view">
+        <field name="name">lhi.graph.connection.list</field>
+        <field name="model">lhi.graph.connection</field>
+        <field name="arch" type="xml">
+            <list string="Microsoft Graph Connections"
+                  decoration-success="connection_status == 'connected'"
+                  decoration-danger="connection_status == 'failed'"
+                  decoration-warning="connection_status == 'degraded'">
+                <field name="name"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="application_permission_mode"/>
+                <field name="delegated_permission_mode"/>
+                <field name="sharepoint_hostname"/>
+                <field name="connection_status"/>
+                <field name="last_successful_test"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_graph_connection_form" model="ir.ui.view">
+        <field name="name">lhi.graph.connection.form</field>
+        <field name="model">lhi.graph.connection</field>
+        <field name="arch" type="xml">
+            <form string="Microsoft Graph Connection">
+                <header>
+                    <button name="action_test_connection"
+                            type="object"
+                            string="Test Connection"
+                            class="oe_highlight"/>
+                    <button name="action_validate_site"
+                            type="object"
+                            string="Validate Site"/>
+                    <button name="action_validate_libraries"
+                            type="object"
+                            string="Validate Libraries"
+                            invisible="not sharepoint_site_id"/>
+                    <button name="action_run_diagnostics"
+                            type="object"
+                            string="Run Diagnostics"/>
+                    <button name="action_clear_application_token_cache"
+                            type="object"
+                            string="Clear App Token Cache"
+                            confirm="Clear the cached application token? The next background Graph request will obtain a new token."/>
+                    <field name="connection_status" widget="statusbar"
+                           statusbar_visible="not_tested,connected,degraded,failed"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active"/>
+                            <field name="tenant_id" placeholder="Tenant UUID"/>
+                            <field name="client_id" placeholder="Application UUID"/>
+                        </group>
+                        <group>
+                            <field name="last_test_at"/>
+                            <field name="last_successful_test"/>
+                            <field name="last_safe_error" invisible="not last_safe_error"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Application Access">
+                            <group>
+                                <group>
+                                    <field name="application_permission_mode"/>
+                                </group>
+                            </group>
+                            <div class="alert alert-info" role="alert">
+                                Application access uses the OAuth 2.0 client-credentials flow
+                                with ENTRA_TENANT_ID, ENTRA_CLIENT_ID, and ENTRA_CLIENT_SECRET
+                                supplied only through the protected runtime environment. Secret
+                                values are never stored or displayed in Odoo.
+                            </div>
+                            <div class="alert alert-info" role="alert">
+                                Application access is fixed to Sites.Selected. Entra consent alone
+                                grants no SharePoint access; the application must also be assigned
+                                to the approved site.
+                            </div>
+                        </page>
+                        <page string="Delegated Access">
+                            <group>
+                                <field name="delegated_permission_mode"/>
+                                <field name="delegated_scopes"
+                                       invisible="delegated_permission_mode == 'disabled'"/>
+                            </group>
+                            <div class="alert alert-info" role="alert">
+                                Delegated access is limited by both the selected permission assignment
+                                and the signed-in user's existing SharePoint permissions.
+                            </div>
+                        </page>
+                        <page string="SharePoint">
+                            <group>
+                                <group>
+                                    <field name="sharepoint_hostname"/>
+                                    <field name="sharepoint_site_path"/>
+                                    <field name="configured_site_id"/>
+                                    <field name="site_validation_context"/>
+                                </group>
+                                <group>
+                                    <field name="sharepoint_site_id"/>
+                                    <field name="sharepoint_site_web_url" widget="url"/>
+                                </group>
+                            </group>
+                            <field name="library_ids">
+                                <list editable="bottom"
+                                      decoration-success="validation_state == 'valid'"
+                                      decoration-danger="validation_state == 'invalid'">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="code"/>
+                                    <field name="expected_name"/>
+                                    <field name="configured_drive_id"/>
+                                    <field name="drive_id" readonly="1"/>
+                                    <field name="root_item_id" readonly="1"/>
+                                    <field name="validation_state" readonly="1"/>
+                                    <button name="action_validate"
+                                            type="object"
+                                            string="Validate"
+                                            icon="fa-check-circle"/>
+                                </list>
+                                <form string="SharePoint Document Library">
+                                    <header>
+                                        <button name="action_validate"
+                                                type="object"
+                                                string="Validate"
+                                                class="oe_highlight"/>
+                                        <field name="validation_state" widget="statusbar"/>
+                                    </header>
+                                    <sheet>
+                                        <group>
+                                            <field name="code"/>
+                                            <field name="expected_name"/>
+                                            <field name="configured_drive_id"/>
+                                            <field name="drive_id"/>
+                                            <field name="root_item_id"/>
+                                            <field name="drive_web_url" widget="url"/>
+                                            <field name="last_validated_at"/>
+                                            <field name="validation_message"/>
+                                        </group>
+                                    </sheet>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Reliability">
+                            <group>
+                                <group>
+                                    <field name="timeout_seconds"/>
+                                    <field name="max_retries"/>
+                                    <field name="backoff_base_seconds"/>
+                                </group>
+                                <group>
+                                    <field name="maximum_retry_after_seconds"/>
+                                    <field name="token_expiry_skew_seconds"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                    <chatter/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_lhi_graph_connection" model="ir.actions.act_window">
+        <field name="name">Microsoft Graph Connections</field>
+        <field name="res_model">lhi.graph.connection</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

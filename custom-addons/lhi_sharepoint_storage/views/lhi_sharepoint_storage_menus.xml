@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_lhi_sharepoint_documents"
+              name="SharePoint Documents"
+              parent="lhi_integration.menu_lhi_integration_monitoring"
+              action="action_lhi_document_item"
+              sequence="50"
+              groups="lhi_security.group_lhi_erp_admin,lhi_security.group_lhi_internal_auditor"/>
+    <menuitem id="menu_lhi_sharepoint_storage_policies"
+              name="Document Storage Policies"
+              parent="lhi_microsoft_graph_core.menu_lhi_graph_configuration"
+              action="action_lhi_document_storage_policy"
+              sequence="30"
+              groups="lhi_security.group_lhi_erp_admin"/>
+</odoo>
+

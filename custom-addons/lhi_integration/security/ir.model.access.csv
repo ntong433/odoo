@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lhi_integration_connection_admin,lhi.integration.connection.admin,model_lhi_integration_connection,base.group_erp_manager,1,1,1,1
+access_lhi_integration_job_admin,lhi.integration.job.admin,model_lhi_integration_job,base.group_erp_manager,1,1,1,1
+access_lhi_integration_webhook_admin,lhi.integration.webhook.admin,model_lhi_integration_webhook,base.group_erp_manager,1,1,1,1
+access_lhi_integration_job_user,lhi.integration.job.user,model_lhi_integration_job,base.group_user,1,0,0,0

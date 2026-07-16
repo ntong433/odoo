@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+    <t t-name="lhi_document_workspace.DocumentWorkspace">
+        <div class="lhi-document-workspace">
+            <input t-ref="versionFileInput" type="file" class="d-none" t-on-change="onVersionFileSelected"/>
+            <div t-if="!recordId" class="lhi-document-workspace__empty">
+                <i class="fa fa-floppy-o"/>
+                <span>Save the record before opening its document workspace.</span>
+            </div>
+            <t t-else="">
+                <div class="lhi-document-workspace__toolbar">
+                    <div class="lhi-document-workspace__search">
+                        <i class="fa fa-search"/>
+                        <input type="search"
+                               placeholder="Search documents"
+                               t-model="state.query"
+                               t-on-keydown.enter="loadWorkspace"/>
+                    </div>
+                    <select t-model="state.category" t-on-change="loadWorkspace" aria-label="Document category">
+                        <option value="">All categories</option>
+                        <t t-foreach="[...new Set(state.documents.map((value) => value.category).filter(Boolean))]" t-as="category" t-key="category">
+                            <option t-att-value="category"><t t-esc="category"/></option>
+                        </t>
+                    </select>
+                    <select t-model="state.workflowState" t-on-change="loadWorkspace" aria-label="Workflow state">
+                        <option value="">All workflow states</option>
+                        <t t-foreach="[...new Set(state.documents.map((value) => value.workflow_state).filter(Boolean))]" t-as="workflowState" t-key="workflowState">
+                            <option t-att-value="workflowState"><t t-esc="workflowState"/></option>
+                        </t>
+                    </select>
+                    <select t-if="state.projectScopeAvailable" t-model="state.scope" t-on-change="loadWorkspace" aria-label="Document scope">
+                        <option value="record">This record</option>
+                        <option value="project">Permitted project scope</option>
+                    </select>
+                    <button type="button" class="lhi-btn lhi-btn--secondary lhi-btn--sm" t-on-click="loadWorkspace">
+                        <i class="fa fa-refresh"/> Refresh
+                    </button>
+                    <button type="button" class="lhi-btn lhi-btn--primary lhi-btn--sm" t-on-click="openTemplateDialog">
+                        <i class="fa fa-plus"/> New from template
+                    </button>
+                </div>
+
+                <div t-if="state.truncated" class="alert alert-info mb-2">
+                    This workspace is showing the newest 100 permitted documents. Narrow the search to find older items.
+                </div>
+                <div t-if="state.loading" class="lhi-document-workspace__loading">
+                    <i class="fa fa-spinner fa-spin"/> Loading permitted SharePoint documents…
+                </div>
+                <div t-elif="!state.documents.length" class="lhi-document-workspace__empty">
+                    <i class="fa fa-folder-open-o"/>
+                    <span>No permitted documents match this record and filter.</span>
+                </div>
+                <div t-else="" class="lhi-document-workspace__body">
+                    <section class="lhi-document-workspace__list" aria-label="Documents">
+                        <article t-foreach="state.documents"
+                                 t-as="document"
+                                 t-key="document.uuid"
+                                 t-att-class="{
+                                     'lhi-document-row': true,
+                                     'lhi-document-row--selected': state.selectedUuid === document.uuid,
+                                 }">
+                            <button type="button"
+                                    class="lhi-document-row__main"
+                                    t-on-click="() => this.selectDocument(document)"
+                                    t-att-disabled="!document.can_preview">
+                                <i t-att-class="document.office_type ? 'fa fa-file-word-o' : (document.mime_type === 'application/pdf' ? 'fa fa-file-pdf-o' : (document.mime_type.startsWith('image/') ? 'fa fa-file-image-o' : 'fa fa-file-o'))"/>
+                                <span class="lhi-document-row__identity">
+                                    <strong t-esc="document.name"/>
+                                    <small>
+                                        <t t-esc="document.category || 'Business document'"/>
+                                        <t t-if="document.version"> · Version <t t-esc="document.version"/></t>
+                                        <t t-if="document.modified_by"> · <t t-esc="document.modified_by"/></t>
+                                    </small>
+                                </span>
+                                <span t-att-class="'lhi-badge lhi-badge--soft-' + (document.storage_state === 'available' ? 'success' : 'danger')" t-esc="document.storage_state"/>
+                                <span t-if="document.workflow_state" class="lhi-badge lhi-badge--soft-neutral" t-esc="document.workflow_state"/>
+                                <i t-if="document.locked" class="fa fa-lock" title="Workflow locked"/>
+                            </button>
+                            <div class="lhi-document-row__actions">
+                                <button type="button" title="Preview" t-on-click="() => this.selectDocument(document)" t-att-disabled="!document.can_preview"><i class="fa fa-eye"/></button>
+                                <button type="button" title="Edit in Microsoft 365" t-on-click="() => this.editDocument(document)" t-att-disabled="!document.can_edit"><i class="fa fa-pencil-square-o"/></button>
+                                <button type="button" title="Open in desktop application" t-on-click="() => this.openDesktop(document)" t-att-disabled="!document.can_edit"><i class="fa fa-desktop"/></button>
+                                <button type="button" title="Download" t-on-click="() => this.downloadDocument(document)" t-att-disabled="!document.can_preview"><i class="fa fa-download"/></button>
+                                <button type="button" title="Version history" t-on-click="() => this.showVersions(document)" t-att-disabled="!document.can_preview"><i class="fa fa-history"/></button>
+                                <button type="button" title="Copy governed link" t-on-click="() => this.copyGovernedLink(document)" t-att-disabled="!document.can_preview"><i class="fa fa-link"/></button>
+                                <button type="button" title="Upload new version" t-on-click="() => this.chooseVersionFile(document, 'new_version')" t-att-disabled="!document.can_write || state.uploading"><i class="fa fa-upload"/></button>
+                                <button type="button" title="Replace content" t-on-click="() => this.chooseVersionFile(document, 'replace')" t-att-disabled="!document.can_write || state.uploading"><i class="fa fa-exchange"/></button>
+                                <button type="button" title="Archive" class="text-danger" t-on-click="() => this.archiveDocument(document)" t-att-disabled="!document.can_write"><i class="fa fa-archive"/></button>
+                            </div>
+                        </article>
+                    </section>
+                    <section class="lhi-document-workspace__preview" aria-label="Document preview">
+                        <iframe t-if="state.previewUrl"
+                                t-att-src="state.previewUrl"
+                                title="Microsoft document preview"
+                                allowfullscreen="allowfullscreen"/>
+                        <div t-else="" class="lhi-document-workspace__preview-placeholder">
+                            <i class="fa fa-eye"/>
+                            <span>Select a document to preview it inside Odoo.</span>
+                        </div>
+                    </section>
+                </div>
+            </t>
+
+            <div t-if="state.showVersions" class="lhi-overlay" t-on-click.self="() => state.showVersions = false">
+                <div class="lhi-dialog" role="dialog" aria-modal="true" aria-label="Version history">
+                    <div class="lhi-dialog__header">
+                        <div>
+                            <h3 class="lhi-dialog__title">Version history</h3>
+                            <small t-esc="state.versionsDocument?.name"/>
+                        </div>
+                        <button type="button" class="lhi-dialog__close" t-on-click="() => state.showVersions = false"><i class="fa fa-times"/></button>
+                    </div>
+                    <div class="lhi-dialog__body">
+                        <div t-if="!state.versions.length" class="text-muted">No SharePoint versions were returned.</div>
+                        <table t-else="" class="lhi-table">
+                            <thead><tr><th>Version</th><th>Modified</th><th>Modified by</th><th>Size</th></tr></thead>
+                            <tbody>
+                                <tr t-foreach="state.versions" t-as="version" t-key="version.id">
+                                    <td t-esc="version.id"/>
+                                    <td t-esc="version.modified_at"/>
+                                    <td t-esc="version.modified_by"/>
+                                    <td><t t-esc="Math.round(version.size / 1024)"/> KiB</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div t-if="state.showTemplateDialog" class="lhi-overlay" t-on-click.self="() => state.showTemplateDialog = false">
+                <div class="lhi-dialog" role="dialog" aria-modal="true" aria-label="New Office document">
+                    <div class="lhi-dialog__header">
+                        <h3 class="lhi-dialog__title">New Office document</h3>
+                        <button type="button" class="lhi-dialog__close" t-on-click="() => state.showTemplateDialog = false"><i class="fa fa-times"/></button>
+                    </div>
+                    <div class="lhi-dialog__body">
+                        <label>Approved SharePoint template</label>
+                        <select class="form-select mb-3" t-model="state.selectedTemplateId">
+                            <option t-foreach="state.templates" t-as="template" t-key="template.id" t-att-value="template.id">
+                                <t t-esc="template.name"/> (<t t-esc="template.source_name"/>)
+                            </option>
+                        </select>
+                        <label>Document name</label>
+                        <input class="form-control" type="text" maxlength="120" placeholder="e.g. Q3 Donor Report" t-model="state.templateFilename" t-on-keydown.enter="createFromTemplate"/>
+                        <small class="text-muted">The approved template extension is added automatically when omitted.</small>
+                    </div>
+                    <div class="lhi-dialog__footer">
+                        <button type="button" class="lhi-btn lhi-btn--secondary" t-on-click="() => state.showTemplateDialog = false">Cancel</button>
+                        <button type="button" class="lhi-btn lhi-btn--primary" t-on-click="createFromTemplate" t-att-disabled="state.creating">
+                            <i t-att-class="state.creating ? 'fa fa-spinner fa-spin' : 'fa fa-external-link'"/> Create and edit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>
+

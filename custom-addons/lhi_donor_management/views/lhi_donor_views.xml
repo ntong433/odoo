@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_donor_form_inherit_management" model="ir.ui.view">
+        <field name="name">lhi.donor.form.inherit.management</field>
+        <field name="model">lhi.donor</field>
+        <field name="inherit_id" ref="lhi_base.view_lhi_donor_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="before">
+                <div class="oe_button_box" name="button_box">
+                    <button class="oe_stat_button" type="object" name="action_view_opportunities" icon="fa-star">
+                        <field string="Opportunities" name="opportunity_count" widget="statinfo"/>
+                    </button>
+                </div>
+            </xpath>
+            <xpath expr="//group" position="inside">
+                <group string="Relationship Details">
+                    <field name="partner_id"/>
+                    <field name="past_performance_score"/>
+                </group>
+            </xpath>
+            <xpath expr="//sheet" position="inside">
+                <notebook>
+                    <page string="Strategic Focus" name="strategic_focus">
+                        <group>
+                            <field name="strategic_focus_ids" widget="many2many_tags"/>
+                            <field name="geography_ids" widget="many2many_tags"/>
+                            <field name="compliance_requirements"/>
+                        </group>
+                    </page>
+                    <page string="Contacts" name="contacts">
+                        <field name="contact_ids">
+                            <list>
+                                <field name="name"/>
+                                <field name="function"/>
+                                <field name="email"/>
+                                <field name="phone"/>
+                            </list>
+                        </field>
+                    </page>
+                </notebook>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Dummy action for the stat button so it doesn't break before lhi_funding_opportunity is installed -->
+    <record id="action_lhi_donor_opportunities" model="ir.actions.act_window">
+        <field name="name">Opportunities</field>
+        <field name="res_model">lhi.donor</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('id', '=', 0)]</field>
+    </record>
+</odoo>

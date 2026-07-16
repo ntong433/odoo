@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_users_form_lhi_entra_identity_sync" model="ir.ui.view">
+        <field name="name">res.users.form.lhi.entra.identity.sync</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="lhi_integration.view_users_form_lhi_entra"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='lhi_integration']/group" position="inside">
+                <group string="Microsoft Entra Identity" groups="lhi_security.group_lhi_erp_admin">
+                    <field name="entra_object_id"/>
+                    <field name="entra_tenant_id"/>
+                    <field name="entra_upn"/>
+                    <field name="entra_account_enabled"/>
+                    <field name="entra_manager_object_id"/>
+                    <field name="entra_manager_user_id"/>
+                    <field name="entra_last_sync_at"/>
+                    <field name="entra_sync_state"/>
+                    <field name="identity_source"/>
+                    <field name="entra_login_blocked"/>
+                </group>
+                <group string="Protected Maintenance Access" groups="base.group_system,lhi_security.group_lhi_erp_admin">
+                    <field name="lhi_local_maintenance_admin"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>
+

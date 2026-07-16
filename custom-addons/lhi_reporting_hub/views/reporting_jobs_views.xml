@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Reporting Jobs Views -->
+    <record id="view_lhi_reporting_job_form" model="ir.ui.view">
+        <field name="name">lhi.reporting.job.form</field>
+        <field name="model">lhi.reporting.job</field>
+        <field name="arch" type="xml">
+            <form string="Data Sync Job">
+                <header>
+                    <button name="action_run_sync" string="Run Sync Now" type="object" class="oe_highlight"/>
+                    <field name="status" widget="statusbar" statusbar_visible="idle,running,success,failed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Dataset Name"/></h1>
+                    </div>
+                    <group>
+                        <group string="Configuration">
+                            <field name="target_table"/>
+                            <field name="is_active"/>
+                        </group>
+                        <group string="Execution Status">
+                            <field name="last_run" readonly="1"/>
+                            <field name="records_synced" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Extraction Query">
+                            <field name="extraction_query" widget="ace" options="{'mode': 'sql'}"/>
+                        </page>
+                        <page string="Error Log" invisible="status != 'failed'">
+                            <field name="last_error" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_reporting_job_tree" model="ir.ui.view">
+        <field name="name">lhi.reporting.job.tree</field>
+        <field name="model">lhi.reporting.job</field>
+        <field name="arch" type="xml">
+            <list string="Data Sync Jobs">
+                <field name="name"/>
+                <field name="target_table"/>
+                <field name="last_run"/>
+                <field name="status" widget="badge"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Data Quality Checks Views -->
+    <record id="view_lhi_data_quality_check_tree" model="ir.ui.view">
+        <field name="name">lhi.data.quality.check.tree</field>
+        <field name="model">lhi.data.quality.check</field>
+        <field name="arch" type="xml">
+            <list string="Data Quality Checks">
+                <field name="name"/>
+                <field name="job_id"/>
+                <field name="is_passing" widget="boolean_toggle"/>
+                <field name="last_run"/>
+                <button name="action_evaluate" type="object" string="Evaluate" icon="fa-play"/>
+            </list>
+        </field>
+    </record>
+</odoo>

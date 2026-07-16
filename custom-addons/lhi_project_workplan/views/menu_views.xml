@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_lhi_workplan" model="ir.actions.act_window">
+        <field name="name">Project Workplans</field>
+        <field name="res_model">lhi.workplan</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_lhi_workplan_search"/>
+    </record>
+    
+    <record id="action_lhi_workplan_activity" model="ir.actions.act_window">
+        <field name="name">Workplan Activities</field>
+        <field name="res_model">lhi.workplan.activity</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Create menus -->
+    <menuitem id="menu_lhi_workplan_root" name="Workplans" parent="lhi_base.menu_lhi_project_root" sequence="20"/>
+    <menuitem id="menu_lhi_workplan" name="Workplans" parent="menu_lhi_workplan_root" action="action_lhi_workplan" sequence="10"/>
+    <menuitem id="menu_lhi_workplan_activity" name="Activities" parent="menu_lhi_workplan_root" action="action_lhi_workplan_activity" sequence="20"/>
+</odoo>

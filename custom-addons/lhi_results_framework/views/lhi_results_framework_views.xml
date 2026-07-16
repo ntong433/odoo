@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_results_framework_form" model="ir.ui.view">
+        <field name="name">lhi.results.framework.form</field>
+        <field name="model">lhi.results.framework</field>
+        <field name="arch" type="xml">
+            <form string="Results Framework">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g. 2030 Global Results Framework"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="project_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Framework Elements">
+                            <field name="element_ids">
+                                <list>
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="code"/>
+                                    <field name="name"/>
+                                    <field name="element_type"/>
+                                    <field name="parent_id"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_results_framework_tree" model="ir.ui.view">
+        <field name="name">lhi.results.framework.tree</field>
+        <field name="model">lhi.results.framework</field>
+        <field name="arch" type="xml">
+            <list string="Results Frameworks">
+                <field name="name"/>
+                <field name="project_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_results_element_form" model="ir.ui.view">
+        <field name="name">lhi.results.element.form</field>
+        <field name="model">lhi.results.element</field>
+        <field name="arch" type="xml">
+            <form string="Results Element">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g. Improved access to water"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="element_type"/>
+                            <field name="framework_id"/>
+                        </group>
+                        <group>
+                            <field name="parent_id" domain="[('framework_id', '=', framework_id)]"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Indicators">
+                            <field name="indicator_ids">
+                                <list>
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="code"/>
+                                    <field name="name"/>
+                                    <field name="target"/>
+                                    <field name="unit"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+</odoo>

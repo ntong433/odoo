@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Clarification Form -->
+    <record id="view_lhi_proposal_clarification_form" model="ir.ui.view">
+        <field name="name">lhi.proposal.clarification.form</field>
+        <field name="model">lhi.proposal.clarification</field>
+        <field name="arch" type="xml">
+            <form string="Clarification">
+                <header>
+                    <field name="status" widget="statusbar" options="{'clickable': '1'}"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="submission_id" readonly="1"/>
+                            <field name="date_received"/>
+                            <field name="deadline"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="question"/>
+                        <field name="response"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Submission Form -->
+    <record id="view_lhi_proposal_submission_form" model="ir.ui.view">
+        <field name="name">lhi.proposal.submission.form</field>
+        <field name="model">lhi.proposal.submission</field>
+        <field name="arch" type="xml">
+            <form string="Proposal Submission">
+                <header>
+                    <field name="state" widget="statusbar" options="{'clickable': '1'}"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="workspace_id" readonly="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="submission_date"/>
+                            <field name="submission_method"/>
+                            <field name="acknowledgement_received"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Submission Package">
+                            <group>
+                                <field name="narrative_snapshot" filename="name"/>
+                                <field name="budget_snapshot" filename="name"/>
+                                <field name="annexes_snapshot" widget="lhi_sharepoint_many2many_binary"/>
+                            </group>
+                        </page>
+                        <page string="Clarifications">
+                            <field name="clarification_ids">
+                                <list>
+                                    <field name="date_received"/>
+                                    <field name="deadline"/>
+                                    <field name="status" widget="badge" decoration-success="status == 'responded'" decoration-warning="status == 'open'"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Submission Tree -->
+    <record id="view_lhi_proposal_submission_tree" model="ir.ui.view">
+        <field name="name">lhi.proposal.submission.tree</field>
+        <field name="model">lhi.proposal.submission</field>
+        <field name="arch" type="xml">
+            <list string="Proposal Submissions" decoration-muted="state == 'revised'" decoration-success="state == 'awarded'" decoration-danger="state == 'rejected'">
+                <field name="name"/>
+                <field name="workspace_id"/>
+                <field name="submission_date"/>
+                <field name="state" widget="badge" decoration-success="state == 'awarded'" decoration-danger="state == 'rejected'"/>
+            </list>
+        </field>
+    </record>
+</odoo>

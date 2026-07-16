@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_lhi_operations_root" name="Operations &amp; Assets" sequence="60" web_icon="lhi_asset_management,static/description/icon.png"/>
+
+    <record id="action_lhi_asset" model="ir.actions.act_window">
+        <field name="name">Assets Register</field>
+        <field name="res_model">lhi.asset</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_lhi_asset_transfer" model="ir.actions.act_window">
+        <field name="name">Asset Transfers</field>
+        <field name="res_model">lhi.asset.transfer</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_lhi_asset" name="Assets" parent="menu_lhi_operations_root" action="action_lhi_asset" sequence="10"/>
+    <menuitem id="menu_lhi_asset_transfer" name="Transfers &amp; Disposals" parent="menu_lhi_operations_root" action="action_lhi_asset_transfer" sequence="20"/>
+</odoo>

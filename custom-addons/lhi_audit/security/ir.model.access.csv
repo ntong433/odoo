@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lhi_audit_log_auditor,lhi.audit.log.auditor,model_lhi_audit_log,lhi_security.group_lhi_internal_auditor,1,0,0,0
+access_lhi_audit_log_manager,lhi.audit.log.manager,model_lhi_audit_log,lhi_security.group_lhi_manager,1,0,0,0

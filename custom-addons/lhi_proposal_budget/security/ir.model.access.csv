@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lhi_proposal_budget_user,lhi.proposal.budget.user,model_lhi_proposal_budget,base.group_user,1,1,1,0
+access_lhi_proposal_budget_admin,lhi.proposal.budget.admin,model_lhi_proposal_budget,base.group_erp_manager,1,1,1,1
+access_lhi_proposal_budget_line_user,lhi.proposal.budget.line.user,model_lhi_proposal_budget_line,base.group_user,1,1,1,1
+access_lhi_proposal_budget_line_admin,lhi.proposal.budget.line.admin,model_lhi_proposal_budget_line,base.group_erp_manager,1,1,1,1
+access_lhi_proposal_submission_user,lhi.proposal.submission.user,model_lhi_proposal_submission,base.group_user,1,1,1,0
+access_lhi_proposal_submission_admin,lhi.proposal.submission.admin,model_lhi_proposal_submission,base.group_erp_manager,1,1,1,1
+access_lhi_proposal_clarification_user,lhi.proposal.clarification.user,model_lhi_proposal_clarification,base.group_user,1,1,1,0
+access_lhi_proposal_clarification_admin,lhi.proposal.clarification.admin,model_lhi_proposal_clarification,base.group_erp_manager,1,1,1,1
+access_lhi_proposal_award_wizard_user,lhi.proposal.award.wizard.user,model_lhi_proposal_award_wizard,base.group_user,1,1,1,1

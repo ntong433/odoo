@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_project_issue_form" model="ir.ui.view">
+        <field name="name">lhi.project.issue.form</field>
+        <field name="model">lhi.project.issue</field>
+        <field name="arch" type="xml">
+            <form string="Project Issue">
+                <header>
+                    <button name="action_open" string="Open Issue" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_resolve" string="Mark Resolved" type="object" class="btn-success" invisible="state != 'open'"/>
+                    <button name="action_close" string="Approve &amp; Close" type="object" class="oe_highlight" invisible="state != 'resolved'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,open,resolved,closed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="project_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="owner_id" widget="many2one_avatar_user"/>
+                        </group>
+                        <group>
+                            <field name="due_date"/>
+                            <field name="closure_approval_id" widget="many2one_avatar_user" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description &amp; Actions">
+                            <field name="description" placeholder="Describe the issue..."/>
+                            <separator string="Corrective Actions"/>
+                            <field name="corrective_action" placeholder="What actions are being taken to resolve this?"/>
+                        </page>
+                        <page string="Evidence">
+                            <field name="resolution_evidence_ids" widget="lhi_sharepoint_many2many_binary"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_project_issue_tree" model="ir.ui.view">
+        <field name="name">lhi.project.issue.tree</field>
+        <field name="model">lhi.project.issue</field>
+        <field name="arch" type="xml">
+            <list string="Project Issues" decoration-danger="state == 'open'" decoration-success="state == 'closed'">
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="owner_id" widget="many2one_avatar_user"/>
+                <field name="due_date"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_project_issue_search" model="ir.ui.view">
+        <field name="name">lhi.project.issue.search</field>
+        <field name="model">lhi.project.issue</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="owner_id"/>
+                <filter string="My Issues" name="my_issues" domain="[('owner_id', '=', uid)]"/>
+                <filter string="Open" name="open" domain="[('state', '=', 'open')]"/>
+                <group>
+                    <filter string="Project" name="project" context="{'group_by':'project_id'}"/>
+                    <filter string="Status" name="status" context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+</odoo>

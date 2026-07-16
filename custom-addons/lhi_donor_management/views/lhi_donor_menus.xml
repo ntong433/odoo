@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- We will let lhi_funding_opportunity define the main menu, but just in case, we add it to contacts for now -->
+    <menuitem id="menu_lhi_donor_management"
+              name="Donors"
+              parent="contacts.menu_contacts"
+              action="lhi_base.action_lhi_donor"
+              sequence="50"/>
+</odoo>

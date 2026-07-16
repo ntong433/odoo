@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- We restrict the main accounting menu to only members of our special Sandbox group or System admin.
+         Even if they can see it, posting operations are blocked by the model overrides. -->
+    <record id="account.menu_finance" model="ir.ui.menu">
+        <field name="groups_id" eval="[(6, 0, [ref('lhi_accounting_base.group_lhi_accounting_sandbox'), ref('base.group_system')])]"/>
+    </record>
+    
+    <!-- Also protect Invoicing dashboard -->
+    <record id="account.menu_board_journal_1" model="ir.ui.menu">
+        <field name="groups_id" eval="[(6, 0, [ref('lhi_accounting_base.group_lhi_accounting_sandbox'), ref('base.group_system')])]"/>
+    </record>
+</odoo>

@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_project_risk_form" model="ir.ui.view">
+        <field name="name">lhi.project.risk.form</field>
+        <field name="model">lhi.project.risk</field>
+        <field name="arch" type="xml">
+            <form string="Project Risk">
+                <header>
+                    <button name="action_activate" string="Activate" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_escalate" string="Escalate" type="object" class="btn-warning" invisible="state not in ('active', 'draft')"/>
+                    <button name="action_close" string="Close Risk" type="object" invisible="state == 'closed'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,active,escalated,closed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group string="Basic Information">
+                            <field name="project_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="category_id"/>
+                            <field name="owner_id" widget="many2one_avatar_user"/>
+                        </group>
+                        <group string="Tracking &amp; Escalation">
+                            <field name="review_date"/>
+                            <field name="escalation_level"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Risk Scoring">
+                            <group>
+                                <group string="Inherent Risk (Before Mitigation)">
+                                    <field name="inherent_likelihood_id"/>
+                                    <field name="inherent_impact_id"/>
+                                    <field name="inherent_score"/>
+                                </group>
+                                <group string="Residual Risk (After Mitigation)">
+                                    <field name="residual_likelihood_id"/>
+                                    <field name="residual_impact_id"/>
+                                    <field name="residual_score"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Mitigation Strategy">
+                            <field name="mitigation_actions" placeholder="Describe actions to mitigate this risk..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_project_risk_tree" model="ir.ui.view">
+        <field name="name">lhi.project.risk.tree</field>
+        <field name="model">lhi.project.risk</field>
+        <field name="arch" type="xml">
+            <list string="Project Risks" decoration-danger="state == 'escalated'" decoration-muted="state == 'closed'">
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="category_id"/>
+                <field name="owner_id" widget="many2one_avatar_user"/>
+                <field name="inherent_score"/>
+                <field name="residual_score"/>
+                <field name="escalation_level"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_project_risk_search" model="ir.ui.view">
+        <field name="name">lhi.project.risk.search</field>
+        <field name="model">lhi.project.risk</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="owner_id"/>
+                <filter string="My Risks" name="my_risks" domain="[('owner_id', '=', uid)]"/>
+                <filter string="Active Risks" name="active" domain="[('state', 'in', ['active', 'escalated'])]"/>
+                <filter string="Escalated" name="escalated" domain="[('state', '=', 'escalated')]"/>
+                <group>
+                    <filter string="Project" name="project" context="{'group_by':'project_id'}"/>
+                    <filter string="Category" name="category" context="{'group_by':'category_id'}"/>
+                    <filter string="Status" name="status" context="{'group_by':'state'}"/>
+                    <filter string="Escalation Level" name="escalation" context="{'group_by':'escalation_level'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_lhi_project_risk_graph" model="ir.ui.view">
+        <field name="name">lhi.project.risk.graph</field>
+        <field name="model">lhi.project.risk</field>
+        <field name="arch" type="xml">
+            <graph string="Risk Matrix Overview" type="bar">
+                <field name="project_id" type="row"/>
+                <field name="state" type="col"/>
+                <field name="inherent_score" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_lhi_project_risk_pivot" model="ir.ui.view">
+        <field name="name">lhi.project.risk.pivot</field>
+        <field name="model">lhi.project.risk</field>
+        <field name="arch" type="xml">
+            <pivot string="Risk Analysis" display_quantity="true">
+                <field name="project_id" type="row"/>
+                <field name="category_id" type="col"/>
+                <field name="residual_score" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+</odoo>

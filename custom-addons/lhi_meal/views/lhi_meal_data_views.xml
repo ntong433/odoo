@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_meal_data_form" model="ir.ui.view">
+        <field name="name">lhi.meal.data.form</field>
+        <field name="model">lhi.meal.data</field>
+        <field name="arch" type="xml">
+            <form string="MEAL Data Record">
+                <header>
+                    <button name="action_submit" string="Submit for Verification" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_approve" string="Verify &amp; Approve" type="object" class="btn-success" invisible="state != 'submitted'"/>
+                    <button name="action_reject" string="Reject" type="object" class="btn-danger" invisible="state != 'submitted'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,approved"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group string="Indicator &amp; Context">
+                            <field name="indicator_id"/>
+                            <field name="activity_id" domain="[('project_id', '=', project_id)]"/>
+                            <field name="project_id"/>
+                            <field name="location_id"/>
+                        </group>
+                        <group string="Measurement">
+                            <field name="date_reported"/>
+                            <field name="reporting_period"/>
+                            <field name="achieved_value"/>
+                            <field name="unit"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Narrative &amp; Details">
+                            <field name="narrative" placeholder="Detailed explanation of the achieved results..."/>
+                            <group>
+                                <field name="is_sensitive" widget="boolean_toggle"/>
+                            </group>
+                        </page>
+                        <page string="Evidence Library">
+                            <field name="evidence_ids">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="evidence_type"/>
+                                    <field name="attachment_ids" widget="lhi_sharepoint_many2many_binary"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Verification">
+                            <group>
+                                <field name="reporter_id" widget="many2one_avatar_user" readonly="1"/>
+                                <field name="reviewer_id" widget="many2one_avatar_user" readonly="1"/>
+                                <field name="correction_feedback" placeholder="Provide feedback if rejecting..."/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_meal_data_tree" model="ir.ui.view">
+        <field name="name">lhi.meal.data.tree</field>
+        <field name="model">lhi.meal.data</field>
+        <field name="arch" type="xml">
+            <list string="MEAL Data Records" decoration-info="state == 'submitted'" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'">
+                <field name="name"/>
+                <field name="date_reported"/>
+                <field name="indicator_id"/>
+                <field name="achieved_value"/>
+                <field name="is_sensitive" widget="boolean_toggle" readonly="1"/>
+                <field name="reporter_id" widget="many2one_avatar_user"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_meal_data_search" model="ir.ui.view">
+        <field name="name">lhi.meal.data.search</field>
+        <field name="model">lhi.meal.data</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="indicator_id"/>
+                <field name="project_id"/>
+                <filter string="My Records" name="my_records" domain="[('reporter_id', '=', uid)]"/>
+                <filter string="To Verify" name="to_verify" domain="[('state', '=', 'submitted')]"/>
+                <filter string="Sensitive Data" name="sensitive" domain="[('is_sensitive', '=', True)]"/>
+                <group>
+                    <filter string="Indicator" name="indicator" context="{'group_by':'indicator_id'}"/>
+                    <filter string="Project" name="project" context="{'group_by':'project_id'}"/>
+                    <filter string="Status" name="status" context="{'group_by':'state'}"/>
+                    <filter string="Reporting Period" name="period" context="{'group_by':'reporting_period'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,91 @@
+// ============================================================================
+// LHI BASE — Typography, Google Fonts import, global resets
+// Sprint 4 · lhi_web_shell · base.scss
+// ============================================================================
+
+// Import Inter from Google Fonts (CDN — no core modification)
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+// ── Global reset / base ───────────────────────────────────────────────────────
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    font-family: $lhi-font-family-sans;
+    font-size: $lhi-font-size-base;
+    font-weight: $lhi-font-weight-normal;
+    line-height: $lhi-line-height-normal;
+    color: var(--lhi-text-primary);
+    background-color: var(--lhi-canvas-bg);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+// ── Focus-visible (accessibility) ─────────────────────────────────────────────
+:focus-visible {
+    outline: 2px solid var(--lhi-primary);
+    outline-offset: 2px;
+    border-radius: $lhi-radius-sm;
+}
+
+// ── Skip-to-content link (WCAG 2.4.1) ────────────────────────────────────────
+.lhi-skip-link {
+    position: absolute;
+    top: -9999px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: $lhi-space-2 $lhi-space-4;
+    background: var(--lhi-primary);
+    color: white;
+    font-weight: $lhi-font-weight-semibold;
+    border-radius: $lhi-radius;
+    z-index: $lhi-z-toast;
+    text-decoration: none;
+    white-space: nowrap;
+
+    &:focus {
+        top: $lhi-space-3;
+    }
+}
+
+// ── Typography scale ─────────────────────────────────────────────────────────
+.lhi-h1 { font-size: $lhi-font-size-3xl; font-weight: $lhi-font-weight-bold;     line-height: $lhi-line-height-tight; }
+.lhi-h2 { font-size: $lhi-font-size-2xl; font-weight: $lhi-font-weight-bold;     line-height: $lhi-line-height-tight; }
+.lhi-h3 { font-size: $lhi-font-size-xl;  font-weight: $lhi-font-weight-semibold; line-height: $lhi-line-height-snug; }
+.lhi-h4 { font-size: $lhi-font-size-lg;  font-weight: $lhi-font-weight-semibold; line-height: $lhi-line-height-snug; }
+.lhi-body { font-size: $lhi-font-size-base; line-height: $lhi-line-height-normal; }
+.lhi-small { font-size: $lhi-font-size-sm;  line-height: $lhi-line-height-normal; }
+.lhi-xs    { font-size: $lhi-font-size-xs;  line-height: $lhi-line-height-normal; }
+
+// ── Link style ───────────────────────────────────────────────────────────────
+a {
+    color: var(--lhi-primary);
+    text-decoration: none;
+    transition: color $lhi-transition-fast;
+
+    &:hover {
+        color: var(--lhi-primary-dark);
+        text-decoration: underline;
+    }
+}
+
+// ── Override Odoo default font globally (backend shell) ───────────────────────
+.o_web_client,
+.o_action_manager,
+.o_main_navbar,
+.o_menu_sections,
+.o_form_view,
+.o_list_view,
+.o_kanban_view,
+.o_calendar_view {
+    font-family: $lhi-font-family-sans !important;
+}

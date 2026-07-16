@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- A basic dashboard action that brings up pivot/graph views for trips or incidents -->
+    <!-- Usually a full dashboard requires a client action, but a board or pivot view suffices for basic reporting -->
+    <record id="action_lhi_fleet_dashboard_trips" model="ir.actions.act_window">
+        <field name="name">Trip Analysis</field>
+        <field name="res_model">lhi.fleet.trip</field>
+        <field name="view_mode">graph,pivot</field>
+    </record>
+    
+    <menuitem id="menu_lhi_fleet_dashboard" name="Fleet Analysis" parent="fleet.menu_fleet_reporting" sequence="10"/>
+    <menuitem id="menu_lhi_fleet_dashboard_trips" name="Trips" parent="menu_lhi_fleet_dashboard" action="action_lhi_fleet_dashboard_trips" sequence="1"/>
+</odoo>

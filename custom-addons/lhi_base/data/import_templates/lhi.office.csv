@@ -1,0 +1,4 @@
+id,name,code,office_type,start_date,end_date
+lhi_office_head,Abuja Head Office,HQ-ABJ,head,2026-01-01,
+lhi_office_maiduguri,Maiduguri Field Office,FO-MAI,field,2026-01-01,
+lhi_office_damaturu,Damaturu Field Office,FO-DAM,field,2026-01-01,

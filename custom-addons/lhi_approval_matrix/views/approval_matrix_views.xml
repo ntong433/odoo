@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Approval Matrix configuration views -->
+    <record id="view_lhi_approval_matrix_tree" model="ir.ui.view">
+        <field name="name">lhi.approval.matrix.tree</field>
+        <field name="model">lhi.approval.matrix</field>
+        <field name="arch" type="xml">
+            <list string="Approval Matrices">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="document_type"/>
+                <field name="min_amount"/>
+                <field name="max_amount"/>
+                <field name="currency_id"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_approval_matrix_form" model="ir.ui.view">
+        <field name="name">lhi.approval.matrix.form</field>
+        <field name="model">lhi.approval.matrix</field>
+        <field name="arch" type="xml">
+            <form string="Approval Matrix Configuration">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Procurement Matrix 100K-500K"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Basic Criteria">
+                            <field name="document_type"/>
+                            <label for="min_amount" string="Amount Range"/>
+                            <div class="o_row">
+                                <field name="min_amount" class="oe_inline"/> to 
+                                <field name="max_amount" class="oe_inline"/>
+                            </div>
+                            <field name="currency_id" options="{'no_create': True}"/>
+                            <field name="sequence"/>
+                            <field name="active"/>
+                            <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
+                        </group>
+                        <group string="Organizational Constraints">
+                            <field name="department_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                            <field name="office_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                            <field name="donor_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                            <field name="award_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                            <field name="project_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                            <field name="funding_source_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                            <field name="procurement_method" invisible="document_type != 'purchase'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Approval Stages" name="stages">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="approver_group_id" options="{'no_create': True}"/>
+                                    <field name="approver_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                                    <field name="approval_type"/>
+                                    <field name="timeout_days"/>
+                                    <field name="escalation_user_id" options="{'no_create': True}"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Active Approval Request views -->
+    <record id="view_lhi_approval_request_tree" model="ir.ui.view">
+        <field name="name">lhi.approval.request.tree</field>
+        <field name="model">lhi.approval.request</field>
+        <field name="arch" type="xml">
+            <list string="Approval Requests" create="false" edit="false">
+                <field name="name"/>
+                <field name="document_type"/>
+                <field name="res_model"/>
+                <field name="res_id"/>
+                <field name="amount"/>
+                <field name="currency_id"/>
+                <field name="creator_id"/>
+                <field name="current_line_id"/>
+                <field name="state" widget="badge" decoration-info="state == 'under_review'" decoration-success="state == 'approved'" decoration-danger="state in ('rejected', 'expired')" decoration-warning="state == 'returned'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_approval_request_form" model="ir.ui.view">
+        <field name="name">lhi.approval.request.form</field>
+        <field name="model">lhi.approval.request</field>
+        <field name="arch" type="xml">
+            <form string="Approval Request Details" create="false">
+                <header>
+                    <button name="action_submit" string="Submit" type="object" class="oe_highlight" invisible="state not in ('draft', 'returned')"/>
+                    <button name="action_approve" string="Approve" type="object" class="btn-success" invisible="state != 'under_review'"/>
+                    <button name="action_reject" string="Reject" type="object" class="btn-danger" invisible="state != 'under_review'"/>
+                    <button name="action_return_for_correction" string="Return for Correction" type="object" class="btn-warning" invisible="state != 'under_review'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,under_review,approved,rejected"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Source Document">
+                            <field name="document_type" readonly="1"/>
+                            <field name="res_model" readonly="1"/>
+                            <field name="res_id" readonly="1"/>
+                            <field name="amount" readonly="1"/>
+                            <field name="currency_id" readonly="1"/>
+                            <field name="company_id" readonly="1"/>
+                        </group>
+                        <group string="Context Parameters">
+                            <field name="creator_id" readonly="1"/>
+                            <field name="department_id" readonly="1"/>
+                            <field name="office_id" readonly="1"/>
+                            <field name="project_id" readonly="1"/>
+                            <field name="matrix_id" readonly="1"/>
+                            <field name="current_line_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Approval Flow Steps" name="steps">
+                            <field name="line_ids" readonly="1">
+                                <list>
+                                    <field name="sequence"/>
+                                    <field name="name"/>
+                                    <field name="approver_group_id"/>
+                                    <field name="approver_ids" widget="many2many_tags"/>
+                                    <field name="approved_user_ids" widget="many2many_tags"/>
+                                    <field name="approval_type"/>
+                                    <field name="state" widget="badge" decoration-success="state == 'approved'" decoration-danger="state == 'rejected'" decoration-warning="state == 'pending'"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Approval Actions History" name="history">
+                            <field name="line_ids" readonly="1">
+                                <form string="Step Details">
+                                    <sheet>
+                                        <group>
+                                            <field name="name"/>
+                                            <field name="state"/>
+                                        </group>
+                                        <field name="history_ids">
+                                            <list>
+                                                <field name="action_date"/>
+                                                <field name="user_id"/>
+                                                <field name="action"/>
+                                                <field name="notes"/>
+                                            </list>
+                                        </field>
+                                    </sheet>
+                                </form>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Segregation of Duties configuration views -->
+    <record id="view_lhi_sod_rule_tree" model="ir.ui.view">
+        <field name="name">lhi.sod.rule.tree</field>
+        <field name="model">lhi.sod.rule</field>
+        <field name="arch" type="xml">
+            <list string="Segregation of Duties Rules">
+                <field name="name"/>
+                <field name="group_1_id"/>
+                <field name="group_2_id"/>
+                <field name="is_active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_sod_rule_form" model="ir.ui.view">
+        <field name="name">lhi.sod.rule.form</field>
+        <field name="model">lhi.sod.rule</field>
+        <field name="arch" type="xml">
+            <form string="Segregation of Duties Rule">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="Conflict Rule Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="group_1_id" options="{'no_create': True}"/>
+                            <field name="group_2_id" options="{'no_create': True}"/>
+                        </group>
+                        <group>
+                            <field name="is_active"/>
+                        </group>
+                    </group>
+                    <group string="Rule Description">
+                        <field name="description" placeholder="Describe the segregation of duties conflict policy..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Approval Delegation views -->
+    <record id="view_lhi_approval_delegation_tree" model="ir.ui.view">
+        <field name="name">lhi.approval.delegation.tree</field>
+        <field name="model">lhi.approval.delegation</field>
+        <field name="arch" type="xml">
+            <list string="Approval Delegations">
+                <field name="delegator_id"/>
+                <field name="delegatee_id"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="document_type"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_approval_delegation_form" model="ir.ui.view">
+        <field name="name">lhi.approval.delegation.form</field>
+        <field name="model">lhi.approval.delegation</field>
+        <field name="arch" type="xml">
+            <form string="Approval Delegation Configuration">
+                <sheet>
+                    <group>
+                        <group string="Parties">
+                            <field name="delegator_id" options="{'no_create': True}"/>
+                            <field name="delegatee_id" options="{'no_create': True}"/>
+                        </group>
+                        <group string="Schedule &amp; Context">
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                            <field name="document_type"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="action_lhi_approval_matrix" model="ir.actions.act_window">
+        <field name="name">Approval Matrices</field>
+        <field name="res_model">lhi.approval.matrix</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create the first LHI Approval Matrix!
+            </p>
+        </field>
+    </record>
+
+    <record id="action_lhi_approval_request" model="ir.actions.act_window">
+        <field name="name">Active Approval Requests</field>
+        <field name="res_model">lhi.approval.request</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_lhi_sod_rule" model="ir.actions.act_window">
+        <field name="name">Segregation of Duties Rules</field>
+        <field name="res_model">lhi.sod.rule</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_lhi_approval_delegation" model="ir.actions.act_window">
+        <field name="name">Approval Delegations</field>
+        <field name="res_model">lhi.approval.delegation</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Menus -->
+    <menuitem id="menu_lhi_approvals_root" name="Approvals" parent="lhi_base.menu_lhi_root" sequence="20"/>
+    <menuitem id="menu_lhi_approval_request" name="Active Requests" parent="menu_lhi_approvals_root" action="action_lhi_approval_request" sequence="10"/>
+    <menuitem id="menu_lhi_approval_matrix" name="Matrix Configurations" parent="menu_lhi_approvals_root" action="action_lhi_approval_matrix" sequence="20"/>
+    <menuitem id="menu_lhi_approval_delegation" name="Approval Delegations" parent="menu_lhi_approvals_root" action="action_lhi_approval_delegation" sequence="30"/>
+    <menuitem id="menu_lhi_sod_rule" name="SoD Conflicts Rules" parent="menu_lhi_approvals_root" action="action_lhi_sod_rule" sequence="40"/>
+</odoo>

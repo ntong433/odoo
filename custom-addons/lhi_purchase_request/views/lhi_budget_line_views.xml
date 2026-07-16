@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_budget_line_form" model="ir.ui.view">
+        <field name="name">lhi.budget.line.form</field>
+        <field name="model">lhi.budget.line</field>
+        <field name="arch" type="xml">
+            <form string="Budget Line">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="description"/>
+                            <field name="project_id"/>
+                            <field name="cost_center_id"/>
+                        </group>
+                        <group>
+                            <field name="total_budget"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_budget_line_tree" model="ir.ui.view">
+        <field name="name">lhi.budget.line.tree</field>
+        <field name="model">lhi.budget.line</field>
+        <field name="arch" type="xml">
+            <list string="Budget Lines">
+                <field name="name"/>
+                <field name="description"/>
+                <field name="project_id"/>
+                <field name="total_budget"/>
+            </list>
+        </field>
+    </record>
+</odoo>

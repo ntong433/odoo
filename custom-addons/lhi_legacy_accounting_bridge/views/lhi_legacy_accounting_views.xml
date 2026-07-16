@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_legacy_accounting_sync_form" model="ir.ui.view">
+        <field name="name">lhi.legacy.accounting.sync.form</field>
+        <field name="model">lhi.legacy.accounting.sync</field>
+        <field name="arch" type="xml">
+            <form string="Legacy Accounting Sync">
+                <header>
+                    <button name="action_transfer" string="Transfer" type="object" class="oe_highlight" invisible="sync_status != 'draft'"/>
+                    <field name="sync_status" widget="statusbar" statusbar_visible="draft,pending,transferred,accepted"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="res_model"/>
+                            <field name="res_id"/>
+                            <field name="integration_uuid"/>
+                            <field name="last_sync_date"/>
+                        </group>
+                        <group string="Accounting Responses">
+                            <field name="bill_number"/>
+                            <field name="posting_status"/>
+                            <field name="payment_status"/>
+                            <field name="payment_date"/>
+                            <field name="payment_reference"/>
+                            <field name="wht_amount"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="rejection_comments" invisible="sync_status != 'rejected'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Logs">
+                            <field name="error_log"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_legacy_accounting_sync_tree" model="ir.ui.view">
+        <field name="name">lhi.legacy.accounting.sync.tree</field>
+        <field name="model">lhi.legacy.accounting.sync</field>
+        <field name="arch" type="xml">
+            <list string="Legacy Accounting Syncs">
+                <field name="name"/>
+                <field name="res_model"/>
+                <field name="integration_uuid"/>
+                <field name="sync_status" widget="badge"/>
+                <field name="payment_status" widget="badge"/>
+            </list>
+        </field>
+    </record>
+    
+    <record id="action_lhi_legacy_accounting_sync" model="ir.actions.act_window">
+        <field name="name">Accounting Sync Records</field>
+        <field name="res_model">lhi.legacy.accounting.sync</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_lhi_legacy_accounting" name="Legacy Accounting Integration" parent="lhi_purchase_request.menu_lhi_procurement_root" sequence="90"/>
+    <menuitem id="menu_lhi_legacy_accounting_sync" name="Sync Records" parent="menu_lhi_legacy_accounting" action="action_lhi_legacy_accounting_sync" sequence="10"/>
+</odoo>

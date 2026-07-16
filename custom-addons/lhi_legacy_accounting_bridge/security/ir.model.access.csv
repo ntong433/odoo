@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lhi_legacy_accounting_sync_user,lhi.legacy.accounting.sync.user,model_lhi_legacy_accounting_sync,base.group_user,1,1,1,0
+access_lhi_legacy_accounting_sync_admin,lhi.legacy.accounting.sync.admin,model_lhi_legacy_accounting_sync,base.group_erp_manager,1,1,1,1

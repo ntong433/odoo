@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="lhi_leave_bridge.LeaveDashboard" owl="1">
+        <div class="o_lhi_leave_dashboard container-fluid py-4">
+            <div t-if="state.isLoading" class="text-center">
+                <i class="fa fa-spinner fa-spin fa-3x"/>
+                <p>Loading Leave Data...</p>
+            </div>
+            <div t-else="" class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h4 class="mb-0">Leave Balances</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Annual</th>
+                                            <th>Sick</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr t-foreach="state.balances" t-as="balance" t-key="balance.id">
+                                            <td t-esc="balance.user_id[1]"/>
+                                            <td t-esc="balance.annual_balance"/>
+                                            <td t-esc="balance.sick_balance"/>
+                                            <td>
+                                                <span t-if="balance.is_stale" class="badge bg-warning text-dark">Stale</span>
+                                                <span t-else="" class="badge bg-success">Live</span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h4 class="mb-0">Staff Currently On Leave</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Type</th>
+                                            <th>From</th>
+                                            <th>To</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr t-foreach="state.staffOnLeave" t-as="req" t-key="req.id">
+                                            <td t-esc="req.user_id[1]"/>
+                                            <td t-esc="req.leave_type"/>
+                                            <td t-esc="req.start_date"/>
+                                            <td t-esc="req.end_date"/>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

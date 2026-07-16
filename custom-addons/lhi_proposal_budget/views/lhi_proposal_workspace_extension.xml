@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_proposal_workspace_form_inherit_budget" model="ir.ui.view">
+        <field name="name">lhi.proposal.workspace.form.inherit.budget</field>
+        <field name="model">lhi.proposal.workspace</field>
+        <field name="inherit_id" ref="lhi_proposal_management.view_lhi_proposal_workspace_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_create_submission" string="Create Submission Package" type="object" class="btn-primary" invisible="state != 'approved'"/>
+                <button name="action_launch_award_wizard" string="Convert to Award" type="object" class="btn-success" invisible="state != 'submitted'"/>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button class="oe_stat_button" type="object" name="action_view_budgets" icon="fa-money">
+                    <field string="Budgets" name="budget_ids" widget="statinfo"/>
+                </button>
+                <button class="oe_stat_button" type="object" name="action_view_submissions" icon="fa-paper-plane">
+                    <field string="Submissions" name="submission_ids" widget="statinfo"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>

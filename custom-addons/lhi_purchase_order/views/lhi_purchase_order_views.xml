@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_purchase_order_form" model="ir.ui.view">
+        <field name="name">lhi.purchase.order.form</field>
+        <field name="model">lhi.purchase.order</field>
+        <field name="arch" type="xml">
+            <form string="Purchase Order">
+                <header>
+                    <button name="action_submit" string="Submit for Approval" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_approve" string="Approve" type="object" class="oe_highlight" invisible="state != 'to_approve'"/>
+                    <button name="action_lock" string="Lock (Sent to Vendor)" type="object" class="oe_highlight" invisible="state != 'approved'"/>
+                    <button name="action_cancel" string="Cancel" type="object" class="btn-danger" invisible="state in ('done', 'cancel')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,approved,locked,done"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="vendor_id"/>
+                            <field name="sourcing_id"/>
+                            <field name="date_order"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Coding Info">
+                            <field name="project_id"/>
+                            <field name="department_id"/>
+                            <field name="cost_center_id"/>
+                            <field name="budget_line_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Order Lines">
+                            <field name="line_ids">
+                                <list string="Order Lines" editable="bottom">
+                                    <field name="name"/>
+                                    <field name="quantity"/>
+                                    <field name="qty_received"/>
+                                    <field name="price_unit"/>
+                                    <field name="price_subtotal"/>
+                                    <field name="currency_id" invisible="1"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer oe_right">
+                                <field name="amount_total"/>
+                                <field name="currency_id" invisible="1"/>
+                            </group>
+                        </page>
+                        <page string="Receipts">
+                            <field name="receipt_ids" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_purchase_order_tree" model="ir.ui.view">
+        <field name="name">lhi.purchase.order.tree</field>
+        <field name="model">lhi.purchase.order</field>
+        <field name="arch" type="xml">
+            <list string="Purchase Orders">
+                <field name="name"/>
+                <field name="vendor_id"/>
+                <field name="project_id"/>
+                <field name="amount_total"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+    
+    <record id="view_lhi_sourcing_po_inherit" model="ir.ui.view">
+        <field name="name">lhi.sourcing.po.inherit</field>
+        <field name="model">lhi.sourcing</field>
+        <field name="inherit_id" ref="lhi_procurement.view_lhi_sourcing_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_generate_po" string="Generate PO" type="object" class="oe_highlight" invisible="state != 'awarded' or po_id != False"/>
+            </xpath>
+            <xpath expr="//field[@name='sourcing_type']" position="after">
+                <field name="po_id" readonly="1" invisible="not po_id"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

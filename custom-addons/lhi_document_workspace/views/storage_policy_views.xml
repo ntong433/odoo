@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_document_storage_policy_form_workspace" model="ir.ui.view">
+        <field name="name">lhi.document.storage.policy.form.workspace</field>
+        <field name="model">lhi.document.storage.policy</field>
+        <field name="inherit_id" ref="lhi_sharepoint_storage.view_lhi_document_storage_policy_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='required_metadata_json']/.." position="after">
+                <group string="Document Workspace">
+                    <field name="workspace_enabled"/>
+                    <field name="workspace_lock_states" invisible="not workspace_enabled"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

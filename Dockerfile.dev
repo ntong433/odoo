@@ -1,0 +1,35 @@
+FROM python:3.10-slim-bookworm
+
+# Install system dependencies needed for Odoo and standard tools
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libxml2-dev \
+    libxslt1-dev \
+    libevent-dev \
+    libsasl2-dev \
+    libldap2-dev \
+    libpq-dev \
+    libjpeg-dev \
+    libpng-dev \
+    ghostscript \
+    git \
+    curl \
+    postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install python dependencies from local requirements.txt
+COPY odoo/requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir "cython<3.0" "setuptools<60" "wheel" && \
+    pip install --no-build-isolation --no-cache-dir -r /tmp/requirements.txt
+
+# Create Odoo home directory and user
+RUN useradd -m -U -s /bin/bash odoo
+WORKDIR /opt/odoo
+
+# Set permissions for volume mountpoints and log files
+RUN mkdir -p /var/lib/odoo /etc/odoo /var/log/odoo && \
+    chown -R odoo:odoo /var/lib/odoo /etc/odoo /var/log/odoo
+
+USER odoo
+
+EXPOSE 8069 8072

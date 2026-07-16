@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Integration Main Menu -->
+    <menuitem id="menu_lhi_integration_root" 
+              name="Integration" 
+              web_icon="lhi_integration,static/description/icon.png"
+              sequence="90" 
+              groups="base.group_erp_manager"/>
+              
+    <!-- Configuration -->
+    <menuitem id="menu_lhi_integration_config" 
+              name="Configuration" 
+              parent="menu_lhi_integration_root" 
+              sequence="100"/>
+              
+    <menuitem id="menu_lhi_integration_connections" 
+              name="API Connections" 
+              parent="menu_lhi_integration_config" 
+              action="action_lhi_integration_connection" 
+              sequence="10"/>
+
+    <!-- Monitoring -->
+    <menuitem id="menu_lhi_integration_monitoring" 
+              name="Monitoring" 
+              parent="menu_lhi_integration_root" 
+              sequence="10"/>
+              
+    <menuitem id="menu_lhi_integration_jobs" 
+              name="Integration Jobs" 
+              parent="menu_lhi_integration_monitoring" 
+              action="action_lhi_integration_job" 
+              sequence="10"/>
+
+    <menuitem id="menu_lhi_integration_webhooks" 
+              name="Inbound Webhooks" 
+              parent="menu_lhi_integration_monitoring" 
+              action="action_lhi_integration_webhook" 
+              sequence="20"/>
+</odoo>

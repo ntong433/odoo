@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_partner_profile_form" model="ir.ui.view">
+        <field name="name">lhi.partner.profile.form</field>
+        <field name="model">lhi.partner.profile</field>
+        <field name="arch" type="xml">
+            <form string="Partner Profile">
+                <header>
+                    <field name="due_diligence_status" widget="statusbar" statusbar_visible="pending,in_progress,completed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group string="Basic Information">
+                            <field name="partner_id" invisible="1"/>
+                            <field name="email"/>
+                            <field name="phone"/>
+                            <field name="website"/>
+                        </group>
+                        <group string="Risk &amp; Compliance">
+                            <field name="due_diligence_date"/>
+                            <field name="risk_rating"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Sub-Awards">
+                            <field name="subaward_ids">
+                                <list string="Sub-Awards">
+                                    <field name="name"/>
+                                    <field name="project_id"/>
+                                    <field name="total_budget"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Findings &amp; Actions">
+                            <group>
+                                <field name="compliance_findings"/>
+                                <field name="capacity_development_actions"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_partner_profile_tree" model="ir.ui.view">
+        <field name="name">lhi.partner.profile.tree</field>
+        <field name="model">lhi.partner.profile</field>
+        <field name="arch" type="xml">
+            <list string="Partner Profiles">
+                <field name="name"/>
+                <field name="due_diligence_status"/>
+                <field name="risk_rating"/>
+            </list>
+        </field>
+    </record>
+</odoo>

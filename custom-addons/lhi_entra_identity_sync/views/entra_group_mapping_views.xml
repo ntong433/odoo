@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_entra_group_mapping_list" model="ir.ui.view">
+        <field name="name">lhi.entra.group.mapping.list</field>
+        <field name="model">lhi.entra.group.mapping</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="management_mode == 'protected'" decoration-muted="not enabled">
+                <field name="priority" widget="handle"/>
+                <field name="entra_group_display_name"/>
+                <field name="entra_group_object_id"/>
+                <field name="odoo_group_id"/>
+                <field name="management_mode"/>
+                <field name="conflict_policy"/>
+                <field name="last_seen_at"/>
+                <field name="enabled"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_entra_group_mapping_form" model="ir.ui.view">
+        <field name="name">lhi.entra.group.mapping.form</field>
+        <field name="model">lhi.entra.group.mapping</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Microsoft Entra">
+                            <field name="connection_id" options="{'no_create': True}"/>
+                            <field name="entra_group_object_id"/>
+                            <field name="entra_group_display_name"/>
+                            <field name="last_seen_at" readonly="1"/>
+                        </group>
+                        <group string="Existing Odoo Authorization">
+                            <field name="odoo_group_id" options="{'no_create': True}"/>
+                            <field name="management_mode"/>
+                            <field name="conflict_policy"/>
+                            <field name="priority"/>
+                            <field name="enabled"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_lhi_entra_group_mapping" model="ir.actions.act_window">
+        <field name="name">Entra Group Mappings</field>
+        <field name="res_model">lhi.entra.group.mapping</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>
+

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_purchase_request_form" model="ir.ui.view">
+        <field name="name">lhi.purchase.request.form</field>
+        <field name="model">lhi.purchase.request</field>
+        <field name="arch" type="xml">
+            <form string="Purchase Request">
+                <header>
+                    <button name="action_submit" string="Submit for Approval" type="object" class="oe_highlight" invisible="state not in ('draft', 'amended')"/>
+                    <button name="action_cancel" string="Cancel" type="object" class="btn-danger" invisible="state in ('cancelled', 'rejected')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,approved,cancelled"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Emergency" bg_color="bg-danger" invisible="not emergency_status"/>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Basic Information">
+                            <field name="requester_id" widget="many2one_avatar_user"/>
+                            <field name="department_id"/>
+                            <field name="office_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="required_date"/>
+                            <field name="emergency_status"/>
+                        </group>
+                        <group string="Funding &amp; Project Info">
+                            <field name="project_id"/>
+                            <field name="donor_id"/>
+                            <field name="award_id"/>
+                            <field name="funding_source_id"/>
+                            <field name="cost_center_id"/>
+                            <field name="budget_line_id"/>
+                            <field name="activity_id"/>
+                            <field name="output_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Products / Services">
+                            <field name="line_ids">
+                                <list string="Lines" editable="bottom">
+                                    <field name="name"/>
+                                    <field name="specifications"/>
+                                    <field name="quantity"/>
+                                    <field name="unit_price"/>
+                                    <field name="estimated_amount" sum="Total Estimated"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer oe_right">
+                                <field name="total_estimated_amount"/>
+                                <field name="currency_id" invisible="1"/>
+                            </group>
+                        </page>
+                        <page string="Justification &amp; Details">
+                            <group>
+                                <field name="procurement_method" readonly="1"/>
+                                <field name="justification"/>
+                                <field name="suggested_vendors"/>
+                                <field name="attachment_ids" widget="lhi_sharepoint_many2many_binary"/>
+                            </group>
+                        </page>
+                        <page string="Approval Matrix Status">
+                            <group>
+                                <field name="lhi_approval_state" readonly="1"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_purchase_request_tree" model="ir.ui.view">
+        <field name="name">lhi.purchase.request.tree</field>
+        <field name="model">lhi.purchase.request</field>
+        <field name="arch" type="xml">
+            <list string="Purchase Requests">
+                <field name="name"/>
+                <field name="requester_id" widget="many2one_avatar_user"/>
+                <field name="department_id"/>
+                <field name="project_id"/>
+                <field name="total_estimated_amount"/>
+                <field name="lhi_approval_state" widget="badge"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+</odoo>

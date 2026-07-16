@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lhi_reporting_job_user,lhi.reporting.job.user,model_lhi_reporting_job,base.group_system,1,1,1,1
+access_lhi_data_quality_check_user,lhi.data.quality.check.user,model_lhi_data_quality_check,base.group_system,1,1,1,1

@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Audit Log Tree/List View -->
+    <record id="view_lhi_audit_log_tree" model="ir.ui.view">
+        <field name="name">lhi.audit.log.tree</field>
+        <field name="model">lhi.audit.log</field>
+        <field name="arch" type="xml">
+            <list string="LHI Audit Logs" create="false" edit="false" delete="false">
+                <field name="action_date"/>
+                <field name="event_type"/>
+                <field name="user_id"/>
+                <field name="res_model"/>
+                <field name="res_id"/>
+                <field name="ip_address"/>
+                <field name="description"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Audit Log Form View -->
+    <record id="view_lhi_audit_log_form" model="ir.ui.view">
+        <field name="name">lhi.audit.log.form</field>
+        <field name="model">lhi.audit.log</field>
+        <field name="arch" type="xml">
+            <form string="Audit Log Details" create="false" edit="false" delete="false">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Event Details">
+                            <field name="event_type" readonly="1"/>
+                            <field name="user_id" readonly="1"/>
+                            <field name="action_date" readonly="1"/>
+                            <field name="ip_address" readonly="1"/>
+                            <field name="company_id" groups="base.group_multi_company" readonly="1"/>
+                        </group>
+                        <group string="Resource Details">
+                            <field name="res_model" readonly="1"/>
+                            <field name="res_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Event Description">
+                        <field name="description" readonly="1"/>
+                    </group>
+                    <group string="Changes Log">
+                        <field name="old_value" readonly="1" invisible="not old_value"/>
+                        <field name="new_value" readonly="1" invisible="not new_value"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Audit Log Search View -->
+    <record id="view_lhi_audit_log_search" model="ir.ui.view">
+        <field name="name">lhi.audit.log.search</field>
+        <field name="model">lhi.audit.log</field>
+        <field name="arch" type="xml">
+            <search string="Search Audit Logs">
+                <field name="description"/>
+                <field name="user_id"/>
+                <field name="res_model"/>
+                <filter string="Security/Permission Changes" name="permission_change" domain="[('event_type', '=', 'permission_change')]"/>
+                <filter string="Approval Actions" name="approval_action" domain="[('event_type', '=', 'approval_action')]"/>
+                <filter string="Feature Flag Toggles" name="feature_flag_toggle" domain="[('event_type', '=', 'feature_flag_toggle')]"/>
+                <filter string="SoD Violations" name="sod_violation" domain="[('event_type', '=', 'sod_violation')]"/>
+                <group>
+                    <filter string="Event Type" name="group_by_event" context="{'group_by': 'event_type'}"/>
+                    <filter string="Done By" name="group_by_user" context="{'group_by': 'user_id'}"/>
+                    <filter string="Date" name="group_by_date" context="{'group_by': 'action_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_lhi_audit_log" model="ir.actions.act_window">
+        <field name="name">LHI Audit Logs</field>
+        <field name="res_model">lhi.audit.log</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_lhi_audit_log_search"/>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_lhi_audit_root" name="Audit" parent="lhi_base.menu_lhi_root" sequence="30"/>
+    <menuitem id="menu_lhi_audit_log" name="Audit Logs" parent="menu_lhi_audit_root" action="action_lhi_audit_log" sequence="10"/>
+</odoo>

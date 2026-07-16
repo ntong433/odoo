@@ -1,0 +1,746 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ==================== LHI OFFICE ==================== -->
+    <record id="view_lhi_office_tree" model="ir.ui.view">
+        <field name="name">lhi.office.tree</field>
+        <field name="model">lhi.office</field>
+        <field name="arch" type="xml">
+            <list string="Offices" decoration-muted="not active">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="office_type"/>
+                <field name="parent_id"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_office_form" model="ir.ui.view">
+        <field name="name">lhi.office.form</field>
+        <field name="model">lhi.office</field>
+        <field name="arch" type="xml">
+            <form string="Office / Field Location">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g. Maiduguri Field Office"/></h1>
+                    </div>
+                    <group>
+                        <group string="Basic Information">
+                            <field name="code"/>
+                            <field name="office_type"/>
+                            <field name="parent_id"/>
+                        </group>
+                        <group string="Controls &amp; Validity">
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active"/>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_office_search" model="ir.ui.view">
+        <field name="name">lhi.office.search</field>
+        <field name="model">lhi.office</field>
+        <field name="arch" type="xml">
+            <search string="Search Offices">
+                <field name="name"/>
+                <field name="code"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <filter name="active_now" string="Currently Active" domain="[('active', '=', True)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_lhi_office" model="ir.actions.act_window">
+        <field name="name">Offices / Locations</field>
+        <field name="res_model">lhi.office</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_lhi_office_search"/>
+    </record>
+
+    <!-- ==================== LHI DEPARTMENT ==================== -->
+    <record id="view_lhi_department_tree" model="ir.ui.view">
+        <field name="name">lhi.department.tree</field>
+        <field name="model">lhi.department</field>
+        <field name="arch" type="xml">
+            <list string="Departments / Units" decoration-muted="not active">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="parent_id"/>
+                <field name="manager_id"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_department_form" model="ir.ui.view">
+        <field name="name">lhi.department.form</field>
+        <field name="model">lhi.department</field>
+        <field name="arch" type="xml">
+            <form string="Department / Unit">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g. Finance &amp; Operations"/></h1>
+                    </div>
+                    <group>
+                        <group string="Structure">
+                            <field name="code"/>
+                            <field name="parent_id"/>
+                            <field name="manager_id"/>
+                        </group>
+                        <group string="Controls &amp; Validity">
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active"/>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_department_search" model="ir.ui.view">
+        <field name="name">lhi.department.search</field>
+        <field name="model">lhi.department</field>
+        <field name="arch" type="xml">
+            <search string="Search Departments &amp; Units">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="parent_id"/>
+                <field name="manager_id"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <filter name="active_now" string="Currently Active" domain="[('active', '=', True)]"/>
+                <group>
+                    <filter string="Parent Department" name="group_parent" context="{'group_by': 'parent_id'}"/>
+                    <filter string="Manager" name="group_manager" context="{'group_by': 'manager_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_lhi_department" model="ir.actions.act_window">
+        <field name="name">Departments &amp; Units</field>
+        <field name="res_model">lhi.department</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_lhi_department_search"/>
+    </record>
+
+    <!-- ==================== LHI PROGRAMME ==================== -->
+    <record id="view_lhi_programme_tree" model="ir.ui.view">
+        <field name="name">lhi.programme.tree</field>
+        <field name="model">lhi.programme</field>
+        <field name="arch" type="xml">
+            <list string="Programmes" decoration-muted="not active">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_programme_form" model="ir.ui.view">
+        <field name="name">lhi.programme.form</field>
+        <field name="model">lhi.programme</field>
+        <field name="arch" type="xml">
+            <form string="Programme">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g. Humanitarian Response"/></h1>
+                    </div>
+                    <group>
+                        <group string="Configuration">
+                            <field name="code"/>
+                            <field name="description"/>
+                        </group>
+                        <group string="Controls &amp; Validity">
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active"/>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_programme_search" model="ir.ui.view">
+        <field name="name">lhi.programme.search</field>
+        <field name="model">lhi.programme</field>
+        <field name="arch" type="xml">
+            <search string="Search Programmes">
+                <field name="name"/>
+                <field name="code"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <filter name="active_now" string="Currently Active" domain="[('active', '=', True)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_lhi_programme" model="ir.actions.act_window">
+        <field name="name">Programmes</field>
+        <field name="res_model">lhi.programme</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_lhi_programme_search"/>
+    </record>
+
+    <!-- ==================== LHI SECTOR ==================== -->
+    <record id="view_lhi_sector_tree" model="ir.ui.view">
+        <field name="name">lhi.sector.tree</field>
+        <field name="model">lhi.sector</field>
+        <field name="arch" type="xml">
+            <list string="Sectors" decoration-muted="not active">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="programme_id"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_sector_form" model="ir.ui.view">
+        <field name="name">lhi.sector.form</field>
+        <field name="model">lhi.sector</field>
+        <field name="arch" type="xml">
+            <form string="Technical Sector">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g. WASH Sector"/></h1>
+                    </div>
+                    <group>
+                        <group string="Configuration">
+                            <field name="code"/>
+                            <field name="programme_id"/>
+                        </group>
+                        <group string="Controls &amp; Validity">
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active"/>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_sector_search" model="ir.ui.view">
+        <field name="name">lhi.sector.search</field>
+        <field name="model">lhi.sector</field>
+        <field name="arch" type="xml">
+            <search string="Search Technical Sectors">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="programme_id"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <filter name="active_now" string="Currently Active" domain="[('active', '=', True)]"/>
+                <group>
+                    <filter string="Programme" name="group_programme" context="{'group_by': 'programme_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_lhi_sector" model="ir.actions.act_window">
+        <field name="name">Technical Sectors</field>
+        <field name="res_model">lhi.sector</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_lhi_sector_search"/>
+    </record>
+
+    <!-- ==================== LHI DONOR ==================== -->
+    <record id="view_lhi_donor_tree" model="ir.ui.view">
+        <field name="name">lhi.donor.tree</field>
+        <field name="model">lhi.donor</field>
+        <field name="arch" type="xml">
+            <list string="Donors" decoration-muted="not active">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="donor_type"/>
+                <field name="contact_name"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_donor_form" model="ir.ui.view">
+        <field name="name">lhi.donor.form</field>
+        <field name="model">lhi.donor</field>
+        <field name="arch" type="xml">
+            <form string="Donor Profile">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g. USAID / BHA"/></h1>
+                    </div>
+                    <group>
+                        <group string="Details">
+                            <field name="code"/>
+                            <field name="donor_type"/>
+                            <field name="contact_name"/>
+                            <field name="email"/>
+                            <field name="phone"/>
+                        </group>
+                        <group string="Controls &amp; Validity">
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active"/>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_donor_search" model="ir.ui.view">
+        <field name="name">lhi.donor.search</field>
+        <field name="model">lhi.donor</field>
+        <field name="arch" type="xml">
+            <search string="Search Donors">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="donor_type"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <filter name="active_now" string="Currently Active" domain="[('active', '=', True)]"/>
+                <group>
+                    <filter string="Donor Type" name="group_donor_type" context="{'group_by': 'donor_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_lhi_donor" model="ir.actions.act_window">
+        <field name="name">Donors</field>
+        <field name="res_model">lhi.donor</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_lhi_donor_search"/>
+    </record>
+
+    <!-- ==================== LHI FUNDING SOURCE ==================== -->
+    <record id="view_lhi_funding_source_tree" model="ir.ui.view">
+        <field name="name">lhi.funding.source.tree</field>
+        <field name="model">lhi.funding.source</field>
+        <field name="arch" type="xml">
+            <list string="Funding Sources" decoration-muted="not active">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="donor_id"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_funding_source_form" model="ir.ui.view">
+        <field name="name">lhi.funding.source.form</field>
+        <field name="model">lhi.funding.source</field>
+        <field name="arch" type="xml">
+            <form string="Funding Source">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g. USAID-BHA WASH Fund 2026"/></h1>
+                    </div>
+                    <group>
+                        <group string="Configuration">
+                            <field name="code"/>
+                            <field name="donor_id"/>
+                        </group>
+                        <group string="Controls &amp; Validity">
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active"/>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_funding_source_search" model="ir.ui.view">
+        <field name="name">lhi.funding.source.search</field>
+        <field name="model">lhi.funding.source</field>
+        <field name="arch" type="xml">
+            <search string="Search Funding Sources">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="donor_id"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <filter name="active_now" string="Currently Active" domain="[('active', '=', True)]"/>
+                <group>
+                    <filter string="Donor" name="group_donor" context="{'group_by': 'donor_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_lhi_funding_source" model="ir.actions.act_window">
+        <field name="name">Funding Sources</field>
+        <field name="res_model">lhi.funding.source</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_lhi_funding_source_search"/>
+    </record>
+
+    <!-- ==================== LHI AWARD ==================== -->
+    <record id="view_lhi_award_tree" model="ir.ui.view">
+        <field name="name">lhi.award.tree</field>
+        <field name="model">lhi.award</field>
+        <field name="arch" type="xml">
+            <list string="Awards" decoration-muted="not active">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="funding_source_id"/>
+                <field name="amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                <field name="currency_id" optional="hide"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_award_form" model="ir.ui.view">
+        <field name="name">lhi.award.form</field>
+        <field name="model">lhi.award</field>
+        <field name="arch" type="xml">
+            <form string="Award Code">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g. Award for Northeast Food Security"/></h1>
+                    </div>
+                    <group>
+                        <group string="Core Code">
+                            <field name="code"/>
+                            <field name="funding_source_id"/>
+                        </group>
+                        <group string="Financials">
+                            <label for="amount"/>
+                            <div class="o_row">
+                                <field name="amount" class="oe_inline"/>
+                                <field name="currency_id" class="oe_inline"/>
+                            </div>
+                        </group>
+                        <group string="Controls &amp; Validity">
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active"/>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_award_search" model="ir.ui.view">
+        <field name="name">lhi.award.search</field>
+        <field name="model">lhi.award</field>
+        <field name="arch" type="xml">
+            <search string="Search Awards">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="funding_source_id"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <filter name="active_now" string="Currently Active" domain="[('active', '=', True)]"/>
+                <group>
+                    <filter string="Funding Source" name="group_funding_source" context="{'group_by': 'funding_source_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_lhi_award" model="ir.actions.act_window">
+        <field name="name">Award Codes</field>
+        <field name="res_model">lhi.award</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_lhi_award_search"/>
+    </record>
+
+    <!-- ==================== LHI PROJECT ==================== -->
+    <record id="view_lhi_project_tree" model="ir.ui.view">
+        <field name="name">lhi.project.tree</field>
+        <field name="model">lhi.project</field>
+        <field name="arch" type="xml">
+            <list string="Projects" decoration-muted="not active">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="award_id"/>
+                <field name="sector_id"/>
+                <field name="office_id"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_project_form" model="ir.ui.view">
+        <field name="name">lhi.project.form</field>
+        <field name="model">lhi.project</field>
+        <field name="arch" type="xml">
+            <form string="Project Code">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g. Northeast WASH Emergency Project"/></h1>
+                    </div>
+                    <group>
+                        <group string="Structure">
+                            <field name="code"/>
+                            <field name="award_id"/>
+                            <field name="sector_id"/>
+                            <field name="office_id"/>
+                        </group>
+                        <group string="Controls &amp; Validity">
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active"/>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_project_search" model="ir.ui.view">
+        <field name="name">lhi.project.search</field>
+        <field name="model">lhi.project</field>
+        <field name="arch" type="xml">
+            <search string="Search Projects">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="award_id"/>
+                <field name="sector_id"/>
+                <field name="office_id"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <filter name="active_now" string="Currently Active" domain="[('active', '=', True)]"/>
+                <group>
+                    <filter string="Award Code" name="group_award" context="{'group_by': 'award_id'}"/>
+                    <filter string="Sector" name="group_sector" context="{'group_by': 'sector_id'}"/>
+                    <filter string="Office/Location" name="group_office" context="{'group_by': 'office_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_lhi_project" model="ir.actions.act_window">
+        <field name="name">Project Codes</field>
+        <field name="res_model">lhi.project</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_lhi_project_search"/>
+    </record>
+
+    <!-- ==================== LHI COST CENTER ==================== -->
+    <record id="view_lhi_cost_center_tree" model="ir.ui.view">
+        <field name="name">lhi.cost.center.tree</field>
+        <field name="model">lhi.cost.center</field>
+        <field name="arch" type="xml">
+            <list string="Cost Centres" decoration-muted="not active">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_cost_center_form" model="ir.ui.view">
+        <field name="name">lhi.cost.center.form</field>
+        <field name="model">lhi.cost.center</field>
+        <field name="arch" type="xml">
+            <form string="Cost Centre">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g. Program WASH Logistics CC"/></h1>
+                    </div>
+                    <group>
+                        <group string="Configuration">
+                            <field name="code"/>
+                            <field name="project_id"/>
+                        </group>
+                        <group string="Controls &amp; Validity">
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active"/>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_cost_center_search" model="ir.ui.view">
+        <field name="name">lhi.cost.center.search</field>
+        <field name="model">lhi.cost.center</field>
+        <field name="arch" type="xml">
+            <search string="Search Cost Centres">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="project_id"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <filter name="active_now" string="Currently Active" domain="[('active', '=', True)]"/>
+                <group>
+                    <filter string="Project" name="group_project" context="{'group_by': 'project_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_lhi_cost_center" model="ir.actions.act_window">
+        <field name="name">Cost Centres</field>
+        <field name="res_model">lhi.cost.center</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_lhi_cost_center_search"/>
+    </record>
+
+    <!-- ==================== LHI ACTIVITY ==================== -->
+    <record id="view_lhi_activity_tree" model="ir.ui.view">
+        <field name="name">lhi.activity.tree</field>
+        <field name="model">lhi.activity</field>
+        <field name="arch" type="xml">
+            <list string="Activities" decoration-muted="not active">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="output_code"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_activity_form" model="ir.ui.view">
+        <field name="name">lhi.activity.form</field>
+        <field name="model">lhi.activity</field>
+        <field name="arch" type="xml">
+            <form string="Activity / Output Code">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g. Drilling of Boreholes"/></h1>
+                    </div>
+                    <group>
+                        <group string="Structure">
+                            <field name="code"/>
+                            <field name="project_id"/>
+                            <field name="output_code"/>
+                        </group>
+                        <group string="Controls &amp; Validity">
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active"/>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_activity_search" model="ir.ui.view">
+        <field name="name">lhi.activity.search</field>
+        <field name="model">lhi.activity</field>
+        <field name="arch" type="xml">
+            <search string="Search Activities &amp; Outputs">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="project_id"/>
+                <field name="output_code"/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <filter name="active_now" string="Currently Active" domain="[('active', '=', True)]"/>
+                <group>
+                    <filter string="Project" name="group_project" context="{'group_by': 'project_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_lhi_activity" model="ir.actions.act_window">
+        <field name="name">Activities &amp; Outputs</field>
+        <field name="res_model">lhi.activity</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_lhi_activity_search"/>
+    </record>
+
+    <!-- ==================== MENU ITEMS LINKAGE ==================== -->
+    <!-- Place under Operations parent menu in lhi_base -->
+    <menuitem id="menu_lhi_office_item" name="Offices / Locations" parent="menu_lhi_operations" action="action_lhi_office" sequence="10"/>
+    <menuitem id="menu_lhi_department_item" name="Departments &amp; Units" parent="menu_lhi_operations" action="action_lhi_department" sequence="20"/>
+    <menuitem id="menu_lhi_programme_item" name="Programmes" parent="menu_lhi_operations" action="action_lhi_programme" sequence="30"/>
+    <menuitem id="menu_lhi_sector_item" name="Technical Sectors" parent="menu_lhi_operations" action="action_lhi_sector" sequence="40"/>
+    <menuitem id="menu_lhi_donor_item" name="Donors" parent="menu_lhi_operations" action="action_lhi_donor" sequence="50"/>
+    <menuitem id="menu_lhi_funding_source_item" name="Funding Sources" parent="menu_lhi_operations" action="action_lhi_funding_source" sequence="60"/>
+    <menuitem id="menu_lhi_award_item" name="Award Codes" parent="menu_lhi_operations" action="action_lhi_award" sequence="70"/>
+    <menuitem id="menu_lhi_project_item" name="Project Codes" parent="menu_lhi_operations" action="action_lhi_project" sequence="80"/>
+    <menuitem id="menu_lhi_cost_center_item" name="Cost Centres" parent="menu_lhi_operations" action="action_lhi_cost_center" sequence="90"/>
+    <menuitem id="menu_lhi_activity_item" name="Activities / Outputs" parent="menu_lhi_operations" action="action_lhi_activity" sequence="100"/>
+</odoo>

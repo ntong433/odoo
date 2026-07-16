@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Root Menu for LHI ERP -->
+    <menuitem id="menu_lhi_root" name="LHI ERP" sequence="10"/>
+
+    <!-- Operational Sub-menu -->
+    <menuitem id="menu_lhi_operations" name="Operations" parent="menu_lhi_root" sequence="10"/>
+    <menuitem id="menu_lhi_project_root" name="Projects" parent="menu_lhi_root" sequence="20"/>
+</odoo>

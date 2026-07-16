@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lhi_document_item_admin,lhi.document.item.admin,model_lhi_document_item,lhi_security.group_lhi_erp_admin,1,1,1,0
+access_lhi_document_item_service,lhi.document.item.service,model_lhi_document_item,lhi_security.group_lhi_integration_service,1,1,1,0
+access_lhi_document_item_auditor,lhi.document.item.auditor,model_lhi_document_item,lhi_security.group_lhi_internal_auditor,1,0,0,0
+access_lhi_document_storage_policy_admin,lhi.document.storage.policy.admin,model_lhi_document_storage_policy,lhi_security.group_lhi_erp_admin,1,1,1,1
+access_lhi_document_storage_policy_service,lhi.document.storage.policy.service,model_lhi_document_storage_policy,lhi_security.group_lhi_integration_service,1,0,0,0
+access_lhi_document_storage_policy_auditor,lhi.document.storage.policy.auditor,model_lhi_document_storage_policy,lhi_security.group_lhi_internal_auditor,1,0,0,0
+

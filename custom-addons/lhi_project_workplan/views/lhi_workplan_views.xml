@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_workplan_form" model="ir.ui.view">
+        <field name="name">lhi.workplan.form</field>
+        <field name="model">lhi.workplan</field>
+        <field name="arch" type="xml">
+            <form string="Project Workplan">
+                <header>
+                    <button name="action_submit" string="Submit" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_approve" string="Approve" type="object" class="btn-success" invisible="state != 'submitted'"/>
+                    <button name="action_create_revision" string="Create Revision" type="object" invisible="state not in ('approved', 'revised')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,approved,revised"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g. 2030 Annual Workplan"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="project_id"/>
+                            <field name="plan_type"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                            <field name="version" readonly="1"/>
+                            <field name="parent_id" readonly="1" invisible="not parent_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Activities">
+                            <field name="workplan_activity_ids">
+                                <list>
+                                    <field name="code"/>
+                                    <field name="name"/>
+                                    <field name="element_type"/>
+                                    <field name="planned_start"/>
+                                    <field name="planned_end"/>
+                                    <field name="responsible_id" widget="many2one_avatar_user"/>
+                                    <field name="state" widget="badge" decoration-success="state == 'completed'" decoration-danger="state == 'delayed'"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_workplan_tree" model="ir.ui.view">
+        <field name="name">lhi.workplan.tree</field>
+        <field name="model">lhi.workplan</field>
+        <field name="arch" type="xml">
+            <list string="Workplans">
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="plan_type"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="version"/>
+                <field name="state" widget="badge" decoration-success="state == 'approved'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_workplan_search" model="ir.ui.view">
+        <field name="name">lhi.workplan.search</field>
+        <field name="model">lhi.workplan</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="project_id"/>
+                <group>
+                    <filter string="Project" name="project" context="{'group_by':'project_id'}"/>
+                    <filter string="Type" name="type" context="{'group_by':'plan_type'}"/>
+                    <filter string="Status" name="status" context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+</odoo>

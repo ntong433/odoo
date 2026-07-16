@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lhi_dashboard_widget_user,lhi.dashboard.widget.user,model_lhi_dashboard_widget,base.group_user,1,0,0,0
+access_lhi_dashboard_widget_admin,lhi.dashboard.widget.admin,model_lhi_dashboard_widget,base.group_erp_manager,1,1,1,1
+access_lhi_announcement_user,lhi.announcement.user,model_lhi_announcement,base.group_user,1,0,0,0
+access_lhi_announcement_admin,lhi.announcement.admin,model_lhi_announcement,base.group_erp_manager,1,1,1,1

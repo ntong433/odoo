@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_lhi_project_amendment" model="ir.actions.act_window">
+        <field name="name">Project Amendments</field>
+        <field name="res_model">lhi.project.amendment</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_lhi_project_amendment_search"/>
+    </record>
+
+    <menuitem id="menu_lhi_project_amendment" name="Amendments" parent="lhi_base.menu_lhi_project_root" action="action_lhi_project_amendment" sequence="40"/>
+</odoo>

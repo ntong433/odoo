@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_entra_configuration_list" model="ir.ui.view">
+        <field name="name">lhi.entra.configuration.list</field>
+        <field name="model">lhi.entra.configuration</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="sync_mode" widget="badge"/>
+                <field name="primary_sso_enabled"/>
+                <field name="scheduled_sync_enabled"/>
+                <field name="last_sync_state" widget="badge"/>
+                <field name="last_successful_sync_at"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_entra_configuration_form" model="ir.ui.view">
+        <field name="name">lhi.entra.configuration.form</field>
+        <field name="model">lhi.entra.configuration</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_configure_oauth_provider" type="object" string="Configure Tenant SSO"/>
+                    <button name="action_run_dry_sync" type="object" string="Run Dry Sync" class="oe_highlight"/>
+                    <button name="action_enable_write_mode" type="object" string="Enable Write Mode" invisible="sync_mode == 'write'"/>
+                    <button name="action_disable_write_mode" type="object" string="Disable Write Mode" invisible="sync_mode != 'write'"/>
+                    <button name="action_enable_primary_sso" type="object" string="Enable Primary SSO" invisible="primary_sso_enabled"/>
+                    <button name="action_disable_primary_sso" type="object" string="Disable Primary SSO" invisible="not primary_sso_enabled"/>
+                    <field name="sync_mode" widget="statusbar" statusbar_visible="dry_run,write"/>
+                </header>
+                <sheet>
+                    <div class="alert alert-warning" role="alert" invisible="sync_mode != 'dry_run'">
+                        Dry-run mode is active. No Entra profile, manager, account, or group changes are written.
+                    </div>
+                    <group>
+                        <group string="Connection and Authentication">
+                            <field name="name"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="connection_id" options="{'no_create': True}"/>
+                            <field name="oauth_provider_id" options="{'no_create': True}"/>
+                            <field name="primary_sso_enabled" readonly="1"/>
+                            <field name="approved_dry_run_id" readonly="1"/>
+                        </group>
+                        <group string="Synchronization Policy">
+                            <field name="allow_controlled_first_match"/>
+                            <field name="user_scope_mode"/>
+                            <field name="entra_scope_group_object_id" invisible="user_scope_mode != 'entra_group'"/>
+                            <field name="sync_login_from_upn"/>
+                            <field name="sync_organizational_scope"/>
+                            <field name="create_missing_employee"/>
+                            <field name="deactivation_policy"/>
+                            <field name="scheduled_sync_enabled"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <group string="Bounded Graph Processing">
+                        <field name="page_size"/>
+                        <field name="maximum_pages"/>
+                        <field name="maximum_users"/>
+                    </group>
+                    <group string="Diagnostics">
+                        <field name="last_sync_state" readonly="1"/>
+                        <field name="last_successful_sync_at" readonly="1"/>
+                        <field name="last_safe_error" readonly="1"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_lhi_entra_configuration" model="ir.actions.act_window">
+        <field name="name">Entra Identity Configuration</field>
+        <field name="res_model">lhi.entra.configuration</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

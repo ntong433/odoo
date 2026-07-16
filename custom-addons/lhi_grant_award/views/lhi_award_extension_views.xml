@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_award_form_inherit_grant" model="ir.ui.view">
+        <field name="name">lhi.award.form.inherit.grant</field>
+        <field name="model">lhi.award</field>
+        <field name="inherit_id" ref="lhi_base.view_lhi_award_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='code']/parent::group" position="after">
+                <group string="Grant Details">
+                    <field name="donor_id"/>
+                    <field name="agreement_date"/>
+                    <field name="closeout_period_days"/>
+                    <field name="reporting_currency_id"/>
+                    <field name="agreement_document_id"/>
+                </group>
+            </xpath>
+            <xpath expr="//sheet" position="inside">
+                <notebook>
+                    <page string="Conditions &amp; Restrictions">
+                        <group>
+                            <field name="indirect_cost_rule"/>
+                            <field name="cost_share"/>
+                            <field name="procurement_thresholds"/>
+                        </group>
+                    </page>
+                    <page string="Compliance &amp; Operations">
+                        <group>
+                            <field name="reporting_requirements"/>
+                            <field name="audit_requirements"/>
+                            <field name="branding"/>
+                            <field name="safeguarding"/>
+                            <field name="data_protection"/>
+                            <field name="asset_ownership"/>
+                            <field name="record_retention"/>
+                            <field name="special_conditions"/>
+                        </group>
+                    </page>
+                </notebook>
+            </xpath>
+        </field>
+    </record>
+</odoo>

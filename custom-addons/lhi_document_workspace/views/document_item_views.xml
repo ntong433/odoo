@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_document_item_form_workspace" model="ir.ui.view">
+        <field name="name">lhi.document.item.form.workspace</field>
+        <field name="model">lhi.document.item</field>
+        <field name="inherit_id" ref="lhi_sharepoint_storage.view_lhi_document_item_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='modified_at']" position="after">
+                <field name="modified_by" readonly="1"/>
+            </xpath>
+            <xpath expr="//field[@name='document_category']" position="after">
+                <field name="workflow_state" readonly="1"/>
+                <field name="retention_category" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

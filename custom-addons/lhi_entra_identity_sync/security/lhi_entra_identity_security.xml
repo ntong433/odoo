@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="rule_lhi_entra_configuration_company" model="ir.rule">
+            <field name="name">Entra Configuration: Multi-Company</field>
+            <field name="model_id" ref="model_lhi_entra_configuration"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_erp_admin'))]"/>
+        </record>
+
+        <record id="rule_lhi_entra_mapping_company" model="ir.rule">
+            <field name="name">Entra Group Mapping: Multi-Company</field>
+            <field name="model_id" ref="model_lhi_entra_group_mapping"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_erp_admin')), (4, ref('lhi_security.group_lhi_internal_auditor'))]"/>
+        </record>
+
+        <record id="rule_lhi_entra_run_company" model="ir.rule">
+            <field name="name">Entra Sync Run: Multi-Company</field>
+            <field name="model_id" ref="model_lhi_entra_sync_run"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_erp_admin')), (4, ref('lhi_security.group_lhi_internal_auditor'))]"/>
+        </record>
+
+        <record id="rule_lhi_entra_plan_company" model="ir.rule">
+            <field name="name">Entra Sync Plan: Multi-Company</field>
+            <field name="model_id" ref="model_lhi_entra_sync_plan"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_erp_admin'))]"/>
+        </record>
+
+        <record id="rule_lhi_entra_finding_company" model="ir.rule">
+            <field name="name">Entra Sync Finding: Multi-Company</field>
+            <field name="model_id" ref="model_lhi_entra_sync_finding"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_erp_admin')), (4, ref('lhi_security.group_lhi_internal_auditor'))]"/>
+        </record>
+
+        <record id="rule_lhi_entra_snapshot_company" model="ir.rule">
+            <field name="name">Entra Sync Snapshot: Multi-Company</field>
+            <field name="model_id" ref="model_lhi_entra_sync_snapshot"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_erp_admin'))]"/>
+        </record>
+    </data>
+</odoo>
+

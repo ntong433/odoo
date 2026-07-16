@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lhi_unified_inbox_user,lhi.unified.inbox.user,model_lhi_unified_inbox,base.group_user,1,1,1,0
+access_lhi_leave_cache_user,lhi.leave.cache.user,model_lhi_leave_cache,base.group_user,1,0,0,0
+access_lhi_leave_request_cache_user,lhi.leave.request.cache.user,model_lhi_leave_request_cache,base.group_user,1,0,0,0

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_project_report_form" model="ir.ui.view">
+        <field name="name">lhi.project.report.form</field>
+        <field name="model">lhi.project.report</field>
+        <field name="arch" type="xml">
+            <form string="Project Report">
+                <header>
+                    <button name="action_in_progress" string="Start Work" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_review" string="Submit for Review" type="object" class="oe_highlight" invisible="state not in ('in_progress', 'revised')"/>
+                    <button name="action_submit" string="Submit to Donor" type="object" class="btn-primary" invisible="state != 'review'"/>
+                    <button name="action_request_revision" string="Request Revisions" type="object" class="btn-warning" invisible="state not in ('review', 'submitted')"/>
+                    <button name="action_approve" string="Approved" type="object" class="btn-success" invisible="state != 'submitted'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,in_progress,review,submitted,approved"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group string="Basic Information">
+                            <field name="project_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="report_type"/>
+                            <field name="version" readonly="1"/>
+                        </group>
+                        <group string="Responsibilities &amp; Timeline">
+                            <field name="owner_id" widget="many2one_avatar_user"/>
+                            <field name="reviewer_id" widget="many2one_avatar_user"/>
+                            <field name="contributor_ids" widget="many2many_tags_avatar"/>
+                            <field name="deadline"/>
+                            <field name="submission_date" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Content">
+                            <field name="content" widget="html"/>
+                        </page>
+                        <page string="Attachments">
+                            <field name="attachment_ids" widget="lhi_sharepoint_many2many_binary"/>
+                        </page>
+                        <page string="Donor Feedback" invisible="state not in ('submitted', 'revised', 'approved')">
+                            <field name="donor_feedback"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_project_report_tree" model="ir.ui.view">
+        <field name="name">lhi.project.report.tree</field>
+        <field name="model">lhi.project.report</field>
+        <field name="arch" type="xml">
+            <list string="Project Reports">
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="report_type"/>
+                <field name="owner_id" widget="many2one_avatar_user"/>
+                <field name="deadline"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+</odoo>

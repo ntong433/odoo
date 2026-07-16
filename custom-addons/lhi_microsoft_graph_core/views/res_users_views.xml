@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_users_form_simple_modif_lhi_graph" model="ir.ui.view">
+        <field name="name">res.users.preferences.form.lhi.graph</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='page_security']/div[@name='auth']" position="after">
+                <div class="d-lg-flex mt-3" name="lhi_graph_delegated_authorization">
+                    <div class="col-lg-3 d-flex flex-column">
+                        <span class="o_form_label">Microsoft 365 Access</span>
+                        <span class="text-muted">Authorize user-driven SharePoint and Office actions.</span>
+                    </div>
+                    <div class="w-lg-75 d-flex flex-column my-auto">
+                        <field name="lhi_graph_delegated_authorized" invisible="1"/>
+                        <field name="lhi_graph_delegated_expires_at" readonly="1"
+                               invisible="not lhi_graph_delegated_authorized"/>
+                        <div>
+                            <button name="action_lhi_graph_authorize"
+                                    type="object"
+                                    string="Authorize Microsoft 365"
+                                    class="btn btn-secondary"
+                                    invisible="lhi_graph_delegated_authorized"/>
+                            <button name="action_lhi_graph_revoke"
+                                    type="object"
+                                    string="Remove Authorization"
+                                    class="btn btn-secondary"
+                                    invisible="not lhi_graph_delegated_authorized"
+                                    confirm="Remove the delegated Microsoft Graph tokens stored for this user?"/>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
+

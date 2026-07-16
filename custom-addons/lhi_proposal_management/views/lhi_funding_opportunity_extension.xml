@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_funding_opportunity_form_inherit_proposal" model="ir.ui.view">
+        <field name="name">lhi.funding.opportunity.form.inherit.proposal</field>
+        <field name="model">lhi.funding.opportunity</field>
+        <field name="inherit_id" ref="lhi_funding_opportunity.view_lhi_funding_opportunity_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_create_concept_note" string="Create Concept Note" type="object" class="btn-secondary" invisible="approval_request_id == False"/>
+                <button name="action_create_full_proposal" string="Create Full Proposal" type="object" class="btn-primary" invisible="approval_request_id == False"/>
+            </xpath>
+            <xpath expr="//sheet/div[@name='button_box']" position="inside">
+                <button class="oe_stat_button" type="object" name="action_view_workspaces" icon="fa-folder-open">
+                    <field string="Workspaces" name="workspace_count" widget="statinfo"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>

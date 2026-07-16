@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lhi_sp_partition,lhi.sharepoint.partition.system,model_lhi_sharepoint_partition,base.group_system,1,1,1,1
+access_lhi_sp_subscription,lhi.sharepoint.subscription.system,model_lhi_sharepoint_subscription,base.group_system,1,1,1,1
+access_lhi_sp_delta,lhi.sharepoint.delta.system,model_lhi_sharepoint_delta,base.group_system,1,1,1,1
+access_lhi_doc_metadata,lhi.document.metadata.system,model_lhi_document_metadata,base.group_system,1,1,1,1
+access_lhi_doc_recon,lhi.document.reconciliation.system,model_lhi_document_reconciliation,base.group_system,1,1,1,1

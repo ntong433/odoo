@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_proposal_section_form" model="ir.ui.view">
+        <field name="name">lhi.proposal.section.form</field>
+        <field name="model">lhi.proposal.section</field>
+        <field name="arch" type="xml">
+            <form string="Proposal Section">
+                <header>
+                    <button name="action_submit_review" string="Submit for Review" type="object" class="oe_highlight" invisible="state != 'draft' and state != 'revision'"/>
+                    <button name="action_approve" string="Approve" type="object" class="oe_highlight" invisible="state != 'review'"/>
+                    <button name="action_request_revision" string="Request Revision" type="object" invisible="state != 'review'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,review,approved"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="workspace_id" readonly="1"/>
+                            <field name="section_type"/>
+                            <field name="required"/>
+                        </group>
+                        <group>
+                            <field name="owner_id" widget="many2one_avatar_user"/>
+                            <field name="reviewer_id" widget="many2one_avatar_user"/>
+                            <field name="contributor_ids" widget="many2many_tags_avatar"/>
+                            <field name="deadline"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Content Draft">
+                            <field name="content" widget="html" options="{'collaborative': true}"/>
+                        </page>
+                        <page string="Attachments">
+                            <field name="attachment_ids" widget="lhi_sharepoint_many2many_binary"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+</odoo>

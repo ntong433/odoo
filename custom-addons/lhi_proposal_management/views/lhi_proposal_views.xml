@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_proposal_workspace_form" model="ir.ui.view">
+        <field name="name">lhi.proposal.workspace.form</field>
+        <field name="model">lhi.proposal.workspace</field>
+        <field name="arch" type="xml">
+            <form string="Proposal Workspace">
+                <header>
+                    <button name="action_submit_for_review" string="Submit for Review" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_request_final_approval" string="Request Final Approval" type="object" class="oe_highlight" invisible="state != 'review' or approval_request_id != False"/>
+                    <button name="action_mark_submitted" string="Mark as Submitted" type="object" class="oe_highlight" invisible="state != 'approved'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,review,approved,submitted"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box"/>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="Workspace Title"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="opportunity_id"/>
+                            <field name="donor_id"/>
+                            <field name="workspace_type"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="lead_writer_id" widget="many2one_avatar_user"/>
+                            <field name="deadline"/>
+                            <field name="submission_deadline"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Sections">
+                            <field name="section_ids">
+                                <list>
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="section_type"/>
+                                    <field name="owner_id" widget="many2one_avatar_user"/>
+                                    <field name="reviewer_id" widget="many2one_avatar_user"/>
+                                    <field name="deadline"/>
+                                    <field name="state"/>
+                                    <field name="required"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Annexes &amp; Checklists">
+                            <field name="annex_ids">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="required"/>
+                                    <field name="is_completed"/>
+                                    <field name="attachment_id"/>
+                                    <field name="notes"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Approval Tracker">
+                            <group>
+                                <field name="approval_request_id"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_proposal_workspace_tree" model="ir.ui.view">
+        <field name="name">lhi.proposal.workspace.tree</field>
+        <field name="model">lhi.proposal.workspace</field>
+        <field name="arch" type="xml">
+            <list string="Proposal Workspaces">
+                <field name="name"/>
+                <field name="opportunity_id"/>
+                <field name="workspace_type"/>
+                <field name="lead_writer_id" widget="many2one_avatar_user"/>
+                <field name="deadline"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-warning="state == 'review'" decoration-success="state == 'approved'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_lhi_proposal_workspace" model="ir.actions.act_window">
+        <field name="name">Proposal Workspaces</field>
+        <field name="res_model">lhi.proposal.workspace</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

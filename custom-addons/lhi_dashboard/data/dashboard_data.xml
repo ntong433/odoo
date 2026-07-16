@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Default Dashboard Widgets -->
+        <record id="widget_announcements" model="lhi.dashboard.widget">
+            <field name="name">Announcements</field>
+            <field name="registry_key">lhi_dashboard.announcements</field>
+            <field name="sequence">10</field>
+            <field name="col_span">2</field>
+            <field name="active" eval="True"/>
+        </record>
+        
+        <record id="widget_my_tasks" model="lhi.dashboard.widget">
+            <field name="name">My Tasks</field>
+            <field name="registry_key">lhi_dashboard.my_tasks</field>
+            <field name="sequence">20</field>
+            <field name="col_span">1</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <record id="widget_my_approvals" model="lhi.dashboard.widget">
+            <field name="name">My Approvals</field>
+            <field name="registry_key">lhi_dashboard.my_approvals</field>
+            <field name="sequence">30</field>
+            <field name="col_span">1</field>
+            <field name="active" eval="True"/>
+        </record>
+        
+        <record id="widget_quick_actions" model="lhi.dashboard.widget">
+            <field name="name">Quick Actions</field>
+            <field name="registry_key">lhi_dashboard.quick_actions</field>
+            <field name="sequence">40</field>
+            <field name="col_span">1</field>
+            <field name="active" eval="True"/>
+        </record>
+
+        <record id="widget_notifications" model="lhi.dashboard.widget">
+            <field name="name">Notifications</field>
+            <field name="registry_key">lhi_dashboard.notifications</field>
+            <field name="sequence">50</field>
+            <field name="col_span">1</field>
+            <field name="active" eval="True"/>
+        </record>
+        
+        <record id="widget_accessible_modules" model="lhi.dashboard.widget">
+            <field name="name">Accessible Modules</field>
+            <field name="registry_key">lhi_dashboard.accessible_modules</field>
+            <field name="sequence">60</field>
+            <field name="col_span">2</field>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+</odoo>

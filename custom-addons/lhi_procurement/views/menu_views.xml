@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_lhi_sourcing" model="ir.actions.act_window">
+        <field name="name">Sourcing Events</field>
+        <field name="res_model">lhi.sourcing</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_lhi_sourcing" name="Sourcing &amp; Tenders" parent="lhi_purchase_request.menu_lhi_procurement_root" action="action_lhi_sourcing" sequence="25"/>
+</odoo>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_fleet_incident_form" model="ir.ui.view">
+        <field name="name">lhi.fleet.incident.form</field>
+        <field name="model">lhi.fleet.incident</field>
+        <field name="arch" type="xml">
+            <form string="Fleet Incident">
+                <header>
+                    <button name="action_report" string="Submit Report" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_investigate" string="Begin Investigation" type="object" class="oe_highlight" invisible="state != 'reported'"/>
+                    <button name="action_resolve" string="Resolve" type="object" class="oe_highlight" invisible="state != 'investigating'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,reported,investigating,resolved"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Incident Info">
+                            <field name="incident_date"/>
+                            <field name="incident_type"/>
+                            <field name="vehicle_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Context">
+                            <field name="trip_id"/>
+                            <field name="driver_id"/>
+                            <field name="police_report_filed"/>
+                        </group>
+                    </group>
+                    <group string="Description">
+                        <field name="description" nolabel="1"/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_fleet_incident_tree" model="ir.ui.view">
+        <field name="name">lhi.fleet.incident.tree</field>
+        <field name="model">lhi.fleet.incident</field>
+        <field name="arch" type="xml">
+            <list string="Incidents">
+                <field name="name"/>
+                <field name="incident_date"/>
+                <field name="incident_type"/>
+                <field name="vehicle_id"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+</odoo>

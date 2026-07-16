@@ -1,0 +1,204 @@
+// ============================================================================
+// LHI LOGIN PAGE — Custom branded sign-in screen
+// Sprint 4 · lhi_web_shell · login.scss
+// ============================================================================
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+// ── Root tokens on login page ─────────────────────────────────────────────────
+body.o_login_page,
+.o_web_login_signup {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: linear-gradient(135deg, #1A2540 0%, #0f1623 50%, #1a1520 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+
+    // Decorative background orbs
+    &::before,
+    &::after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+        filter: blur(80px);
+        opacity: 0.15;
+    }
+
+    &::before {
+        width: 600px;
+        height: 600px;
+        background: #C8281A;
+        top: -200px;
+        left: -100px;
+    }
+
+    &::after {
+        width: 500px;
+        height: 500px;
+        background: #E8620A;
+        bottom: -150px;
+        right: -80px;
+    }
+}
+
+// ── Login card ────────────────────────────────────────────────────────────────
+.o_login_form,
+.oe_login_form {
+    position: relative;
+    z-index: 1;
+    background: rgba(30, 37, 55, 0.85);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 20px;
+    padding: 48px 44px;
+    width: min(440px, calc(100vw - 2rem));
+    box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+
+    // LHI Logo above the form
+    &::before {
+        display: block;
+        content: 'LHI';
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.18em;
+        color: rgba(255,255,255,0.3);
+        text-align: center;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+    }
+}
+
+// ── Branding header ───────────────────────────────────────────────────────────
+.o_login_header,
+.oe_login_logo_wrap {
+    text-align: center;
+    margin-bottom: 32px;
+
+    .o_logo {
+        max-width: 120px;
+        height: auto;
+        filter: brightness(0) invert(1);
+        opacity: 0.9;
+    }
+}
+
+.o_login_title,
+.oe_login_subtitle {
+    color: rgba(255,255,255,0.85);
+    font-size: 22px;
+    font-weight: 700;
+    text-align: center;
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+}
+
+.o_login_subtitle {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.45);
+}
+
+// ── Form labels ───────────────────────────────────────────────────────────────
+.o_login_form label,
+.oe_login_form label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 6px;
+}
+
+// ── Input fields ──────────────────────────────────────────────────────────────
+.o_login_form .form-control,
+.oe_login_form .form-control,
+.o_login_form input[type="text"],
+.o_login_form input[type="password"],
+.o_login_form input[type="email"] {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    color: rgba(255,255,255,0.9);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    padding: 11px 14px;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+    width: 100%;
+
+    &::placeholder { color: rgba(255,255,255,0.3); }
+
+    &:focus {
+        outline: none;
+        background: rgba(255,255,255,0.10);
+        border-color: #C8281A;
+        box-shadow: 0 0 0 3px rgba(200, 40, 26, 0.25);
+    }
+}
+
+// ── Sign-in button ────────────────────────────────────────────────────────────
+.o_login_form .btn-primary,
+.oe_login_form .btn-primary {
+    display: block;
+    width: 100%;
+    background: linear-gradient(135deg, #C8281A 0%, #a82015 100%);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 12px;
+    cursor: pointer;
+    margin-top: 24px;
+    transition: opacity 150ms ease, transform 150ms ease, box-shadow 150ms ease;
+    box-shadow: 0 4px 15px rgba(200, 40, 26, 0.4);
+
+    &:hover {
+        opacity: 0.92;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(200, 40, 26, 0.5);
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+}
+
+// ── Divider / secondary links ─────────────────────────────────────────────────
+.o_login_form a,
+.oe_login_form a {
+    color: rgba(200, 40, 26, 0.85);
+    font-size: 13px;
+    text-decoration: none;
+    transition: color 150ms ease;
+
+    &:hover { color: #e04030; text-decoration: underline; }
+}
+
+// ── Error/alert messages ──────────────────────────────────────────────────────
+.o_login_form .alert,
+.oe_login_form .alert {
+    border-radius: 10px;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    border: none;
+
+    &.alert-danger {
+        background: rgba(200, 40, 26, 0.15);
+        color: #f4a098;
+        border-left: 3px solid #C8281A;
+    }
+}
+
+// ── Footer attribution ────────────────────────────────────────────────────────
+.o_login_footer,
+.oe_login_footer {
+    text-align: center;
+    margin-top: 28px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.25);
+    font-family: 'Inter', sans-serif;
+}

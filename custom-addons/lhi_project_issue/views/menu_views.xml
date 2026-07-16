@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_lhi_project_issue" model="ir.actions.act_window">
+        <field name="name">Project Issues</field>
+        <field name="res_model">lhi.project.issue</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_lhi_project_issue_search"/>
+    </record>
+
+    <!-- Menu assuming menu_lhi_risk_issue_root exists from lhi_project_risk -->
+    <menuitem id="menu_lhi_project_issue" name="Issue Register" parent="lhi_project_risk.menu_lhi_risk_issue_root" action="action_lhi_project_issue" sequence="20"/>
+</odoo>

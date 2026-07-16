@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Sourcing Event Form -->
+    <record id="view_lhi_sourcing_form" model="ir.ui.view">
+        <field name="name">lhi.sourcing.form</field>
+        <field name="model">lhi.sourcing</field>
+        <field name="arch" type="xml">
+            <form string="Sourcing Event">
+                <header>
+                    <button name="action_publish" string="Publish / Open Bidding" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_bid_opening" string="Start Bid Opening" type="object" class="oe_highlight" invisible="state != 'published'"/>
+                    <button name="action_technical_evaluation" string="Start Technical Eval" type="object" class="oe_highlight" invisible="state != 'opening'"/>
+                    <button name="action_financial_evaluation" string="Start Financial Eval" type="object" class="oe_highlight" invisible="state != 'technical'"/>
+                    <button name="action_recommend" string="Recommend Award" type="object" class="oe_highlight" invisible="state != 'financial'"/>
+                    <button name="action_award" string="Final Award" type="object" class="oe_highlight" invisible="state != 'recommended'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,published,opening,technical,financial,recommended,awarded"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" readonly="1"/></h1>
+                        <label for="title" class="oe_edit_only"/>
+                        <h2><field name="title"/></h2>
+                    </div>
+                    <group>
+                        <group string="Source Details">
+                            <field name="request_id"/>
+                            <field name="sourcing_type"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                        <group string="Evaluation Configuration">
+                            <field name="evaluation_method"/>
+                            <field name="tech_weight" invisible="evaluation_method != 'weighted'"/>
+                            <field name="fin_weight" invisible="evaluation_method != 'weighted'"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Bids">
+                            <field name="bid_ids">
+                                <list string="Bids">
+                                    <field name="vendor_id"/>
+                                    <field name="technical_compliant"/>
+                                    <field name="technical_score"/>
+                                    <field name="financial_amount"/>
+                                    <field name="weighted_score"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                                <form string="Bid">
+                                    <header>
+                                        <button name="action_submit" string="Submit Bid" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                                        <button name="action_disqualify" string="Disqualify" type="object" class="btn-danger" invisible="state in ('draft', 'disqualified', 'awarded')"/>
+                                        <field name="state" widget="statusbar" statusbar_visible="draft,submitted,recommended,awarded"/>
+                                    </header>
+                                    <sheet>
+                                        <group>
+                                            <group>
+                                                <field name="vendor_id"/>
+                                                <field name="financial_amount"/>
+                                                <field name="currency_id" invisible="1"/>
+                                            </group>
+                                            <group>
+                                                <field name="technical_compliant"/>
+                                                <field name="technical_score"/>
+                                                <field name="financial_score"/>
+                                                <field name="weighted_score"/>
+                                            </group>
+                                        </group>
+                                        <group string="Evaluation Notes">
+                                            <field name="evaluator_comments"/>
+                                            <field name="disqualification_reason" invisible="state != 'disqualified'"/>
+                                        </group>
+                                    </sheet>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Evaluators &amp; Conflicts">
+                            <field name="evaluator_ids">
+                                <list string="Evaluators" editable="bottom">
+                                    <field name="user_id"/>
+                                    <field name="conflict_declared"/>
+                                    <field name="conflict_details"/>
+                                    <button name="action_declare_no_conflict" string="Declare No Conflict" type="object" icon="fa-check"/>
+                                    <button name="action_declare_conflict" string="Declare Conflict" type="object" icon="fa-warning"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Audit Summary">
+                            <field name="audit_file" widget="html"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_sourcing_tree" model="ir.ui.view">
+        <field name="name">lhi.sourcing.tree</field>
+        <field name="model">lhi.sourcing</field>
+        <field name="arch" type="xml">
+            <list string="Sourcing Events">
+                <field name="name"/>
+                <field name="title"/>
+                <field name="sourcing_type"/>
+                <field name="evaluation_method"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- PR View Inherit -->
+    <record id="view_lhi_purchase_request_sourcing_inherit" model="ir.ui.view">
+        <field name="name">lhi.purchase.request.sourcing.inherit</field>
+        <field name="model">lhi.purchase.request</field>
+        <field name="inherit_id" ref="lhi_purchase_request.view_lhi_purchase_request_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_create_sourcing_event" string="Create Sourcing Event" type="object" class="oe_highlight" invisible="state != 'approved' or sourcing_id != False"/>
+            </xpath>
+            <xpath expr="//field[@name='budget_line_id']" position="after">
+                <field name="sourcing_id" readonly="1" invisible="not sourcing_id"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

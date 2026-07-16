@@ -1,0 +1,349 @@
+// ============================================================================
+// LHI VIEW OVERRIDES — Form, List, Kanban, Calendar, Control Panel, Search
+// Sprint 4 · lhi_web_shell · views.scss
+//
+// Strategy: Narrow BEM-adjacent selectors. No !important except where Odoo
+// has a specificity battle with inline styles.
+// ============================================================================
+
+// ── Control Panel (top of every view) ────────────────────────────────────────
+.o_control_panel {
+    background: var(--lhi-card-bg);
+    border-bottom: 1px solid var(--lhi-card-border);
+    padding: $lhi-space-3 $lhi-space-4;
+
+    .o_control_panel_main {
+        gap: $lhi-space-2;
+    }
+
+    // Breadcrumb
+    .o_breadcrumb {
+        font-family: $lhi-font-family-sans;
+
+        .o_breadcrumb_item {
+            font-size: $lhi-font-size-sm;
+            color: var(--lhi-text-secondary);
+            font-weight: $lhi-font-weight-medium;
+
+            &:last-child {
+                color: var(--lhi-text-primary);
+                font-weight: $lhi-font-weight-semibold;
+            }
+
+            a { color: inherit; }
+        }
+
+        .o_breadcrumb_item + .o_breadcrumb_item::before {
+            color: var(--lhi-text-muted);
+        }
+    }
+
+    // Primary action button
+    .o_cp_buttons {
+        .btn-primary {
+            background: var(--lhi-primary);
+            border-color: var(--lhi-primary);
+            font-family: $lhi-font-family-sans;
+            font-weight: $lhi-font-weight-medium;
+            border-radius: $lhi-radius;
+            font-size: $lhi-font-size-sm;
+            transition: background $lhi-transition-fast, box-shadow $lhi-transition-fast;
+
+            &:hover   { background: var(--lhi-primary-dark); border-color: var(--lhi-primary-dark); }
+            &:focus   { box-shadow: 0 0 0 3px rgba(200, 40, 26, 0.25); }
+        }
+
+        .btn-secondary {
+            font-family: $lhi-font-family-sans;
+            font-size: $lhi-font-size-sm;
+            border-radius: $lhi-radius;
+            border-color: var(--lhi-card-border);
+            color: var(--lhi-text-secondary);
+            background: var(--lhi-card-bg);
+
+            &:hover { border-color: var(--lhi-primary); color: var(--lhi-primary); }
+        }
+    }
+
+    // Search bar
+    .o_searchview {
+        background: var(--lhi-canvas-bg);
+        border: 1px solid var(--lhi-card-border);
+        border-radius: $lhi-radius-full;
+        font-family: $lhi-font-family-sans;
+
+        &.o_searchview_more { border-color: var(--lhi-primary); }
+
+        .o_searchview_input {
+            font-family: $lhi-font-family-sans;
+            font-size: $lhi-font-size-sm;
+            color: var(--lhi-text-primary);
+        }
+
+        .o_searchview_facet {
+            background: #{$lhi-red-50};
+            border-color: #{$lhi-red-200};
+            color: $lhi-red-700;
+            border-radius: $lhi-radius-full;
+            font-size: $lhi-font-size-xs;
+        }
+    }
+
+    // View switcher (list/kanban/calendar)
+    .o_cp_switch_buttons {
+        .o_switch_view {
+            color: var(--lhi-text-secondary);
+            border-radius: $lhi-radius-sm;
+            transition: color $lhi-transition-fast, background $lhi-transition-fast;
+
+            &.active,
+            &:hover {
+                color: var(--lhi-primary);
+                background: #{$lhi-red-50};
+            }
+        }
+    }
+}
+
+// ── Form View ─────────────────────────────────────────────────────────────────
+.o_form_view {
+    background: var(--lhi-canvas-bg);
+    font-family: $lhi-font-family-sans;
+
+    .o_form_sheet_bg {
+        background: var(--lhi-canvas-bg);
+    }
+
+    .o_form_sheet {
+        background: var(--lhi-card-bg);
+        border: 1px solid var(--lhi-card-border);
+        border-radius: $lhi-radius-xl;
+        box-shadow: var(--lhi-shadow);
+        margin: $lhi-space-4;
+        padding: $lhi-space-6;
+    }
+
+    // Field labels
+    .o_field_widget .o_form_label,
+    .o_field_label {
+        font-size: $lhi-font-size-sm;
+        font-weight: $lhi-font-weight-medium;
+        color: var(--lhi-text-secondary);
+        font-family: $lhi-font-family-sans;
+    }
+
+    // Field inputs
+    .o_field_widget input,
+    .o_field_widget textarea,
+    .o_field_widget select {
+        font-family: $lhi-font-family-sans;
+        font-size: $lhi-font-size-sm;
+        color: var(--lhi-text-primary);
+        border-color: var(--lhi-card-border);
+        border-radius: $lhi-radius;
+        transition: border-color $lhi-transition-fast, box-shadow $lhi-transition-fast;
+
+        &:focus {
+            border-color: var(--lhi-primary);
+            box-shadow: 0 0 0 3px rgba(200, 40, 26, 0.12);
+        }
+    }
+
+    // Status bar
+    .o_statusbar_status .btn {
+        font-family: $lhi-font-family-sans;
+        font-size: $lhi-font-size-xs;
+        font-weight: $lhi-font-weight-medium;
+
+        &.btn-primary {
+            background: var(--lhi-primary);
+            border-color: var(--lhi-primary);
+
+            &::before { background: transparent; }
+        }
+
+        &.o_arrow_button_current {
+            background: var(--lhi-primary);
+            color: white;
+        }
+    }
+
+    // Chatter
+    .o_chatter {
+        border-left: 1px solid var(--lhi-card-border);
+        font-family: $lhi-font-family-sans;
+        background: var(--lhi-canvas-bg);
+
+        .o_chatter_topbar .o_chatter_button_main {
+            font-family: $lhi-font-family-sans;
+        }
+    }
+}
+
+// ── List View ─────────────────────────────────────────────────────────────────
+.o_list_view {
+    font-family: $lhi-font-family-sans;
+    background: var(--lhi-card-bg);
+    border: 1px solid var(--lhi-card-border);
+    border-radius: $lhi-radius-xl;
+    overflow: hidden;
+
+    table {
+        font-family: $lhi-font-family-sans;
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    thead th {
+        font-size: $lhi-font-size-xs;
+        font-weight: $lhi-font-weight-semibold;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--lhi-text-secondary);
+        background: var(--lhi-canvas-bg);
+        padding: $lhi-space-3 $lhi-space-4;
+        border-bottom: 1px solid var(--lhi-card-border);
+
+        &.o_column_sortable:hover { color: var(--lhi-primary); }
+    }
+
+    tbody tr {
+        border-bottom: 1px solid var(--lhi-card-border);
+        transition: background $lhi-transition-fast;
+
+        &:last-child { border-bottom: none; }
+        &:hover       { background: var(--lhi-canvas-bg); }
+        &.o_data_row_selected { background: #{$lhi-red-50}; }
+    }
+
+    tbody td {
+        font-size: $lhi-font-size-sm;
+        color: var(--lhi-text-primary);
+        padding: $lhi-space-3 $lhi-space-4;
+        vertical-align: middle;
+    }
+
+    // Checkboxes
+    .o_list_record_selector {
+        .o_checkbox input[type=checkbox]:checked + span {
+            background: var(--lhi-primary);
+            border-color: var(--lhi-primary);
+        }
+    }
+}
+
+// ── Kanban View ───────────────────────────────────────────────────────────────
+.o_kanban_view {
+    background: var(--lhi-canvas-bg);
+    font-family: $lhi-font-family-sans;
+    gap: $lhi-space-4;
+    padding: $lhi-space-4;
+
+    .o_kanban_group {
+        background: var(--lhi-card-bg);
+        border: 1px solid var(--lhi-card-border);
+        border-radius: $lhi-radius-lg;
+        padding: $lhi-space-3;
+        min-width: 280px;
+    }
+
+    .o_kanban_header {
+        .o_kanban_header_title {
+            font-size: $lhi-font-size-sm;
+            font-weight: $lhi-font-weight-semibold;
+            color: var(--lhi-text-primary);
+            font-family: $lhi-font-family-sans;
+        }
+    }
+
+    .o_kanban_record {
+        background: var(--lhi-card-bg);
+        border: 1px solid var(--lhi-card-border);
+        border-radius: $lhi-radius);
+        padding: $lhi-space-3 $lhi-space-4;
+        margin-bottom: $lhi-space-2;
+        box-shadow: var(--lhi-shadow-sm);
+        cursor: pointer;
+        transition: box-shadow $lhi-transition-fast, transform $lhi-transition-fast, border-color $lhi-transition-fast;
+        font-family: $lhi-font-family-sans;
+
+        &:hover {
+            box-shadow: var(--lhi-shadow-md);
+            transform: translateY(-1px);
+            border-color: var(--lhi-primary-light);
+        }
+
+        &.o_kanban_ghost {
+            background: #{$lhi-red-50};
+            border-style: dashed;
+            border-color: var(--lhi-primary-light);
+        }
+    }
+}
+
+// ── Calendar View ─────────────────────────────────────────────────────────────
+.o_calendar_view {
+    font-family: $lhi-font-family-sans;
+    background: var(--lhi-card-bg);
+    border: 1px solid var(--lhi-card-border);
+    border-radius: $lhi-radius-xl;
+
+    .fc-header-toolbar {
+        padding: $lhi-space-3 $lhi-space-4;
+        background: var(--lhi-canvas-bg);
+        border-bottom: 1px solid var(--lhi-card-border);
+
+        .fc-button {
+            font-family: $lhi-font-family-sans;
+            font-size: $lhi-font-size-sm;
+            border-radius: $lhi-radius;
+            border-color: var(--lhi-card-border);
+            color: var(--lhi-text-secondary);
+            background: var(--lhi-card-bg);
+
+            &.fc-button-active,
+            &:hover {
+                background: var(--lhi-primary);
+                border-color: var(--lhi-primary);
+                color: white;
+            }
+        }
+    }
+
+    .fc-event {
+        background: var(--lhi-primary);
+        border-color: var(--lhi-primary-dark);
+        border-radius: $lhi-radius-sm;
+        font-family: $lhi-font-family-sans;
+        font-size: $lhi-font-size-xs;
+
+        &:hover { filter: brightness(1.1); }
+    }
+
+    .fc-today { background: #{$lhi-red-50} !important; }
+}
+
+// ── Dropdown / autocomplete ────────────────────────────────────────────────────
+.o_dropdown_menu,
+.o_autocomplete_dropdown {
+    font-family: $lhi-font-family-sans;
+    border-radius: $lhi-radius-lg;
+    border-color: var(--lhi-card-border);
+    box-shadow: var(--lhi-shadow-lg);
+
+    .dropdown-item,
+    .o_dropdown_item {
+        font-size: $lhi-font-size-sm;
+        color: var(--lhi-text-primary);
+        transition: background $lhi-transition-fast;
+        border-radius: $lhi-radius-sm;
+        margin: 0 $lhi-space-1;
+
+        &:hover,
+        &.active,
+        &:focus {
+            background: #{$lhi-red-50};
+            color: var(--lhi-primary);
+        }
+    }
+}

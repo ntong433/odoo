@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_lhi_procurement_commitment" model="ir.actions.act_window">
+        <field name="name">Operational Commitments</field>
+        <field name="res_model">lhi.procurement.commitment</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_lhi_procurement_commitment" name="Commitments" parent="lhi_purchase_request.menu_lhi_procurement_root" action="action_lhi_procurement_commitment" sequence="30"/>
+</odoo>

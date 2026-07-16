@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vehicle Form Override -->
+    <record id="view_fleet_vehicle_form_lhi_inherit" model="ir.ui.view">
+        <field name="name">fleet.vehicle.form.lhi.inherit</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='driver_id']" position="after">
+                <field name="lhi_custodian_id"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="LHI Operations &amp; Ownership">
+                    <group>
+                        <group string="Funding">
+                            <field name="lhi_donor_id"/>
+                            <field name="lhi_project_id"/>
+                            <field name="lhi_grant_id"/>
+                        </group>
+                        <group string="Compliance &amp; Expiry">
+                            <field name="lhi_insurance_expiry"/>
+                            <field name="lhi_registration_expiry"/>
+                            <field name="lhi_permit_expiry"/>
+                            <field name="lhi_office_id"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Services Override -->
+    <record id="view_fleet_vehicle_log_services_form_lhi" model="ir.ui.view">
+        <field name="name">fleet.vehicle.log.services.form.lhi.inherit</field>
+        <field name="model">fleet.vehicle.log.services</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_log_services_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='vendor_id']" position="after">
+                <field name="lhi_project_id"/>
+                <field name="lhi_activity_id"/>
+                <field name="lhi_funding_source_id"/>
+            </xpath>
+        </field>
+    </record>
+    
+    <!-- Contracts Override -->
+    <record id="view_fleet_vehicle_log_contract_form_lhi" model="ir.ui.view">
+        <field name="name">fleet.vehicle.log.contract.form.lhi.inherit</field>
+        <field name="model">fleet.vehicle.log.contract</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_log_contract_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='insurer_id']" position="after">
+                <field name="lhi_donor_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Odometer Override -->
+    <record id="view_fleet_vehicle_odometer_form_lhi" model="ir.ui.view">
+        <field name="name">fleet.vehicle.odometer.form.lhi.inherit</field>
+        <field name="model">fleet.vehicle.odometer</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_odometer_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='driver_id']" position="after">
+                <field name="lhi_trip_id" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

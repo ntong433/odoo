@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lhi_sourcing_user,lhi.sourcing.user,model_lhi_sourcing,base.group_user,1,1,1,0
+access_lhi_sourcing_evaluator_user,lhi.sourcing.evaluator.user,model_lhi_sourcing_evaluator,base.group_user,1,1,1,0
+access_lhi_bid_user,lhi.bid.user,model_lhi_bid,base.group_user,1,1,1,0
+access_lhi_sourcing_admin,lhi.sourcing.admin,model_lhi_sourcing,base.group_erp_manager,1,1,1,1
+access_lhi_sourcing_evaluator_admin,lhi.sourcing.evaluator.admin,model_lhi_sourcing_evaluator,base.group_erp_manager,1,1,1,1
+access_lhi_bid_admin,lhi.bid.admin,model_lhi_bid,base.group_erp_manager,1,1,1,1

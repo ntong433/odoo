@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="policy_funding_opportunity_workspace" model="lhi.document.storage.policy">
+            <field name="name">Funding Opportunity Documents</field>
+            <field name="model_name">lhi.funding.opportunity</field>
+            <field name="library_code">projects</field>
+            <field name="folder_strategy">model_record</field>
+            <field name="document_category">Funding Opportunity</field>
+            <field name="retention_category">Grant Record</field>
+        </record>
+        <record id="policy_proposal_workspace" model="lhi.document.storage.policy">
+            <field name="name">Proposal Workspace Documents</field>
+            <field name="model_name">lhi.proposal.workspace</field>
+            <field name="library_code">projects</field>
+            <field name="folder_strategy">model_record</field>
+            <field name="document_category">Proposal</field>
+            <field name="retention_category">Grant Record</field>
+        </record>
+        <record id="policy_meal_data_workspace" model="lhi.document.storage.policy">
+            <field name="name">MEAL Record Documents</field>
+            <field name="model_name">lhi.meal.data</field>
+            <field name="library_code">projects</field>
+            <field name="folder_strategy">project_workspace</field>
+            <field name="project_subfolder">04 MEAL and Evidence</field>
+            <field name="document_category">MEAL Evidence</field>
+            <field name="confidentiality">confidential</field>
+            <field name="retention_category">Grant Record</field>
+        </record>
+        <record id="policy_partner_profile_workspace" model="lhi.document.storage.policy">
+            <field name="name">Partner Profile Documents</field>
+            <field name="model_name">lhi.partner.profile</field>
+            <field name="library_code">projects</field>
+            <field name="folder_strategy">model_record</field>
+            <field name="document_category">Partner</field>
+            <field name="confidentiality">confidential</field>
+            <field name="retention_category">Grant Record</field>
+        </record>
+        <record id="policy_receipt_workspace" model="lhi.document.storage.policy">
+            <field name="name">Receipt and Acceptance Documents</field>
+            <field name="model_name">lhi.receipt</field>
+            <field name="library_code">procurement</field>
+            <field name="folder_strategy">project_workspace</field>
+            <field name="project_subfolder">05 Procurement</field>
+            <field name="document_category">Receipt</field>
+            <field name="retention_category">Procurement Record</field>
+        </record>
+        <record id="policy_stock_picking_workspace" model="lhi.document.storage.policy">
+            <field name="name">Inventory Transfer Documents</field>
+            <field name="model_name">stock.picking</field>
+            <field name="library_code">operations</field>
+            <field name="folder_strategy">model_record</field>
+            <field name="document_category">Inventory</field>
+            <field name="retention_category">Operational</field>
+        </record>
+    </data>
+</odoo>
+

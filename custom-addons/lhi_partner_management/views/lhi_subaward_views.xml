@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_subaward_form" model="ir.ui.view">
+        <field name="name">lhi.subaward.form</field>
+        <field name="model">lhi.subaward</field>
+        <field name="arch" type="xml">
+            <form string="Sub-Award">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,active,closed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group string="Basic Information">
+                            <field name="partner_profile_id"/>
+                            <field name="project_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Details">
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                            <field name="total_budget"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Deliverables">
+                            <field name="deliverable_ids">
+                                <list string="Deliverables" editable="bottom">
+                                    <field name="name"/>
+                                    <field name="due_date"/>
+                                    <field name="status" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Disbursements &amp; Liquidations">
+                            <field name="disbursement_ids">
+                                <list string="Disbursements" editable="bottom">
+                                    <field name="name"/>
+                                    <field name="amount_disbursed"/>
+                                    <field name="date_disbursed"/>
+                                    <field name="amount_liquidated"/>
+                                    <field name="date_liquidated"/>
+                                    <field name="status" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_subaward_tree" model="ir.ui.view">
+        <field name="name">lhi.subaward.tree</field>
+        <field name="model">lhi.subaward</field>
+        <field name="arch" type="xml">
+            <list string="Sub-Awards">
+                <field name="name"/>
+                <field name="partner_profile_id"/>
+                <field name="project_id"/>
+                <field name="total_budget"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+</odoo>

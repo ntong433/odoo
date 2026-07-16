@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_award_wizard_form" model="ir.ui.view">
+        <field name="name">lhi.proposal.award.wizard.form</field>
+        <field name="model">lhi.proposal.award.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Convert Proposal to Award">
+                <group>
+                    <group>
+                        <field name="workspace_id"/>
+                        <field name="submission_id" options="{'no_create': True}"/>
+                        <field name="budget_id" options="{'no_create': True}"/>
+                    </group>
+                    <group>
+                        <field name="award_name"/>
+                        <field name="award_reference"/>
+                        <field name="start_date"/>
+                        <field name="end_date"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_convert_to_award" string="Convert to Award" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

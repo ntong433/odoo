@@ -1,0 +1,11 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lhi_entra_configuration_admin,lhi.entra.configuration.admin,model_lhi_entra_configuration,lhi_security.group_lhi_erp_admin,1,1,1,0
+access_lhi_entra_mapping_admin,lhi.entra.group.mapping.admin,model_lhi_entra_group_mapping,lhi_security.group_lhi_erp_admin,1,1,1,1
+access_lhi_entra_mapping_auditor,lhi.entra.group.mapping.auditor,model_lhi_entra_group_mapping,lhi_security.group_lhi_internal_auditor,1,0,0,0
+access_lhi_entra_run_admin,lhi.entra.sync.run.admin,model_lhi_entra_sync_run,lhi_security.group_lhi_erp_admin,1,0,0,0
+access_lhi_entra_run_auditor,lhi.entra.sync.run.auditor,model_lhi_entra_sync_run,lhi_security.group_lhi_internal_auditor,1,0,0,0
+access_lhi_entra_plan_admin,lhi.entra.sync.plan.admin,model_lhi_entra_sync_plan,lhi_security.group_lhi_erp_admin,1,0,0,0
+access_lhi_entra_finding_admin,lhi.entra.sync.finding.admin,model_lhi_entra_sync_finding,lhi_security.group_lhi_erp_admin,1,0,0,0
+access_lhi_entra_finding_auditor,lhi.entra.sync.finding.auditor,model_lhi_entra_sync_finding,lhi_security.group_lhi_internal_auditor,1,0,0,0
+access_lhi_entra_snapshot_admin,lhi.entra.sync.snapshot.admin,model_lhi_entra_sync_snapshot,lhi_security.group_lhi_erp_admin,1,0,0,0
+

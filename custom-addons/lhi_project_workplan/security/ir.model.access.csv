@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lhi_workplan_user,lhi.workplan.user,model_lhi_workplan,base.group_user,1,1,1,0
+access_lhi_workplan_admin,lhi.workplan.admin,model_lhi_workplan,base.group_erp_manager,1,1,1,1
+access_lhi_workplan_activity_user,lhi.workplan.activity.user,model_lhi_workplan_activity,base.group_user,1,1,1,0
+access_lhi_workplan_activity_admin,lhi.workplan.activity.admin,model_lhi_workplan_activity,base.group_erp_manager,1,1,1,1

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Add to the existing Pipeline menu from lhi_funding_opportunity -->
+    <menuitem id="menu_lhi_proposal_workspace" 
+              name="Workspaces" 
+              parent="lhi_funding_opportunity.menu_lhi_funding_root" 
+              action="action_lhi_proposal_workspace" 
+              sequence="15"/>
+</odoo>

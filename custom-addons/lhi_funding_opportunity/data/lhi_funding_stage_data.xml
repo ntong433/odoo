@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="stage_opportunity_new" model="lhi.funding.stage">
+            <field name="name">Identification</field>
+            <field name="sequence">1</field>
+            <field name="is_won">False</field>
+        </record>
+        
+        <record id="stage_opportunity_assessment" model="lhi.funding.stage">
+            <field name="name">Go/No-Go Assessment</field>
+            <field name="sequence">2</field>
+            <field name="is_won">False</field>
+        </record>
+        
+        <record id="stage_opportunity_proposal" model="lhi.funding.stage">
+            <field name="name">Proposal Development</field>
+            <field name="sequence">3</field>
+            <field name="is_won">False</field>
+        </record>
+
+        <record id="stage_opportunity_submitted" model="lhi.funding.stage">
+            <field name="name">Submitted</field>
+            <field name="sequence">4</field>
+            <field name="is_won">False</field>
+        </record>
+        
+        <record id="stage_opportunity_won" model="lhi.funding.stage">
+            <field name="name">Awarded</field>
+            <field name="sequence">5</field>
+            <field name="is_won">True</field>
+        </record>
+        
+        <record id="stage_opportunity_lost" model="lhi.funding.stage">
+            <field name="name">Lost/Rejected</field>
+            <field name="sequence">6</field>
+            <field name="is_lost">True</field>
+            <field name="fold">True</field>
+        </record>
+    </data>
+</odoo>

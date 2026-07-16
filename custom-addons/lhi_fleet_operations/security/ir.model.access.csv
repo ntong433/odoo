@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lhi_fleet_trip_user,lhi.fleet.trip.user,model_lhi_fleet_trip,base.group_user,1,1,1,0
+access_lhi_fleet_incident_user,lhi.fleet.incident.user,model_lhi_fleet_incident,base.group_user,1,1,1,0
+access_lhi_fleet_trip_admin,lhi.fleet.trip.admin,model_lhi_fleet_trip,fleet.fleet_group_manager,1,1,1,1
+access_lhi_fleet_incident_admin,lhi.fleet.incident.admin,model_lhi_fleet_incident,fleet.fleet_group_manager,1,1,1,1

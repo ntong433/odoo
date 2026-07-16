@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Default standard sections -->
+        <record id="tmpl_technical" model="lhi.proposal.section.template">
+            <field name="name">Technical Narrative</field>
+            <field name="section_type">technical</field>
+            <field name="workspace_type">both</field>
+            <field name="sequence">10</field>
+        </record>
+        <record id="tmpl_toc" model="lhi.proposal.section.template">
+            <field name="name">Theory of Change</field>
+            <field name="section_type">toc</field>
+            <field name="workspace_type">both</field>
+            <field name="sequence">20</field>
+        </record>
+        <record id="tmpl_objectives" model="lhi.proposal.section.template">
+            <field name="name">Objectives &amp; Outcomes</field>
+            <field name="section_type">objectives</field>
+            <field name="workspace_type">both</field>
+            <field name="sequence">30</field>
+        </record>
+        <record id="tmpl_activities" model="lhi.proposal.section.template">
+            <field name="name">Activities &amp; Implementation Approach</field>
+            <field name="section_type">activities</field>
+            <field name="workspace_type">both</field>
+            <field name="sequence">40</field>
+        </record>
+        <record id="tmpl_workplan" model="lhi.proposal.section.template">
+            <field name="name">Work Plan</field>
+            <field name="section_type">workplan</field>
+            <field name="workspace_type">full_proposal</field>
+            <field name="sequence">50</field>
+        </record>
+        <record id="tmpl_meal" model="lhi.proposal.section.template">
+            <field name="name">MEAL Framework</field>
+            <field name="section_type">meal</field>
+            <field name="workspace_type">both</field>
+            <field name="sequence">60</field>
+        </record>
+        <record id="tmpl_risk" model="lhi.proposal.section.template">
+            <field name="name">Risk Register</field>
+            <field name="section_type">risk</field>
+            <field name="workspace_type">both</field>
+            <field name="sequence">70</field>
+        </record>
+        <record id="tmpl_sustainability" model="lhi.proposal.section.template">
+            <field name="name">Sustainability &amp; Safeguarding</field>
+            <field name="section_type">sustainability</field>
+            <field name="workspace_type">both</field>
+            <field name="sequence">80</field>
+        </record>
+        <record id="tmpl_staffing" model="lhi.proposal.section.template">
+            <field name="name">Staffing &amp; HR</field>
+            <field name="section_type">staffing</field>
+            <field name="workspace_type">full_proposal</field>
+            <field name="sequence">90</field>
+        </record>
+        <record id="tmpl_procurement" model="lhi.proposal.section.template">
+            <field name="name">Procurement Plan</field>
+            <field name="section_type">procurement</field>
+            <field name="workspace_type">full_proposal</field>
+            <field name="sequence">100</field>
+        </record>
+        <record id="tmpl_budget" model="lhi.proposal.section.template">
+            <field name="name">Budget Narrative</field>
+            <field name="section_type">budget</field>
+            <field name="workspace_type">both</field>
+            <field name="sequence">110</field>
+        </record>
+    </data>
+</odoo>

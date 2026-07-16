@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Multi-Company Rules for LHI Base Master Data -->
+        <record id="rule_lhi_office_multi_company" model="ir.rule">
+            <field name="name">LHI Office Multi-Company</field>
+            <field name="model_id" ref="lhi_base.model_lhi_office"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="rule_lhi_department_multi_company" model="ir.rule">
+            <field name="name">LHI Department Multi-Company</field>
+            <field name="model_id" ref="lhi_base.model_lhi_department"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="rule_lhi_programme_multi_company" model="ir.rule">
+            <field name="name">LHI Programme Multi-Company</field>
+            <field name="model_id" ref="lhi_base.model_lhi_programme"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="rule_lhi_sector_multi_company" model="ir.rule">
+            <field name="name">LHI Sector Multi-Company</field>
+            <field name="model_id" ref="lhi_base.model_lhi_sector"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="rule_lhi_donor_multi_company" model="ir.rule">
+            <field name="name">LHI Donor Multi-Company</field>
+            <field name="model_id" ref="lhi_base.model_lhi_donor"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="rule_lhi_funding_source_multi_company" model="ir.rule">
+            <field name="name">LHI Funding Source Multi-Company</field>
+            <field name="model_id" ref="lhi_base.model_lhi_funding_source"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="rule_lhi_award_multi_company" model="ir.rule">
+            <field name="name">LHI Award Multi-Company</field>
+            <field name="model_id" ref="lhi_base.model_lhi_award"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="rule_lhi_project_multi_company" model="ir.rule">
+            <field name="name">LHI Project Multi-Company</field>
+            <field name="model_id" ref="lhi_base.model_lhi_project"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="rule_lhi_cost_center_multi_company" model="ir.rule">
+            <field name="name">LHI Cost Center Multi-Company</field>
+            <field name="model_id" ref="lhi_base.model_lhi_cost_center"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="rule_lhi_activity_multi_company" model="ir.rule">
+            <field name="name">LHI Activity Multi-Company</field>
+            <field name="model_id" ref="lhi_base.model_lhi_activity"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <!-- Department Restriction for LHI Employees -->
+        <record id="rule_lhi_department_employee_restriction" model="ir.rule">
+            <field name="name">LHI Department Employee Restriction</field>
+            <field name="model_id" ref="lhi_base.model_lhi_department"/>
+            <field name="groups" eval="[(4, ref('group_lhi_employee'))]"/>
+            <field name="domain_force">['|', ('id', 'in', user.lhi_department_ids.ids), ('parent_id', 'child_of', user.lhi_department_ids.ids)] if user.lhi_department_ids else [(1, '=', 1)]</field>
+        </record>
+
+        <!-- Department Bypass for LHI Managers -->
+        <record id="rule_lhi_department_manager_bypass" model="ir.rule">
+            <field name="name">LHI Department Manager Bypass</field>
+            <field name="model_id" ref="lhi_base.model_lhi_department"/>
+            <field name="groups" eval="[(4, ref('group_lhi_manager'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+
+        <!-- Project Restriction for LHI Employees -->
+        <record id="rule_lhi_project_employee_restriction" model="ir.rule">
+            <field name="name">LHI Project Employee Restriction</field>
+            <field name="model_id" ref="lhi_base.model_lhi_project"/>
+            <field name="groups" eval="[(4, ref('group_lhi_employee'))]"/>
+            <field name="domain_force">[('id', 'in', user.lhi_project_ids.ids)] if user.lhi_project_ids else [(1, '=', 1)]</field>
+        </record>
+
+        <!-- Project Bypass for LHI Managers -->
+        <record id="rule_lhi_project_manager_bypass" model="ir.rule">
+            <field name="name">LHI Project Manager Bypass</field>
+            <field name="model_id" ref="lhi_base.model_lhi_project"/>
+            <field name="groups" eval="[(4, ref('group_lhi_manager'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+
+        <!-- Office Restriction for LHI Employees -->
+        <record id="rule_lhi_office_employee_restriction" model="ir.rule">
+            <field name="name">LHI Office Employee Restriction</field>
+            <field name="model_id" ref="lhi_base.model_lhi_office"/>
+            <field name="groups" eval="[(4, ref('group_lhi_employee'))]"/>
+            <field name="domain_force">['|', ('id', 'in', user.lhi_office_ids.ids), ('parent_id', 'child_of', user.lhi_office_ids.ids)] if user.lhi_office_ids else [(1, '=', 1)]</field>
+        </record>
+
+        <!-- Office Bypass for LHI Managers -->
+        <record id="rule_lhi_office_manager_bypass" model="ir.rule">
+            <field name="name">LHI Office Manager Bypass</field>
+            <field name="model_id" ref="lhi_base.model_lhi_office"/>
+            <field name="groups" eval="[(4, ref('group_lhi_manager'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+    </data>
+</odoo>

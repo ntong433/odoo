@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lhi_meal_data_user,lhi.meal.data.user,model_lhi_meal_data,base.group_user,1,1,1,0
+access_lhi_meal_data_admin,lhi.meal.data.admin,model_lhi_meal_data,base.group_erp_manager,1,1,1,1
+access_lhi_meal_evidence_user,lhi.meal.evidence.user,model_lhi_meal_evidence,base.group_user,1,1,1,0
+access_lhi_meal_evidence_admin,lhi.meal.evidence.admin,model_lhi_meal_evidence,base.group_erp_manager,1,1,1,1

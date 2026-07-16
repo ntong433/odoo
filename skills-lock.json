@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "skills": {
+    "odoo-docker-deployment": {
+      "source": "costrict-plugins-repo/sickn33-antigravity-awesome-skills-antigravity-bundle-odoo-erp",
+      "sourceType": "github",
+      "skillPath": "skills/odoo-docker-deployment/SKILL.md",
+      "computedHash": "cfb50cf46d9563746fb8113187a5b3dd85434667bf516ade9e56b2665a71eaf1"
+    },
+    "odoo-ecommerce-configurator": {
+      "source": "costrict-plugins-repo/sickn33-antigravity-awesome-skills-antigravity-bundle-odoo-erp",
+      "sourceType": "github",
+      "skillPath": "skills/odoo-ecommerce-configurator/SKILL.md",
+      "computedHash": "df32510c0cd409fe26e65ff6ae9dcf0b31a256da409d3253700034604fc74661"
+    },
+    "odoo-module-developer": {
+      "source": "costrict-plugins-repo/sickn33-antigravity-awesome-skills-antigravity-bundle-odoo-erp",
+      "sourceType": "github",
+      "skillPath": "skills/odoo-module-developer/SKILL.md",
+      "computedHash": "9002ecd36cc379bea52f672c855806e504565c99a004f2b581eb8e68d6290230"
+    },
+    "odoo-orm-expert": {
+      "source": "costrict-plugins-repo/sickn33-antigravity-awesome-skills-antigravity-bundle-odoo-erp",
+      "sourceType": "github",
+      "skillPath": "skills/odoo-orm-expert/SKILL.md",
+      "computedHash": "d96c8693ea64eb84b9153a3d07b3768bb201828c9b75781b56c9f5cdf22c3fb3"
+    },
+    "odoo-performance-tuner": {
+      "source": "costrict-plugins-repo/sickn33-antigravity-awesome-skills-antigravity-bundle-odoo-erp",
+      "sourceType": "github",
+      "skillPath": "skills/odoo-performance-tuner/SKILL.md",
+      "computedHash": "63404c45bc04e3ada7cb95f5f9a9cc6ce30cff5d67d3a547d107f35325ed5db3"
+    },
+    "odoo-sales-crm-expert": {
+      "source": "costrict-plugins-repo/sickn33-antigravity-awesome-skills-antigravity-bundle-odoo-erp",
+      "sourceType": "github",
+      "skillPath": "skills/odoo-sales-crm-expert/SKILL.md",
+      "computedHash": "027dc73453ec5a786eb4308987dce3bb0b2a7ac78347ee368320202393e2149f"
+    },
+    "odoo-security-rules": {
+      "source": "costrict-plugins-repo/sickn33-antigravity-awesome-skills-antigravity-bundle-odoo-erp",
+      "sourceType": "github",
+      "skillPath": "skills/odoo-security-rules/SKILL.md",
+      "computedHash": "c47fd6dd778a228c188c734fb66993cd6658c7d1d0cd0ab73774c2c27aad0e63"
+    }
+  }
+}

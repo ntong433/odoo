@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="lhi_integration.menu_lhi_integration_root" model="ir.ui.menu">
+        <field name="group_ids" eval="[(4, ref('lhi_security.group_lhi_erp_admin'))]"/>
+    </record>
+
+    <menuitem id="menu_lhi_graph_configuration"
+              name="Microsoft Graph"
+              parent="lhi_integration.menu_lhi_integration_config"
+              sequence="20"
+              groups="lhi_security.group_lhi_erp_admin"/>
+
+    <menuitem id="menu_lhi_graph_connections"
+              name="Connections"
+              parent="menu_lhi_graph_configuration"
+              action="action_lhi_graph_connection"
+              sequence="10"/>
+
+    <menuitem id="menu_lhi_graph_workspace_templates"
+              name="Workspace Templates"
+              parent="menu_lhi_graph_configuration"
+              action="action_lhi_graph_workspace_template"
+              sequence="20"/>
+
+    <menuitem id="menu_lhi_graph_diagnostics"
+              name="Graph Diagnostics"
+              parent="lhi_integration.menu_lhi_integration_monitoring"
+              action="action_lhi_graph_diagnostic"
+              sequence="30"
+              groups="lhi_security.group_lhi_erp_admin"/>
+
+    <menuitem id="menu_lhi_graph_request_logs"
+              name="Graph Request Logs"
+              parent="lhi_integration.menu_lhi_integration_monitoring"
+              action="action_lhi_graph_request_log"
+              sequence="40"
+              groups="lhi_security.group_lhi_erp_admin,lhi_security.group_lhi_internal_auditor"/>
+</odoo>

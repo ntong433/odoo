@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_meal_evidence_form" model="ir.ui.view">
+        <field name="name">lhi.meal.evidence.form</field>
+        <field name="model">lhi.meal.evidence</field>
+        <field name="arch" type="xml">
+            <form string="Evidence Library">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="evidence_type"/>
+                            <field name="meal_data_id"/>
+                            <field name="is_sensitive" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Attachments">
+                            <field name="attachment_ids" widget="lhi_sharepoint_many2many_binary"/>
+                            <separator string="Description"/>
+                            <field name="description"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_meal_evidence_tree" model="ir.ui.view">
+        <field name="name">lhi.meal.evidence.tree</field>
+        <field name="model">lhi.meal.evidence</field>
+        <field name="arch" type="xml">
+            <list string="Evidence Library">
+                <field name="name"/>
+                <field name="evidence_type"/>
+                <field name="meal_data_id"/>
+                <field name="is_sensitive" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+    
+    <record id="view_lhi_meal_evidence_search" model="ir.ui.view">
+        <field name="name">lhi.meal.evidence.search</field>
+        <field name="model">lhi.meal.evidence</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="meal_data_id"/>
+                <filter string="Sensitive Data" name="sensitive" domain="[('is_sensitive', '=', True)]"/>
+                <group>
+                    <filter string="Evidence Type" name="type" context="{'group_by':'evidence_type'}"/>
+                    <filter string="MEAL Record" name="meal_data" context="{'group_by':'meal_data_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+</odoo>

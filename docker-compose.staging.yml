@@ -1,0 +1,88 @@
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_staging_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  odoo:
+    build:
+      context: .
+      dockerfile: Dockerfile.staging
+      network: host
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${ODOO_PORT}:8069"
+      - "8072:8072"
+    volumes:
+      - odoo_staging_data:/var/lib/odoo
+    environment:
+      - HOST=db
+      - USER=${POSTGRES_USER}
+      - PASSWORD=${POSTGRES_PASSWORD}
+      - LHI_ENVIRONMENT=${LHI_ENVIRONMENT:-staging}
+      - LHI_PUBLIC_URL=${LHI_PUBLIC_URL:-https://work.lhinigeria.org}
+      - ENTRA_REDIRECT_URI=${ENTRA_REDIRECT_URI:-https://work.lhinigeria.org/auth_oauth/signin}
+      - ENTRA_GRAPH_DELEGATED_REDIRECT_URI=${ENTRA_GRAPH_DELEGATED_REDIRECT_URI:-https://work.lhinigeria.org/lhi/microsoft_graph/oauth/callback}
+      - ENTRA_TENANT_ID=${ENTRA_TENANT_ID:-}
+      - ENTRA_CLIENT_ID=${ENTRA_CLIENT_ID:-}
+      - ENTRA_CLIENT_SECRET=${ENTRA_CLIENT_SECRET:-}
+      - ENTRA_AUTHORITY=${ENTRA_AUTHORITY:-}
+      - ENTRA_GRAPH_SCOPE=${ENTRA_GRAPH_SCOPE:-https://graph.microsoft.com/.default}
+      - ENTRA_TOKEN_ENDPOINT=${ENTRA_TOKEN_ENDPOINT:-}
+      - ENTRA_SSO_ENABLED=${ENTRA_SSO_ENABLED:-true}
+      - LOCAL_ADMIN_LOGIN_ENABLED=${LOCAL_ADMIN_LOGIN_ENABLED:-true}
+      - SHAREPOINT_HOSTNAME=${SHAREPOINT_HOSTNAME:-}
+      - SHAREPOINT_SITE_PATH=${SHAREPOINT_SITE_PATH:-}
+      - SHAREPOINT_SITE_ID=${SHAREPOINT_SITE_ID:-}
+      - SHAREPOINT_LIBRARY_NAME=${SHAREPOINT_LIBRARY_NAME:-Documents}
+      - SHAREPOINT_DRIVE_ID=${SHAREPOINT_DRIVE_ID:-}
+      - SHAREPOINT_ROOT_FOLDER=${SHAREPOINT_ROOT_FOLDER:-ERP}
+      - SHAREPOINT_ROOT_ITEM_ID=${SHAREPOINT_ROOT_ITEM_ID:-}
+      - SHAREPOINT_STORAGE_ENABLED=${SHAREPOINT_STORAGE_ENABLED:-true}
+      - SHAREPOINT_ALLOW_LOCAL_FALLBACK=${SHAREPOINT_ALLOW_LOCAL_FALLBACK:-false}
+      - GRAPH_BASE_URL=${GRAPH_BASE_URL:-https://graph.microsoft.com/v1.0}
+      - GRAPH_WEBHOOK_URL=${GRAPH_WEBHOOK_URL:-https://work.lhinigeria.org/lhi/graph/notifications}
+      - GRAPH_WEBHOOK_CLIENT_STATE=${GRAPH_WEBHOOK_CLIENT_STATE:-}
+      - GRAPH_HTTP_TIMEOUT_SECONDS=${GRAPH_HTTP_TIMEOUT_SECONDS:-60}
+      - GRAPH_MAX_RETRIES=${GRAPH_MAX_RETRIES:-5}
+      - GRAPH_RETRY_BASE_SECONDS=${GRAPH_RETRY_BASE_SECONDS:-2}
+      - GRAPH_SYNC_ENABLED=${GRAPH_SYNC_ENABLED:-true}
+      - GRAPH_DELTA_SYNC_ENABLED=${GRAPH_DELTA_SYNC_ENABLED:-true}
+      - GRAPH_SUBSCRIPTION_RENEWAL_ENABLED=${GRAPH_SUBSCRIPTION_RENEWAL_ENABLED:-true}
+      - ENTRA_IDENTITY_SYNC_ENABLED=${ENTRA_IDENTITY_SYNC_ENABLED:-true}
+      - ENTRA_MANAGER_SYNC_ENABLED=${ENTRA_MANAGER_SYNC_ENABLED:-true}
+      - ENTRA_GROUP_SYNC_ENABLED=${ENTRA_GROUP_SYNC_ENABLED:-true}
+      - ENTRA_CREATE_DUPLICATE_ODOO_GROUPS=${ENTRA_CREATE_DUPLICATE_ODOO_GROUPS:-false}
+      - ENTRA_PROTECTED_GROUPS_ENABLED=${ENTRA_PROTECTED_GROUPS_ENABLED:-true}
+      - ENTRA_GROUP_SYNC_DRY_RUN=${ENTRA_GROUP_SYNC_DRY_RUN:-false}
+      - DOCUMENT_PREVIEW_ENABLED=${DOCUMENT_PREVIEW_ENABLED:-true}
+      - DOCUMENT_MICROSOFT_EDIT_ENABLED=${DOCUMENT_MICROSOFT_EDIT_ENABLED:-true}
+      - DOCUMENT_EDIT_NEW_TAB=${DOCUMENT_EDIT_NEW_TAB:-true}
+      - DOCUMENT_MIGRATION_ENABLED=${DOCUMENT_MIGRATION_ENABLED:-false}
+      - DOCUMENT_LOCAL_PURGE_ENABLED=${DOCUMENT_LOCAL_PURGE_ENABLED:-false}
+      - LHI_ENTRA_MAINTENANCE_ALLOWED_CIDRS=${LHI_ENTRA_MAINTENANCE_ALLOWED_CIDRS:-}
+      - LHI_ENTRA_TRUST_PROXY_HEADERS=${LHI_ENTRA_TRUST_PROXY_HEADERS:-false}
+      - LHI_SHAREPOINT_SPOOL_DIR=${LHI_SHAREPOINT_SPOOL_DIR:-/var/lib/odoo/lhi-sharepoint-spool}
+    command:
+      - /bin/sh
+      - -c
+      - >-
+        /opt/odoo/scripts/validate_microsoft_env.sh --configuration-only &&
+        exec python3 /opt/odoo/odoo-bin -c /etc/odoo/odoo.conf
+
+volumes:
+  postgres_staging_data:
+  odoo_staging_data:

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_project_form_documents" model="ir.ui.view">
+        <field name="name">lhi.project.form.documents</field>
+        <field name="model">lhi.project</field>
+        <field name="inherit_id" ref="lhi_base.view_lhi_project_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <notebook><page string="Documents" name="lhi_documents"><field name="lhi_document_workspace" widget="lhi_document_workspace" nolabel="1"/></page></notebook>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_lhi_award_form_documents" model="ir.ui.view">
+        <field name="name">lhi.award.form.documents</field>
+        <field name="model">lhi.award</field>
+        <field name="inherit_id" ref="lhi_base.view_lhi_award_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <notebook><page string="Documents" name="lhi_documents"><field name="lhi_document_workspace" widget="lhi_document_workspace" nolabel="1"/></page></notebook>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_lhi_funding_opportunity_form_documents" model="ir.ui.view">
+        <field name="name">lhi.funding.opportunity.form.documents</field>
+        <field name="model">lhi.funding.opportunity</field>
+        <field name="inherit_id" ref="lhi_funding_opportunity.view_lhi_funding_opportunity_form"/>
+        <field name="arch" type="xml"><xpath expr="//notebook" position="inside"><page string="Documents" name="lhi_documents"><field name="lhi_document_workspace" widget="lhi_document_workspace" nolabel="1"/></page></xpath></field>
+    </record>
+
+    <record id="view_lhi_proposal_workspace_form_documents" model="ir.ui.view">
+        <field name="name">lhi.proposal.workspace.form.documents</field>
+        <field name="model">lhi.proposal.workspace</field>
+        <field name="inherit_id" ref="lhi_proposal_management.view_lhi_proposal_workspace_form"/>
+        <field name="arch" type="xml"><xpath expr="//notebook" position="inside"><page string="Documents" name="lhi_documents"><field name="lhi_document_workspace" widget="lhi_document_workspace" nolabel="1"/></page></xpath></field>
+    </record>
+
+    <record id="view_lhi_workplan_form_documents" model="ir.ui.view">
+        <field name="name">lhi.workplan.form.documents</field>
+        <field name="model">lhi.workplan</field>
+        <field name="inherit_id" ref="lhi_project_workplan.view_lhi_workplan_form"/>
+        <field name="arch" type="xml"><xpath expr="//notebook" position="inside"><page string="Documents" name="lhi_documents"><field name="lhi_document_workspace" widget="lhi_document_workspace" nolabel="1"/></page></xpath></field>
+    </record>
+
+    <record id="view_lhi_meal_data_form_documents" model="ir.ui.view">
+        <field name="name">lhi.meal.data.form.documents</field>
+        <field name="model">lhi.meal.data</field>
+        <field name="inherit_id" ref="lhi_meal.view_lhi_meal_data_form"/>
+        <field name="arch" type="xml"><xpath expr="//notebook" position="inside"><page string="Documents" name="lhi_documents"><field name="lhi_document_workspace" widget="lhi_document_workspace" nolabel="1"/></page></xpath></field>
+    </record>
+
+    <record id="view_lhi_meal_evidence_form_documents" model="ir.ui.view">
+        <field name="name">lhi.meal.evidence.form.documents</field>
+        <field name="model">lhi.meal.evidence</field>
+        <field name="inherit_id" ref="lhi_meal.view_lhi_meal_evidence_form"/>
+        <field name="arch" type="xml"><xpath expr="//notebook" position="inside"><page string="Document Workspace" name="lhi_documents"><field name="lhi_document_workspace" widget="lhi_document_workspace" nolabel="1"/></page></xpath></field>
+    </record>
+
+    <record id="view_lhi_project_report_form_documents" model="ir.ui.view">
+        <field name="name">lhi.project.report.form.documents</field>
+        <field name="model">lhi.project.report</field>
+        <field name="inherit_id" ref="lhi_project_reporting.view_lhi_project_report_form"/>
+        <field name="arch" type="xml"><xpath expr="//notebook" position="inside"><page string="Document Workspace" name="lhi_documents"><field name="lhi_document_workspace" widget="lhi_document_workspace" nolabel="1"/></page></xpath></field>
+    </record>
+
+    <record id="view_lhi_partner_profile_form_documents" model="ir.ui.view">
+        <field name="name">lhi.partner.profile.form.documents</field>
+        <field name="model">lhi.partner.profile</field>
+        <field name="inherit_id" ref="lhi_partner_management.view_lhi_partner_profile_form"/>
+        <field name="arch" type="xml"><xpath expr="//notebook" position="inside"><page string="Documents" name="lhi_documents"><field name="lhi_document_workspace" widget="lhi_document_workspace" nolabel="1"/></page></xpath></field>
+    </record>
+
+    <record id="view_lhi_subaward_form_documents" model="ir.ui.view">
+        <field name="name">lhi.subaward.form.documents</field>
+        <field name="model">lhi.subaward</field>
+        <field name="inherit_id" ref="lhi_partner_management.view_lhi_subaward_form"/>
+        <field name="arch" type="xml"><xpath expr="//notebook" position="inside"><page string="Documents" name="lhi_documents"><field name="lhi_document_workspace" widget="lhi_document_workspace" nolabel="1"/></page></xpath></field>
+    </record>
+
+    <record id="view_lhi_purchase_request_form_documents" model="ir.ui.view">
+        <field name="name">lhi.purchase.request.form.documents</field>
+        <field name="model">lhi.purchase.request</field>
+        <field name="inherit_id" ref="lhi_purchase_request.view_lhi_purchase_request_form"/>
+        <field name="arch" type="xml"><xpath expr="//notebook" position="inside"><page string="Document Workspace" name="lhi_documents"><field name="lhi_document_workspace" widget="lhi_document_workspace" nolabel="1"/></page></xpath></field>
+    </record>
+
+    <record id="view_lhi_sourcing_form_documents" model="ir.ui.view">
+        <field name="name">lhi.sourcing.form.documents</field>
+        <field name="model">lhi.sourcing</field>
+        <field name="inherit_id" ref="lhi_procurement.view_lhi_sourcing_form"/>
+        <field name="arch" type="xml"><xpath expr="//notebook" position="inside"><page string="Document Workspace" name="lhi_documents"><field name="lhi_document_workspace" widget="lhi_document_workspace" nolabel="1"/></page></xpath></field>
+    </record>
+
+    <record id="view_lhi_purchase_order_form_documents" model="ir.ui.view">
+        <field name="name">lhi.purchase.order.form.documents</field>
+        <field name="model">lhi.purchase.order</field>
+        <field name="inherit_id" ref="lhi_purchase_order.view_lhi_purchase_order_form"/>
+        <field name="arch" type="xml"><xpath expr="//notebook" position="inside"><page string="Documents" name="lhi_documents"><field name="lhi_document_workspace" widget="lhi_document_workspace" nolabel="1"/></page></xpath></field>
+    </record>
+
+    <record id="view_lhi_receipt_form_documents" model="ir.ui.view">
+        <field name="name">lhi.receipt.form.documents</field>
+        <field name="model">lhi.receipt</field>
+        <field name="inherit_id" ref="lhi_purchase_order.view_lhi_receipt_form"/>
+        <field name="arch" type="xml"><xpath expr="//notebook" position="inside"><page string="Documents" name="lhi_documents"><field name="lhi_document_workspace" widget="lhi_document_workspace" nolabel="1"/></page></xpath></field>
+    </record>
+
+    <record id="view_stock_picking_form_documents" model="ir.ui.view">
+        <field name="name">stock.picking.form.lhi.documents</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml"><xpath expr="//notebook" position="inside"><page string="LHI Documents" name="lhi_documents"><field name="lhi_document_workspace" widget="lhi_document_workspace" nolabel="1"/></page></xpath></field>
+    </record>
+
+    <record id="view_stock_lot_form_documents" model="ir.ui.view">
+        <field name="name">stock.lot.form.lhi.documents</field>
+        <field name="model">stock.lot</field>
+        <field name="inherit_id" ref="stock.view_production_lot_form"/>
+        <field name="arch" type="xml"><xpath expr="//sheet" position="inside"><notebook><page string="LHI Documents" name="lhi_documents"><field name="lhi_document_workspace" widget="lhi_document_workspace" nolabel="1"/></page></notebook></xpath></field>
+    </record>
+
+    <record id="view_lhi_asset_form_documents" model="ir.ui.view">
+        <field name="name">lhi.asset.form.documents</field>
+        <field name="model">lhi.asset</field>
+        <field name="inherit_id" ref="lhi_asset_management.view_lhi_asset_form"/>
+        <field name="arch" type="xml"><xpath expr="//notebook" position="inside"><page string="Documents" name="lhi_documents"><field name="lhi_document_workspace" widget="lhi_document_workspace" nolabel="1"/></page></xpath></field>
+    </record>
+
+    <record id="view_fleet_vehicle_form_documents" model="ir.ui.view">
+        <field name="name">fleet.vehicle.form.lhi.documents.workspace</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
+        <field name="arch" type="xml"><xpath expr="//notebook" position="inside"><page string="LHI Documents" name="lhi_documents"><field name="lhi_document_workspace" widget="lhi_document_workspace" nolabel="1"/></page></xpath></field>
+    </record>
+
+    <record id="view_lhi_fleet_trip_form_documents" model="ir.ui.view">
+        <field name="name">lhi.fleet.trip.form.documents</field>
+        <field name="model">lhi.fleet.trip</field>
+        <field name="inherit_id" ref="lhi_fleet_operations.view_lhi_fleet_trip_form"/>
+        <field name="arch" type="xml"><xpath expr="//notebook" position="inside"><page string="Documents" name="lhi_documents"><field name="lhi_document_workspace" widget="lhi_document_workspace" nolabel="1"/></page></xpath></field>
+    </record>
+
+    <record id="view_lhi_fleet_incident_form_documents" model="ir.ui.view">
+        <field name="name">lhi.fleet.incident.form.documents</field>
+        <field name="model">lhi.fleet.incident</field>
+        <field name="inherit_id" ref="lhi_fleet_operations.view_lhi_fleet_incident_form"/>
+        <field name="arch" type="xml"><xpath expr="//sheet" position="inside"><notebook><page string="Documents" name="lhi_documents"><field name="lhi_document_workspace" widget="lhi_document_workspace" nolabel="1"/></page></notebook></xpath></field>
+    </record>
+
+    <record id="view_lhi_reporting_calendar_form_documents" model="ir.ui.view">
+        <field name="name">lhi.reporting.calendar.form.documents</field>
+        <field name="model">lhi.reporting.calendar</field>
+        <field name="inherit_id" ref="lhi_project_compliance.view_lhi_reporting_calendar_form"/>
+        <field name="arch" type="xml"><xpath expr="//notebook" position="inside"><page string="Document Workspace" name="lhi_documents"><field name="lhi_document_workspace" widget="lhi_document_workspace" nolabel="1"/></page></xpath></field>
+    </record>
+
+    <record id="view_lhi_project_closeout_form_documents" model="ir.ui.view">
+        <field name="name">lhi.project.closeout.form.documents</field>
+        <field name="model">lhi.project.closeout</field>
+        <field name="inherit_id" ref="lhi_project_closeout.view_lhi_project_closeout_form"/>
+        <field name="arch" type="xml"><xpath expr="//notebook" position="inside"><page string="Documents" name="lhi_documents"><field name="lhi_document_workspace" widget="lhi_document_workspace" nolabel="1"/></page></xpath></field>
+    </record>
+</odoo>
+

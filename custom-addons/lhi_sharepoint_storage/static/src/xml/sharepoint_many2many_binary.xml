@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="lhi_sharepoint_storage.Many2ManyBinaryField">
+        <div t-attf-class="oe_fileupload {{props.className ? props.className : ''}}" aria-atomic="true">
+            <div class="o_attachments">
+                <t t-foreach="files" t-as="file" t-key="file_index">
+                    <t t-call="web.Many2ManyBinaryField.attachment_preview"/>
+                </t>
+            </div>
+            <div t-if="!props.readonly &amp;&amp; (!props.numberOfFiles or files.length &lt; props.numberOfFiles)" class="oe_add">
+                <label class="btn btn-secondary o_attach">
+                    <span class="fa fa-cloud-upload" aria-hidden="true"/>
+                    <span class="ms-1"><t t-esc="uploadText"/></span>
+                    <input type="file"
+                           class="d-none"
+                           t-att-accept="props.acceptedFileExtensions"
+                           multiple="multiple"
+                           t-on-change="onDirectFilesSelected"/>
+                </label>
+                <small class="text-muted ms-2">Stored in SharePoint</small>
+            </div>
+        </div>
+    </t>
+</templates>
+

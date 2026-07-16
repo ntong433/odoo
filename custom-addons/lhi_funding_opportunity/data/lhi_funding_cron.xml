@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="ir_cron_check_funding_deadlines" model="ir.cron">
+            <field name="name">Funding Opportunity: Check Overdue Deadlines</field>
+            <field name="model_id" ref="model_lhi_funding_opportunity"/>
+            <field name="state">code</field>
+            <field name="code">model._check_overdue_deadlines()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_lhi_meal_data" model="ir.actions.act_window">
+        <field name="name">Data Collection Records</field>
+        <field name="res_model">lhi.meal.data</field>
+        <field name="view_mode">list,form,graph,pivot</field>
+        <field name="search_view_id" ref="view_lhi_meal_data_search"/>
+    </record>
+
+    <record id="action_lhi_meal_evidence" model="ir.actions.act_window">
+        <field name="name">Evidence Library</field>
+        <field name="res_model">lhi.meal.evidence</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_lhi_meal_evidence_search"/>
+    </record>
+
+    <!-- Assumes menu_lhi_meal_root exists from lhi_results_framework -->
+    <menuitem id="menu_lhi_meal_data" name="Data Collection" parent="lhi_results_framework.menu_lhi_meal_root" action="action_lhi_meal_data" sequence="30"/>
+    <menuitem id="menu_lhi_meal_evidence" name="Evidence Library" parent="lhi_results_framework.menu_lhi_meal_root" action="action_lhi_meal_evidence" sequence="40"/>
+</odoo>

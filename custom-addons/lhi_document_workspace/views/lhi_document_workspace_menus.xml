@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_lhi_document_templates"
+              name="Office Document Templates"
+              parent="lhi_microsoft_graph_core.menu_lhi_graph_configuration"
+              action="action_lhi_document_template"
+              sequence="40"
+              groups="lhi_security.group_lhi_erp_admin,lhi_security.group_lhi_internal_auditor"/>
+</odoo>
+

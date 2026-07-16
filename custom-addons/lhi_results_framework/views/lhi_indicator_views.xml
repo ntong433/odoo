@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_indicator_form" model="ir.ui.view">
+        <field name="name">lhi.indicator.form</field>
+        <field name="model">lhi.indicator</field>
+        <field name="arch" type="xml">
+            <form string="Indicator">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group string="Basic Information">
+                            <field name="code"/>
+                            <field name="element_id"/>
+                            <field name="framework_id"/>
+                            <field name="project_id"/>
+                        </group>
+                        <group string="Targets and Progress">
+                            <field name="baseline"/>
+                            <field name="target"/>
+                            <field name="achieved_total" readonly="1"/>
+                            <field name="progress_percentage" widget="progressbar"/>
+                            <field name="unit"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Measurement &amp; Tracking">
+                            <group>
+                                <group>
+                                    <field name="frequency"/>
+                                    <field name="data_source"/>
+                                    <field name="responsible_id" widget="many2one_avatar_user"/>
+                                </group>
+                                <group>
+                                    <field name="is_disaggregated"/>
+                                    <field name="workplan_activity_ids" widget="many2many_tags" domain="[('project_id', '=', project_id)]"/>
+                                </group>
+                            </group>
+                            <separator string="Definition &amp; Formula"/>
+                            <field name="definition" placeholder="How is this indicator calculated?"/>
+                            <separator string="Means of Verification"/>
+                            <field name="means_of_verification" placeholder="What evidence is required?"/>
+                        </page>
+                        <page string="Disaggregation" invisible="not is_disaggregated">
+                            <field name="disaggregation_ids">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_indicator_tree" model="ir.ui.view">
+        <field name="name">lhi.indicator.tree</field>
+        <field name="model">lhi.indicator</field>
+        <field name="arch" type="xml">
+            <list string="Indicators">
+                <field name="sequence" widget="handle"/>
+                <field name="code"/>
+                <field name="name"/>
+                <field name="element_id"/>
+                <field name="target"/>
+                <field name="achieved_total"/>
+                <field name="progress_percentage" widget="progressbar"/>
+            </list>
+        </field>
+    </record>
+    
+    <record id="view_lhi_indicator_search" model="ir.ui.view">
+        <field name="name">lhi.indicator.search</field>
+        <field name="model">lhi.indicator</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="element_id"/>
+                <field name="project_id"/>
+                <group>
+                    <filter string="Results Element" name="element" context="{'group_by':'element_id'}"/>
+                    <filter string="Project" name="project" context="{'group_by':'project_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <record id="group_lhi_meal_sensitive" model="res.groups">
+            <field name="name">LHI MEAL: Access Sensitive Data</field>
+            <field name="privilege_id" ref="lhi_security.res_groups_privilege_lhi_erp"/>
+        </record>
+
+        <record id="rule_lhi_meal_data_company" model="ir.rule">
+            <field name="name">MEAL Data: Multi-Company</field>
+            <field name="model_id" ref="model_lhi_meal_data"/>
+            <field name="domain_force">
+                ['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]
+            </field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        
+        <record id="rule_lhi_meal_data_sensitive" model="ir.rule">
+            <field name="name">MEAL Data: Sensitive Data Protection</field>
+            <field name="model_id" ref="model_lhi_meal_data"/>
+            <!-- Users WITHOUT sensitive group can only see non-sensitive records -->
+            <field name="domain_force">[('is_sensitive', '=', False)]</field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+        
+        <record id="rule_lhi_meal_data_sensitive_allow" model="ir.rule">
+            <field name="name">MEAL Data: Sensitive Data Allowance</field>
+            <field name="model_id" ref="model_lhi_meal_data"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('lhi_meal.group_lhi_meal_sensitive'))]"/>
+        </record>
+
+        <record id="rule_lhi_meal_evidence_company" model="ir.rule">
+            <field name="name">MEAL Evidence: Multi-Company</field>
+            <field name="model_id" ref="model_lhi_meal_evidence"/>
+            <field name="domain_force">
+                ['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]
+            </field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+        <record id="rule_lhi_meal_evidence_sensitive" model="ir.rule">
+            <field name="name">MEAL Evidence: Sensitive Data Protection</field>
+            <field name="model_id" ref="model_lhi_meal_evidence"/>
+            <field name="domain_force">[('is_sensitive', '=', False)]</field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+        <record id="rule_lhi_meal_evidence_sensitive_allow" model="ir.rule">
+            <field name="name">MEAL Evidence: Sensitive Data Allowance</field>
+            <field name="model_id" ref="model_lhi_meal_evidence"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('lhi_meal.group_lhi_meal_sensitive'))]"/>
+        </record>
+        
+        <record id="seq_lhi_meal_data" model="ir.sequence">
+            <field name="name">MEAL Data Reference</field>
+            <field name="code">lhi.meal.data</field>
+            <field name="prefix">MD/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

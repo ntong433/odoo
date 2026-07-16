@@ -1,0 +1,57 @@
+{
+  "siteTitle": "LHI ERP",
+  "siteAlias": "ERP",
+  "libraries": [
+    "Documents"
+  ],
+  "rootFolder": "ERP",
+  "rootFolders": [
+    "Projects",
+    "Procurement",
+    "Operations",
+    "Controlled Documents",
+    "Signed Documents"
+  ],
+  "siteColumns": [
+    {"internalName": "LhiOdooDatabase", "displayName": "Odoo Database", "type": "Text", "required": true},
+    {"internalName": "LhiOdooModel", "displayName": "Odoo Model", "type": "Text", "required": true},
+    {"internalName": "LhiOdooRecordId", "displayName": "Odoo Record ID", "type": "Integer", "required": true},
+    {"internalName": "LhiCompanyCode", "displayName": "LHI Company Code", "type": "Text", "required": true},
+    {"internalName": "LhiDocumentClass", "displayName": "LHI Document Class", "type": "Choice", "required": true},
+    {"internalName": "LhiWorkflowState", "displayName": "LHI Workflow State", "type": "Text", "required": false},
+    {"internalName": "LhiContentSha256", "displayName": "Content SHA-256", "type": "Text", "required": true},
+    {"internalName": "LhiAuditCorrelationId", "displayName": "Audit Correlation ID", "type": "Text", "required": true},
+    {"internalName": "LhiRetentionCategory", "displayName": "Retention Category", "type": "Choice", "required": true}
+  ],
+  "documentClasses": [
+    "Project",
+    "Proposal",
+    "Award",
+    "Procurement",
+    "Operations",
+    "MEAL Evidence",
+    "Partner",
+    "Compliance",
+    "Controlled Document",
+    "Signed Document"
+  ],
+  "retentionCategories": [
+    "Operational",
+    "Grant Record",
+    "Procurement Record",
+    "Controlled Record",
+    "Signed Record",
+    "Legal Hold Review"
+  ],
+  "projectFolders": [
+    "01 Proposal",
+    "02 Award and Agreement",
+    "03 Workplans",
+    "04 MEAL and Evidence",
+    "05 Procurement",
+    "06 Reports",
+    "07 Partners",
+    "08 Compliance and Audit",
+    "09 Closeout"
+  ]
+}

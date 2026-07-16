@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_project_form_inherit_lifecycle" model="ir.ui.view">
+        <field name="name">lhi.project.form.inherit.lifecycle</field>
+        <field name="model">lhi.project</field>
+        <field name="inherit_id" ref="lhi_base.view_lhi_project_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='office_id']" position="after">
+                <field name="odoo_project_id" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="edit_project_inherit_lhi" model="ir.ui.view">
+        <field name="name">project.project.form.inherit.lhi</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='user_id']" position="after">
+                <field name="lhi_project_id"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

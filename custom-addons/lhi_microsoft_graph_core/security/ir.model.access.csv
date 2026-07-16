@@ -1,0 +1,12 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lhi_graph_connection_admin,lhi.graph.connection.admin,model_lhi_graph_connection,lhi_security.group_lhi_erp_admin,1,1,1,1
+access_lhi_graph_connection_service,lhi.graph.connection.service,model_lhi_graph_connection,lhi_security.group_lhi_integration_service,1,0,0,0
+access_lhi_graph_library_admin,lhi.graph.library.admin,model_lhi_graph_library,lhi_security.group_lhi_erp_admin,1,1,1,1
+access_lhi_graph_library_service,lhi.graph.library.service,model_lhi_graph_library,lhi_security.group_lhi_integration_service,1,0,0,0
+access_lhi_graph_diagnostic_admin,lhi.graph.diagnostic.admin,model_lhi_graph_diagnostic,lhi_security.group_lhi_erp_admin,1,0,0,0
+access_lhi_graph_request_log_admin,lhi.graph.request.log.admin,model_lhi_graph_request_log,lhi_security.group_lhi_erp_admin,1,0,0,0
+access_lhi_graph_request_log_auditor,lhi.graph.request.log.auditor,model_lhi_graph_request_log,lhi_security.group_lhi_internal_auditor,1,0,0,0
+access_lhi_graph_workspace_template_admin,lhi.graph.workspace.template.admin,model_lhi_graph_workspace_template,lhi_security.group_lhi_erp_admin,1,1,1,1
+access_lhi_graph_workspace_template_service,lhi.graph.workspace.template.service,model_lhi_graph_workspace_template,lhi_security.group_lhi_integration_service,1,0,0,0
+access_lhi_graph_workspace_template_line_admin,lhi.graph.workspace.template.line.admin,model_lhi_graph_workspace_template_line,lhi_security.group_lhi_erp_admin,1,1,1,1
+access_lhi_graph_workspace_template_line_service,lhi.graph.workspace.template.line.service,model_lhi_graph_workspace_template_line,lhi_security.group_lhi_integration_service,1,0,0,0

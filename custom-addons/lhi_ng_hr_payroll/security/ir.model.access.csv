@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lhi_payroll_structure,lhi.payroll.structure.system,model_lhi_payroll_structure,base.group_system,1,1,1,1
+access_lhi_payroll_rule,lhi.payroll.rule.system,model_lhi_payroll_rule,base.group_system,1,1,1,1
+access_lhi_payslip,lhi.payslip.system,model_lhi_payslip,base.group_system,1,1,1,1
+access_lhi_payslip_batch,lhi.payslip.batch.system,model_lhi_payslip_batch,base.group_system,1,1,1,1

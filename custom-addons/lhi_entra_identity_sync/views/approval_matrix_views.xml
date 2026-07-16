@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_approval_matrix_form_entra_manager" model="ir.ui.view">
+        <field name="name">lhi.approval.matrix.form.entra.manager</field>
+        <field name="model">lhi.approval.matrix</field>
+        <field name="inherit_id" ref="lhi_approval_matrix.view_lhi_approval_matrix_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='line_ids']/list/field[@name='approver_group_id']" position="before">
+                <field name="approver_source"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_lhi_approval_request_form_entra_manager" model="ir.ui.view">
+        <field name="name">lhi.approval.request.form.entra.manager</field>
+        <field name="model">lhi.approval.request</field>
+        <field name="inherit_id" ref="lhi_approval_matrix.view_lhi_approval_request_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/button[@name='action_return_for_correction']" position="after">
+                <button name="action_reassign_synchronized_manager"
+                        type="object"
+                        string="Reassign Current Manager"
+                        groups="lhi_security.group_lhi_manager"
+                        invisible="state != 'under_review'"/>
+            </xpath>
+            <xpath expr="//field[@name='current_line_id']" position="after">
+                <field name="manager_reassignment_count" readonly="1"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
+

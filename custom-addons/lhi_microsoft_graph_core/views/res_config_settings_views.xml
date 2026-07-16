@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_lhi_graph" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.lhi.graph</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='general_settings']" position="inside">
+                <block title="LHI Microsoft Graph" name="lhi_microsoft_graph_settings"
+                       groups="lhi_security.group_lhi_erp_admin">
+                    <setting string="Microsoft Graph and SharePoint"
+                             help="Configure selected permissions, SharePoint identifiers, protected environment-based client-secret authentication, and diagnostics.">
+                        <field name="lhi_graph_connection_id" readonly="1"/>
+                        <div class="mt8">
+                            <button name="action_open_lhi_graph_connections"
+                                    type="object"
+                                    string="Manage Microsoft Graph Connections"
+                                    class="btn-link"
+                                    icon="oi-arrow-right"/>
+                        </div>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

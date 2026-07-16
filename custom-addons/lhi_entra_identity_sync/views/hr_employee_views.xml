@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_employee_form_lhi_entra_identity_sync" model="ir.ui.view">
+        <field name="name">hr.employee.form.lhi.entra.identity.sync</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="lhi_integration.view_employee_form_lhi_entra"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='lhi_integration']" position="inside">
+                <field name="entra_object_id"/>
+                <field name="entra_upn"/>
+                <field name="entra_account_enabled"/>
+                <field name="entra_manager_object_id"/>
+                <field name="entra_last_sync_at"/>
+                <field name="entra_sync_state"/>
+                <field name="identity_source"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
+

@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lhi_proposal_workspace_user,lhi.proposal.workspace.user,model_lhi_proposal_workspace,base.group_user,1,1,1,0
+access_lhi_proposal_workspace_admin,lhi.proposal.workspace.admin,model_lhi_proposal_workspace,base.group_erp_manager,1,1,1,1
+access_lhi_proposal_section_user,lhi.proposal.section.user,model_lhi_proposal_section,base.group_user,1,1,1,0
+access_lhi_proposal_section_admin,lhi.proposal.section.admin,model_lhi_proposal_section,base.group_erp_manager,1,1,1,1
+access_lhi_proposal_annex_user,lhi.proposal.annex.user,model_lhi_proposal_annex,base.group_user,1,1,1,0
+access_lhi_proposal_annex_admin,lhi.proposal.annex.admin,model_lhi_proposal_annex,base.group_erp_manager,1,1,1,1
+access_lhi_proposal_template_user,lhi.proposal.section.template.user,model_lhi_proposal_section_template,base.group_user,1,0,0,0
+access_lhi_proposal_template_admin,lhi.proposal.section.template.admin,model_lhi_proposal_section_template,base.group_erp_manager,1,1,1,1

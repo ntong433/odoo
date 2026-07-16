@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!-- Theme Toggle Systray Item -->
+    <t t-name="lhi_web_shell.ThemeToggle" owl="1">
+        <button class="lhi-theme-toggle border-0 bg-transparent p-2 d-flex align-items-center" 
+                t-on-click="toggleTheme"
+                title="Toggle Dark Mode"
+                aria-label="Toggle dark mode">
+            <i t-attf-class="fa fa-lg {{ theme.isDark ? 'fa-sun-o' : 'fa-moon-o' }}" 
+               t-att-style="theme.isDark ? 'color: #f59e0b;' : 'color: var(--lhi-text-secondary);'"></i>
+        </button>
+    </t>
+
+    <!-- Notification Badge Systray Item -->
+    <t t-name="lhi_web_shell.NotificationBadge" owl="1">
+        <button class="lhi-topbar__icon-btn" 
+                title="Notifications"
+                aria-label="View notifications">
+            <i class="fa fa-lg fa-bell-o"></i>
+            <!-- Placeholder pulse dot for pending actions/notifications -->
+            <span class="lhi-badge-dot"></span>
+        </button>
+    </t>
+
+    <!-- Sidebar Component Template -->
+    <t t-name="lhi_web_shell.Sidebar" owl="1">
+        <aside class="lhi-sidebar" t-att-class="{ 'lhi-sidebar--collapsed': state.collapsed }">
+            <div class="lhi-sidebar__brand">
+                <div class="lhi-sidebar__org-name">Life Helpers Initiative</div>
+            </div>
+            
+            <div class="lhi-sidebar__nav">
+                <div class="lhi-sidebar__section-label">Apps</div>
+                <t t-foreach="apps" t-as="app" t-key="app.id">
+                    <a t-att-class="'lhi-sidebar__item ' + (currentApp and currentApp.id === app.id ? 'lhi-sidebar__item--active' : '')"
+                       t-on-click="() => this.onAppClick(app)">
+                        <!-- Mapping Odoo webIcon to a generic font-awesome if unavailable -->
+                        <i class="fa fa-cube lhi-sidebar__icon"></i>
+                        <span class="lhi-sidebar__label" t-esc="app.name"></span>
+                    </a>
+                </t>
+            </div>
+            
+            <div class="lhi-sidebar__footer">
+                <button class="lhi-sidebar__collapse-btn" t-on-click="toggleCollapse">
+                    <i t-attf-class="fa {{ state.collapsed ? 'fa-chevron-right' : 'fa-chevron-left' }}"></i>
+                    <span class="lhi-sidebar__label" t-if="!state.collapsed">Collapse</span>
+                </button>
+            </div>
+        </aside>
+    </t>
+
+    <!-- Inject Sidebar into WebClient -->
+    <t t-name="lhi_web_shell.WebClient" t-inherit="web.WebClient" t-inherit-mode="extension" owl="1">
+        <xpath expr="//t[@t-if='!state.fullscreen']" position="before">
+            <t t-if="!state.fullscreen">
+                <LhiSidebar/>
+            </t>
+        </xpath>
+    </t>
+
+</templates>

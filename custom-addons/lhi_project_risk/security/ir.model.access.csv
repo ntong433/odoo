@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lhi_risk_likelihood,lhi.risk.likelihood,model_lhi_risk_likelihood,base.group_user,1,0,0,0
+access_lhi_risk_impact,lhi.risk.impact,model_lhi_risk_impact,base.group_user,1,0,0,0
+access_lhi_risk_category,lhi.risk.category,model_lhi_risk_category,base.group_user,1,0,0,0
+access_lhi_project_risk_user,lhi.project.risk.user,model_lhi_project_risk,base.group_user,1,1,1,0
+access_lhi_project_risk_admin,lhi.project.risk.admin,model_lhi_project_risk,base.group_erp_manager,1,1,1,1
+access_lhi_risk_likelihood_admin,lhi.risk.likelihood.admin,model_lhi_risk_likelihood,base.group_erp_manager,1,1,1,1
+access_lhi_risk_impact_admin,lhi.risk.impact.admin,model_lhi_risk_impact,base.group_erp_manager,1,1,1,1
+access_lhi_risk_category_admin,lhi.risk.category.admin,model_lhi_risk_category,base.group_erp_manager,1,1,1,1

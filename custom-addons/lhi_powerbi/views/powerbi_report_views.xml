@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_powerbi_report_form" model="ir.ui.view">
+        <field name="name">lhi.powerbi.report.form</field>
+        <field name="model">lhi.powerbi.report</field>
+        <field name="arch" type="xml">
+            <form string="Power BI Report">
+                <header>
+                    <button name="action_view_report" string="View Report" type="object" class="oe_highlight"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group string="Configuration">
+                            <field name="workspace_id"/>
+                            <field name="report_id"/>
+                            <field name="embed_url"/>
+                        </group>
+                        <group string="Access">
+                            <field name="allowed_group_ids" widget="many2many_tags"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description">
+                            <field name="description"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_powerbi_report_tree" model="ir.ui.view">
+        <field name="name">lhi.powerbi.report.tree</field>
+        <field name="model">lhi.powerbi.report</field>
+        <field name="arch" type="xml">
+            <list string="Power BI Reports">
+                <field name="name"/>
+                <field name="workspace_id"/>
+                <field name="report_id"/>
+                <button name="action_view_report" type="object" string="View" icon="fa-bar-chart"/>
+            </list>
+        </field>
+    </record>
+</odoo>

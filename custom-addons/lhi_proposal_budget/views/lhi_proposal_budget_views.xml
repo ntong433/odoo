@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Budget Form -->
+    <record id="view_lhi_proposal_budget_form" model="ir.ui.view">
+        <field name="name">lhi.proposal.budget.form</field>
+        <field name="model">lhi.proposal.budget</field>
+        <field name="arch" type="xml">
+            <form string="Proposal Budget">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="Budget Title"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="workspace_id" readonly="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="currency_id"/>
+                            <field name="exchange_rate_date"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Budget Lines">
+                            <field name="line_ids">
+                                <list editable="bottom" decoration-warning="total_base_currency == 0">
+                                    <field name="donor_category"/>
+                                    <field name="lhi_category"/>
+                                    <field name="location_id"/>
+                                    <field name="department_id"/>
+                                    <field name="cost_center_id"/>
+                                    <field name="unit"/>
+                                    <field name="unit_cost"/>
+                                    <field name="quantity"/>
+                                    <field name="frequency"/>
+                                    <field name="duration"/>
+                                    <field name="currency_id"/>
+                                    <field name="exchange_rate"/>
+                                    <field name="line_total"/>
+                                    <field name="total_base_currency"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer oe_right">
+                                <field name="total_donor_contribution" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="total_lhi_contribution" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="total_partner_contribution" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="total_indirect_costs" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <div class="oe_subtotal_footer_separator oe_inline o_td_label">
+                                    <label for="total_amount"/>
+                                </div>
+                                <field name="total_amount" nolabel="1" class="oe_subtotal_footer_separator" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            </group>
+                            <div class="oe_clear"/>
+                        </page>
+                        <page string="Narrative">
+                            <field name="narrative" widget="html"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Budget Line Form for detailed editing -->
+    <record id="view_lhi_proposal_budget_line_form" model="ir.ui.view">
+        <field name="name">lhi.proposal.budget.line.form</field>
+        <field name="model">lhi.proposal.budget.line</field>
+        <field name="arch" type="xml">
+            <form string="Budget Line">
+                <sheet>
+                    <group>
+                        <group string="Categorization">
+                            <field name="donor_category"/>
+                            <field name="lhi_category"/>
+                            <field name="output"/>
+                            <field name="activity"/>
+                        </group>
+                        <group string="Coding">
+                            <field name="location_id"/>
+                            <field name="department_id"/>
+                            <field name="cost_center_id"/>
+                        </group>
+                        <group string="Calculation">
+                            <field name="unit"/>
+                            <field name="unit_cost"/>
+                            <field name="quantity"/>
+                            <field name="frequency"/>
+                            <field name="duration"/>
+                            <field name="currency_id"/>
+                            <field name="exchange_rate"/>
+                        </group>
+                        <group string="Distribution (%)">
+                            <field name="donor_percentage"/>
+                            <field name="lhi_percentage"/>
+                            <field name="partner_percentage"/>
+                            <field name="indirect_cost_rate"/>
+                        </group>
+                    </group>
+                    <group string="Totals (Base Currency)">
+                        <field name="donor_contribution_base"/>
+                        <field name="lhi_contribution_base"/>
+                        <field name="partner_contribution_base"/>
+                        <field name="indirect_costs_base"/>
+                        <field name="total_base_currency" style="font-weight:bold;"/>
+                    </group>
+                    <group string="Justification">
+                        <field name="justification" nolabel="1" placeholder="Budget notes and justification..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_proposal_budget_tree" model="ir.ui.view">
+        <field name="name">lhi.proposal.budget.tree</field>
+        <field name="model">lhi.proposal.budget</field>
+        <field name="arch" type="xml">
+            <list string="Proposal Budgets">
+                <field name="name"/>
+                <field name="workspace_id"/>
+                <field name="currency_id"/>
+                <field name="total_amount"/>
+            </list>
+        </field>
+    </record>
+</odoo>

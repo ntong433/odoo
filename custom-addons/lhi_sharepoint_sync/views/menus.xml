@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_lhi_sharepoint_root" name="SharePoint Sync" sequence="100"/>
+    <menuitem id="menu_lhi_sharepoint_partition" name="Partitions" parent="menu_lhi_sharepoint_root" action="action_lhi_sharepoint_partition" sequence="10"/>
+    <menuitem id="menu_lhi_sharepoint_subscription" name="Graph Subscriptions" parent="menu_lhi_sharepoint_root" action="action_lhi_sharepoint_subscription" sequence="20"/>
+</odoo>

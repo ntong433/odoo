@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_users_form_lhi_inherit" model="ir.ui.view">
+        <field name="name">res.users.form.lhi.inherit</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="LHI Restrictions" name="lhi_restrictions">
+                    <group string="LHI Organizational Restrictions">
+                        <field name="lhi_department_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                        <field name="lhi_project_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                        <field name="lhi_office_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

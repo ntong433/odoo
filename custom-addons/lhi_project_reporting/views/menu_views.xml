@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_lhi_project_report" model="ir.actions.act_window">
+        <field name="name">Project Reports</field>
+        <field name="res_model">lhi.project.report</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_lhi_project_report" name="Reports" parent="lhi_base.menu_lhi_project_root" action="action_lhi_project_report" sequence="60"/>
+</odoo>

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="module_category_lhi_erp" model="ir.module.category">
+        <field name="name">LHI ERP</field>
+        <field name="description">Access levels for LHI ERP applications</field>
+        <field name="sequence">100</field>
+    </record>
+
+    <record id="res_groups_privilege_lhi_erp" model="res.groups.privilege">
+        <field name="name">LHI ERP Access</field>
+        <field name="category_id" ref="module_category_lhi_erp"/>
+    </record>
+
+    <!-- Base User and Manager Groups (Keep xml_ids for backward compatibility with tests) -->
+    <record id="group_lhi_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <record id="group_lhi_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_user'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+    </record>
+
+    <!-- Specific LHI Roles -->
+    <record id="group_lhi_employee" model="res.groups">
+        <field name="name">LHI Employee</field>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_user'))]"/>
+    </record>
+
+    <record id="group_lhi_supervisor" model="res.groups">
+        <field name="name">LHI Supervisor</field>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+    </record>
+
+    <record id="group_lhi_project_officer" model="res.groups">
+        <field name="name">LHI Project Officer</field>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+    </record>
+
+    <record id="group_lhi_project_manager" model="res.groups">
+        <field name="name">LHI Project Manager</field>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_project_officer'))]"/>
+    </record>
+
+    <record id="group_lhi_programme_director" model="res.groups">
+        <field name="name">LHI Programme Director</field>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_project_manager'))]"/>
+    </record>
+
+    <record id="group_lhi_meal_officer" model="res.groups">
+        <field name="name">LHI MEAL Officer</field>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+    </record>
+
+    <record id="group_lhi_procurement_officer" model="res.groups">
+        <field name="name">LHI Procurement Officer</field>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+    </record>
+
+    <record id="group_lhi_procurement_manager" model="res.groups">
+        <field name="name">LHI Procurement Manager</field>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_procurement_officer'))]"/>
+    </record>
+
+    <record id="group_lhi_store_officer" model="res.groups">
+        <field name="name">LHI Store Officer</field>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+    </record>
+
+    <record id="group_lhi_fleet_officer" model="res.groups">
+        <field name="name">LHI Fleet Officer</field>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+    </record>
+
+    <record id="group_lhi_finance_reviewer" model="res.groups">
+        <field name="name">LHI Finance Reviewer</field>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+    </record>
+
+    <record id="group_lhi_hr_officer" model="res.groups">
+        <field name="name">LHI HR Officer</field>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+    </record>
+
+    <record id="group_lhi_internal_auditor" model="res.groups">
+        <field name="name">LHI Internal Auditor</field>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+    </record>
+
+    <record id="group_lhi_executive_approver" model="res.groups">
+        <field name="name">LHI Executive Approver</field>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+    </record>
+
+    <record id="group_lhi_erp_admin" model="res.groups">
+        <field name="name">LHI ERP Administrator</field>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_manager'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+    </record>
+
+    <record id="group_lhi_integration_service" model="res.groups">
+        <field name="name">LHI Integration Service Account</field>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+    </record>
+</odoo>

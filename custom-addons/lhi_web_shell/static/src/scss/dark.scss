@@ -1,0 +1,93 @@
+// ============================================================================
+// LHI DARK MODE — CSS variable overrides for [data-theme="dark"]
+// Sprint 4 · lhi_web_shell · dark.scss
+//
+// Applied by the lhi_theme_service.js toggling data-theme on <html>.
+// ============================================================================
+
+[data-theme="dark"] {
+    // Sidebar
+    --lhi-sidebar-bg:      #0f1623;
+    --lhi-sidebar-text:    rgba(255, 255, 255, 0.78);
+    --lhi-sidebar-hover:   rgba(255, 255, 255, 0.07);
+
+    // Topbar
+    --lhi-topbar-bg:       #1a1f2e;
+    --lhi-topbar-border:   rgba(255, 255, 255, 0.08);
+
+    // Page canvas
+    --lhi-canvas-bg:       #141824;
+    --lhi-card-bg:         #1e2537;
+    --lhi-card-border:     rgba(255, 255, 255, 0.08);
+
+    // Text
+    --lhi-text-primary:    #e9ecef;
+    --lhi-text-secondary:  #a0aab4;
+    --lhi-text-muted:      #6c757d;
+
+    // Odoo overrides in dark mode
+    .o_form_sheet {
+        background: var(--lhi-card-bg);
+        border-color: var(--lhi-card-border);
+    }
+
+    .o_list_view {
+        background: var(--lhi-card-bg);
+        border-color: var(--lhi-card-border);
+
+        thead th {
+            background: #161b28;
+        }
+
+        tbody tr:hover {
+            background: rgba(255,255,255,0.04);
+        }
+    }
+
+    .o_kanban_view {
+        background: var(--lhi-canvas-bg);
+
+        .o_kanban_group {
+            background: var(--lhi-card-bg);
+            border-color: var(--lhi-card-border);
+        }
+
+        .o_kanban_record {
+            background: var(--lhi-card-bg);
+            border-color: var(--lhi-card-border);
+        }
+    }
+
+    .o_control_panel {
+        background: var(--lhi-card-bg);
+        border-bottom-color: var(--lhi-card-border);
+    }
+
+    .o_searchview {
+        background: #141824;
+        border-color: var(--lhi-card-border);
+    }
+
+    .lhi-badge--soft-primary { background: rgba(200, 40, 26, 0.2); color: #f4a098; }
+    .lhi-badge--soft-success { background: rgba(25, 135, 84, 0.2); color: #86efac; }
+    .lhi-badge--soft-warning { background: rgba(245, 158, 11, 0.2); color: #fde68a; }
+    .lhi-badge--soft-info    { background: rgba(2, 132, 199, 0.2);  color: #7dd3fc; }
+    .lhi-badge--soft-neutral { background: rgba(255,255,255,0.08);  color: var(--lhi-text-secondary); }
+
+    .lhi-skeleton {
+        background: linear-gradient(90deg, #2a3347 25%, #232c40 50%, #2a3347 75%);
+        background-size: 200% 100%;
+    }
+
+    // Input fields
+    input, textarea, select {
+        background-color: #141824;
+        color: var(--lhi-text-primary);
+        border-color: var(--lhi-card-border);
+    }
+}
+
+// ── Theme transition (smooth switch) ─────────────────────────────────────────
+html {
+    transition: background-color $lhi-transition-medium, color $lhi-transition-medium;
+}

@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Kanban View for Pipeline -->
+    <record id="view_lhi_funding_opportunity_kanban" model="ir.ui.view">
+        <field name="name">lhi.funding.opportunity.kanban</field>
+        <field name="model">lhi.funding.opportunity</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="stage_id" class="o_kanban_small_column o_opportunity_kanban" quick_create="false">
+                <field name="name"/>
+                <field name="donor_id"/>
+                <field name="funding_ceiling"/>
+                <field name="currency_id"/>
+                <field name="probability"/>
+                <field name="submission_deadline"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click">
+                            <div class="o_kanban_record_top">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title"><field name="name"/></strong>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <div><field name="donor_id"/></div>
+                                <div>
+                                    <field name="funding_ceiling" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                </div>
+                                <div t-if="record.submission_deadline.raw_value">
+                                    <i class="fa fa-clock-o" aria-label="Deadline" role="img" title="Deadline"/> 
+                                    <field name="submission_deadline"/>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_left">
+                                    <field name="probability" widget="progressbar"/>
+                                </div>
+                                <div class="oe_kanban_bottom_right">
+                                    <field name="user_id" widget="many2one_avatar_user"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_lhi_funding_opportunity_form" model="ir.ui.view">
+        <field name="name">lhi.funding.opportunity.form</field>
+        <field name="model">lhi.funding.opportunity</field>
+        <field name="arch" type="xml">
+            <form string="Funding Opportunity">
+                <header>
+                    <button name="action_request_approval" string="Request Go/No-Go Approval" type="object" class="oe_highlight" invisible="approval_request_id != False"/>
+                    <field name="stage_id" widget="statusbar" options="{'clickable': '1'}"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box"/>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only" string="Opportunity Name"/>
+                        <h1><field name="name" placeholder="e.g. USAID Health Resiliency..."/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="reference"/>
+                            <field name="donor_id"/>
+                            <field name="user_id" widget="many2one_avatar_user"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="funding_ceiling" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="probability"/>
+                            <field name="submission_deadline"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Categorization &amp; Scope">
+                            <group>
+                                <group>
+                                    <field name="sector_id"/>
+                                    <field name="programme_id"/>
+                                </group>
+                                <group>
+                                    <field name="duration_months"/>
+                                    <field name="geography_ids" widget="many2many_tags"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Requirements">
+                            <group>
+                                <field name="co_financing_required"/>
+                                <field name="co_financing_amount" invisible="co_financing_required == False"/>
+                            </group>
+                            <group string="Notes">
+                                <field name="eligibility_notes" placeholder="Checklist and eligibility criteria..."/>
+                                <field name="consortium_requirements" placeholder="Partner requirements..."/>
+                                <field name="source_documents" widget="html"/>
+                            </group>
+                        </page>
+                        <page string="Go/No-Go Assessment">
+                            <group>
+                                <group string="Scores (1-10)">
+                                    <field name="score_strategic_fit"/>
+                                    <field name="score_technical_capacity"/>
+                                    <field name="score_operational_presence"/>
+                                    <field name="score_staffing"/>
+                                    <field name="score_compliance"/>
+                                </group>
+                                <group string="Scores Continued">
+                                    <field name="score_partnerships"/>
+                                    <field name="score_security"/>
+                                    <field name="score_financial_exposure"/>
+                                    <field name="score_timeline"/>
+                                    <field name="total_score" style="font-weight:bold; font-size:1.2em;"/>
+                                </group>
+                            </group>
+                            <group string="Approval Tracker">
+                                <field name="approval_request_id"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree View -->
+    <record id="view_lhi_funding_opportunity_tree" model="ir.ui.view">
+        <field name="name">lhi.funding.opportunity.tree</field>
+        <field name="model">lhi.funding.opportunity</field>
+        <field name="arch" type="xml">
+            <list string="Funding Opportunities">
+                <field name="name"/>
+                <field name="donor_id"/>
+                <field name="stage_id"/>
+                <field name="funding_ceiling" sum="Total Ceiling"/>
+                <field name="submission_deadline"/>
+                <field name="probability" widget="progressbar"/>
+                <field name="user_id" widget="many2one_avatar_user"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Graph View -->
+    <record id="view_lhi_funding_opportunity_graph" model="ir.ui.view">
+        <field name="name">lhi.funding.opportunity.graph</field>
+        <field name="model">lhi.funding.opportunity</field>
+        <field name="arch" type="xml">
+            <graph string="Opportunities Pipeline" type="bar">
+                <field name="stage_id"/>
+                <field name="donor_id"/>
+                <field name="funding_ceiling" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- Pivot View -->
+    <record id="view_lhi_funding_opportunity_pivot" model="ir.ui.view">
+        <field name="name">lhi.funding.opportunity.pivot</field>
+        <field name="model">lhi.funding.opportunity</field>
+        <field name="arch" type="xml">
+            <pivot string="Opportunities Pipeline" display_quantity="1">
+                <field name="stage_id" type="row"/>
+                <field name="programme_id" type="col"/>
+                <field name="funding_ceiling" type="measure"/>
+                <field name="probability" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_lhi_funding_opportunity" model="ir.actions.act_window">
+        <field name="name">Funding Opportunities</field>
+        <field name="res_model">lhi.funding.opportunity</field>
+        <field name="view_mode">kanban,list,form,graph,pivot</field>
+        <field name="context">{'search_default_user_id': uid}</field>
+    </record>
+</odoo>

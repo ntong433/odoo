@@ -1,0 +1,4 @@
+id,name,code,donor_type,contact_name,email
+lhi_donor_usaid,USAID / Bureau for Humanitarian Assistance,BHA,bilateral,John Doe,bha@usaid.gov
+lhi_donor_unicef,UNICEF Nigeria,UNICEF,multilateral,Jane Smith,unicef@un.org
+lhi_donor_echo,European Civil Protection and Humanitarian Aid Operations,ECHO,bilateral,Jean Dupont,echo@eu.europa.eu

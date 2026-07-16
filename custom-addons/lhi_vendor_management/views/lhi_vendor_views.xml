@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_vendor_form" model="ir.ui.view">
+        <field name="name">lhi.vendor.form</field>
+        <field name="model">lhi.vendor</field>
+        <field name="arch" type="xml">
+            <form string="Vendor Onboarding">
+                <header>
+                    <button name="action_submit_for_review" string="Submit for Review" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_approve" string="Approve Vendor" type="object" class="oe_highlight" invisible="state != 'under_review'"/>
+                    <button name="action_suspend" string="Suspend Vendor" type="object" class="btn-danger" invisible="state != 'approved'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,under_review,approved"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Suspended" bg_color="bg-danger" invisible="state != 'suspended'"/>
+                    <widget name="web_ribbon" title="Flagged" bg_color="bg-warning" invisible="sanctions_status != 'flagged'"/>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only" string="Legal Name"/>
+                        <h1><field name="name" required="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Contact Info">
+                            <field name="email"/>
+                            <field name="phone"/>
+                            <field name="street"/>
+                            <field name="city"/>
+                            <field name="country_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Business Details">
+                            <field name="tin"/>
+                            <field name="categories"/>
+                            <field name="bank_details"/>
+                            <field name="ownership_information"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Due Diligence &amp; Compliance">
+                            <group>
+                                <field name="due_diligence_status"/>
+                                <field name="sanctions_status"/>
+                                <field name="conflict_declared"/>
+                                <field name="conflict_details" invisible="not conflict_declared" required="conflict_declared"/>
+                                <field name="expiry_date" readonly="1"/>
+                            </group>
+                        </page>
+                        <page string="Documents">
+                            <field name="document_ids" widget="lhi_sharepoint_many2many_binary"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_vendor_tree" model="ir.ui.view">
+        <field name="name">lhi.vendor.tree</field>
+        <field name="model">lhi.vendor</field>
+        <field name="arch" type="xml">
+            <list string="Vendors" decoration-danger="state == 'suspended'" decoration-warning="state == 'draft'">
+                <field name="name"/>
+                <field name="tin"/>
+                <field name="categories"/>
+                <field name="due_diligence_status" widget="badge"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+</odoo>

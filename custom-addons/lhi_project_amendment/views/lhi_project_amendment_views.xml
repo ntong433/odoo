@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_project_amendment_form" model="ir.ui.view">
+        <field name="name">lhi.project.amendment.form</field>
+        <field name="model">lhi.project.amendment</field>
+        <field name="arch" type="xml">
+            <form string="Project Amendment">
+                <header>
+                    <button name="action_submit_internal" string="Submit for Internal Review" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_approve_internal" string="Approve Internally" type="object" class="btn-success" invisible="state != 'internal_review'"/>
+                    <button name="action_donor_approve" string="Donor Approved" type="object" class="btn-success" invisible="state != 'submitted'"/>
+                    <button name="action_reject" string="Reject" type="object" class="btn-danger" invisible="state not in ('internal_review', 'submitted')"/>
+                    <button name="action_apply" string="Apply Changes" type="object" class="oe_highlight" invisible="state != 'approved'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,internal_review,submitted,approved,applied"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group string="Basic Information">
+                            <field name="project_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="amendment_type"/>
+                        </group>
+                        <group string="Timeline &amp; Approvals">
+                            <field name="donor_submission_date"/>
+                            <field name="donor_response_date"/>
+                            <field name="effective_date"/>
+                            <field name="internal_approval_id" widget="many2one_avatar_user" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Change Details">
+                            <group>
+                                <field name="original_value"/>
+                                <field name="proposed_value"/>
+                            </group>
+                            <separator string="Justification"/>
+                            <field name="justification" placeholder="Provide full justification for this change..."/>
+                        </page>
+                        <page string="Documents">
+                            <field name="amended_document_ids" widget="lhi_sharepoint_many2many_binary"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_project_amendment_tree" model="ir.ui.view">
+        <field name="name">lhi.project.amendment.tree</field>
+        <field name="model">lhi.project.amendment</field>
+        <field name="arch" type="xml">
+            <list string="Project Amendments" decoration-info="state == 'submitted'" decoration-success="state == 'approved'" decoration-muted="state == 'applied'">
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="amendment_type"/>
+                <field name="effective_date"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_project_amendment_search" model="ir.ui.view">
+        <field name="name">lhi.project.amendment.search</field>
+        <field name="model">lhi.project.amendment</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="project_id"/>
+                <filter string="Approved" name="approved" domain="[('state', '=', 'approved')]"/>
+                <filter string="Applied" name="applied" domain="[('state', '=', 'applied')]"/>
+                <group>
+                    <filter string="Project" name="project" context="{'group_by':'project_id'}"/>
+                    <filter string="Type" name="type" context="{'group_by':'amendment_type'}"/>
+                    <filter string="Status" name="status" context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+</odoo>

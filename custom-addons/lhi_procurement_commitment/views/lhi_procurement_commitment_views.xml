@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_procurement_commitment_form" model="ir.ui.view">
+        <field name="name">lhi.procurement.commitment.form</field>
+        <field name="model">lhi.procurement.commitment</field>
+        <field name="arch" type="xml">
+            <form string="Operational Commitment">
+                <header>
+                    <button name="action_release" string="Release Commitment" type="object" invisible="state != 'reserved'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="reserved,released,consumed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group string="Source Request">
+                            <field name="request_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Budget Info">
+                            <field name="project_id"/>
+                            <field name="department_id"/>
+                            <field name="cost_center_id"/>
+                            <field name="budget_line_id"/>
+                        </group>
+                        <group string="Amounts">
+                            <field name="amount_reserved"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_procurement_commitment_tree" model="ir.ui.view">
+        <field name="name">lhi.procurement.commitment.tree</field>
+        <field name="model">lhi.procurement.commitment</field>
+        <field name="arch" type="xml">
+            <list string="Operational Commitments">
+                <field name="name"/>
+                <field name="request_id"/>
+                <field name="project_id"/>
+                <field name="budget_line_id"/>
+                <field name="amount_reserved"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_purchase_request_commitment_inherit" model="ir.ui.view">
+        <field name="name">lhi.purchase.request.commitment.inherit</field>
+        <field name="model">lhi.purchase.request</field>
+        <field name="inherit_id" ref="lhi_purchase_request.view_lhi_purchase_request_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='cost_center_id']" position="after">
+                <field name="commitment_id" readonly="1" invisible="not commitment_id"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

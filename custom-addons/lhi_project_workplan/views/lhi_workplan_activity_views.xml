@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_workplan_activity_form" model="ir.ui.view">
+        <field name="name">lhi.workplan.activity.form</field>
+        <field name="model">lhi.workplan.activity</field>
+        <field name="arch" type="xml">
+            <form string="Workplan Element">
+                <header>
+                    <button name="action_generate_task" string="Generate Execution Task" type="object" class="oe_highlight" invisible="state != 'approved' or odoo_task_id != False or element_type not in ('activity', 'subactivity')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,approved,in_progress,completed"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="%(project.action_view_task)d" type="action" class="oe_stat_button" icon="fa-tasks" invisible="not odoo_task_id">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Execution Task</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g. Conduct Training for Trainers"/></h1>
+                    </div>
+                    <group>
+                        <group string="Hierarchy &amp; Core">
+                            <field name="code"/>
+                            <field name="element_type"/>
+                            <field name="workplan_id"/>
+                            <field name="project_id"/>
+                            <field name="parent_id" domain="[('workplan_id', '=', workplan_id)]"/>
+                        </group>
+                        <group string="Execution Details">
+                            <field name="responsible_id" widget="many2one_avatar_user"/>
+                            <field name="location_id"/>
+                            <field name="odoo_task_id" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Schedule &amp; Targets">
+                            <group>
+                                <group>
+                                    <field name="planned_start"/>
+                                    <field name="planned_end"/>
+                                    <field name="actual_start"/>
+                                    <field name="actual_end"/>
+                                </group>
+                                <group>
+                                    <field name="target_value"/>
+                                    <field name="achieved_value"/>
+                                    <field name="unit"/>
+                                    <field name="is_milestone"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Logistics &amp; Dependencies">
+                            <group>
+                                <group>
+                                    <field name="budget_line"/>
+                                    <field name="procurement_required"/>
+                                    <field name="fleet_required"/>
+                                </group>
+                                <group>
+                                    <field name="dependency_ids" widget="many2many_tags" domain="[('workplan_id', '=', workplan_id)]"/>
+                                </group>
+                            </group>
+                            <separator string="Evidence Requirements"/>
+                            <field name="evidence_requirements" placeholder="Documents needed to mark as completed..."/>
+                        </page>
+                        <page string="Sub-Elements">
+                            <field name="child_ids" readonly="1">
+                                <list>
+                                    <field name="code"/>
+                                    <field name="name"/>
+                                    <field name="element_type"/>
+                                    <field name="state"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    
+    <record id="view_lhi_workplan_activity_tree" model="ir.ui.view">
+        <field name="name">lhi.workplan.activity.tree</field>
+        <field name="model">lhi.workplan.activity</field>
+        <field name="arch" type="xml">
+            <list string="Activities" decoration-danger="state == 'delayed'" decoration-success="state == 'completed'">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="workplan_id"/>
+                <field name="element_type"/>
+                <field name="planned_start"/>
+                <field name="planned_end"/>
+                <field name="responsible_id" widget="many2one_avatar_user"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+    
+    <!-- Action to view execution task -->
+    <record id="project.action_view_task" model="ir.actions.act_window">
+        <!-- We use the existing project action for the stat button -->
+        <!-- Just referencing the xml id in the button is enough, but defining it in case it's not exposed exactly this way -->
+    </record>
+</odoo>

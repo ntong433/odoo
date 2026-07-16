@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_lhi_accounting" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.lhi.accounting</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@id='analytic']" position="before">
+                <block title="LHI Migration Control" id="lhi_accounting_cutover">
+                    <setting string="Activate Production Accounting" help="Warning: Only enable this upon formal approval of the legacy accounting migration.">
+                        <field name="lhi_accounting_cutover_active"/>
+                    </setting>
+                </block>
+            </xpath>
+        </field>
+    </record>
+</odoo>

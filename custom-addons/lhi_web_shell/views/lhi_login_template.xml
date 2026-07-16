@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Override the web login layout -->
+    <template id="lhi_login_layout_override" inherit_id="web.login_layout">
+        <xpath expr="//div[contains(@t-attf-class, 'card')]" position="attributes">
+            <attribute name="t-attf-class" add="lhi-login-container" separator=" "/>
+        </xpath>
+    </template>
+
+    <!-- Override the web login form -->
+    <template id="lhi_login_override" inherit_id="web.login">
+        <xpath expr="//form" position="attributes">
+            <attribute name="t-attf-class" add="o_login_form" separator=" "/>
+        </xpath>
+    </template>
+</odoo>

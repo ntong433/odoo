@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_announcement_form" model="ir.ui.view">
+        <field name="name">lhi.announcement.form</field>
+        <field name="model">lhi.announcement</field>
+        <field name="arch" type="xml">
+            <form string="Announcement">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="type"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="date_start"/>
+                            <field name="date_end"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Content">
+                            <field name="content"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_announcement_tree" model="ir.ui.view">
+        <field name="name">lhi.announcement.tree</field>
+        <field name="model">lhi.announcement</field>
+        <field name="arch" type="xml">
+            <list string="Announcements">
+                <field name="name"/>
+                <field name="type"/>
+                <field name="date_start"/>
+                <field name="date_end"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_lhi_announcement" model="ir.actions.act_window">
+        <field name="name">Announcements</field>
+        <field name="res_model">lhi.announcement</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_document_item_list" model="ir.ui.view">
+        <field name="name">lhi.document.item.list</field>
+        <field name="model">lhi.document.item</field>
+        <field name="arch" type="xml">
+            <list create="0" delete="0" decoration-danger="storage_state in ('failed', 'missing', 'mismatch')" decoration-success="storage_state == 'available'">
+                <field name="name"/>
+                <field name="linked_model"/>
+                <field name="linked_record_id"/>
+                <field name="project_id" optional="show"/>
+                <field name="document_category" optional="show"/>
+                <field name="file_size" widget="file_size"/>
+                <field name="storage_state" widget="badge"/>
+                <field name="upload_state" widget="badge"/>
+                <field name="reconciliation_state" widget="badge"/>
+                <field name="last_sync_at"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_document_item_form" model="ir.ui.view">
+        <field name="name">lhi.document.item.form</field>
+        <field name="model">lhi.document.item</field>
+        <field name="arch" type="xml">
+            <form create="0" delete="0">
+                <header>
+                    <button name="action_retry" type="object" string="Retry Upload" class="btn-primary" invisible="storage_state not in ('failed', 'pending')"/>
+                    <button name="action_reconcile" type="object" string="Reconcile" invisible="not sharepoint_item_id"/>
+                    <field name="storage_state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="uuid" readonly="1"/>
+                            <field name="mime_type" readonly="1"/>
+                            <field name="file_size" readonly="1" widget="file_size"/>
+                            <field name="checksum" readonly="1"/>
+                            <field name="requested_by_id" readonly="1"/>
+                            <field name="company_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="linked_model" readonly="1"/>
+                            <field name="linked_record_id" readonly="1"/>
+                            <field name="linked_field" readonly="1"/>
+                            <field name="project_id" readonly="1"/>
+                            <field name="award_id" readonly="1"/>
+                            <field name="document_category" readonly="1"/>
+                            <field name="confidentiality" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="SharePoint">
+                            <group>
+                                <field name="graph_connection_id" readonly="1"/>
+                                <field name="storage_policy_id" readonly="1"/>
+                                <field name="sharepoint_site_id" readonly="1"/>
+                                <field name="sharepoint_drive_id" readonly="1"/>
+                                <field name="sharepoint_item_id" readonly="1"/>
+                                <field name="sharepoint_parent_item_id" readonly="1"/>
+                                <field name="sharepoint_web_url" readonly="1" widget="url"/>
+                                <field name="sharepoint_etag" readonly="1"/>
+                                <field name="sharepoint_version" readonly="1"/>
+                                <field name="modified_at" readonly="1"/>
+                            </group>
+                        </page>
+                        <page string="Processing">
+                            <group>
+                                <field name="upload_state" readonly="1"/>
+                                <field name="upload_attempts" readonly="1"/>
+                                <field name="upload_next_offset" readonly="1"/>
+                                <field name="upload_session_expiration" readonly="1"/>
+                                <field name="reconciliation_state" readonly="1"/>
+                                <field name="last_sync_at" readonly="1"/>
+                                <field name="last_error" readonly="1"/>
+                            </group>
+                        </page>
+                        <page string="Odoo Links">
+                            <field name="attachment_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="res_model"/>
+                                    <field name="res_id"/>
+                                    <field name="mimetype"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_document_item_search" model="ir.ui.view">
+        <field name="name">lhi.document.item.search</field>
+        <field name="model">lhi.document.item</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="uuid"/>
+                <field name="linked_model"/>
+                <field name="project_id"/>
+                <filter name="failed" string="Failed" domain="[('storage_state', '=', 'failed')]"/>
+                <filter name="pending" string="Pending" domain="[('storage_state', 'in', ('pending', 'uploading'))]"/>
+                <filter name="mismatch" string="Reconciliation Issues" domain="[('reconciliation_state', 'in', ('missing', 'mismatch', 'failed'))]"/>
+                <group>
+                    <filter name="group_state" string="Storage State" context="{'group_by': 'storage_state'}"/>
+                    <filter name="group_model" string="Linked Model" context="{'group_by': 'linked_model'}"/>
+                    <filter name="group_company" string="Company" context="{'group_by': 'company_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_lhi_document_item" model="ir.actions.act_window">
+        <field name="name">SharePoint Documents</field>
+        <field name="res_model">lhi.document.item</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_lhi_document_item_search"/>
+    </record>
+</odoo>
+

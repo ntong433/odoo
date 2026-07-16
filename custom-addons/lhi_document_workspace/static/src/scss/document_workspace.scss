@@ -1,0 +1,180 @@
+.lhi-document-workspace {
+    min-height: 28rem;
+    color: var(--lhi-text-primary);
+
+    &__toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .5rem;
+        align-items: center;
+        margin-bottom: .75rem;
+
+        select {
+            min-height: 2.25rem;
+            max-width: 13rem;
+            border: 1px solid var(--lhi-card-border);
+            border-radius: .375rem;
+            background: var(--lhi-card-bg);
+            color: var(--lhi-text-primary);
+            padding: .35rem .6rem;
+        }
+    }
+
+    &__search {
+        display: flex;
+        align-items: center;
+        flex: 1 1 15rem;
+        min-width: 12rem;
+        border: 1px solid var(--lhi-card-border);
+        border-radius: .375rem;
+        background: var(--lhi-card-bg);
+        padding: 0 .65rem;
+
+        input {
+            width: 100%;
+            min-height: 2.25rem;
+            border: 0;
+            outline: 0;
+            background: transparent;
+            color: var(--lhi-text-primary);
+            padding-left: .5rem;
+        }
+    }
+
+    &__body {
+        display: grid;
+        grid-template-columns: minmax(22rem, 40%) minmax(28rem, 60%);
+        min-height: 34rem;
+        border: 1px solid var(--lhi-card-border);
+        border-radius: .75rem;
+        overflow: hidden;
+        background: var(--lhi-card-bg);
+    }
+
+    &__list {
+        overflow: auto;
+        border-right: 1px solid var(--lhi-card-border);
+        background: var(--lhi-card-bg);
+    }
+
+    &__preview {
+        min-height: 34rem;
+        background: var(--lhi-canvas-bg);
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            min-height: 34rem;
+            border: 0;
+            background: #fff;
+        }
+    }
+
+    &__preview-placeholder,
+    &__empty,
+    &__loading {
+        display: flex;
+        min-height: 16rem;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: .75rem;
+        color: var(--lhi-text-secondary);
+        text-align: center;
+
+        .fa {
+            font-size: 2rem;
+            color: var(--lhi-primary);
+        }
+    }
+}
+
+.lhi-document-row {
+    border-bottom: 1px solid var(--lhi-card-border);
+    transition: background .15s ease;
+
+    &:hover,
+    &--selected {
+        background: var(--lhi-canvas-bg);
+    }
+
+    &--selected {
+        box-shadow: inset 3px 0 0 var(--lhi-primary);
+    }
+
+    &__main {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        gap: .65rem;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        padding: .8rem .9rem .45rem;
+        text-align: left;
+
+        > .fa:first-child {
+            flex: 0 0 auto;
+            width: 1.4rem;
+            font-size: 1.35rem;
+            color: var(--lhi-primary);
+        }
+    }
+
+    &__identity {
+        display: flex;
+        flex: 1 1 auto;
+        min-width: 0;
+        flex-direction: column;
+
+        strong,
+        small {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        small {
+            color: var(--lhi-text-secondary);
+        }
+    }
+
+    &__actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .15rem;
+        padding: 0 .75rem .55rem 2.85rem;
+
+        button {
+            width: 1.9rem;
+            height: 1.9rem;
+            border: 0;
+            border-radius: .3rem;
+            background: transparent;
+            color: var(--lhi-text-secondary);
+
+            &:hover:not(:disabled) {
+                background: var(--lhi-neutral-100);
+                color: var(--lhi-primary);
+            }
+
+            &:disabled {
+                opacity: .35;
+                cursor: not-allowed;
+            }
+        }
+    }
+}
+
+@media (max-width: 1100px) {
+    .lhi-document-workspace__body {
+        grid-template-columns: 1fr;
+    }
+
+    .lhi-document-workspace__list {
+        max-height: 24rem;
+        border-right: 0;
+        border-bottom: 1px solid var(--lhi-card-border);
+    }
+}
+

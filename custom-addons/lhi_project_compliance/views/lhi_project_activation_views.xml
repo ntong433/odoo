@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_project_form_inherit_activation" model="ir.ui.view">
+        <field name="name">lhi.project.form.inherit.activation</field>
+        <field name="model">lhi.project</field>
+        <field name="inherit_id" ref="lhi_base.view_lhi_project_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="before">
+                <header>
+                    <button name="action_activate_project" string="Activate Project" type="object" class="btn-primary" invisible="state != 'setup'"/>
+                    <button name="action_close_project" string="Close Project" type="object" invisible="state != 'active'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="setup,active,closed"/>
+                </header>
+            </xpath>
+            <xpath expr="//sheet" position="inside">
+                <notebook>
+                    <page string="Activation Checklist">
+                        <group>
+                            <group string="Documentation">
+                                <field name="chk_signed_agreement" readonly="state != 'setup'"/>
+                                <field name="chk_approved_budget" readonly="state != 'setup'"/>
+                                <field name="chk_workplan" readonly="state != 'setup'"/>
+                                <field name="chk_procurement_plan" readonly="state != 'setup'"/>
+                                <field name="chk_risk_register" readonly="state != 'setup'"/>
+                            </group>
+                            <group string="Systems &amp; HR">
+                                <field name="chk_project_code" readonly="state != 'setup'"/>
+                                <field name="chk_project_team" readonly="state != 'setup'"/>
+                                <field name="chk_meal_setup" readonly="state != 'setup'"/>
+                                <field name="chk_reporting_calendar" readonly="state != 'setup'"/>
+                                <field name="chk_focal_persons" readonly="1"/>
+                            </group>
+                        </group>
+                        <group string="Focal Persons">
+                            <group>
+                                <field name="focal_pm_id" widget="many2one_avatar_user" readonly="state != 'setup'"/>
+                                <field name="focal_finance_id" widget="many2one_avatar_user" readonly="state != 'setup'"/>
+                                <field name="focal_meal_id" widget="many2one_avatar_user" readonly="state != 'setup'"/>
+                            </group>
+                        </group>
+                    </page>
+                </notebook>
+            </xpath>
+        </field>
+    </record>
+</odoo>

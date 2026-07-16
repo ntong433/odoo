@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_purchase_order_accounting_inherit" model="ir.ui.view">
+        <field name="name">lhi.purchase.order.accounting.inherit</field>
+        <field name="model">lhi.purchase.order</field>
+        <field name="inherit_id" ref="lhi_purchase_order.view_lhi_purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_send_to_accounting" string="Send to Legacy Accounting" type="object" class="oe_highlight" invisible="state not in ('locked', 'done') or accounting_status != 'none'"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Accounting &amp; Payment">
+                    <group>
+                        <group>
+                            <field name="accounting_status"/>
+                            <field name="accounting_sync_id" invisible="not accounting_sync_id"/>
+                            <field name="bill_number"/>
+                        </group>
+                        <group>
+                            <field name="payment_status"/>
+                            <field name="payment_date"/>
+                            <field name="payment_reference"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

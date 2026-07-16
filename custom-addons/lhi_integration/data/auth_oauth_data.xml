@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Add Microsoft Entra ID OAuth Provider -->
+        <record id="provider_microsoft_entra" model="auth.oauth.provider">
+            <field name="name">Microsoft Entra ID (LHI Sign-in)</field>
+            <field name="client_id">PLACEHOLDER_CLIENT_ID</field>
+            <field name="auth_endpoint">https://login.microsoftonline.com/common/oauth2/v2.0/authorize</field>
+            <field name="scope">openid profile email User.Read</field>
+            <field name="validation_endpoint">https://graph.microsoft.com/oidc/userinfo</field>
+            <field name="data_endpoint">https://graph.microsoft.com/oidc/userinfo</field>
+            <field name="body">Sign in with Microsoft</field>
+            <!-- Fresh databases must fail closed until an administrator replaces
+                 the placeholder client ID and validates the provider. Existing
+                 configured databases are not changed because this file is noupdate. -->
+            <field name="enabled" eval="False"/>
+        </record>
+    </data>
+</odoo>

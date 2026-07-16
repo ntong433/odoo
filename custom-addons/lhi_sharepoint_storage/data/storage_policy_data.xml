@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="policy_project_reports" model="lhi.document.storage.policy">
+            <field name="name">Project Reports</field>
+            <field name="model_name">lhi.project.report</field>
+            <field name="library_code">projects</field>
+            <field name="folder_strategy">project_workspace</field>
+            <field name="project_subfolder">06 Reports</field>
+            <field name="document_category">Project Report</field>
+            <field name="retention_category">Grant Record</field>
+        </record>
+        <record id="policy_projects" model="lhi.document.storage.policy">
+            <field name="name">Project Workspace Documents</field>
+            <field name="model_name">lhi.project</field>
+            <field name="library_code">projects</field>
+            <field name="folder_strategy">project_workspace</field>
+            <field name="document_category">Project</field>
+            <field name="retention_category">Grant Record</field>
+        </record>
+        <record id="policy_workplans" model="lhi.document.storage.policy">
+            <field name="name">Project Workplan Documents</field>
+            <field name="model_name">lhi.workplan</field>
+            <field name="library_code">projects</field>
+            <field name="folder_strategy">project_workspace</field>
+            <field name="project_subfolder">03 Workplans</field>
+            <field name="document_category">Project</field>
+            <field name="retention_category">Grant Record</field>
+        </record>
+        <record id="policy_workplan_activities" model="lhi.document.storage.policy">
+            <field name="name">Workplan Activity Documents</field>
+            <field name="model_name">lhi.workplan.activity</field>
+            <field name="library_code">projects</field>
+            <field name="folder_strategy">project_workspace</field>
+            <field name="project_subfolder">03 Workplans</field>
+            <field name="document_category">Project</field>
+            <field name="retention_category">Grant Record</field>
+        </record>
+        <record id="policy_proposal_sections" model="lhi.document.storage.policy">
+            <field name="name">Proposal Working Documents</field>
+            <field name="model_name">lhi.proposal.section</field>
+            <field name="library_code">projects</field>
+            <field name="folder_strategy">project_workspace</field>
+            <field name="project_subfolder">01 Proposal</field>
+            <field name="document_category">Proposal</field>
+        </record>
+        <record id="policy_proposal_annex" model="lhi.document.storage.policy">
+            <field name="name">Proposal Annexes</field>
+            <field name="model_name">lhi.proposal.annex</field>
+            <field name="library_code">projects</field>
+            <field name="folder_strategy">project_workspace</field>
+            <field name="project_subfolder">01 Proposal</field>
+            <field name="document_category">Proposal Annex</field>
+        </record>
+        <record id="policy_proposal_submission" model="lhi.document.storage.policy">
+            <field name="name">Proposal Submission Snapshots</field>
+            <field name="model_name">lhi.proposal.submission</field>
+            <field name="library_code">projects</field>
+            <field name="folder_strategy">project_workspace</field>
+            <field name="project_subfolder">01 Proposal</field>
+            <field name="document_category">Proposal Submission</field>
+        </record>
+        <record id="policy_award_agreement" model="lhi.document.storage.policy">
+            <field name="name">Award and Agreement Documents</field>
+            <field name="model_name">lhi.award</field>
+            <field name="library_code">projects</field>
+            <field name="folder_strategy">model_record</field>
+            <field name="document_category">Award Agreement</field>
+            <field name="confidentiality">confidential</field>
+            <field name="retention_category">Grant Record</field>
+        </record>
+        <record id="policy_meal_evidence" model="lhi.document.storage.policy">
+            <field name="name">MEAL Evidence</field>
+            <field name="model_name">lhi.meal.evidence</field>
+            <field name="library_code">projects</field>
+            <field name="folder_strategy">project_workspace</field>
+            <field name="project_subfolder">04 MEAL and Evidence</field>
+            <field name="document_category">MEAL Evidence</field>
+            <field name="confidentiality">confidential</field>
+        </record>
+        <record id="policy_purchase_request" model="lhi.document.storage.policy">
+            <field name="name">Purchase Request Documents</field>
+            <field name="model_name">lhi.purchase.request</field>
+            <field name="library_code">procurement</field>
+            <field name="folder_strategy">project_workspace</field>
+            <field name="project_subfolder">05 Procurement</field>
+            <field name="document_category">Purchase Request</field>
+            <field name="retention_category">Procurement Record</field>
+        </record>
+        <record id="policy_purchase_order" model="lhi.document.storage.policy">
+            <field name="name">Purchase Order Documents</field>
+            <field name="model_name">lhi.purchase.order</field>
+            <field name="library_code">procurement</field>
+            <field name="folder_strategy">project_workspace</field>
+            <field name="project_subfolder">05 Procurement</field>
+            <field name="document_category">Purchase Order</field>
+            <field name="retention_category">Procurement Record</field>
+        </record>
+        <record id="policy_sourcing" model="lhi.document.storage.policy">
+            <field name="name">RFQ and Sourcing Documents</field>
+            <field name="model_name">lhi.sourcing</field>
+            <field name="library_code">procurement</field>
+            <field name="folder_strategy">model_record</field>
+            <field name="document_category">RFQ</field>
+            <field name="retention_category">Procurement Record</field>
+        </record>
+        <record id="policy_bid" model="lhi.document.storage.policy">
+            <field name="name">Procurement Bid Documents</field>
+            <field name="model_name">lhi.bid</field>
+            <field name="library_code">procurement</field>
+            <field name="folder_strategy">model_record</field>
+            <field name="document_category">Bid</field>
+            <field name="confidentiality">restricted</field>
+            <field name="retention_category">Procurement Record</field>
+        </record>
+        <record id="policy_vendor" model="lhi.document.storage.policy">
+            <field name="name">Vendor Compliance Documents</field>
+            <field name="model_name">lhi.vendor</field>
+            <field name="library_code">procurement</field>
+            <field name="folder_strategy">model_record</field>
+            <field name="document_category">Vendor Document</field>
+            <field name="confidentiality">confidential</field>
+            <field name="retention_category">Procurement Record</field>
+        </record>
+        <record id="policy_reporting_calendar" model="lhi.document.storage.policy">
+            <field name="name">Compliance Reporting Documents</field>
+            <field name="model_name">lhi.reporting.calendar</field>
+            <field name="library_code">projects</field>
+            <field name="folder_strategy">project_workspace</field>
+            <field name="project_subfolder">08 Compliance and Audit</field>
+            <field name="document_category">Compliance Evidence</field>
+        </record>
+        <record id="policy_project_issue" model="lhi.document.storage.policy">
+            <field name="name">Issue Resolution Evidence</field>
+            <field name="model_name">lhi.project.issue</field>
+            <field name="library_code">projects</field>
+            <field name="folder_strategy">project_workspace</field>
+            <field name="project_subfolder">08 Compliance and Audit</field>
+            <field name="document_category">Issue Evidence</field>
+        </record>
+        <record id="policy_project_amendment" model="lhi.document.storage.policy">
+            <field name="name">Project Amendment Documents</field>
+            <field name="model_name">lhi.project.amendment</field>
+            <field name="library_code">projects</field>
+            <field name="folder_strategy">project_workspace</field>
+            <field name="project_subfolder">02 Award and Agreement</field>
+            <field name="document_category">Project Amendment</field>
+        </record>
+        <record id="policy_project_risk" model="lhi.document.storage.policy">
+            <field name="name">Project Risk Evidence</field>
+            <field name="model_name">lhi.project.risk</field>
+            <field name="library_code">projects</field>
+            <field name="folder_strategy">project_workspace</field>
+            <field name="project_subfolder">08 Compliance and Audit</field>
+            <field name="document_category">Compliance</field>
+            <field name="retention_category">Grant Record</field>
+        </record>
+        <record id="policy_project_closeout" model="lhi.document.storage.policy">
+            <field name="name">Project Closeout Documents</field>
+            <field name="model_name">lhi.project.closeout</field>
+            <field name="library_code">projects</field>
+            <field name="folder_strategy">project_workspace</field>
+            <field name="project_subfolder">09 Closeout</field>
+            <field name="document_category">Project</field>
+            <field name="retention_category">Grant Record</field>
+        </record>
+        <record id="policy_subaward" model="lhi.document.storage.policy">
+            <field name="name">Partner and Sub-Award Documents</field>
+            <field name="model_name">lhi.subaward</field>
+            <field name="library_code">projects</field>
+            <field name="folder_strategy">project_workspace</field>
+            <field name="project_subfolder">07 Partners</field>
+            <field name="document_category">Partner</field>
+            <field name="confidentiality">confidential</field>
+            <field name="retention_category">Grant Record</field>
+        </record>
+        <record id="policy_asset" model="lhi.document.storage.policy">
+            <field name="name">Asset Documents</field>
+            <field name="model_name">lhi.asset</field>
+            <field name="library_code">operations</field>
+            <field name="folder_strategy">model_record</field>
+            <field name="document_category">Asset</field>
+        </record>
+        <record id="policy_stock_lot" model="lhi.document.storage.policy">
+            <field name="name">Inventory and Stock Evidence</field>
+            <field name="model_name">stock.lot</field>
+            <field name="library_code">operations</field>
+            <field name="folder_strategy">model_record</field>
+            <field name="document_category">Inventory</field>
+        </record>
+        <record id="policy_fleet_vehicle" model="lhi.document.storage.policy">
+            <field name="name">Fleet Vehicle Documents</field>
+            <field name="model_name">fleet.vehicle</field>
+            <field name="library_code">operations</field>
+            <field name="folder_strategy">model_record</field>
+            <field name="document_category">Fleet</field>
+        </record>
+        <record id="policy_fleet_trip" model="lhi.document.storage.policy">
+            <field name="name">Fleet Trip Documents</field>
+            <field name="model_name">lhi.fleet.trip</field>
+            <field name="library_code">operations</field>
+            <field name="folder_strategy">model_record</field>
+            <field name="document_category">Fleet Trip</field>
+        </record>
+        <record id="policy_fleet_incident" model="lhi.document.storage.policy">
+            <field name="name">Fleet Incident Evidence</field>
+            <field name="model_name">lhi.fleet.incident</field>
+            <field name="library_code">operations</field>
+            <field name="folder_strategy">model_record</field>
+            <field name="document_category">Fleet Incident</field>
+        </record>
+        <record id="policy_opensign_source" model="lhi.document.storage.policy">
+            <field name="name">OpenSign Source Documents</field>
+            <field name="model_name">lhi.opensign.request</field>
+            <field name="field_name">source_pdf</field>
+            <field name="library_code">controlled_documents</field>
+            <field name="folder_strategy">model_record</field>
+            <field name="document_category">Signature Source</field>
+            <field name="confidentiality">confidential</field>
+        </record>
+        <record id="policy_opensign_signed" model="lhi.document.storage.policy">
+            <field name="name">OpenSign Signed Documents</field>
+            <field name="model_name">lhi.opensign.request</field>
+            <field name="field_name">signed_pdf</field>
+            <field name="library_code">signed_documents</field>
+            <field name="folder_strategy">model_record</field>
+            <field name="document_category">Signed Document</field>
+            <field name="confidentiality">confidential</field>
+            <field name="retention_category">Signed Record</field>
+        </record>
+        <record id="policy_opensign_certificate" model="lhi.document.storage.policy">
+            <field name="name">OpenSign Audit Certificates</field>
+            <field name="model_name">lhi.opensign.request</field>
+            <field name="field_name">audit_certificate</field>
+            <field name="library_code">signed_documents</field>
+            <field name="folder_strategy">model_record</field>
+            <field name="document_category">Signature Certificate</field>
+            <field name="confidentiality">confidential</field>
+            <field name="retention_category">Signed Record</field>
+        </record>
+        <record id="policy_opensign_odoo_signed" model="lhi.document.storage.policy">
+            <field name="name">OpenSign Odoo Signed PDFs</field>
+            <field name="model_name">opensign.document</field>
+            <field name="field_name">signed_pdf</field>
+            <field name="library_code">signed_documents</field>
+            <field name="folder_strategy">model_record</field>
+            <field name="document_category">Signed Document</field>
+            <field name="confidentiality">confidential</field>
+            <field name="retention_category">Signed Record</field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="lhi_dashboard.Dashboard" owl="1">
+        <div class="lhi-dashboard">
+            <div class="lhi-dashboard__header">
+                <h1 class="lhi-h2">Welcome, <t t-esc="user.name"/></h1>
+                <p class="lhi-dashboard__subtitle">Here's your personalized overview.</p>
+            </div>
+
+            <div t-if="state.loading" class="lhi-dashboard__loading">
+                <div class="lhi-skeleton lhi-skeleton--text" style="height: 100px; margin-bottom: 20px;"></div>
+                <div class="lhi-skeleton lhi-skeleton--text" style="height: 100px; margin-bottom: 20px;"></div>
+                <div class="lhi-skeleton lhi-skeleton--text" style="height: 100px;"></div>
+            </div>
+            
+            <div t-else="" class="lhi-dashboard__grid">
+                <t t-foreach="state.widgets" t-as="widget" t-key="widget.id">
+                    <div t-attf-class="lhi-dashboard__widget-wrapper col-span-{{widget.col_span}}">
+                        <!-- Dynamically render the component based on registry_key -->
+                        <t t-component="widget.registry_key" t-props="{ widgetInfo: widget }" />
+                    </div>
+                </t>
+            </div>
+            
+            <!-- Empty State -->
+            <div t-if="!state.loading and state.widgets.length === 0" class="lhi-empty">
+                <i class="fa fa-dashboard lhi-empty__icon"></i>
+                <h2 class="lhi-empty__title">No Dashboard Widgets</h2>
+                <p class="lhi-empty__body">You don't have access to any dashboard widgets. Please contact your administrator.</p>
+            </div>
+        </div>
+    </t>
+
+</templates>

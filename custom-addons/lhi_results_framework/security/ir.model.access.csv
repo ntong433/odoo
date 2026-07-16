@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lhi_results_framework_user,lhi.results.framework.user,model_lhi_results_framework,base.group_user,1,1,1,0
+access_lhi_results_framework_admin,lhi.results.framework.admin,model_lhi_results_framework,base.group_erp_manager,1,1,1,1
+access_lhi_results_element_user,lhi.results.element.user,model_lhi_results_element,base.group_user,1,1,1,0
+access_lhi_results_element_admin,lhi.results.element.admin,model_lhi_results_element,base.group_erp_manager,1,1,1,1
+access_lhi_indicator_user,lhi.indicator.user,model_lhi_indicator,base.group_user,1,1,1,0
+access_lhi_indicator_admin,lhi.indicator.admin,model_lhi_indicator,base.group_erp_manager,1,1,1,1
+access_lhi_indicator_disag_user,lhi.indicator.disaggregation.user,model_lhi_indicator_disaggregation,base.group_user,1,1,1,0
+access_lhi_indicator_disag_admin,lhi.indicator.disaggregation.admin,model_lhi_indicator_disaggregation,base.group_erp_manager,1,1,1,1

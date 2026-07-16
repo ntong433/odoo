@@ -1,0 +1,47 @@
+// ============================================================================
+// LHI Dashboard Layout
+// Sprint 5 · lhi_dashboard · dashboard.scss
+// ============================================================================
+
+.lhi-dashboard {
+    padding: $lhi-space-6;
+    height: 100%;
+    overflow-y: auto;
+    
+    .lhi-dashboard__header {
+        margin-bottom: $lhi-space-6;
+        
+        .lhi-dashboard__subtitle {
+            color: var(--lhi-text-secondary);
+            font-size: $lhi-font-size-sm;
+            margin-top: $lhi-space-1;
+        }
+    }
+
+    .lhi-dashboard__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: $lhi-space-6;
+        align-items: start;
+        
+        @media (min-width: #{$lhi-bp-xl}) {
+            grid-template-columns: repeat(4, 1fr);
+            
+            .col-span-1 { grid-column: span 1; }
+            .col-span-2 { grid-column: span 2; }
+            .col-span-3 { grid-column: span 3; }
+            .col-span-4 { grid-column: span 4; }
+        }
+        
+        @media (max-width: #{$lhi-bp-lg}) {
+            grid-template-columns: repeat(2, 1fr);
+            .col-span-2, .col-span-3, .col-span-4 { grid-column: span 2; }
+        }
+        
+        @media (max-width: #{$lhi-bp-sm}) {
+            grid-template-columns: 1fr;
+            .col-span-2, .col-span-3, .col-span-4 { grid-column: span 1; }
+            gap: $lhi-space-4;
+        }
+    }
+}

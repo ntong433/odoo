@@ -44,6 +44,7 @@ Deliverables:
             'lhi_web_shell/static/src/scss/views.scss',
             'lhi_web_shell/static/src/scss/components.scss',
             'lhi_web_shell/static/src/scss/dark.scss',
+            'lhi_web_shell/static/src/xml/lhi_components.xml',
         ],
 
         # ── 3. Backend JS + XML (Owl components — no SCSS here) ──
@@ -52,7 +53,6 @@ Deliverables:
             'lhi_web_shell/static/src/js/lhi_theme_toggle.js',
             'lhi_web_shell/static/src/js/lhi_sidebar.js',
             'lhi_web_shell/static/src/js/lhi_notification_badge.js',
-            'lhi_web_shell/static/src/xml/lhi_components.xml',
         ],
 
         # ── 4. Frontend (public pages: login) ──

@@ -80,8 +80,8 @@
             We prepend the sidebar so it occupies column 1.
             All other children automatically flow into column 2 via shell SCSS rules.
         -->
-        <xpath expr="//t[@t-component='Components.HomeMenu']" position="before">
-            <LhiSidebar t-if="!state.fullscreen"/>
+        <xpath expr="//NavBar" position="before">
+            <LhiSidebar/>
         </xpath>
     </t>
 

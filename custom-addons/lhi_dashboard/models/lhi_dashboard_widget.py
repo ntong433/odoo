@@ -45,3 +45,23 @@ class LhiDashboardWidget(models.Model):
                 })
         
         return result
+
+    @api.model
+    def get_my_approval_summary(self):
+        model_name = "lhi.approval.line"
+
+        if model_name not in self.env:
+            return {
+                "available": False,
+                "count": 0,
+            }
+
+        count = self.env[model_name].search_count([
+            ("user_id", "=", self.env.user.id),
+            ("status", "=", "pending"),
+        ])
+
+        return {
+            "available": True,
+            "count": count,
+        }

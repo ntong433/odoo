@@ -56,12 +56,15 @@
 
     <!-- My Approvals Widget -->
     <t t-name="lhi_dashboard.MyApprovalsWidget" owl="1">
-        <div class="lhi-card lhi-card--stat lhi-card--interactive lhi-card--accent-orange" t-on-click="openApprovals">
+        <div t-attf-class="lhi-card lhi-card--stat lhi-card--accent-orange #{state.available ? 'lhi-card--interactive' : ''}" t-on-click="openApprovals">
             <div class="lhi-card__body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <div class="lhi-card__stat-label">Pending Approvals</div>
-                        <div class="lhi-card__stat-value mt-2" t-if="!state.loading"><t t-esc="state.count"/></div>
+                        <div class="lhi-card__stat-value mt-2" t-if="!state.loading">
+                            <t t-if="state.available"><t t-esc="state.count"/></t>
+                            <t t-else="">Not available</t>
+                        </div>
                         <div class="lhi-skeleton lhi-skeleton--text mt-2" t-else="" style="width: 50px;"></div>
                     </div>
                     <div class="text-muted opacity-50">
@@ -69,7 +72,7 @@
                     </div>
                 </div>
             </div>
-            <div class="lhi-card__footer text-primary fw-medium" style="cursor: pointer;">
+            <div class="lhi-card__footer text-primary fw-medium" t-att-style="state.available ? 'cursor: pointer;' : 'cursor: not-allowed; opacity: 0.5;'">
                 Review Approvals <i class="fa fa-arrow-right ms-1"></i>
             </div>
         </div>

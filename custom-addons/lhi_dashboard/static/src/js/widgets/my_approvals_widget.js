@@ -13,17 +13,18 @@ export class MyApprovalsWidget extends Component {
         this.actionService = useService("action");
         this.state = useState({
             count: 0,
+            available: true,
             loading: true,
         });
 
         onWillStart(async () => {
             try {
-                this.state.count = await this.orm.searchCount("lhi.approval.line", [
-                    ['user_id', '=', user.userId],
-                    ['status', '=', 'pending']
-                ]);
+                const result = await this.orm.call("lhi.dashboard.widget", "get_my_approval_summary", []);
+                this.state.count = result.count;
+                this.state.available = result.available;
             } catch (e) {
                 console.error("Failed to load approvals", e);
+                this.state.available = false;
             } finally {
                 this.state.loading = false;
             }
@@ -31,6 +32,9 @@ export class MyApprovalsWidget extends Component {
     }
     
     openApprovals() {
+        if (!this.state.available) {
+            return;
+        }
         this.actionService.doAction({
             type: 'ir.actions.act_window',
             name: 'My Pending Approvals',

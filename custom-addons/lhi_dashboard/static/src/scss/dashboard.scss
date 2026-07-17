@@ -8,8 +8,11 @@
 
 // ── Dashboard Page Container ─────────────────────────────────────────────────
 .lhi-dashboard {
+    display: block;
     width: 100%;
+    max-width: none;
     min-width: 0;
+    min-height: 100%;
     margin: 0;
     padding: $lhi-space-5 $lhi-space-6 $lhi-space-8;
     background-color: var(--lhi-canvas-bg);

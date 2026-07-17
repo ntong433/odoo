@@ -6,6 +6,7 @@
 
 import { Component, useState, onWillUnmount } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
+import { resolveAppIcon } from "./icon_utils";
 
 export class LhiSidebar extends Component {
     static template = "lhi_web_shell.Sidebar";
@@ -36,18 +37,18 @@ export class LhiSidebar extends Component {
     }
 
     get apps() {
-        return this.menuService.getApps();
+        const DASHBOARD_XMLID = "lhi_dashboard.menu_lhi_dashboard_root";
+        return this.menuService.getApps().filter((app) => app.xmlid !== DASHBOARD_XMLID);
     }
 
     getIconProps(app) {
-        // Default fallback: FontAwesome cube
         const faFallback = { type: 'fa', class: 'fa fa-th-large' };
 
         if (!app.webIcon && !app.webIconData) return faFallback;
 
         // Base64-encoded image data from Odoo (must be a valid non-empty string)
         if (app.webIconData && typeof app.webIconData === 'string' && app.webIconData.length > 64) {
-            return { type: 'image', src: `data:image/png;base64,${app.webIconData}` };
+            return { type: 'image', src: resolveAppIcon(app.webIconData) };
         }
 
         if (app.webIcon) {
@@ -55,13 +56,18 @@ export class LhiSidebar extends Component {
             if (app.webIcon.includes(',')) {
                 const [moduleName, iconPath] = app.webIcon.split(',');
                 if (moduleName && iconPath) {
-                    return { type: 'image', src: `/${moduleName}/${iconPath}` };
+                    return { type: 'image', src: resolveAppIcon(`/${moduleName}/${iconPath}`) };
                 }
             }
 
             // FontAwesome class reference
             if (app.webIcon.startsWith('fa-') || app.webIcon.startsWith('fa ')) {
                 return { type: 'fa', class: `fa ${app.webIcon.replace(/^fa\s+/, '')}` };
+            }
+            
+            // Raw paths or URLs
+            if (app.webIcon.startsWith('/') || app.webIcon.startsWith('http')) {
+                return { type: 'image', src: resolveAppIcon(app.webIcon) };
             }
         }
 
@@ -88,9 +94,7 @@ export class LhiSidebar extends Component {
         if (app.id === 'dashboard') {
             this.state.activeAppId = 'dashboard';
             // Trigger Odoo's action manager to go to home or dashboard action.
-            // If there's a real dashboard app, we'd navigate to it. 
-            // For now we assume clicking dashboard triggers a reload or a specific action.
-            window.location.href = "/web";
+            this.actionService.doAction("lhi_dashboard.action_lhi_dashboard");
             return;
         }
 

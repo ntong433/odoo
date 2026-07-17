@@ -5,6 +5,8 @@ import { browser } from "@web/core/browser/browser";
 
 const actionRegistry = registry.category("actions");
 
+let dashboardRedirectStarted = false;
+
 /**
  * LHI Home Router
  * Ensures that if a user navigates to the root with no deep link,
@@ -18,10 +20,19 @@ function lhiHomeAction(env, action) {
         return;
     }
 
-    // No deep link, route to the dashboard action
-    env.services.action.doAction("lhi_dashboard.action_dashboard", {
-        clearBreadcrumbs: true,
-    });
+    const currentController = env.services.action.currentController;
+    const isAlreadyDashboard = currentController && 
+        (currentController.action.xml_id === "lhi_dashboard.action_lhi_dashboard" || 
+         currentController.action.tag === "lhi_dashboard.dashboard_action");
+
+    if (!isAlreadyDashboard && !dashboardRedirectStarted) {
+        dashboardRedirectStarted = true;
+        env.services.action.doAction("lhi_dashboard.action_lhi_dashboard", {
+            clearBreadcrumbs: true,
+        }).finally(() => {
+            dashboardRedirectStarted = false;
+        });
+    }
 }
 
 // Register a client action that can be used as a home fallback

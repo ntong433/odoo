@@ -51,17 +51,15 @@ body {
 .lhi-sidebar {
     grid-column: 1 !important;
     grid-row: 1 !important;
-    width: 100%;
+    position: relative;
+    width: var(--lhi-sidebar-width, #{$lhi-sidebar-width});
     height: 100dvh;
-    min-height: 100vh;
-    overflow-x: hidden;
-    overflow-y: auto;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
     background: var(--lhi-sidebar-bg);
     z-index: $lhi-z-sidebar;
     transition: width $lhi-transition-medium;
-    flex-shrink: 0;
 
     // Custom scrollbar
     &::-webkit-scrollbar { width: 4px; }
@@ -136,6 +134,17 @@ body {
 }
 
 // ── 6. Sidebar Brand ─────────────────────────────────────────────────────────
+.lhi-sidebar__nav {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: $lhi-space-4 $lhi-space-3;
+    gap: $lhi-space-1;
+}
+
 .lhi-sidebar__brand {
     display: flex;
     align-items: center;
@@ -172,19 +181,6 @@ body {
 }
 
 // ── 7. Sidebar Nav ───────────────────────────────────────────────────────────
-.lhi-sidebar__nav {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: $lhi-space-2 0;
-
-    &::-webkit-scrollbar { width: 4px; }
-    &::-webkit-scrollbar-track { background: transparent; }
-    &::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: $lhi-radius-full;
-    }
-}
 
 .lhi-sidebar__section-label {
     font-size: $lhi-font-size-xs;
@@ -264,11 +260,12 @@ body {
 
 // ── 8. Sidebar Footer ────────────────────────────────────────────────────────
 .lhi-sidebar__footer {
-    padding: $lhi-space-2 $lhi-space-3;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    flex: 0 0 auto;
+    padding: $lhi-space-4;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     flex-direction: column;
-    gap: $lhi-space-1;
+    gap: $lhi-space-2;
     flex-shrink: 0;
 
     .lhi-sidebar__utility {

@@ -51,6 +51,7 @@ Deliverables:
         'web.assets_backend': [
             'lhi_web_shell/static/src/js/lhi_theme_service.js',
             'lhi_web_shell/static/src/js/lhi_theme_toggle.js',
+            'lhi_web_shell/static/src/js/icon_utils.js',
             'lhi_web_shell/static/src/js/lhi_sidebar.js',
             'lhi_web_shell/static/src/js/lhi_notification_badge.js',
         ],

@@ -34,7 +34,7 @@
             <div class="lhi-login-methods">
                 <t t-if="entra_provider">
                     <div class="d-grid mb-3">
-                        <a t-attf-href="/auth_oauth/signin?oauth_provider_id={{ entra_provider.id }}&amp;web_login=1" class="btn btn-outline-dark lhi-ms-login-btn">
+                        <a href="/lhi/auth/microsoft/login" class="btn btn-outline-dark lhi-ms-login-btn">
                             <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" alt="Microsoft" class="ms-logo"/>
                             Sign in with Microsoft
                         </a>

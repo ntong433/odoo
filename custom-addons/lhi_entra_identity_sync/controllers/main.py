@@ -1,7 +1,13 @@
+import base64
 import ipaddress
+import json
+import logging
 import os
 import time
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
+
+import requests
+import werkzeug
 
 from odoo import http, _
 from odoo.http import request
@@ -79,6 +85,160 @@ class LhiEntraLoginController(OAuthLogin):
         return request.redirect(
             "/web/login?lhi_maintenance=1&redirect=%s"
             % quote(redirect or "/odoo", safe="")
+        )
+
+    @http.route(
+        "/lhi/auth/microsoft/login",
+        type="http",
+        auth="none",
+        readonly=False,
+        sitemap=False,
+    )
+    def lhi_microsoft_login(self, **kwargs):
+        configuration = self._configuration()
+        if not configuration or not configuration.oauth_provider_id.enabled:
+            return request.make_response(_("Microsoft Entra login is not configured."), status=503)
+
+        provider = configuration.oauth_provider_id
+        client_id = provider.client_id
+        auth_endpoint = provider.auth_endpoint
+        
+        base_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url', '').rstrip('/')
+        redirect_uri = f"{base_url}/auth_oauth/signin"
+        
+        state = os.urandom(16).hex()
+        nonce = os.urandom(16).hex()
+        
+        request.session['oauth_state'] = state
+        request.session['oauth_nonce'] = nonce
+        
+        params = {
+            "client_id": client_id,
+            "response_type": "code",
+            "redirect_uri": redirect_uri,
+            "scope": provider.scope,
+            "state": state,
+            "nonce": nonce,
+            "prompt": "select_account"
+        }
+        url = f"{auth_endpoint}?{urlencode(params)}"
+        return request.redirect(url)
+
+    @http.route('/auth_oauth/signin', type='http', auth='none')
+    def signin(self, **kw):
+        state = kw.get('state')
+        code = kw.get('code')
+        error = kw.get('error')
+        error_description = kw.get('error_description', '')
+
+        if error:
+            _logger.error("OAuth error: %s - %s", error, error_description)
+            return request.redirect('/web/login?oauth_error=1')
+            
+        if not code or not state:
+            # Fall back to standard Odoo implicit flow if no code is provided
+            return super().signin(**kw)
+            
+        # 1. Validate State
+        stored_state = request.session.get('oauth_state')
+        if not stored_state or state != stored_state:
+            _logger.error("OAuth state mismatch or missing state.")
+            return self._safe_error_response("Invalid OAuth state.")
+            
+        configuration = self._configuration()
+        if not configuration:
+            return self._safe_error_response("Entra configuration missing.")
+            
+        provider = configuration.oauth_provider_id
+        client_id = provider.client_id
+        client_secret = os.environ.get("ENTRA_CLIENT_SECRET")
+        if not client_secret:
+            _logger.error("ENTRA_CLIENT_SECRET is not configured.")
+            return self._safe_error_response("Server configuration error.")
+            
+        base_url = request.env['ir.config_parameter'].sudo().get_param('web.base.url', '').rstrip('/')
+        redirect_uri = f"{base_url}/auth_oauth/signin"
+        
+        # Determine token endpoint
+        token_endpoint = provider.auth_endpoint.replace("/authorize", "/token")
+        
+        token_data = {
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "grant_type": "authorization_code",
+            "code": code,
+            "redirect_uri": redirect_uri,
+            "scope": provider.scope,
+        }
+        
+        try:
+            # 2. Exchange Code for Token
+            token_response = requests.post(token_endpoint, data=token_data, timeout=15)
+            token_response.raise_for_status()
+            tokens = token_response.json()
+            access_token = tokens.get('access_token')
+            id_token = tokens.get('id_token')
+            
+            # 3. Validate ID Token
+            if id_token:
+                payload_b64 = id_token.split('.')[1]
+                payload_b64 += '=' * (-len(payload_b64) % 4)
+                id_token_payload = json.loads(base64.urlsafe_b64decode(payload_b64).decode('utf-8'))
+                
+                tid = id_token_payload.get("tid")
+                expected_tenant = os.environ.get("ENTRA_TENANT_ID")
+                if expected_tenant and tid and tid != expected_tenant:
+                    _logger.error("Invalid tenant ID: %s", tid)
+                    return self._safe_error_response("Invalid tenant.")
+                
+                nonce_claim = id_token_payload.get("nonce")
+                stored_nonce = request.session.get('oauth_nonce')
+                if not stored_nonce or nonce_claim != stored_nonce:
+                    _logger.error("Nonce mismatch.")
+                    return self._safe_error_response("Invalid OAuth nonce.")
+            
+            # 4. Fetch User Info
+            userinfo_endpoint = provider.validation_endpoint or "https://graph.microsoft.com/v1.0/me"
+            headers = {"Authorization": f"Bearer {access_token}"}
+            userinfo_resp = requests.get(userinfo_endpoint, headers=headers, timeout=15)
+            userinfo_resp.raise_for_status()
+            userinfo = userinfo_resp.json()
+            
+            validation = {
+                "user_id": userinfo.get("id") or userinfo.get("oid") or userinfo.get("sub"),
+                "userPrincipalName": userinfo.get("userPrincipalName") or userinfo.get("upn"),
+                "mail": userinfo.get("mail") or userinfo.get("email"),
+                "accountEnabled": userinfo.get("accountEnabled", True),
+                "displayName": userinfo.get("displayName") or userinfo.get("name"),
+            }
+            
+            request.session.pop('oauth_state', None)
+            request.session.pop('oauth_nonce', None)
+            
+            dbname = request.db
+            params_auth = {"access_token": access_token}
+            
+            # 5. Authenticate via Odoo
+            user_login = request.env['res.users'].sudo()._auth_oauth_signin(provider.id, validation, params_auth)
+            request.session.authenticate(dbname, user_login, access_token)
+            
+            # Trigger post-login sync if implemented
+            user = request.env['res.users'].sudo().search([('login', '=', user_login)], limit=1)
+            if user and hasattr(user, '_lhi_queue_entra_profile_sync'):
+                user._lhi_queue_entra_profile_sync()
+                
+            return request.redirect('/web')
+            
+        except Exception as e:
+            _logger.exception("OAuth code exchange or validation failed.")
+            return self._safe_error_response("Microsoft sign-in could not be completed.")
+
+    def _safe_error_response(self, message):
+        error_id = os.urandom(4).hex().upper()
+        _logger.error("OAuth Error Reference: %s", error_id)
+        return request.make_response(
+            f"{message}\nPlease contact the LHI IT Helpdesk with reference ID: {error_id}", 
+            status=500
         )
 
     @http.route()

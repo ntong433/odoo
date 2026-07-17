@@ -82,10 +82,14 @@ a {
 .o_web_client,
 .o_action_manager,
 .o_main_navbar,
-.o_menu_sections,
-.o_form_view,
-.o_list_view,
-.o_kanban_view,
-.o_calendar_view {
-    font-family: $lhi-font-family-sans !important;
+body {
+    font-family:
+        "Inter",
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        "Helvetica Neue",
+        Arial,
+        sans-serif;
 }

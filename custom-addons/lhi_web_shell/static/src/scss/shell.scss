@@ -52,7 +52,7 @@ body {
     grid-column: 1 !important;
     grid-row: 1 !important;
     position: relative;
-    width: var(--lhi-sidebar-width, #{$lhi-sidebar-width});
+    width: 100%;
     height: 100dvh;
     display: flex;
     flex-direction: column;
@@ -312,9 +312,17 @@ body {
     .lhi-sidebar__label,
     .lhi-sidebar__badge {
         opacity: 0;
+        width: 0;
         max-width: 0;
+        margin: 0;
+        padding: 0;
         overflow: hidden;
         pointer-events: none;
+    }
+
+    .lhi-sidebar__brand {
+        padding: $lhi-space-3 0;
+        justify-content: center;
     }
 
     .lhi-sidebar__item {

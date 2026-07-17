@@ -30,35 +30,26 @@ Deliverables:
         'views/lhi_login_template.xml',
     ],
     'assets': {
-        # ── Backend bundle (authenticated views) ──────────────────────────────
-        'web.assets_backend': [
-            # 1. Tokens / variables (must load first)
+        'web._assets_primary_variables': [
             'lhi_web_shell/static/src/scss/tokens.scss',
-            # 2. Base reset & typography
+        ],
+        'web.assets_web': [
             'lhi_web_shell/static/src/scss/base.scss',
-            # 3. Shell layout (sidebar, topbar, breadcrumbs)
             'lhi_web_shell/static/src/scss/shell.scss',
-            # 4. Component library (cards, badges, dialogs, timelines, tables)
             'lhi_web_shell/static/src/scss/components.scss',
-            # 5. View overrides (form, list, kanban, calendar, search)
             'lhi_web_shell/static/src/scss/views.scss',
-            # 6. Dark-mode overrides
             'lhi_web_shell/static/src/scss/dark.scss',
-            # JS: theme toggle service and component
+        ],
+        'web.assets_backend': [
             'lhi_web_shell/static/src/js/lhi_theme_service.js',
             'lhi_web_shell/static/src/js/lhi_theme_toggle.js',
             'lhi_web_shell/static/src/js/lhi_sidebar.js',
-            # JS: notification badge component
             'lhi_web_shell/static/src/js/lhi_notification_badge.js',
-            # XML templates
             'lhi_web_shell/static/src/xml/lhi_components.xml',
         ],
-        # ── Frontend login/public bundle ──────────────────────────────────────
         'web.assets_frontend': [
-            'lhi_web_shell/static/src/scss/tokens.scss',
             'lhi_web_shell/static/src/scss/login.scss',
         ],
-        # ── QUnit / Hoot tests ────────────────────────────────────────────────
         'web.assets_unit_tests': [
             'lhi_web_shell/static/tests/lhi_theme_service_tests.js',
         ],

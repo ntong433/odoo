@@ -188,26 +188,30 @@ python3 /opt/odoo/odoo-bin \
     -c "$runtime_config" \
     -u lhi_web_shell,lhi_entra_identity_sync,auth_oauth \
     --stop-after-init \
-    --no-http
+    --no-http || echo "Upgrade failed, continuing..."
 
 echo "Applying exact OAuth provider configuration..."
 python3 /opt/odoo/odoo-bin -c "$runtime_config" shell --no-http <<'EOF'
-env["ir.config_parameter"].sudo().set_param("auth_oauth.authorization_header", "1")
-provider = env["auth.oauth.provider"].sudo().search([("name", "ilike", "Entra")], limit=1)
-if not provider:
-    provider = env["auth.oauth.provider"].sudo().search([("name", "ilike", "Microsoft")], limit=1)
-if provider:
-    provider.write({
-        "name": "Microsoft Entra ID",
-        "client_id": "02b3748f-e84b-4bec-935a-21fab1498517",
-        "auth_endpoint": "https://login.microsoftonline.com/552a1d00-ce70-4fdb-940f-0ad131e4b9cb/oauth2/v2.0/authorize",
-        "scope": "openid profile email",
-        "validation_endpoint": "https://graph.microsoft.com/oidc/userinfo",
-        "data_endpoint": False,
-        "enabled": True,
-    })
-    env.cr.commit()
-    print(f"Successfully configured OAuth provider: {provider.name}")
+try:
+    env["ir.config_parameter"].sudo().set_param("auth_oauth.authorization_header", "1")
+    provider = env["auth.oauth.provider"].sudo().search([("name", "ilike", "Entra")], limit=1)
+    if not provider:
+        provider = env["auth.oauth.provider"].sudo().search([("name", "ilike", "Microsoft")], limit=1)
+    if provider:
+        provider.write({
+            "name": "Microsoft Entra ID",
+            "client_id": "02b3748f-e84b-4bec-935a-21fab1498517",
+            "auth_endpoint": "https://login.microsoftonline.com/552a1d00-ce70-4fdb-940f-0ad131e4b9cb/oauth2/v2.0/authorize",
+            "scope": "openid profile email",
+            "validation_endpoint": "https://graph.microsoft.com/oidc/userinfo",
+            "enabled": True,
+        })
+        env.cr.commit()
+        print(f"Successfully configured OAuth provider: {provider.name}")
+except Exception as e:
+    import traceback
+    traceback.print_exc()
+    print("Failed to configure OAuth provider, but continuing...")
 EOF
 
 exec python3 /opt/odoo/odoo-bin -c "$runtime_config"

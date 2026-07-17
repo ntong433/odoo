@@ -1,178 +1,304 @@
 // ============================================================================
 // LHI Dashboard Layout
-// Sprint 5 · lhi_dashboard · dashboard.scss
+// lhi_dashboard · dashboard.scss
+//
+// The dashboard is the lhi-content child — it fills available space and
+// scrolls only when content exceeds the viewport. No centering, no top offsets.
 // ============================================================================
 
+// ── Dashboard Page Container ─────────────────────────────────────────────────
 .lhi-dashboard {
-    padding: $lhi-space-6;
-    height: 100%;
-    overflow-y: auto;
-    background-color: var(--lhi-bg-body, #f8f9fa);
-    
-    .lhi-dashboard__header {
-        margin-bottom: $lhi-space-6;
-        padding-bottom: $lhi-space-4;
-        border-bottom: 1px solid var(--lhi-border-color, #e5e7eb);
-        
-        .lhi-dashboard__title {
-            color: var(--lhi-text-primary, #111827);
-            font-weight: 700;
-            margin: 0;
-            letter-spacing: -0.01em;
-        }
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: $lhi-space-5 $lhi-space-6 $lhi-space-8;
+    background-color: var(--lhi-canvas-bg);
 
-        .lhi-dashboard__subtitle {
-            color: var(--lhi-text-secondary, #6b7280);
-            font-size: $lhi-font-size-md;
-            margin-top: $lhi-space-1;
-            margin-bottom: 0;
-        }
-
-        // Global Omnibar Search
-        .lhi-omnibar-container {
-            width: 100%;
-            max-width: 400px;
-            
-            .lhi-omnibar {
-                background-color: var(--lhi-bg-surface, #ffffff);
-                border: 1px solid var(--lhi-border-color, #d1d5db);
-                border-radius: 20px;
-                transition: box-shadow 0.2s ease, border-color 0.2s ease;
-                
-                &:focus-within {
-                    border-color: #C8281A;
-                    box-shadow: 0 0 0 3px rgba(200, 40, 26, 0.15);
-                }
-
-                input {
-                    padding: 10px 14px;
-                    font-size: 14px;
-                    color: var(--lhi-text-primary, #111827);
-                    
-                    &::placeholder {
-                        color: var(--lhi-text-muted, #9ca3af);
-                    }
-                }
-            }
-
-            .lhi-omnibar-results {
-                border: 1px solid var(--lhi-border-color, #e5e7eb);
-                max-height: 350px;
-                overflow-y: auto;
-                top: 100%;
-                left: 0;
-
-                .list-group-item {
-                    border-color: var(--lhi-border-color, #f3f4f6);
-                    transition: background-color 0.15s ease;
-
-                    &:hover {
-                        background-color: var(--lhi-bg-hover, #f9fafb);
-                    }
-                }
-            }
-        }
+    @media (max-width: #{$lhi-bp-md}) {
+        padding: $lhi-space-4;
     }
+}
 
-    .lhi-dashboard__grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: $lhi-space-6;
-        align-items: start;
-        
-        @media (min-width: #{$lhi-bp-xl}) {
-            grid-template-columns: repeat(4, 1fr);
-            
-            .col-span-1 { grid-column: span 1; }
-            .col-span-2 { grid-column: span 2; }
-            .col-span-3 { grid-column: span 3; }
-            .col-span-4 { grid-column: span 4; }
-        }
-        
-        @media (max-width: #{$lhi-bp-lg}) {
-            grid-template-columns: repeat(2, 1fr);
-            .col-span-2, .col-span-3, .col-span-4 { grid-column: span 2; }
-        }
-        
-        @media (max-width: #{$lhi-bp-sm}) {
-            grid-template-columns: 1fr;
-            .col-span-2, .col-span-3, .col-span-4 { grid-column: span 1; }
-            gap: $lhi-space-4;
-        }
-    }
+// ── Dashboard Header (Welcome + Omnibar) ─────────────────────────────────────
+.lhi-dashboard__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: $lhi-space-4;
+    margin-bottom: $lhi-space-6;
 
-    // Modern Widget UI overrides
-    .lhi-card {
-        background: var(--lhi-bg-surface);
-        border: 1px solid var(--lhi-border-color);
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-        
-        .lhi-card__header {
-            background: var(--lhi-bg-surface);
-            border-bottom: 1px solid var(--lhi-border-color);
-
-            .lhi-card__title {
-                color: var(--lhi-text-primary);
-            }
-        }
-        
-        .lhi-card__body {
-            background: var(--lhi-bg-surface);
-            color: var(--lhi-text-primary);
-            border-bottom-left-radius: inherit;
-            border-bottom-right-radius: inherit;
-        }
-
-        &.lhi-kpi-primary { background: var(--lhi-primary); color: white; border-color: transparent; }
-        &.lhi-kpi-secondary { background: var(--lhi-secondary); color: white; border-color: transparent; }
-        &.lhi-kpi-accent { background: var(--lhi-accent); color: white; border-color: transparent; }
-
-        .lhi-kpi-bg-overlay {
-            position: absolute;
-            top: 0; right: 0; height: 100%; width: 50%;
-            background: radial-gradient(circle at top right, rgba(255,255,255,0.15) 0%, transparent 60%);
-            pointer-events: none;
-        }
-
-        .lhi-kpi-footer {
-            background: rgba(0, 0, 0, 0.1) !important;
-            border-top: 1px solid rgba(255,255,255,0.1) !important;
-            color: rgba(255,255,255,0.9) !important;
-        }
-    }
-
-    .lhi-app-tile {
-        background: var(--lhi-bg-surface);
-        border: 1px solid var(--lhi-border-color);
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    .lhi-dashboard__title {
+        font-size: $lhi-font-size-2xl;
+        font-weight: $lhi-font-weight-bold;
         color: var(--lhi-text-primary);
-        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        margin: 0;
+        letter-spacing: -0.01em;
+        line-height: $lhi-line-height-tight;
+    }
+
+    .lhi-dashboard__subtitle {
+        font-size: $lhi-font-size-md;
+        color: var(--lhi-text-secondary);
+        margin: $lhi-space-1 0 0;
+    }
+}
+
+// ── Dashboard 12-Column Responsive Grid ──────────────────────────────────────
+.lhi-dashboard__grid {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: $lhi-space-4;
+    width: 100%;
+    align-items: start;
+
+    @media (max-width: #{$lhi-bp-xl}) {
+        grid-template-columns: repeat(8, minmax(0, 1fr));
+    }
+
+    @media (max-width: #{$lhi-bp-md}) {
+        grid-template-columns: 1fr;
+    }
+}
+
+// Column span helpers inside the 12-col grid
+.lhi-dashboard__widget-wrapper {
+    min-width: 0;
+    overflow: hidden;
+
+    &.col-span-12 { grid-column: span 12; }
+    &.col-span-8  { grid-column: span 8; }
+    &.col-span-6  { grid-column: span 6; }
+    &.col-span-4  { grid-column: span 4; }
+    &.col-span-3  { grid-column: span 3; }
+    &.col-span-2  { grid-column: span 2; }
+    &.col-span-1  { grid-column: span 1; }
+
+    // On medium viewports, collapse wide spans
+    @media (max-width: #{$lhi-bp-xl}) {
+        &.col-span-12 { grid-column: span 8; }
+        &.col-span-6  { grid-column: span 4; }
+        &.col-span-3, &.col-span-4 { grid-column: span 4; }
+    }
+
+    // On small viewports, full width for all
+    @media (max-width: #{$lhi-bp-md}) {
+        &.col-span-12,
+        &.col-span-8,
+        &.col-span-6,
+        &.col-span-4,
+        &.col-span-3,
+        &.col-span-2,
+        &.col-span-1 {
+            grid-column: 1 / -1 !important;
+        }
+    }
+}
+
+// ── LHI Cards ────────────────────────────────────────────────────────────────
+.lhi-card {
+    background: var(--lhi-card-bg);
+    border: 1px solid var(--lhi-card-border);
+    border-radius: $lhi-radius-xl;
+    box-shadow: $lhi-shadow-sm;
+    min-width: 0;
+    overflow: hidden;
+
+    .lhi-card__header {
+        background: var(--lhi-card-bg);
+        border-bottom: 1px solid var(--lhi-card-border);
+        padding: $lhi-space-4;
+
+        .lhi-card__title {
+            font-size: $lhi-font-size-md;
+            font-weight: $lhi-font-weight-semibold;
+            color: var(--lhi-text-primary);
+            margin: 0;
+        }
+    }
+
+    .lhi-card__body {
+        background: var(--lhi-card-bg);
+        color: var(--lhi-text-primary);
+    }
+
+    // KPI variant cards
+    &.lhi-kpi-primary   { background: var(--lhi-primary); color: white; border-color: transparent; }
+    &.lhi-kpi-secondary { background: $lhi-navy-800; color: white; border-color: transparent; }
+    &.lhi-kpi-accent    { background: var(--lhi-accent); color: white; border-color: transparent; }
+
+    &.lhi-card--interactive {
+        cursor: pointer;
+        transition: transform $lhi-transition-fast, box-shadow $lhi-transition-fast;
 
         &:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            border-color: var(--lhi-primary);
-        }
-
-        .lhi-app-icon-bg {
-            background: var(--lhi-primary-bg-subtle);
-            color: var(--lhi-primary);
-        }
-
-        .lhi-app-icon-img {
-            width: 40px;
-            height: 40px;
-            object-fit: contain;
+            box-shadow: $lhi-shadow-md;
         }
     }
 
-    .list-group-item {
-        background-color: var(--lhi-bg-surface);
-        border-color: var(--lhi-border-color);
-        color: var(--lhi-text-primary);
+    .lhi-kpi-bg-overlay {
+        position: absolute;
+        top: 0;
+        right: 0;
+        height: 100%;
+        width: 50%;
+        background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
+        pointer-events: none;
+    }
 
-        .text-dark {
-            color: var(--lhi-text-primary) !important;
+    .lhi-kpi-footer {
+        background: rgba(0, 0, 0, 0.1) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: rgba(255, 255, 255, 0.9) !important;
+        padding: $lhi-space-3 $lhi-space-4;
+        font-size: $lhi-font-size-sm;
+        font-weight: $lhi-font-weight-medium;
+    }
+}
+
+// ── Skeleton Loading ─────────────────────────────────────────────────────────
+.lhi-skeleton {
+    background: linear-gradient(90deg, var(--lhi-card-border) 25%, var(--lhi-canvas-bg) 50%, var(--lhi-card-border) 75%);
+    background-size: 200% 100%;
+    animation: lhi-shimmer 1.5s infinite;
+    border-radius: $lhi-radius;
+}
+
+@keyframes lhi-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+// ── Dashboard Omnibar Search ─────────────────────────────────────────────────
+.lhi-omnibar-container {
+    width: 100%;
+    max-width: 440px;
+    position: relative;
+
+    .lhi-omnibar {
+        background-color: var(--lhi-card-bg);
+        border: 1px solid var(--lhi-card-border);
+        border-radius: $lhi-radius-full;
+        display: flex;
+        align-items: center;
+        transition: box-shadow $lhi-transition-fast, border-color $lhi-transition-fast;
+
+        &:focus-within {
+            border-color: var(--lhi-primary);
+            box-shadow: 0 0 0 3px rgba(200, 40, 26, 0.15);
         }
+
+        input {
+            padding: $lhi-space-2 $lhi-space-3;
+            font-size: $lhi-font-size-sm;
+            color: var(--lhi-text-primary);
+            font-family: $lhi-font-family-sans;
+            flex: 1;
+            min-width: 0;
+            background: transparent;
+            border: none;
+            outline: none;
+
+            &::placeholder {
+                color: var(--lhi-text-muted);
+            }
+        }
+    }
+
+    .lhi-omnibar-results {
+        border: 1px solid var(--lhi-card-border);
+        background: var(--lhi-card-bg);
+        max-height: 360px;
+        overflow-y: auto;
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        border-radius: $lhi-radius-lg;
+        box-shadow: $lhi-shadow-lg;
+        z-index: $lhi-z-dropdown;
+
+        .list-group-item {
+            background-color: var(--lhi-card-bg);
+            border-color: var(--lhi-card-border);
+            color: var(--lhi-text-primary);
+            transition: background-color $lhi-transition-fast;
+
+            &:hover {
+                background-color: var(--lhi-canvas-bg);
+            }
+        }
+    }
+}
+
+// ── App Tiles Grid ───────────────────────────────────────────────────────────
+.lhi-app-tile {
+    background: var(--lhi-card-bg);
+    border: 1px solid var(--lhi-card-border);
+    border-radius: $lhi-radius-lg;
+    box-shadow: $lhi-shadow-sm;
+    color: var(--lhi-text-primary);
+    transition: transform $lhi-transition-medium, box-shadow $lhi-transition-medium, border-color $lhi-transition-fast;
+    cursor: pointer;
+    min-height: 100px;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: $lhi-shadow-md;
+        border-color: $lhi-red-400;
+    }
+
+    .lhi-app-icon-bg {
+        background: rgba(200, 40, 26, 0.1);
+        color: var(--lhi-primary);
+    }
+
+    .lhi-app-icon-img {
+        width: 36px;
+        height: 36px;
+        object-fit: contain;
+        border-radius: $lhi-radius-sm;
+    }
+}
+
+// ── Dashboard List Group Items ────────────────────────────────────────────────
+.lhi-dashboard .list-group-item,
+.lhi-card .list-group-item {
+    background-color: var(--lhi-card-bg);
+    border-color: var(--lhi-card-border);
+    color: var(--lhi-text-primary);
+
+    .text-dark {
+        color: var(--lhi-text-primary) !important;
+    }
+}
+
+// ── Empty State ───────────────────────────────────────────────────────────────
+.lhi-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: $lhi-space-12 $lhi-space-6;
+    color: var(--lhi-text-muted);
+
+    .lhi-empty__icon {
+        font-size: 3rem;
+        opacity: 0.25;
+        margin-bottom: $lhi-space-4;
+    }
+
+    .lhi-empty__title {
+        font-size: $lhi-font-size-lg;
+        font-weight: $lhi-font-weight-semibold;
+        color: var(--lhi-text-secondary);
+        margin-bottom: $lhi-space-2;
+    }
+
+    .lhi-empty__body {
+        font-size: $lhi-font-size-sm;
+        text-align: center;
+        max-width: 360px;
     }
 }

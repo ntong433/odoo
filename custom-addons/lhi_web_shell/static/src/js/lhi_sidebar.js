@@ -40,14 +40,32 @@ export class LhiSidebar extends Component {
     }
 
     getIconProps(app) {
-        if (!app.webIcon) return { type: 'fa', class: 'fa fa-cube' };
-        if (app.webIconData) return { type: 'base64', src: `data:image/png;base64,${app.webIconData}` };
-        if (app.webIcon.includes(',')) {
-            const parts = app.webIcon.split(',');
-            return { type: 'image', src: `/${parts[0]}/${parts[1]}` };
+        // Default fallback: FontAwesome cube
+        const faFallback = { type: 'fa', class: 'fa fa-th-large' };
+
+        if (!app.webIcon && !app.webIconData) return faFallback;
+
+        // Base64-encoded image data from Odoo (must be a valid non-empty string)
+        if (app.webIconData && typeof app.webIconData === 'string' && app.webIconData.length > 64) {
+            return { type: 'image', src: `data:image/png;base64,${app.webIconData}` };
         }
-        if (app.webIcon.startsWith('fa')) return { type: 'fa', class: app.webIcon };
-        return { type: 'fa', class: 'fa fa-cube' };
+
+        if (app.webIcon) {
+            // Module-relative static path: "module_name,path/to/icon.png"
+            if (app.webIcon.includes(',')) {
+                const [moduleName, iconPath] = app.webIcon.split(',');
+                if (moduleName && iconPath) {
+                    return { type: 'image', src: `/${moduleName}/${iconPath}` };
+                }
+            }
+
+            // FontAwesome class reference
+            if (app.webIcon.startsWith('fa-') || app.webIcon.startsWith('fa ')) {
+                return { type: 'fa', class: `fa ${app.webIcon.replace(/^fa\s+/, '')}` };
+            }
+        }
+
+        return faFallback;
     }
 
     toggleCollapse() {

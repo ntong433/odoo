@@ -70,13 +70,21 @@
         </aside>
     </t>
 
-    <!-- Inject Sidebar into WebClient -->
+    <!-- Inject Sidebar into WebClient as first child of the CSS grid -->
     <t t-name="lhi_web_shell.WebClient" t-inherit="web.WebClient" t-inherit-mode="extension" owl="1">
-        <xpath expr="//t[@t-if='!state.fullscreen']" position="before">
-            <t t-if="!state.fullscreen">
-                <LhiSidebar/>
-            </t>
+        <!--
+            The .o_web_client div is a CSS Grid with two columns:
+              column 1: var(--lhi-sidebar-width)  → occupied by .lhi-sidebar
+              column 2: minmax(0, 1fr)             → all Odoo-native children (topbar, action manager)
+
+            We prepend the sidebar so it occupies column 1.
+            All other children automatically flow into column 2 via shell.scss rules.
+        -->
+        <xpath expr="//t[@t-component='Components.HomeMenu']" position="before">
+            <LhiSidebar t-if="!state.fullscreen"/>
         </xpath>
     </t>
 
+
 </templates>
+

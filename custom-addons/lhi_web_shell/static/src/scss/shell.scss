@@ -1,359 +1,341 @@
 // ============================================================================
-// LHI SHELL — Sidebar, Topbar, Breadcrumbs, User Menu
-// Sprint 4 · lhi_web_shell · shell.scss
+// LHI SHELL — Viewport-Based CSS Grid Layout
+// lhi_web_shell · shell.scss
 //
-// Approach: Scope overrides under .o_web_client to stay narrowly targeted.
-//           Avoid touching global selectors not under our control.
+// Architecture:
+//   html/body/.o_web_client → full viewport container (no overflow)
+//   .lhi-sidebar            → grid column 1, full height, self-scrolling
+//   .lhi-workspace          → grid column 2, row-based (.lhi-topbar / .lhi-content)
+//   .lhi-content            → only this region scrolls
+//
+// NO position:absolute, NO margin-top hacks, NO JS pixel offsets.
 // ============================================================================
 
-// ── Layout container ─────────────────────────────────────────────────────────
-.o_web_client {
-    display: grid;
-    grid-template-columns: var(--lhi-sidebar-width) 1fr;
-    grid-template-rows: var(--lhi-topbar-height) 1fr;
-    grid-template-areas:
-        "sidebar topbar"
-        "sidebar main";
-    min-height: 100vh;
-    background: var(--lhi-canvas-bg);
-    transition: grid-template-columns $lhi-transition-medium;
+// ── 1. Root Viewport Lock ────────────────────────────────────────────────────
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
 
+// ── 2. Odoo Web Client — CSS Grid Shell ─────────────────────────────────────
+.o_web_client {
+    display: grid !important;
+    grid-template-columns: var(--lhi-sidebar-width, #{$lhi-sidebar-width}) minmax(0, 1fr) !important;
+    grid-template-rows: 1fr !important;
+    width: 100% !important;
+    height: 100dvh !important;
+    min-height: 100vh !important;
+    overflow: hidden !important;
+    background: var(--lhi-canvas-bg);
+
+    // Collapsed sidebar state
     &.lhi-sidebar-collapsed {
-        --lhi-sidebar-width: #{$lhi-sidebar-collapsed-width};
+        grid-template-columns: var(--lhi-sidebar-collapsed-width, #{$lhi-sidebar-collapsed-width}) minmax(0, 1fr) !important;
     }
 
+    // Mobile: sidebar hidden by default
     @media (max-width: #{$lhi-bp-lg}) {
-        grid-template-columns: 0 1fr;
+        grid-template-columns: 0 minmax(0, 1fr) !important;
+
         &.lhi-sidebar-open {
-            grid-template-columns: var(--lhi-sidebar-width) 1fr;
+            grid-template-columns: #{$lhi-sidebar-width} minmax(0, 1fr) !important;
         }
     }
 }
 
-// ── Sidebar ───────────────────────────────────────────────────────────────────
-.o_main_navbar:not(.o_topbar) {
-    display: none; // hide old left navbar; our sidebar replaces it
-}
-
+// ── 3. Sidebar — Column 1 ────────────────────────────────────────────────────
 .lhi-sidebar {
-    grid-area: sidebar;
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    width: 100%;
+    height: 100dvh;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     background: var(--lhi-sidebar-bg);
-    width: var(--lhi-sidebar-width);
-    height: 100vh;
-    position: sticky;
-    top: 0;
-    overflow: hidden;
     z-index: $lhi-z-sidebar;
-    transition: width $lhi-transition-medium, transform $lhi-transition-medium;
+    transition: width $lhi-transition-medium;
+    flex-shrink: 0;
 
-    // Scrollable nav area
-    .lhi-sidebar__nav {
-        flex: 1;
-        overflow-y: auto;
-        overflow-x: hidden;
-        padding: $lhi-space-2 0;
-
-        // Custom scrollbar
-        &::-webkit-scrollbar { width: 4px; }
-        &::-webkit-scrollbar-track { background: transparent; }
-        &::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.2);
-            border-radius: $lhi-radius-full;
-        }
+    // Custom scrollbar
+    &::-webkit-scrollbar { width: 4px; }
+    &::-webkit-scrollbar-track { background: transparent; }
+    &::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: $lhi-radius-full;
     }
 
-    // Brand lockup
-    .lhi-sidebar__brand {
-        display: flex;
-        align-items: center;
-        gap: $lhi-space-3;
-        padding: $lhi-space-4 $lhi-space-4 $lhi-space-3;
-        border-bottom: 1px solid rgba(255,255,255,0.08);
-        min-height: var(--lhi-topbar-height);
-
-        .lhi-sidebar__logo {
-            width: 32px;
-            height: 32px;
-            flex-shrink: 0;
-            object-fit: contain;
-        }
-
-        .lhi-sidebar__org-name {
-            font-size: $lhi-font-size-sm;
-            font-weight: $lhi-font-weight-bold;
-            color: #ffffff;
-            line-height: $lhi-line-height-tight;
-            letter-spacing: 0.01em;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .lhi-sidebar__org-sub {
-            font-size: $lhi-font-size-xs;
-            color: rgba(255,255,255,0.5);
-            white-space: nowrap;
-        }
-    }
-
-    // Section label
-    .lhi-sidebar__section-label {
-        font-size: $lhi-font-size-xs;
-        font-weight: $lhi-font-weight-semibold;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: rgba(255,255,255,0.35);
-        padding: $lhi-space-4 $lhi-space-4 $lhi-space-1;
-        white-space: nowrap;
-        overflow: hidden;
-    }
-
-    // Nav item
-    .lhi-sidebar__item {
-        display: flex;
-        align-items: center;
-        gap: $lhi-space-3;
-        padding: $lhi-space-2 $lhi-space-4;
-        margin: 0 $lhi-space-2;
-        border-radius: $lhi-radius;
-        color: var(--lhi-sidebar-text);
-        font-size: $lhi-font-size-sm;
-        font-weight: $lhi-font-weight-medium;
-        cursor: pointer;
-        transition: background $lhi-transition-fast, color $lhi-transition-fast;
-        white-space: nowrap;
-        text-decoration: none;
-
-        .lhi-sidebar__icon {
-            width: 18px;
-            height: 18px;
-            flex-shrink: 0;
-            opacity: 0.7;
-            transition: opacity $lhi-transition-fast;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            &.lhi-sidebar__icon-img {
-                object-fit: contain;
-                opacity: 0.9;
-            }
-        }
-
-        .lhi-sidebar__label {
-            flex: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            transition: opacity $lhi-transition-medium;
-        }
-
-        .lhi-sidebar__badge {
-            background: var(--lhi-accent);
-            color: white;
-            font-size: $lhi-font-size-xs;
-            font-weight: $lhi-font-weight-bold;
-            padding: 1px 6px;
-            border-radius: $lhi-radius-full;
-            min-width: 20px;
-            text-align: center;
-        }
-
-        &:hover {
-            background: var(--lhi-sidebar-hover);
-            color: #ffffff;
-
-            .lhi-sidebar__icon { opacity: 1; }
-        }
-
-        &.lhi-sidebar__item--active {
-            background: var(--lhi-sidebar-active);
-            color: #ffffff;
-
-            .lhi-sidebar__icon { opacity: 1; }
-        }
-    }
-
-    // Collapse toggle and utilities at bottom
-    .lhi-sidebar__footer {
-        padding: $lhi-space-3 $lhi-space-4;
-        border-top: 1px solid rgba(255,255,255,0.08);
-        display: flex;
-        flex-direction: column;
-        gap: $lhi-space-2;
-
-        .lhi-sidebar__utility {
-            margin: 0;
-            padding: $lhi-space-2;
-            width: 100%;
-        }
-
-        .lhi-sidebar__collapse-btn {
-            display: flex;
-            align-items: center;
-            gap: $lhi-space-3;
-            color: rgba(255,255,255,0.5);
-            font-size: $lhi-font-size-sm;
-            cursor: pointer;
-            background: none;
-            border: none;
-            padding: $lhi-space-2;
-            border-radius: $lhi-radius-sm;
-            width: 100%;
-            transition: color $lhi-transition-fast, background $lhi-transition-fast;
-
-            i {
-                width: 18px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            &:hover { 
-                color: #ffffff; 
-                background: var(--lhi-sidebar-hover);
-            }
-        }
-    }
-
-    // Collapsed state: hide labels, show icons only
-    .o_web_client.lhi-sidebar-collapsed & {
-        .lhi-sidebar__org-name,
-        .lhi-sidebar__org-sub,
-        .lhi-sidebar__section-label,
-        .lhi-sidebar__label,
-        .lhi-sidebar__badge {
-            opacity: 0;
-            pointer-events: none;
-            width: 0;
-        }
-        .lhi-sidebar__item {
-            justify-content: center;
-            padding: $lhi-space-2 0;
-        }
-    }
-
-    // Mobile overlay: slide in
+    // Mobile: fixed overlay
     @media (max-width: #{$lhi-bp-lg}) {
-        position: fixed;
-        left: 0; top: 0;
+        position: fixed !important;
+        left: 0;
+        top: 0;
+        width: #{$lhi-sidebar-width};
         transform: translateX(-100%);
         box-shadow: $lhi-shadow-xl;
+        transition: transform $lhi-transition-medium;
 
-        .o_web_client.lhi-sidebar-open & {
+        .lhi-sidebar-open & {
             transform: translateX(0);
         }
     }
 }
 
-// ── Topbar ────────────────────────────────────────────────────────────────────
-.o_main_navbar,
-.lhi-topbar {
-    grid-area: topbar;
-    display: flex;
+// ── 4. Workspace — Column 2 (topbar + content rows) ─────────────────────────
+// Odoo places the action manager and main content here.
+// We wrap it with a sub-grid to stack topbar above content.
+.o_web_client > .o_main_navbar,
+.o_web_client > .o_home_menu_background,
+.o_action_manager,
+.o_content {
+    // These must live in the second grid column
+    grid-column: 2 !important;
+}
+
+// The main topbar sits in row 1 of the content column
+.o_main_navbar {
+    grid-row: 1 !important;
+    display: flex !important;
     align-items: center;
-    height: var(--lhi-topbar-height);
-    background: var(--lhi-topbar-bg);
-    border-bottom: 1px solid var(--lhi-topbar-border);
-    padding: 0 $lhi-space-4;
-    gap: $lhi-space-3;
-    position: sticky;
-    top: 0;
+    width: 100% !important;
+    height: var(--lhi-topbar-height, #{$lhi-topbar-height}) !important;
+    min-height: var(--lhi-topbar-height, #{$lhi-topbar-height}) !important;
+    background: var(--lhi-topbar-bg) !important;
+    border-bottom: 1px solid var(--lhi-topbar-border) !important;
+    padding: 0 $lhi-space-4 !important;
     z-index: $lhi-z-topbar;
     box-shadow: $lhi-shadow-sm;
+    flex-shrink: 0;
 
-    // Hamburger (mobile)
-    .lhi-topbar__menu-btn {
-        display: none;
+    // Hide the default Odoo app brand and section links since LHI sidebar handles navigation
+    .o_menu_brand,
+    .o_menu_sections,
+    .o_menu_systray .o_nav_entry:not(.lhi-keep) {
+        // Keep systray but hide legacy breadcrumb area
+    }
+}
+
+// ── 5. Content area — full width in second column, own scrolling ─────────────
+.o_action_manager {
+    grid-column: 2 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    background: var(--lhi-canvas-bg);
+    // No top margin or padding — content starts flush below topbar
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+// ── 6. Sidebar Brand ─────────────────────────────────────────────────────────
+.lhi-sidebar__brand {
+    display: flex;
+    align-items: center;
+    gap: $lhi-space-3;
+    padding: $lhi-space-3 $lhi-space-4;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    min-height: var(--lhi-topbar-height, #{$lhi-topbar-height});
+    flex-shrink: 0;
+
+    .lhi-sidebar__logo {
+        width: 32px;
+        height: 32px;
+        border-radius: $lhi-radius-sm;
+        object-fit: contain;
+        flex-shrink: 0;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .lhi-sidebar__org-name {
+        font-size: $lhi-font-size-sm;
+        font-weight: $lhi-font-weight-bold;
+        color: #ffffff;
+        line-height: $lhi-line-height-tight;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .lhi-sidebar__org-sub {
+        font-size: $lhi-font-size-xs;
+        color: rgba(255, 255, 255, 0.5);
+        white-space: nowrap;
+    }
+}
+
+// ── 7. Sidebar Nav ───────────────────────────────────────────────────────────
+.lhi-sidebar__nav {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: $lhi-space-2 0;
+
+    &::-webkit-scrollbar { width: 4px; }
+    &::-webkit-scrollbar-track { background: transparent; }
+    &::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: $lhi-radius-full;
+    }
+}
+
+.lhi-sidebar__section-label {
+    font-size: $lhi-font-size-xs;
+    font-weight: $lhi-font-weight-semibold;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.35);
+    padding: $lhi-space-4 $lhi-space-4 $lhi-space-1;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.lhi-sidebar__item {
+    display: flex;
+    align-items: center;
+    gap: $lhi-space-3;
+    padding: $lhi-space-2 $lhi-space-3;
+    margin: 2px $lhi-space-2;
+    border-radius: $lhi-radius;
+    color: var(--lhi-sidebar-text);
+    font-size: $lhi-font-size-sm;
+    font-weight: $lhi-font-weight-medium;
+    cursor: pointer;
+    transition: background $lhi-transition-fast, color $lhi-transition-fast;
+    white-space: nowrap;
+    text-decoration: none !important;
+    outline: none;
+
+    .lhi-sidebar__icon {
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+        opacity: 0.72;
+        transition: opacity $lhi-transition-fast;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &.lhi-sidebar__icon-img {
+            object-fit: contain;
+            opacity: 0.9;
+            border-radius: $lhi-radius-sm;
+        }
+    }
+
+    .lhi-sidebar__label {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        transition: opacity $lhi-transition-medium, max-width $lhi-transition-medium;
+    }
+
+    .lhi-sidebar__badge {
+        background: var(--lhi-accent);
+        color: white;
+        font-size: $lhi-font-size-xs;
+        font-weight: $lhi-font-weight-bold;
+        padding: 1px 6px;
+        border-radius: $lhi-radius-full;
+        min-width: 20px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    &:hover {
+        background: var(--lhi-sidebar-hover);
+        color: #ffffff;
+        .lhi-sidebar__icon { opacity: 1; }
+    }
+
+    &.lhi-sidebar__item--active {
+        background: var(--lhi-sidebar-active);
+        color: #ffffff;
+        .lhi-sidebar__icon { opacity: 1; }
+    }
+}
+
+// ── 8. Sidebar Footer ────────────────────────────────────────────────────────
+.lhi-sidebar__footer {
+    padding: $lhi-space-2 $lhi-space-3;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: $lhi-space-1;
+    flex-shrink: 0;
+
+    .lhi-sidebar__utility {
+        margin: 0;
+        padding: $lhi-space-2 $lhi-space-3;
+        width: 100%;
+    }
+
+    .lhi-sidebar__collapse-btn {
+        display: flex;
+        align-items: center;
+        gap: $lhi-space-3;
+        color: rgba(255, 255, 255, 0.5);
+        font-size: $lhi-font-size-sm;
+        cursor: pointer;
         background: none;
         border: none;
-        color: var(--lhi-text-secondary);
-        cursor: pointer;
-        padding: $lhi-space-1;
+        padding: $lhi-space-2 $lhi-space-3;
         border-radius: $lhi-radius-sm;
+        width: 100%;
         transition: color $lhi-transition-fast, background $lhi-transition-fast;
+        white-space: nowrap;
 
-        &:hover { color: var(--lhi-text-primary); background: var(--lhi-canvas-bg); }
+        i {
+            width: 18px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-        @media (max-width: #{$lhi-bp-lg}) { display: flex; }
+        &:hover {
+            color: #ffffff;
+            background: var(--lhi-sidebar-hover);
+        }
     }
+}
 
-    // Breadcrumbs
-    .lhi-breadcrumbs {
-        display: flex;
-        align-items: center;
-        gap: $lhi-space-1;
-        flex: 1;
-        min-width: 0;
+// ── 9. Collapsed Sidebar State ───────────────────────────────────────────────
+.lhi-sidebar--collapsed {
+    .lhi-sidebar__org-name,
+    .lhi-sidebar__org-sub,
+    .lhi-sidebar__section-label,
+    .lhi-sidebar__label,
+    .lhi-sidebar__badge {
+        opacity: 0;
+        max-width: 0;
         overflow: hidden;
-
-        .lhi-breadcrumb__item {
-            font-size: $lhi-font-size-sm;
-            color: var(--lhi-text-secondary);
-            white-space: nowrap;
-            transition: color $lhi-transition-fast;
-
-            &:last-child {
-                color: var(--lhi-text-primary);
-                font-weight: $lhi-font-weight-medium;
-            }
-
-            &:not(:last-child):hover { color: var(--lhi-primary); }
-        }
-
-        .lhi-breadcrumb__sep {
-            color: var(--lhi-text-muted);
-            font-size: $lhi-font-size-xs;
-        }
+        pointer-events: none;
     }
 
-    // Spacer
-    .lhi-topbar__spacer { flex: 1; }
-
-    // Search bar
-    .lhi-topbar__search {
-        position: relative;
-
-        .lhi-topbar__search-input {
-            background: var(--lhi-canvas-bg);
-            border: 1px solid var(--lhi-card-border);
-            border-radius: $lhi-radius-full;
-            padding: $lhi-space-1 $lhi-space-4 $lhi-space-1 $lhi-space-8;
-            font-size: $lhi-font-size-sm;
-            font-family: $lhi-font-family-sans;
-            color: var(--lhi-text-primary);
-            width: 220px;
-            transition: width $lhi-transition-medium, border-color $lhi-transition-fast, box-shadow $lhi-transition-fast;
-
-            &::placeholder { color: var(--lhi-text-muted); }
-
-            &:focus {
-                outline: none;
-                width: 300px;
-                border-color: var(--lhi-primary);
-                box-shadow: 0 0 0 3px rgba(200, 40, 26, 0.15);
-            }
-        }
-
-        .lhi-topbar__search-icon {
-            position: absolute;
-            left: $lhi-space-3;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--lhi-text-muted);
-            pointer-events: none;
-        }
+    .lhi-sidebar__item {
+        justify-content: center;
+        padding: $lhi-space-2;
     }
 
-    // Action cluster (right side)
-    .lhi-topbar__actions {
-        display: flex;
-        align-items: center;
-        gap: $lhi-space-1;
+    .lhi-sidebar__collapse-btn .lhi-sidebar__label {
+        display: none;
     }
+}
 
-    // Icon button (notification bell, settings, etc.)
+// ── 10. Topbar Overrides (LHI-specific elements) ─────────────────────────────
+.o_main_navbar {
+    .o_menu_brand { display: none !important; }
+
+    // Custom topbar elements injected by lhi_theme_toggle systray
+    .lhi-theme-toggle,
     .lhi-topbar__icon-btn {
         position: relative;
         display: flex;
@@ -373,7 +355,6 @@
             color: var(--lhi-text-primary);
         }
 
-        // Notification dot
         .lhi-badge-dot {
             position: absolute;
             top: 6px;
@@ -386,83 +367,100 @@
             animation: lhi-pulse 2s ease-in-out infinite;
         }
     }
+}
 
-    // Theme toggle
-    .lhi-theme-toggle {
-        @extend .lhi-topbar__icon-btn;
+// ── 11. App Home Menu / Switcher ─────────────────────────────────────────────
+.o_home_menu,
+.o_home_menu_background {
+    background-color: var(--lhi-canvas-bg) !important;
+    background-image: none !important;
+    font-family: $lhi-font-family-sans;
+
+    .o_menu_search input {
+        background: var(--lhi-card-bg) !important;
+        border: 1px solid var(--lhi-card-border) !important;
+        border-radius: $lhi-radius-full !important;
+        padding: $lhi-space-3 $lhi-space-4 !important;
+        color: var(--lhi-text-primary) !important;
+        box-shadow: $lhi-shadow-sm !important;
+        font-family: $lhi-font-family-sans;
+
+        &:focus {
+            border-color: var(--lhi-primary) !important;
+            box-shadow: 0 0 0 3px rgba(200, 40, 26, 0.15) !important;
+            outline: none;
+        }
     }
 
-    // User avatar / menu trigger
-    .lhi-topbar__user {
-        display: flex;
-        align-items: center;
-        gap: $lhi-space-2;
-        padding: $lhi-space-1 $lhi-space-2;
-        border-radius: $lhi-radius;
-        cursor: pointer;
-        transition: background $lhi-transition-fast;
-        border: none;
-        background: none;
+    .o_menu_apps {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: flex-start !important;
+        gap: $lhi-space-4 !important;
+        padding: $lhi-space-6 !important;
+        max-width: 1280px;
+        margin: 0 auto;
 
-        &:hover { background: var(--lhi-canvas-bg); }
+        .o_app {
+            background: var(--lhi-card-bg);
+            border: 1px solid var(--lhi-card-border);
+            border-radius: $lhi-radius-xl;
+            box-shadow: $lhi-shadow-sm;
+            padding: $lhi-space-4;
+            transition: transform $lhi-transition-medium, box-shadow $lhi-transition-medium, border-color $lhi-transition-fast;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 140px;
+            height: 140px;
+            text-decoration: none !important;
 
-        .lhi-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: $lhi-radius-full;
-            object-fit: cover;
-            background: var(--lhi-primary);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: $lhi-font-size-sm;
-            font-weight: $lhi-font-weight-bold;
-            flex-shrink: 0;
-        }
+            &:hover {
+                transform: translateY(-4px);
+                box-shadow: $lhi-shadow-lg;
+                border-color: $lhi-red-400;
+            }
 
-        .lhi-topbar__user-info {
-            @media (max-width: #{$lhi-bp-md}) { display: none; }
+            .o_app_icon {
+                border-radius: $lhi-radius-lg;
+                width: 56px;
+                height: 56px;
+                object-fit: contain;
+                margin-bottom: $lhi-space-2;
+                box-shadow: none;
+                background: transparent;
+            }
 
-            .lhi-topbar__user-name {
+            .o_caption {
+                font-family: $lhi-font-family-sans;
                 font-size: $lhi-font-size-sm;
-                font-weight: $lhi-font-weight-medium;
+                font-weight: $lhi-font-weight-bold;
                 color: var(--lhi-text-primary);
-                line-height: 1;
-            }
-
-            .lhi-topbar__user-role {
-                font-size: $lhi-font-size-xs;
-                color: var(--lhi-text-muted);
-                line-height: 1;
-                margin-top: 2px;
+                text-shadow: none !important;
+                text-align: center;
+                line-height: $lhi-line-height-tight;
             }
         }
     }
 }
 
-// Odoo main topbar overrides
-.o_main_navbar {
-    .o_menu_brand,
-    .o_menu_sections {
-        display: none !important; // LHI sidebar handles navigation
+// ── 12. Mobile Overlay Backdrop ──────────────────────────────────────────────
+.lhi-sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: calc(#{$lhi-z-sidebar} - 1);
+    backdrop-filter: blur(2px);
+    animation: lhi-fade-in $lhi-transition-fast forwards;
+
+    @media (max-width: #{$lhi-bp-lg}) {
+        &.lhi-sidebar-backdrop--visible { display: block; }
     }
 }
 
-// ── Main content area ─────────────────────────────────────────────────────────
-.o_action_manager,
-.o_content {
-    grid-area: main;
-    overflow: auto;
-    padding: $lhi-space-6;
-    background: var(--lhi-canvas-bg);
-
-    @media (max-width: #{$lhi-bp-md}) {
-        padding: $lhi-space-4;
-    }
-}
-
-// ── Dropdown menus ────────────────────────────────────────────────────────────
+// ── 13. Dropdown Menus ───────────────────────────────────────────────────────
 .lhi-dropdown {
     position: absolute;
     background: var(--lhi-card-bg);
@@ -486,9 +484,7 @@
 
         &:hover { background: var(--lhi-canvas-bg); }
 
-        &.lhi-dropdown__item--danger {
-            color: var(--lhi-danger);
-        }
+        &.lhi-dropdown__item--danger { color: var(--lhi-danger); }
     }
 
     .lhi-dropdown__divider {
@@ -498,7 +494,32 @@
     }
 }
 
-// ── Animations ────────────────────────────────────────────────────────────────
+// ── 14. Print Rules ──────────────────────────────────────────────────────────
+@media print {
+    .lhi-sidebar,
+    .o_main_navbar,
+    .lhi-sidebar-backdrop,
+    .lhi-topbar__icon-btn,
+    .lhi-theme-toggle {
+        display: none !important;
+    }
+
+    .o_web_client {
+        display: block !important;
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    .o_action_manager {
+        grid-column: 1 !important;
+        overflow: visible !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+    }
+}
+
+// ── 15. Keyframe Animations ──────────────────────────────────────────────────
 @keyframes lhi-pulse {
     0%, 100% { opacity: 1; }
     50%       { opacity: 0.5; }
@@ -509,105 +530,12 @@
     to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes lhi-slide-in-left {
-    from { transform: translateX(-100%); }
-    to   { transform: translateX(0); }
-}
-
 @keyframes lhi-fade-in {
     from { opacity: 0; }
     to   { opacity: 1; }
 }
 
-// ── Mobile overlay backdrop ───────────────────────────────────────────────────
-.lhi-sidebar-backdrop {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: $lhi-z-sidebar - 1;
-    backdrop-filter: blur(2px);
-    animation: lhi-fade-in $lhi-transition-fast forwards;
-
-    @media (max-width: #{$lhi-bp-lg}) {
-        &.lhi-sidebar-backdrop--visible { display: block; }
-    }
+@keyframes lhi-slide-in-left {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(0); }
 }
-
-// ── App Switcher / Home Menu ─────────────────────────────────────────────────
-.o_home_menu,
-.o_home_menu_background {
-    background-color: var(--lhi-canvas-bg) !important;
-    background-image: none !important;
-    font-family: $lhi-font-family-sans;
-
-    .o_menu_search {
-        input {
-            background: var(--lhi-card-bg) !important;
-            border: 1px solid var(--lhi-card-border) !important;
-            border-radius: $lhi-radius-full !important;
-            padding: $lhi-space-3 $lhi-space-4 !important;
-            color: var(--lhi-text-primary) !important;
-            box-shadow: var(--lhi-shadow-sm) !important;
-            font-family: $lhi-font-family-sans;
-            
-            &:focus {
-                border-color: var(--lhi-primary) !important;
-                box-shadow: 0 0 0 3px rgba(200, 40, 26, 0.15) !important;
-                outline: none;
-            }
-        }
-    }
-
-    .o_menu_apps {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: $lhi-space-4 !important;
-        padding: $lhi-space-6 !important;
-
-        .o_app {
-            background: var(--lhi-card-bg);
-            border: 1px solid var(--lhi-card-border);
-            border-radius: $lhi-radius-xl;
-            box-shadow: var(--lhi-shadow-sm);
-            padding: $lhi-space-4;
-            transition: transform $lhi-transition-medium, box-shadow $lhi-transition-medium, border-color $lhi-transition-fast;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 140px;
-            height: 140px;
-            text-decoration: none;
-
-            &:hover {
-                transform: translateY(-4px);
-                box-shadow: var(--lhi-shadow-lg);
-                border-color: var(--lhi-primary-light);
-            }
-
-            .o_app_icon {
-                border-radius: $lhi-radius-lg;
-                width: 64px;
-                height: 64px;
-                object-fit: contain;
-                margin-bottom: $lhi-space-3;
-                box-shadow: none;
-                background: transparent;
-            }
-
-            .o_caption {
-                font-family: $lhi-font-family-sans;
-                font-size: $lhi-font-size-sm;
-                font-weight: $lhi-font-weight-bold;
-                color: var(--lhi-text-primary);
-                text-shadow: none !important;
-                margin-top: 0;
-                text-align: center;
-                line-height: $lhi-line-height-tight;
-            }
-        }
-    }
-}
-

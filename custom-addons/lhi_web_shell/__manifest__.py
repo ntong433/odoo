@@ -30,16 +30,23 @@ Deliverables:
         'views/lhi_login_template.xml',
     ],
     'assets': {
+        # ── 1. Primary Variables (loaded earliest — before Odoo/Bootstrap SCSS) ──
+        # tokens.scss MUST be here so $lhi-* variables exist for all later files.
         'web._assets_primary_variables': [
             'lhi_web_shell/static/src/scss/tokens.scss',
         ],
+
+        # ── 2. Backend Web Assets (compiled together after primary variables) ──
+        # Order: base → shell → views → components → dark mode
         'web.assets_web': [
             'lhi_web_shell/static/src/scss/base.scss',
             'lhi_web_shell/static/src/scss/shell.scss',
-            'lhi_web_shell/static/src/scss/components.scss',
             'lhi_web_shell/static/src/scss/views.scss',
+            'lhi_web_shell/static/src/scss/components.scss',
             'lhi_web_shell/static/src/scss/dark.scss',
         ],
+
+        # ── 3. Backend JS + XML (Owl components — no SCSS here) ──
         'web.assets_backend': [
             'lhi_web_shell/static/src/js/lhi_theme_service.js',
             'lhi_web_shell/static/src/js/lhi_theme_toggle.js',
@@ -47,9 +54,13 @@ Deliverables:
             'lhi_web_shell/static/src/js/lhi_notification_badge.js',
             'lhi_web_shell/static/src/xml/lhi_components.xml',
         ],
+
+        # ── 4. Frontend (public pages: login) ──
         'web.assets_frontend': [
             'lhi_web_shell/static/src/scss/login.scss',
         ],
+
+        # ── 5. Unit tests ──
         'web.assets_unit_tests': [
             'lhi_web_shell/static/tests/lhi_theme_service_tests.js',
         ],

@@ -78,13 +78,14 @@ $font-family-sans-serif:
 $lhi-font-family-sans: $font-family-sans-serif;
 $lhi-font-family-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
-$lhi-font-size-xs:   0.75rem;   // 12px
-$lhi-font-size-sm:   0.875rem;  // 14px
-$lhi-font-size-base: 1rem;      // 16px
-$lhi-font-size-lg:   1.125rem;  // 18px
-$lhi-font-size-xl:   1.25rem;   // 20px
-$lhi-font-size-2xl:  1.5rem;    // 24px
-$lhi-font-size-3xl:  1.875rem;  // 30px
+$lhi-font-size-xs:   0.75rem   !default;   // 12px
+$lhi-font-size-sm:   0.875rem  !default;   // 14px
+$lhi-font-size-md:   1rem      !default;   // 16px — alias for base, required by dashboard
+$lhi-font-size-base: 1rem      !default;   // 16px
+$lhi-font-size-lg:   1.125rem  !default;   // 18px
+$lhi-font-size-xl:   1.25rem   !default;   // 20px
+$lhi-font-size-2xl:  1.5rem    !default;   // 24px
+$lhi-font-size-3xl:  1.875rem  !default;   // 30px
 
 $lhi-font-weight-normal:   400;
 $lhi-font-weight-medium:   500;

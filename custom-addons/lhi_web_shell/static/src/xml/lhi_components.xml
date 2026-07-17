@@ -71,7 +71,7 @@
     </t>
 
     <!-- Inject Sidebar into WebClient as first child of the CSS grid -->
-    <t t-name="lhi_web_shell.WebClient" t-inherit="web.WebClient" t-inherit-mode="extension" owl="1">
+    <t t-inherit="web.WebClient" t-inherit-mode="extension">
         <!--
             The .o_web_client div is a CSS Grid with two columns:
               column 1: lhi sidebar width variable  → occupied by .lhi-sidebar

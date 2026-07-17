@@ -3,9 +3,31 @@
 // Sprint 4 · lhi_web_shell · base.scss
 // ============================================================================
 
-// Import Inter from Google Fonts (CDN — no core modification)
-
-
+// Local Inter Font-Face Definitions
+@font-face {
+    font-family: "Inter";
+    src: url("/lhi_web_shell/static/src/fonts/Inter-Regular.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+}
+@font-face {
+    font-family: "Inter";
+    src: url("/lhi_web_shell/static/src/fonts/Inter-Medium.woff2") format("woff2");
+    font-weight: 500;
+    font-style: normal;
+}
+@font-face {
+    font-family: "Inter";
+    src: url("/lhi_web_shell/static/src/fonts/Inter-SemiBold.woff2") format("woff2");
+    font-weight: 600;
+    font-style: normal;
+}
+@font-face {
+    font-family: "Inter";
+    src: url("/lhi_web_shell/static/src/fonts/Inter-Bold.woff2") format("woff2");
+    font-weight: 700;
+    font-style: normal;
+}
 // ── Global reset / base ───────────────────────────────────────────────────────
 *,
 *::before,

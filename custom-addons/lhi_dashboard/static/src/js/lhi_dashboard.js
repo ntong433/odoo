@@ -20,6 +20,7 @@ export class LhiDashboard extends Component {
         this.state = useState({
             widgets: [],
             loading: true,
+            error: false,
             searchQuery: "",
             searchResults: [],
             showSearchResults: false,
@@ -32,14 +33,38 @@ export class LhiDashboard extends Component {
     }
 
     async loadWidgets() {
-        try {
-            // Fetch authorized widgets configured by administrator
-            const userWidgets = await this.orm.call(
-                "lhi.dashboard.widget", 
-                "get_user_widgets", 
-                []
-            );
-            
+        const delays = [0, 500, 1500, 3000];
+        let userWidgets = null;
+        this.state.error = false;
+
+        for (let i = 0; i < delays.length; i++) {
+            try {
+                if (delays[i] > 0) {
+                    await new Promise(resolve => setTimeout(resolve, delays[i]));
+                }
+                userWidgets = await this.orm.call(
+                    "lhi.dashboard.widget", 
+                    "get_user_widgets", 
+                    []
+                );
+                break; // success
+            } catch (error) {
+                const errorStr = String(error?.name || error?.message || error || "");
+                if (errorStr.includes("ConnectionLostError") || errorStr.includes("Connection") || errorStr.includes("XMLHttp")) {
+                    console.warn(`RPC connection lost. Retrying in ${delays[i+1] || 'none'}ms...`);
+                    if (i === delays.length - 1) {
+                        console.error("Dashboard widget load failed after max retries.", error);
+                        this.state.error = true;
+                    }
+                } else {
+                    console.error("Failed to load dashboard widgets", error);
+                    this.state.error = true;
+                    break;
+                }
+            }
+        }
+        
+        if (userWidgets) {
             // Map the database config to actual registered JS components
             this.state.widgets = userWidgets.map(w => {
                 const component = dashboardWidgetRegistry.get(w.registry_key);
@@ -49,12 +74,9 @@ export class LhiDashboard extends Component {
                 console.warn(`Dashboard widget component '${w.registry_key}' not found in registry.`);
                 return null;
             }).filter(Boolean);
-
-        } catch (error) {
-            console.error("Failed to load dashboard widgets", error);
-        } finally {
-            this.state.loading = false;
         }
+
+        this.state.loading = false;
     }
 
     onSearchFocus() {

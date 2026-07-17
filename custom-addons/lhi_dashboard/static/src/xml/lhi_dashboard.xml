@@ -45,22 +45,39 @@
                 </div>
             </div>
 
-            <div t-if="state.loading" class="lhi-dashboard__loading mt-4">
-                <div class="lhi-skeleton lhi-skeleton--text" style="height: 120px; margin-bottom: 24px;"></div>
-                <div class="lhi-skeleton lhi-skeleton--text" style="height: 120px; margin-bottom: 24px;"></div>
-                <div class="lhi-skeleton lhi-skeleton--text" style="height: 120px;"></div>
+            <div t-if="state.error" class="lhi-empty mt-5 text-center">
+                <i class="fa fa-exclamation-triangle lhi-empty__icon text-warning" style="font-size: 3rem;"></i>
+                <h2 class="lhi-empty__title mt-3 h4">Dashboard Temporarily Unavailable</h2>
+                <p class="lhi-empty__body text-muted">A connection error occurred while loading your widgets.</p>
+                <button class="btn btn-primary mt-3" t-on-click="loadWidgets">
+                    <i class="fa fa-refresh me-2"></i> Retry Connection
+                </button>
+            </div>
+
+            <div t-elif="state.loading" class="lhi-dashboard__loading mt-4">
+                <div class="row">
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="lhi-skeleton lhi-skeleton--text" style="height: 140px; border-radius: var(--lhi-radius-xl, 1rem);"></div>
+                    </div>
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="lhi-skeleton lhi-skeleton--text" style="height: 140px; border-radius: var(--lhi-radius-xl, 1rem);"></div>
+                    </div>
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="lhi-skeleton lhi-skeleton--text" style="height: 140px; border-radius: var(--lhi-radius-xl, 1rem);"></div>
+                    </div>
+                </div>
             </div>
             
-            <div t-else="" class="lhi-dashboard__grid mt-4">
+            <div t-elif="!state.error and state.widgets.length > 0" class="lhi-dashboard__grid mt-4">
                 <t t-foreach="state.widgets" t-as="widget" t-key="widget.id">
-                    <div t-attf-class="lhi-dashboard__widget-wrapper col-span-{{widget.col_span}}">
+                    <div t-attf-class="lhi-dashboard__widget-wrapper lhi-dashboard__widget--{{ widget.col_span === 12 ? 'full' : (widget.col_span > 6 ? 'wide' : 'standard') }}">
                         <t t-component="widget.component" t-props="{ widgetInfo: widget }" />
                     </div>
                 </t>
             </div>
             
             <!-- Empty State -->
-            <div t-if="!state.loading and state.widgets.length === 0" class="lhi-empty mt-5 text-center">
+            <div t-elif="!state.error and !state.loading and state.widgets.length === 0" class="lhi-empty mt-5 text-center">
                 <i class="fa fa-th-large lhi-empty__icon text-muted" style="font-size: 3rem;"></i>
                 <h2 class="lhi-empty__title mt-3 h4">No Dashboard Widgets</h2>
                 <p class="lhi-empty__body text-muted">You don't have access to any dashboard widgets. Please contact your administrator.</p>

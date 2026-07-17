@@ -66,30 +66,22 @@
     min-width: 0;
     overflow: hidden;
 
-    &.col-span-12 { grid-column: span 12; }
-    &.col-span-8  { grid-column: span 8; }
-    &.col-span-6  { grid-column: span 6; }
-    &.col-span-4  { grid-column: span 4; }
-    &.col-span-3  { grid-column: span 3; }
-    &.col-span-2  { grid-column: span 2; }
-    &.col-span-1  { grid-column: span 1; }
+    &.lhi-dashboard__widget--full { grid-column: span 12; }
+    &.lhi-dashboard__widget--wide { grid-column: span 8; }
+    &.lhi-dashboard__widget--standard { grid-column: span 4; }
 
     // On medium viewports, collapse wide spans
     @media (max-width: #{$lhi-bp-xl}) {
-        &.col-span-12 { grid-column: span 8; }
-        &.col-span-6  { grid-column: span 4; }
-        &.col-span-3, &.col-span-4 { grid-column: span 4; }
+        &.lhi-dashboard__widget--full { grid-column: span 8; }
+        &.lhi-dashboard__widget--wide { grid-column: span 8; }
+        &.lhi-dashboard__widget--standard { grid-column: span 4; }
     }
 
     // On small viewports, full width for all
     @media (max-width: #{$lhi-bp-md}) {
-        &.col-span-12,
-        &.col-span-8,
-        &.col-span-6,
-        &.col-span-4,
-        &.col-span-3,
-        &.col-span-2,
-        &.col-span-1 {
+        &.lhi-dashboard__widget--full,
+        &.lhi-dashboard__widget--wide,
+        &.lhi-dashboard__widget--standard {
             grid-column: 1 / -1 !important;
         }
     }

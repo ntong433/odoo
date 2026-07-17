@@ -231,20 +231,18 @@ class LhiEntraConfiguration(models.Model):
         provider = self.oauth_provider_id
         provider.write(
             {
+                "name": "Microsoft Entra ID",
                 "client_id": client_id,
                 "auth_endpoint": (
                     f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/authorize"
                 ),
-                "scope": "openid profile email https://graph.microsoft.com/User.Read",
-                "validation_endpoint": (
-                    "https://graph.microsoft.com/v1.0/me"
-                    "?$select=id,displayName,givenName,surname,mail,"
-                    "userPrincipalName,accountEnabled"
-                ),
+                "scope": "openid profile email",
+                "validation_endpoint": "https://graph.microsoft.com/oidc/userinfo",
                 "data_endpoint": False,
                 "enabled": True,
             }
         )
+        self.env["ir.config_parameter"].sudo().set_param("auth_oauth.authorization_header", "1")
         self.env["lhi.audit.log"].create_event(
             event_type="write_sensitive_field",
             res_model=self._name,

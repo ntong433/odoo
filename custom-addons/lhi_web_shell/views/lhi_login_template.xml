@@ -29,15 +29,20 @@
     <!-- Override the web login form -->
     <template id="lhi_login_override" inherit_id="web.login">
         <xpath expr="//form" position="replace">
-            <t t-set="entra_provider" t-value="request.env['auth.oauth.provider'].sudo().search([('name', 'ilike', 'Entra')], limit=1)"/>
-            
             <div class="lhi-login-methods">
-                <t t-if="entra_provider">
+                <t t-if="providers">
                     <div class="d-grid mb-3">
-                        <a href="/lhi/auth/microsoft/login" class="btn btn-outline-dark lhi-ms-login-btn">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" alt="Microsoft" class="ms-logo"/>
-                            Sign in with Microsoft
-                        </a>
+                        <t t-foreach="providers" t-as="provider">
+                            <a
+                                t-if="'Microsoft' in provider.get('name', '') or 'Azure' in provider.get('name', '') or 'Entra' in provider.get('name', '')"
+                                t-att-href="provider.get('auth_link')"
+                                class="btn btn-outline-dark lhi-ms-login-btn"
+                                role="button"
+                            >
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" alt="Microsoft" class="ms-logo"/>
+                                <span>Sign in with Microsoft</span>
+                            </a>
+                        </t>
                     </div>
                     <div class="lhi-divider">
                         <span>or sign in locally</span>

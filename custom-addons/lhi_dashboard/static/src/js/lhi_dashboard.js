@@ -83,22 +83,38 @@ export class LhiDashboard extends Component {
         this.state.isSearching = true;
         this.state.showSearchResults = true;
 
-        // Search through apps
-        const apps = this.menuService.getApps();
-        
-        this.state.searchResults = apps
-            .filter(app => app.name.toLowerCase().includes(query))
-            .slice(0, 5)
-            .map(app => ({
-                id: app.id,
-                name: app.name,
-                description: "Application",
-                icon: "cube",
-                actionID: app.actionID,
-                appID: app.id
-            }));
+        if (this.searchTimeout) {
+            clearTimeout(this.searchTimeout);
+        }
+
+        this.searchTimeout = setTimeout(async () => {
+            // Search through apps
+            const apps = this.menuService.getApps();
             
-        this.state.isSearching = false;
+            const localResults = apps
+                .filter(app => app.name.toLowerCase().includes(query))
+                .slice(0, 5)
+                .map(app => ({
+                    id: `app_${app.id}`,
+                    name: app.name,
+                    description: "Application",
+                    icon: "cube",
+                    actionID: app.actionID,
+                    appID: app.id,
+                    category: "App"
+                }));
+                
+            try {
+                // Search globally
+                const globalResults = await this.orm.call("lhi.dashboard.widget", "global_search", [query]);
+                this.state.searchResults = [...localResults, ...globalResults];
+            } catch (e) {
+                console.error("Global search failed:", e);
+                this.state.searchResults = localResults;
+            }
+                
+            this.state.isSearching = false;
+        }, 300);
     }
 
     onSearchSelect(result) {
@@ -108,6 +124,14 @@ export class LhiDashboard extends Component {
             this.menuService.selectMenu(result.appID);
         } else if (result.actionID) {
             this.actionService.doAction(result.actionID);
+        } else if (result.res_model && result.res_id) {
+            this.actionService.doAction({
+                type: 'ir.actions.act_window',
+                res_model: result.res_model,
+                res_id: result.res_id,
+                views: [[false, 'form']],
+                target: 'current',
+            });
         }
     }
 }

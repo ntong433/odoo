@@ -533,3 +533,81 @@
         &.lhi-sidebar-backdrop--visible { display: block; }
     }
 }
+
+// ── App Switcher / Home Menu ─────────────────────────────────────────────────
+.o_home_menu,
+.o_home_menu_background {
+    background-color: var(--lhi-canvas-bg) !important;
+    background-image: none !important;
+    font-family: $lhi-font-family-sans;
+
+    .o_menu_search {
+        input {
+            background: var(--lhi-card-bg) !important;
+            border: 1px solid var(--lhi-card-border) !important;
+            border-radius: $lhi-radius-full !important;
+            padding: $lhi-space-3 $lhi-space-4 !important;
+            color: var(--lhi-text-primary) !important;
+            box-shadow: var(--lhi-shadow-sm) !important;
+            font-family: $lhi-font-family-sans;
+            
+            &:focus {
+                border-color: var(--lhi-primary) !important;
+                box-shadow: 0 0 0 3px rgba(200, 40, 26, 0.15) !important;
+                outline: none;
+            }
+        }
+    }
+
+    .o_menu_apps {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: $lhi-space-4 !important;
+        padding: $lhi-space-6 !important;
+
+        .o_app {
+            background: var(--lhi-card-bg);
+            border: 1px solid var(--lhi-card-border);
+            border-radius: $lhi-radius-xl;
+            box-shadow: var(--lhi-shadow-sm);
+            padding: $lhi-space-4;
+            transition: transform $lhi-transition-medium, box-shadow $lhi-transition-medium, border-color $lhi-transition-fast;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 140px;
+            height: 140px;
+            text-decoration: none;
+
+            &:hover {
+                transform: translateY(-4px);
+                box-shadow: var(--lhi-shadow-lg);
+                border-color: var(--lhi-primary-light);
+            }
+
+            .o_app_icon {
+                border-radius: $lhi-radius-lg;
+                width: 64px;
+                height: 64px;
+                object-fit: contain;
+                margin-bottom: $lhi-space-3;
+                box-shadow: none;
+                background: transparent;
+            }
+
+            .o_caption {
+                font-family: $lhi-font-family-sans;
+                font-size: $lhi-font-size-sm;
+                font-weight: $lhi-font-weight-bold;
+                color: var(--lhi-text-primary);
+                text-shadow: none !important;
+                margin-top: 0;
+                text-align: center;
+                line-height: $lhi-line-height-tight;
+            }
+        }
+    }
+}
+

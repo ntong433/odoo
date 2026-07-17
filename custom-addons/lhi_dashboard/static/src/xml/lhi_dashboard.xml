@@ -28,11 +28,14 @@
                         <div class="list-group list-group-flush rounded-3 overflow-hidden">
                             <t t-foreach="state.searchResults" t-as="result" t-key="result.id">
                                 <a href="#" class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-2" t-on-mousedown.prevent="() => this.onSearchSelect(result)">
-                                    <div class="lhi-badge lhi-badge--soft-primary p-2 rounded">
+                                    <div class="lhi-badge lhi-badge--soft-primary p-2 rounded d-flex justify-content-center align-items-center" style="width: 32px; height: 32px;">
                                         <i t-attf-class="fa fa-{{ result.icon || 'cube' }}"></i>
                                     </div>
-                                    <div>
-                                        <div class="fw-bold text-dark" t-esc="result.name"></div>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="fw-bold text-dark" t-esc="result.name"></span>
+                                            <span class="badge bg-light text-secondary border fw-normal" t-if="result.category" t-esc="result.category"></span>
+                                        </div>
                                         <div class="text-muted small" t-esc="result.description"></div>
                                     </div>
                                 </a>

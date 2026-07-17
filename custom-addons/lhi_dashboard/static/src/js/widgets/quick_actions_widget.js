@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component } from "@odoo/owl";
+import { Component, onWillStart, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { dashboardWidgetRegistry } from "../dashboard_widget_registry";
 
@@ -9,16 +9,33 @@ export class QuickActionsWidget extends Component {
     
     setup() {
         this.actionService = useService("action");
+        this.orm = useService("orm");
+        
+        this.state = useState({
+            actions: [],
+            loading: true,
+        });
+        
+        onWillStart(async () => {
+            try {
+                this.state.actions = await this.orm.call("lhi.dashboard.widget", "get_quick_actions", []);
+            } catch (e) {
+                console.error("Failed to load quick actions", e);
+                this.state.actions = [];
+            } finally {
+                this.state.loading = false;
+            }
+        });
     }
     
-    createApproval() {
+    executeAction(action) {
         this.actionService.doAction({
-            type: 'ir.actions.act_window',
-            name: 'New Approval Request',
-            res_model: 'lhi.approval.request',
-            view_mode: 'form',
-            views: [[false, 'form']],
-            target: 'new',
+            type: action.action_type,
+            name: action.name,
+            res_model: action.res_model,
+            view_mode: action.view_mode,
+            views: [[false, action.view_mode]],
+            target: action.target,
         });
     }
 }

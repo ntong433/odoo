@@ -347,3 +347,60 @@
         }
     }
 }
+
+// ── App Screen Shell ──────────────────────────────────────────────────────────
+.o_action_manager {
+    background-color: var(--lhi-canvas-bg);
+}
+
+// ── Search Panel (Left Sidebar in Views) ──────────────────────────────────────
+.o_search_panel {
+    background-color: var(--lhi-card-bg);
+    border-right: 1px solid var(--lhi-card-border);
+    font-family: $lhi-font-family-sans;
+
+    .o_search_panel_category_value {
+        .list-group-item {
+            background-color: transparent;
+            color: var(--lhi-text-primary);
+            border: none;
+
+            &:hover {
+                background-color: var(--lhi-primary-bg-subtle);
+                color: var(--lhi-primary);
+            }
+            &.active {
+                background-color: var(--lhi-primary-bg-subtle);
+                color: var(--lhi-primary);
+                font-weight: $lhi-font-weight-bold;
+            }
+        }
+    }
+}
+
+// ── Dialogs & Modals ─────────────────────────────────────────────────────────
+.modal-content {
+    background-color: var(--lhi-card-bg);
+    border: 1px solid var(--lhi-card-border);
+    border-radius: $lhi-radius-xl;
+    box-shadow: var(--lhi-shadow-xl);
+    font-family: $lhi-font-family-sans;
+
+    .modal-header {
+        border-bottom: 1px solid var(--lhi-card-border);
+        .modal-title {
+            color: var(--lhi-text-primary);
+            font-weight: $lhi-font-weight-semibold;
+        }
+    }
+    .modal-body {
+        color: var(--lhi-text-primary);
+    }
+    .modal-footer {
+        border-top: 1px solid var(--lhi-card-border);
+        background-color: var(--lhi-canvas-bg);
+        border-bottom-left-radius: calc(#{$lhi-radius-xl} - 1px);
+        border-bottom-right-radius: calc(#{$lhi-radius-xl} - 1px);
+    }
+}
+

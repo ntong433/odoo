@@ -27,7 +27,7 @@
     <t t-name="lhi_web_shell.Sidebar" owl="1">
         <aside class="lhi-sidebar" t-att-class="{ 'lhi-sidebar--collapsed': state.collapsed }">
             <div class="lhi-sidebar__brand">
-                <img src="/lhi_web_shell/static/description/icon.png" class="lhi-sidebar__logo" alt="LHI Logo" onerror="this.src='/web/static/img/favicon.ico'"/>
+                <img src="/web/binary/company_logo" class="lhi-sidebar__logo" alt="LHI Nigeria Logo" onerror="this.src='/web/static/img/favicon.ico'"/>
                 <div class="lhi-sidebar__org-name">Life Helpers Initiative</div>
             </div>
             

@@ -3,31 +3,32 @@
 
     <!-- Announcements Widget -->
     <t t-name="lhi_dashboard.AnnouncementsWidget" owl="1">
-        <div class="lhi-card">
-            <div class="lhi-card__header">
-                <h3 class="lhi-card__title">Announcements</h3>
+        <div class="lhi-card rounded-4 mb-4">
+            <div class="lhi-card__header px-4 py-3 rounded-top-4">
+                <h3 class="lhi-card__title m-0 fw-bold">Announcements</h3>
             </div>
             <div class="lhi-card__body p-0">
                 <div t-if="state.loading" class="p-4 text-center text-muted">
                     <i class="fa fa-circle-o-notch fa-spin fa-2x"></i>
                 </div>
                 <div t-elif="state.announcements.length === 0" class="p-4 text-center text-muted">
-                    No active announcements.
+                    <i class="fa fa-bullhorn fa-2x mb-3 opacity-25"></i>
+                    <p class="mb-0">No active announcements.</p>
                 </div>
-                <div t-else="" class="list-group list-group-flush">
+                <div t-else="" class="list-group list-group-flush rounded-bottom-4">
                     <t t-foreach="state.announcements" t-as="ann" t-key="ann.id">
-                        <div class="list-group-item p-4">
+                        <div class="list-group-item p-4 border-bottom-0">
                             <div class="d-flex w-100 justify-content-between align-items-center mb-2">
-                                <h5 class="mb-0 fw-bold" t-esc="ann.title"/>
-                                <small class="text-muted" t-esc="ann.date"/>
+                                <h5 class="mb-0 fw-bold text-dark" t-esc="ann.title"/>
+                                <small class="text-muted fw-medium" t-esc="ann.date"/>
                             </div>
-                            <span t-attf-class="lhi-badge lhi-badge--soft-{{ann.type}} mb-2">
+                            <span t-attf-class="badge rounded-pill text-bg-{{ann.type === 'danger' ? 'danger' : (ann.type === 'warning' ? 'warning' : 'primary')}} mb-2 px-2 py-1">
                                 <t t-if="ann.type === 'danger'">Urgent</t>
                                 <t t-elif="ann.type === 'warning'">Warning</t>
                                 <t t-elif="ann.type === 'success'">Success</t>
                                 <t t-else="">Info</t>
                             </span>
-                            <div class="mt-2 text-secondary" t-out="ann.content"/>
+                            <div class="mt-2 text-muted" style="font-size: 14px;" t-out="ann.content"/>
                         </div>
                     </t>
                 </div>
@@ -37,16 +38,24 @@
 
     <!-- Accessible Modules Widget -->
     <t t-name="lhi_dashboard.AccessibleModulesWidget" owl="1">
-        <div class="lhi-card">
-            <div class="lhi-card__header">
-                <h3 class="lhi-card__title">My Apps</h3>
+        <div class="lhi-card rounded-4 mb-4">
+            <div class="lhi-card__header px-4 py-3 rounded-top-4">
+                <h3 class="lhi-card__title m-0 fw-bold">My Apps</h3>
             </div>
-            <div class="lhi-card__body">
-                <div class="lhi-stat-grid" style="grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));">
+            <div class="lhi-card__body p-4 rounded-bottom-4" style="background-color: var(--lhi-bg-body);">
+                <div class="lhi-stat-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 1rem;">
                     <t t-foreach="apps" t-as="app" t-key="app.id">
-                        <div class="text-center p-3 lhi-card lhi-card--interactive" t-on-click="() => this.onAppClick(app)">
-                            <i class="fa fa-cube fa-2x mb-2 text-primary"></i>
-                            <div class="lhi-h4 mt-2" t-esc="app.name"></div>
+                        <div class="lhi-app-tile text-center p-4 rounded-4 d-flex flex-column align-items-center justify-content-center" t-on-click="() => this.onAppClick(app)" style="cursor: pointer; min-height: 120px;">
+                            <div class="lhi-app-icon-bg p-3 rounded-circle mb-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <t t-set="icon" t-value="getIconProps(app)"/>
+                                <t t-if="icon.type === 'fa'">
+                                    <i t-attf-class="{{icon.class}} fa-2x"></i>
+                                </t>
+                                <t t-else="">
+                                    <img t-att-src="icon.src" class="lhi-app-icon-img" alt=""/>
+                                </t>
+                            </div>
+                            <div class="fw-bold" style="font-size: 14px;" t-esc="app.name"></div>
                         </div>
                     </t>
                 </div>
@@ -56,23 +65,25 @@
 
     <!-- My Approvals Widget -->
     <t t-name="lhi_dashboard.MyApprovalsWidget" owl="1">
-        <div t-attf-class="lhi-card lhi-card--stat lhi-card--accent-orange #{state.available ? 'lhi-card--interactive' : ''}" t-on-click="openApprovals">
-            <div class="lhi-card__body">
-                <div class="d-flex justify-content-between align-items-center">
+        <div t-attf-class="lhi-card lhi-kpi-secondary rounded-4 mb-4 overflow-hidden #{state.available ? 'lhi-card--interactive' : ''}" t-on-click="openApprovals" style="transition: transform 0.2s ease, box-shadow 0.2s ease;">
+            <div class="lhi-card__body p-4 position-relative">
+                <div class="d-flex justify-content-between align-items-center position-relative z-index-1">
                     <div>
-                        <div class="lhi-card__stat-label">Pending Approvals</div>
-                        <div class="lhi-card__stat-value mt-2" t-if="!state.loading">
+                        <div class="fw-medium opacity-75 text-uppercase tracking-wide" style="font-size: 12px; letter-spacing: 1px;">Pending Approvals</div>
+                        <div class="fw-bold mt-1" style="font-size: 2.5rem;" t-if="!state.loading">
                             <t t-if="state.available"><t t-esc="state.count"/></t>
-                            <t t-else="">Not available</t>
+                            <t t-else=""><span style="font-size: 1.5rem;">N/A</span></t>
                         </div>
-                        <div class="lhi-skeleton lhi-skeleton--text mt-2" t-else="" style="width: 50px;"></div>
+                        <div class="lhi-skeleton lhi-skeleton--text mt-2 bg-white opacity-25" t-else="" style="width: 50px; height: 40px;"></div>
                     </div>
-                    <div class="text-muted opacity-50">
-                        <i class="fa fa-check-circle fa-3x"></i>
+                    <div class="opacity-25">
+                        <i class="fa fa-check-circle" style="font-size: 4rem;"></i>
                     </div>
                 </div>
+                <!-- Decorative background -->
+                <div class="lhi-kpi-bg-overlay"></div>
             </div>
-            <div class="lhi-card__footer text-primary fw-medium" t-att-style="state.available ? 'cursor: pointer;' : 'cursor: not-allowed; opacity: 0.5;'">
+            <div class="lhi-kpi-footer px-4 py-3 fw-bold text-center" t-att-style="state.available ? 'cursor: pointer;' : 'cursor: not-allowed; opacity: 0.5;'">
                 Review Approvals <i class="fa fa-arrow-right ms-1"></i>
             </div>
         </div>
@@ -80,20 +91,21 @@
 
     <!-- My Tasks Widget -->
     <t t-name="lhi_dashboard.MyTasksWidget" owl="1">
-        <div class="lhi-card lhi-card--stat lhi-card--interactive lhi-card--accent-blue" t-on-click="openTasks">
-            <div class="lhi-card__body">
-                <div class="d-flex justify-content-between align-items-center">
+        <div class="lhi-card lhi-kpi-primary rounded-4 mb-4 overflow-hidden lhi-card--interactive" t-on-click="openTasks" style="transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer;">
+            <div class="lhi-card__body p-4 position-relative">
+                <div class="d-flex justify-content-between align-items-center position-relative z-index-1">
                     <div>
-                        <div class="lhi-card__stat-label">My Activities</div>
-                        <div class="lhi-card__stat-value mt-2" t-if="!state.loading"><t t-esc="state.count"/></div>
-                        <div class="lhi-skeleton lhi-skeleton--text mt-2" t-else="" style="width: 50px;"></div>
+                        <div class="fw-medium opacity-75 text-uppercase tracking-wide" style="font-size: 12px; letter-spacing: 1px;">My Activities</div>
+                        <div class="fw-bold mt-1" style="font-size: 2.5rem;" t-if="!state.loading"><t t-esc="state.count"/></div>
+                        <div class="lhi-skeleton lhi-skeleton--text mt-2 bg-white opacity-25" t-else="" style="width: 50px; height: 40px;"></div>
                     </div>
-                    <div class="text-muted opacity-50">
-                        <i class="fa fa-tasks fa-3x"></i>
+                    <div class="opacity-25">
+                        <i class="fa fa-tasks" style="font-size: 4rem;"></i>
                     </div>
                 </div>
+                <div class="lhi-kpi-bg-overlay"></div>
             </div>
-            <div class="lhi-card__footer text-primary fw-medium" style="cursor: pointer;">
+            <div class="lhi-kpi-footer px-4 py-3 fw-bold text-center">
                 View Tasks <i class="fa fa-arrow-right ms-1"></i>
             </div>
         </div>
@@ -101,34 +113,41 @@
 
     <!-- Notifications Widget -->
     <t t-name="lhi_dashboard.NotificationsWidget" owl="1">
-        <div class="lhi-card lhi-card--stat lhi-card--interactive" t-on-click="openInbox">
-            <div class="lhi-card__body">
-                <div class="d-flex justify-content-between align-items-center">
+        <div class="lhi-card lhi-kpi-accent rounded-4 mb-4 overflow-hidden lhi-card--interactive" t-on-click="openInbox" style="transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer;">
+            <div class="lhi-card__body p-4 position-relative">
+                <div class="d-flex justify-content-between align-items-center position-relative z-index-1">
                     <div>
-                        <div class="lhi-card__stat-label">Messages &amp; Alerts</div>
-                        <div class="lhi-card__stat-value mt-2">Inbox</div>
+                        <div class="fw-medium opacity-75 text-uppercase tracking-wide" style="font-size: 12px; letter-spacing: 1px;">Messages &amp; Alerts</div>
+                        <div class="fw-bold mt-1" style="font-size: 2.5rem;">Inbox</div>
                     </div>
-                    <div class="text-muted opacity-50">
-                        <i class="fa fa-envelope fa-3x"></i>
+                    <div class="opacity-25">
+                        <i class="fa fa-envelope" style="font-size: 4rem;"></i>
                     </div>
                 </div>
+                <div class="lhi-kpi-bg-overlay"></div>
+            </div>
+            <div class="lhi-kpi-footer px-4 py-3 fw-bold text-center">
+                Open Discuss <i class="fa fa-arrow-right ms-1"></i>
             </div>
         </div>
     </t>
 
     <!-- Quick Actions Widget -->
     <t t-name="lhi_dashboard.QuickActionsWidget" owl="1">
-        <div class="lhi-card">
-            <div class="lhi-card__header">
-                <h3 class="lhi-card__title">Quick Actions</h3>
+        <div class="lhi-card rounded-4 mb-4">
+            <div class="lhi-card__header px-4 py-3 rounded-top-4">
+                <h3 class="lhi-card__title m-0 fw-bold">Quick Actions</h3>
             </div>
-            <div class="lhi-card__body p-0">
+            <div class="lhi-card__body p-0 rounded-bottom-4 overflow-hidden">
                 <div class="list-group list-group-flush">
-                    <button class="list-group-item list-group-item-action p-3 d-flex align-items-center gap-3 border-0 border-bottom" t-on-click="createApproval">
-                        <div class="lhi-badge lhi-badge--soft-primary p-2 rounded-circle">
+                    <button class="list-group-item list-group-item-action p-3 d-flex align-items-center gap-3 border-0 border-bottom text-start" t-on-click="createApproval">
+                        <div class="lhi-app-icon-bg d-flex align-items-center justify-content-center rounded-circle" style="width: 40px; height: 40px;">
                             <i class="fa fa-plus"></i>
                         </div>
-                        <span class="fw-medium">New Request</span>
+                        <div>
+                            <span class="fw-bold text-dark d-block">New Request</span>
+                            <span class="text-muted small">Submit a new approval</span>
+                        </div>
                     </button>
                     <!-- More quick actions can be added here -->
                 </div>

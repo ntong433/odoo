@@ -3,18 +3,52 @@
 
     <t t-name="lhi_dashboard.Dashboard" owl="1">
         <div class="lhi-dashboard">
-            <div class="lhi-dashboard__header">
-                <h1 class="lhi-h2">Welcome, <t t-esc="user.name"/></h1>
-                <p class="lhi-dashboard__subtitle">Here's your personalized overview.</p>
+            <div class="lhi-dashboard__header d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h1 class="lhi-dashboard__title">Welcome, <t t-esc="user.name"/></h1>
+                    <p class="lhi-dashboard__subtitle">Here's your personalized enterprise overview.</p>
+                </div>
+                
+                <!-- Global Omnibar Search -->
+                <div class="lhi-omnibar-container position-relative">
+                    <div class="lhi-omnibar d-flex align-items-center">
+                        <i class="fa fa-search text-muted ms-3"></i>
+                        <input type="text" 
+                               class="form-control border-0 bg-transparent shadow-none" 
+                               placeholder="Search apps, menus, or records..." 
+                               t-model="state.searchQuery" 
+                               t-on-input="onSearchInput"
+                               t-on-blur="onSearchBlur"
+                               t-on-focus="onSearchFocus"/>
+                        <i t-if="state.isSearching" class="fa fa-circle-o-notch fa-spin text-muted me-3"></i>
+                    </div>
+                    
+                    <!-- Search Results Dropdown -->
+                    <div t-if="state.showSearchResults and state.searchResults.length > 0" class="lhi-omnibar-results shadow-lg rounded-3 position-absolute w-100 bg-white mt-1 z-index-1000">
+                        <div class="list-group list-group-flush rounded-3 overflow-hidden">
+                            <t t-foreach="state.searchResults" t-as="result" t-key="result.id">
+                                <a href="#" class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-2" t-on-mousedown.prevent="() => this.onSearchSelect(result)">
+                                    <div class="lhi-badge lhi-badge--soft-primary p-2 rounded">
+                                        <i t-attf-class="fa fa-{{ result.icon || 'cube' }}"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark" t-esc="result.name"></div>
+                                        <div class="text-muted small" t-esc="result.description"></div>
+                                    </div>
+                                </a>
+                            </t>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div t-if="state.loading" class="lhi-dashboard__loading">
-                <div class="lhi-skeleton lhi-skeleton--text" style="height: 100px; margin-bottom: 20px;"></div>
-                <div class="lhi-skeleton lhi-skeleton--text" style="height: 100px; margin-bottom: 20px;"></div>
-                <div class="lhi-skeleton lhi-skeleton--text" style="height: 100px;"></div>
+            <div t-if="state.loading" class="lhi-dashboard__loading mt-4">
+                <div class="lhi-skeleton lhi-skeleton--text" style="height: 120px; margin-bottom: 24px;"></div>
+                <div class="lhi-skeleton lhi-skeleton--text" style="height: 120px; margin-bottom: 24px;"></div>
+                <div class="lhi-skeleton lhi-skeleton--text" style="height: 120px;"></div>
             </div>
             
-            <div t-else="" class="lhi-dashboard__grid">
+            <div t-else="" class="lhi-dashboard__grid mt-4">
                 <t t-foreach="state.widgets" t-as="widget" t-key="widget.id">
                     <div t-attf-class="lhi-dashboard__widget-wrapper col-span-{{widget.col_span}}">
                         <t t-component="widget.component" t-props="{ widgetInfo: widget }" />
@@ -23,10 +57,10 @@
             </div>
             
             <!-- Empty State -->
-            <div t-if="!state.loading and state.widgets.length === 0" class="lhi-empty">
-                <i class="fa fa-dashboard lhi-empty__icon"></i>
-                <h2 class="lhi-empty__title">No Dashboard Widgets</h2>
-                <p class="lhi-empty__body">You don't have access to any dashboard widgets. Please contact your administrator.</p>
+            <div t-if="!state.loading and state.widgets.length === 0" class="lhi-empty mt-5 text-center">
+                <i class="fa fa-th-large lhi-empty__icon text-muted" style="font-size: 3rem;"></i>
+                <h2 class="lhi-empty__title mt-3 h4">No Dashboard Widgets</h2>
+                <p class="lhi-empty__body text-muted">You don't have access to any dashboard widgets. Please contact your administrator.</p>
             </div>
         </div>
     </t>

@@ -14,11 +14,16 @@ export class LhiDashboard extends Component {
     setup() {
         this.orm = useService("orm");
         this.actionService = useService("action");
+        this.menuService = useService("menu");
         this.user = user;
         
         this.state = useState({
             widgets: [],
             loading: true,
+            searchQuery: "",
+            searchResults: [],
+            showSearchResults: false,
+            isSearching: false,
         });
 
         onWillStart(async () => {
@@ -49,6 +54,60 @@ export class LhiDashboard extends Component {
             console.error("Failed to load dashboard widgets", error);
         } finally {
             this.state.loading = false;
+        }
+    }
+
+    onSearchFocus() {
+        if (this.state.searchQuery.length > 0) {
+            this.state.showSearchResults = true;
+        }
+    }
+
+    onSearchBlur() {
+        // Delay hiding to allow click events on results to fire
+        setTimeout(() => {
+            this.state.showSearchResults = false;
+        }, 200);
+    }
+
+    onSearchInput(ev) {
+        const query = ev.target.value.toLowerCase();
+        this.state.searchQuery = query;
+        
+        if (query.length < 2) {
+            this.state.searchResults = [];
+            this.state.showSearchResults = false;
+            return;
+        }
+
+        this.state.isSearching = true;
+        this.state.showSearchResults = true;
+
+        // Search through apps
+        const apps = this.menuService.getApps();
+        
+        this.state.searchResults = apps
+            .filter(app => app.name.toLowerCase().includes(query))
+            .slice(0, 5)
+            .map(app => ({
+                id: app.id,
+                name: app.name,
+                description: "Application",
+                icon: "cube",
+                actionID: app.actionID,
+                appID: app.id
+            }));
+            
+        this.state.isSearching = false;
+    }
+
+    onSearchSelect(result) {
+        this.state.showSearchResults = false;
+        this.state.searchQuery = "";
+        if (result.appID) {
+            this.menuService.selectMenu(result.appID);
+        } else if (result.actionID) {
+            this.actionService.doAction(result.actionID);
         }
     }
 }

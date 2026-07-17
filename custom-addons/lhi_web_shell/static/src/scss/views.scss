@@ -81,7 +81,7 @@
         }
 
         .o_searchview_facet {
-            background: #{$lhi-red-50};
+            background: var(--lhi-primary-bg-subtle);
             border-color: #{$lhi-red-200};
             color: $lhi-red-700;
             border-radius: $lhi-radius-full;
@@ -99,7 +99,7 @@
             &.active,
             &:hover {
                 color: var(--lhi-primary);
-                background: #{$lhi-red-50};
+                background: var(--lhi-primary-bg-subtle);
             }
         }
     }
@@ -213,7 +213,7 @@
 
         &:last-child { border-bottom: none; }
         &:hover       { background: var(--lhi-canvas-bg); }
-        &.o_data_row_selected { background: #{$lhi-red-50}; }
+        &.o_data_row_selected { background: var(--lhi-primary-bg-subtle); }
     }
 
     tbody td {
@@ -274,7 +274,7 @@
         }
 
         &.o_kanban_ghost {
-            background: #{$lhi-red-50};
+            background: var(--lhi-primary-bg-subtle);
             border-style: dashed;
             border-color: var(--lhi-primary-light);
         }
@@ -320,7 +320,7 @@
         &:hover { filter: brightness(1.1); }
     }
 
-    .fc-today { background: #{$lhi-red-50} !important; }
+    .fc-today { background: var(--lhi-primary-bg-subtle) !important; }
 }
 
 // ── Dropdown / autocomplete ────────────────────────────────────────────────────
@@ -342,7 +342,7 @@
         &:hover,
         &.active,
         &:focus {
-            background: #{$lhi-red-50};
+            background: var(--lhi-primary-bg-subtle);
             color: var(--lhi-primary);
         }
     }

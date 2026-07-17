@@ -132,6 +132,14 @@
             flex-shrink: 0;
             opacity: 0.7;
             transition: opacity $lhi-transition-fast;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            &.lhi-sidebar__icon-img {
+                object-fit: contain;
+                opacity: 0.9;
+            }
         }
 
         .lhi-sidebar__label {
@@ -167,31 +175,50 @@
         }
     }
 
-    // Collapse toggle at bottom
+    // Collapse toggle and utilities at bottom
     .lhi-sidebar__footer {
         padding: $lhi-space-3 $lhi-space-4;
         border-top: 1px solid rgba(255,255,255,0.08);
+        display: flex;
+        flex-direction: column;
+        gap: $lhi-space-2;
+
+        .lhi-sidebar__utility {
+            margin: 0;
+            padding: $lhi-space-2;
+            width: 100%;
+        }
 
         .lhi-sidebar__collapse-btn {
             display: flex;
             align-items: center;
-            gap: $lhi-space-2;
+            gap: $lhi-space-3;
             color: rgba(255,255,255,0.5);
-            font-size: $lhi-font-size-xs;
+            font-size: $lhi-font-size-sm;
             cursor: pointer;
             background: none;
             border: none;
-            padding: $lhi-space-1;
+            padding: $lhi-space-2;
             border-radius: $lhi-radius-sm;
             width: 100%;
-            transition: color $lhi-transition-fast;
+            transition: color $lhi-transition-fast, background $lhi-transition-fast;
 
-            &:hover { color: rgba(255,255,255,0.9); }
+            i {
+                width: 18px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            &:hover { 
+                color: #ffffff; 
+                background: var(--lhi-sidebar-hover);
+            }
         }
     }
 
     // Collapsed state: hide labels, show icons only
-    &.lhi-sidebar--collapsed {
+    .o_web_client.lhi-sidebar-collapsed & {
         .lhi-sidebar__org-name,
         .lhi-sidebar__org-sub,
         .lhi-sidebar__section-label,
@@ -214,7 +241,7 @@
         transform: translateX(-100%);
         box-shadow: $lhi-shadow-xl;
 
-        &.lhi-sidebar--open {
+        .o_web_client.lhi-sidebar-open & {
             transform: translateX(0);
         }
     }

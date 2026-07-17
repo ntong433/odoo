@@ -22,9 +22,9 @@ const LIGHT_VALUE   = "light";
  */
 function applyTheme(theme) {
     if (theme === DARK_VALUE) {
-        document.documentElement.setAttribute("data-theme", DARK_VALUE);
+        document.documentElement.setAttribute("data-bs-theme", DARK_VALUE);
     } else {
-        document.documentElement.removeAttribute("data-theme");
+        document.documentElement.setAttribute("data-bs-theme", LIGHT_VALUE);
     }
 }
 

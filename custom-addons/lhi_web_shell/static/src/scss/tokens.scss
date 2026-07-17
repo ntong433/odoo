@@ -148,8 +148,28 @@ $lhi-z-dropdown: 300;
 $lhi-z-dialog:   400;
 $lhi-z-toast:    500;
 
+// ── Bootstrap & Odoo Brand Overrides ──────────────────────────────────────────
+// Override Odoo core brands and Bootstrap default SCSS variables.
+// This flows through the entire system compilation.
+
+$o-brand-odoo:        $lhi-red-600 !default;
+$o-brand-primary:     $lhi-red-600 !default;
+$o-brand-secondary:   $lhi-navy-900 !default;
+
+$primary:             $lhi-red-600 !default;
+$secondary:           $lhi-navy-900 !default;
+$info:                $lhi-info !default;
+$success:             $lhi-success !default;
+$warning:             $lhi-warning !default;
+$danger:              $lhi-danger !default;
+
+$font-family-sans-serif: $lhi-font-family-sans !default;
+$border-radius:       $lhi-radius !default;
+$border-radius-sm:    $lhi-radius-sm !default;
+$border-radius-lg:    $lhi-radius-lg !default;
+
 // ── CSS Custom Properties (exposed to JS / runtime themes) ───────────────────
-:root {
+:root, [data-bs-theme="light"] {
     // Brand primaries
     --lhi-primary:         #{$lhi-red-600};
     --lhi-primary-light:   #{$lhi-red-400};
@@ -193,4 +213,34 @@ $lhi-z-toast:    500;
     --lhi-shadow:          #{$lhi-shadow};
     --lhi-shadow-md:       #{$lhi-shadow-md};
     --lhi-transition:      #{$lhi-transition};
+    --lhi-primary-bg-subtle: #{$lhi-red-50};
+}
+
+[data-bs-theme="dark"] {
+    // Topbar
+    --lhi-topbar-bg:       #1f2937;
+    --lhi-topbar-border:   #374151;
+
+    // Page canvas
+    --lhi-canvas-bg:       #111827;
+    --lhi-card-bg:         #1f2937;
+    --lhi-card-border:     #374151;
+
+    // Text
+    --lhi-text-primary:    #f9fafb;
+    --lhi-text-secondary:  #9ca3af;
+    --lhi-text-muted:      #6b7280;
+
+    // Sidebar - blend with dark mode
+    --lhi-sidebar-bg:      #0f172a;
+
+    // Bootstrap overrides for dark mode native syncing
+    --bs-body-bg:          var(--lhi-canvas-bg);
+    --bs-body-color:       var(--lhi-text-primary);
+    --bs-tertiary-bg:      var(--lhi-card-bg);
+    --bs-secondary-bg:     var(--lhi-card-bg);
+    --bs-border-color:     var(--lhi-card-border);
+    --bs-primary:          var(--lhi-primary);
+
+    --lhi-primary-bg-subtle: rgba(200, 40, 26, 0.2);
 }

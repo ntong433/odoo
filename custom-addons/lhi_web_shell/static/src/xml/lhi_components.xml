@@ -27,23 +27,42 @@
     <t t-name="lhi_web_shell.Sidebar" owl="1">
         <aside class="lhi-sidebar" t-att-class="{ 'lhi-sidebar--collapsed': state.collapsed }">
             <div class="lhi-sidebar__brand">
+                <img src="/lhi_web_shell/static/description/icon.png" class="lhi-sidebar__logo" alt="LHI Logo" onerror="this.src='/web/static/img/favicon.ico'"/>
                 <div class="lhi-sidebar__org-name">Life Helpers Initiative</div>
             </div>
             
             <div class="lhi-sidebar__nav">
+                <!-- Pinned Dashboard -->
+                <a t-attf-class="lhi-sidebar__item {{ state.activeAppId === 'dashboard' ? 'lhi-sidebar__item--active' : '' }}"
+                   t-on-click="() => this.onAppClick({ id: 'dashboard' })"
+                   title="Dashboard">
+                    <i class="fa fa-th-large lhi-sidebar__icon"></i>
+                    <span class="lhi-sidebar__label">Dashboard</span>
+                </a>
+
                 <div class="lhi-sidebar__section-label">Apps</div>
                 <t t-foreach="apps" t-as="app" t-key="app.id">
-                    <a t-att-class="'lhi-sidebar__item ' + (currentApp and currentApp.id === app.id ? 'lhi-sidebar__item--active' : '')"
-                       t-on-click="() => this.onAppClick(app)">
-                        <!-- Mapping Odoo webIcon to a generic font-awesome if unavailable -->
-                        <i class="fa fa-cube lhi-sidebar__icon"></i>
+                    <a t-attf-class="lhi-sidebar__item {{ state.activeAppId === app.id ? 'lhi-sidebar__item--active' : '' }}"
+                       t-on-click="() => this.onAppClick(app)"
+                       t-att-title="app.name">
+                        <t t-set="icon" t-value="getIconProps(app)"/>
+                        <t t-if="icon.type === 'fa'">
+                            <i t-attf-class="{{icon.class}} lhi-sidebar__icon"></i>
+                        </t>
+                        <t t-else="">
+                            <img t-att-src="icon.src" class="lhi-sidebar__icon lhi-sidebar__icon-img" alt=""/>
+                        </t>
                         <span class="lhi-sidebar__label" t-esc="app.name"></span>
                     </a>
                 </t>
             </div>
             
             <div class="lhi-sidebar__footer">
-                <button class="lhi-sidebar__collapse-btn" t-on-click="toggleCollapse">
+                <a class="lhi-sidebar__item lhi-sidebar__utility" href="/web#action=base.action_res_users_my" title="Preferences">
+                    <i class="fa fa-cog lhi-sidebar__icon"></i>
+                    <span class="lhi-sidebar__label">Preferences</span>
+                </a>
+                <button class="lhi-sidebar__collapse-btn" t-on-click="toggleCollapse" t-att-title="state.collapsed ? 'Expand' : 'Collapse'">
                     <i t-attf-class="fa {{ state.collapsed ? 'fa-chevron-right' : 'fa-chevron-left' }}"></i>
                     <span class="lhi-sidebar__label" t-if="!state.collapsed">Collapse</span>
                 </button>

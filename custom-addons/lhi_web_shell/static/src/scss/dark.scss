@@ -1,23 +1,15 @@
 // ============================================================================
-// LHI DARK MODE — CSS variable overrides for [data-theme="dark"]
+// LHI DARK MODE — CSS variable overrides for [data-bs-theme="dark"]
 // Sprint 4 · lhi_web_shell · dark.scss
 //
-// Applied by the lhi_theme_service.js toggling data-theme on <html>.
+// Applied by the lhi_theme_service.js toggling data-bs-theme on <html>.
 // ============================================================================
 
-[data-theme="dark"] {
-    // Sidebar
-    --lhi-sidebar-bg:      #0f1623;
-    --lhi-sidebar-text:    rgba(255, 255, 255, 0.78);
-    --lhi-sidebar-hover:   rgba(255, 255, 255, 0.07);
-
+[data-bs-theme="dark"] {
     // Topbar
-    --lhi-topbar-bg:       #1a1f2e;
     --lhi-topbar-border:   rgba(255, 255, 255, 0.08);
 
     // Page canvas
-    --lhi-canvas-bg:       #141824;
-    --lhi-card-bg:         #1e2537;
     --lhi-card-border:     rgba(255, 255, 255, 0.08);
 
     // Text

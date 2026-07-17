@@ -1,16 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Override the web login layout -->
+    <!-- Override the web login layout for a split-screen enterprise look -->
     <template id="lhi_login_layout_override" inherit_id="web.login_layout">
-        <xpath expr="//div[contains(@t-attf-class, 'card')]" position="attributes">
-            <attribute name="t-attf-class" add="lhi-login-container" separator=" "/>
+        <xpath expr="//div[contains(@t-attf-class, 'card')]" position="replace">
+            <div class="lhi-login-wrapper">
+                <div class="lhi-login-left">
+                    <div class="lhi-login-branding">
+                        <!-- Use standard company logo but heavily styled -->
+                        <img t-attf-src="/logo.png?company={{ company.id if company else 1 }}" alt="LHI Nigeria Logo" class="lhi-logo" t-if="False"/>
+                        <img src="/web/binary/company_logo" alt="LHI Nigeria Logo" class="lhi-logo"/>
+                        <h1>Life Helpers Initiative</h1>
+                        <p>Enterprise Resource Planning &amp; Management System</p>
+                    </div>
+                </div>
+                <div class="lhi-login-right">
+                    <div class="lhi-login-card">
+                        <div class="text-center mb-4">
+                            <h2 class="lhi-login-title">Welcome Back</h2>
+                            <p class="lhi-login-subtitle">Please sign in to your account</p>
+                        </div>
+                        <t t-out="0"/>
+                    </div>
+                </div>
+            </div>
         </xpath>
     </template>
 
     <!-- Override the web login form -->
     <template id="lhi_login_override" inherit_id="web.login">
-        <xpath expr="//form" position="attributes">
-            <attribute name="t-attf-class" add="o_login_form" separator=" "/>
+        <xpath expr="//form" position="replace">
+            <t t-set="entra_provider" t-value="request.env['auth.oauth.provider'].sudo().search([('name', 'ilike', 'Entra')], limit=1)"/>
+            
+            <div class="lhi-login-methods">
+                <t t-if="entra_provider">
+                    <div class="d-grid mb-3">
+                        <a t-attf-href="/auth_oauth/signin?oauth_provider_id={{ entra_provider.id }}&amp;web_login=1" class="btn btn-outline-dark lhi-ms-login-btn">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" alt="Microsoft" class="ms-logo"/>
+                            Sign in with Microsoft
+                        </a>
+                    </div>
+                    <div class="lhi-divider">
+                        <span>or sign in locally</span>
+                    </div>
+                </t>
+            </div>
+
+            <form class="oe_login_form lhi_login_form" role="form" t-attf-action="/web/login" method="post" onsubmit="this.action = '/web/login' + location.hash">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                <div class="mb-3 field-login">
+                    <label for="login" class="form-label">Email / Username</label>
+                    <input type="text" placeholder="name@lhinigeria.org" name="login" t-att-value="login" id="login" class="form-control" required="required" autofocus="autofocus" autocapitalize="off"/>
+                </div>
+
+                <div class="mb-3 field-password">
+                    <label for="password" class="form-label d-flex justify-content-between">
+                        <span>Password</span>
+                        <a t-if="reset_password_enabled" t-attf-href="/web/reset_password?{{ keep_query() }}" class="lhi-forgot-password">Forgot password?</a>
+                    </label>
+                    <div class="input-group">
+                        <input type="password" placeholder="••••••••" name="password" id="password" class="form-control" required="required" autocomplete="current-password" t-att-autofocus="'autofocus' if login else None" maxlength="4096"/>
+                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                            <i class="fa fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <p class="alert alert-danger" t-if="error" role="alert">
+                    <t t-esc="error"/>
+                </p>
+                <p class="alert alert-success" t-if="message" role="status">
+                    <t t-esc="message"/>
+                </p>
+
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-primary lhi-btn-primary">Sign in</button>
+                </div>
+                
+                <input type="hidden" name="redirect" t-att-value="redirect"/>
+            </form>
+            
+            <script>
+                document.getElementById('togglePassword').addEventListener('click', function (e) {
+                    const password = document.getElementById('password');
+                    const icon = this.querySelector('i');
+                    if (password.type === 'password') {
+                        password.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        password.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                });
+            </script>
         </xpath>
     </template>
 </odoo>

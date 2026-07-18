@@ -32,7 +32,7 @@ class LhiEntraConfiguration(models.Model):
         "auth.oauth.provider",
         required=True,
         default=lambda self: self.env.ref(
-            "lhi_integration.provider_microsoft_entra",
+            "lhi_entra_identity_sync.oauth_provider_microsoft_entra",
             raise_if_not_found=False,
         ),
         ondelete="restrict",
@@ -59,6 +59,24 @@ class LhiEntraConfiguration(models.Model):
         string="Allow Controlled First Match by UPN/Email",
         default=False,
         tracking=True,
+    )
+    create_missing_users = fields.Boolean(
+        string="Provision Missing Odoo Users",
+        default=True,
+        tracking=True,
+        help=(
+            "Create real internal Odoo users for unambiguous in-scope Entra identities. "
+            "Creation remains subject to dry-run approval and never sends an invitation."
+        ),
+    )
+    send_invitation_emails_after_sync = fields.Boolean(
+        string="Send Invitation Emails After Sync",
+        default=False,
+        tracking=True,
+        help=(
+            "Reserved for a separately approved manual invitation process. Automatic "
+            "and scheduled Entra synchronization never sends invitations."
+        ),
     )
     sync_login_from_upn = fields.Boolean(default=True, tracking=True)
     user_scope_mode = fields.Selection(
@@ -126,6 +144,33 @@ class LhiEntraConfiguration(models.Model):
         "unique(company_id)",
         "Only one active Entra identity synchronization configuration is allowed per company.",
     )
+
+    def init(self):
+        self._ensure_oauth_provider_xmlid()
+
+    @api.model
+    def _ensure_oauth_provider_xmlid(self):
+        provider = self.env.ref(
+            "lhi_integration.provider_microsoft_entra", raise_if_not_found=False
+        )
+        provider_xmlid = self.env["ir.model.data"].sudo().search(
+            [
+                ("module", "=", "lhi_entra_identity_sync"),
+                ("name", "=", "oauth_provider_microsoft_entra"),
+            ],
+            limit=1,
+        )
+        if provider and not provider_xmlid:
+            self.env["ir.model.data"].sudo().create(
+                {
+                    "module": "lhi_entra_identity_sync",
+                    "name": "oauth_provider_microsoft_entra",
+                    "model": "auth.oauth.provider",
+                    "res_id": provider.id,
+                    "noupdate": True,
+                }
+            )
+        return provider
 
     @api.constrains("page_size", "maximum_users", "maximum_pages")
     def _check_operational_bounds(self):
@@ -229,8 +274,7 @@ class LhiEntraConfiguration(models.Model):
                 )
             )
         provider = self.oauth_provider_id
-        provider.write(
-            {
+        provider_values = {
                 "name": "Microsoft Entra ID",
                 "client_id": client_id,
                 "auth_endpoint": (
@@ -240,9 +284,16 @@ class LhiEntraConfiguration(models.Model):
                 "validation_endpoint": "https://graph.microsoft.com/oidc/userinfo",
                 "data_endpoint": False,
                 "enabled": True,
+                "body": "Sign in with Microsoft",
             }
-        )
+        if "css_class" in provider._fields:
+            provider_values["css_class"] = "fa fa-fw fa-windows"
+        provider.write(provider_values)
         self.env["ir.config_parameter"].sudo().set_param("auth_oauth.authorization_header", "1")
+        self.env["ir.config_parameter"].sudo().set_param(
+            "web.base.url", "https://work.lhinigeria.org"
+        )
+        self.env["ir.config_parameter"].sudo().set_param("web.base.url.freeze", "True")
         self.env["lhi.audit.log"].create_event(
             event_type="write_sensitive_field",
             res_model=self._name,
@@ -310,6 +361,13 @@ class LhiEntraConfiguration(models.Model):
         return True
 
     def write(self, vals):
+        if vals.get("send_invitation_emails_after_sync"):
+            raise ValidationError(
+                _(
+                    "Automatic Entra invitation email delivery is not implemented. "
+                    "Use a separately approved manual invitation process."
+                )
+            )
         if (
             vals.get("sync_mode") == "write"
             or vals.get("primary_sso_enabled") is True
@@ -329,6 +387,13 @@ class LhiEntraConfiguration(models.Model):
         )
         for configuration in configurations:
             try:
+                configuration = configuration.with_context(
+                    no_reset_password=True,
+                    mail_create_nosubscribe=True,
+                    tracking_disable=True,
+                    mail_notrack=True,
+                    lhi_entra_automatic_sync=True,
+                )
                 self.env["lhi.entra.sync.run"].sudo().create_and_execute(
                     configuration=configuration,
                     apply=configuration.sync_mode == "write",

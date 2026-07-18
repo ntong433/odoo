@@ -48,7 +48,6 @@ Deliverables:
             'lhi_dashboard/static/src/js/widgets/notifications_widget.js',
             'lhi_dashboard/static/src/js/widgets/quick_actions_widget.js',
             'lhi_dashboard/static/src/js/lhi_dashboard.js',
-            'lhi_dashboard/static/src/js/lhi_home_router.js',
             'lhi_dashboard/static/src/xml/lhi_dashboard.xml',
             'lhi_dashboard/static/src/xml/widgets.xml',
         ],

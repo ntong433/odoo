@@ -3,6 +3,7 @@ from . import models
 
 
 def post_init_hook(env):
+    env["lhi.entra.configuration"]._ensure_oauth_provider_xmlid()
     users = env["res.users"].sudo().with_context(active_test=False).search(
         [
             ("lhi_entra_object_id", "!=", False),
@@ -13,4 +14,3 @@ def post_init_hook(env):
         user.with_context(lhi_entra_sync=True).write(
             {"entra_object_id": user.lhi_entra_object_id}
         )
-

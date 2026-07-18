@@ -31,15 +31,19 @@
         <xpath expr="//form" position="replace">
             <div class="lhi-login-methods">
                 <t t-if="providers">
+                    <t t-set="microsoft_provider"
+                       t-value="request.env.ref('lhi_entra_identity_sync.oauth_provider_microsoft_entra', raise_if_not_found=False)"/>
+                    <t t-set="microsoft_provider_id"
+                       t-value="microsoft_provider.id if microsoft_provider else False"/>
                     <div class="d-grid mb-3">
                         <t t-foreach="providers" t-as="provider">
                             <a
-                                t-if="'Microsoft' in provider.get('name', '') or 'Azure' in provider.get('name', '') or 'Entra' in provider.get('name', '')"
+                                t-if="provider.get('id') == microsoft_provider_id"
                                 t-att-href="provider.get('auth_link')"
                                 class="btn btn-outline-dark lhi-ms-login-btn"
                                 role="button"
                             >
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" alt="Microsoft" class="ms-logo"/>
+                                <i class="fa fa-fw fa-windows me-2" aria-hidden="true"/>
                                 <span>Sign in with Microsoft</span>
                             </a>
                         </t>

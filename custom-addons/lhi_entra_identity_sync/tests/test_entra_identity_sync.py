@@ -181,6 +181,83 @@ class TestLhiEntraIdentitySync(TransactionCase):
         self.assertEqual(first, second)
         self.assertEqual(graph_get_all.call_count, 1)
 
+    def test_missing_entra_user_is_created_silently_and_idempotently(self):
+        remote = self._remote_user()
+        remote.update(
+            {
+                "id": "88888888-8888-4888-8888-888888888888",
+                "displayName": "New Silent User",
+                "mail": False,
+                "userPrincipalName": "NEW.USER@EXAMPLE.ORG",
+            }
+        )
+        mail_count = self.env["mail.mail"].sudo().search_count([])
+        with (
+            patch.object(
+                type(self.connection),
+                "graph_get_all",
+                return_value=[remote],
+            ),
+            patch.object(
+                type(self.connection),
+                "graph_request",
+                side_effect=self._graph_request,
+            ),
+        ):
+            run = self.env["lhi.entra.sync.run"].create_and_execute(
+                configuration=self.configuration,
+                apply=False,
+                source="manual",
+            )
+        self.assertEqual(run.state, "planned")
+        self.assertEqual(run.plan_ids.match_method, "create")
+        self.assertFalse(run.plan_ids.user_id)
+        self.assertFalse(
+            self.env["res.users"].with_context(active_test=False).search(
+                [("entra_object_id", "=", remote["id"])]
+            )
+        )
+
+        self.configuration.write({"approved_dry_run_id": run.id})
+        self.configuration.with_context(lhi_entra_activation=True).write(
+            {"sync_mode": "write"}
+        )
+        run.action_apply()
+        user = self.env["res.users"].with_context(active_test=False).search(
+            [("entra_object_id", "=", remote["id"])]
+        )
+        self.assertEqual(len(user), 1)
+        self.assertEqual(user.login, "new.user@example.org")
+        self.assertTrue(user.has_group("lhi_security.group_lhi_employee"))
+        self.assertFalse(user.share)
+        self.assertEqual(self.env["mail.mail"].sudo().search_count([]), mail_count)
+
+        with (
+            patch.object(
+                type(self.connection),
+                "graph_get_all",
+                return_value=[remote],
+            ),
+            patch.object(
+                type(self.connection),
+                "graph_request",
+                side_effect=self._graph_request,
+            ),
+        ):
+            second = self.env["lhi.entra.sync.run"].create_and_execute(
+                configuration=self.configuration,
+                apply=True,
+                source="manual",
+            )
+        self.assertEqual(second.state, "applied")
+        self.assertEqual(
+            self.env["res.users"].with_context(active_test=False).search_count(
+                [("entra_object_id", "=", remote["id"])]
+            ),
+            1,
+        )
+        self.assertEqual(self.env["mail.mail"].sudo().search_count([]), mail_count)
+
     def test_graph_failure_queues_retry_without_changing_roles(self):
         with patch.object(
             type(self.connection),

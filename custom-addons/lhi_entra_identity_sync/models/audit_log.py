@@ -7,11 +7,13 @@ class LhiAuditLog(models.Model):
     event_type = fields.Selection(
         selection_add=[
             ("identity_sync", "Entra Identity Synchronization"),
+            ("identity_link", "Entra First-Login Identity Link"),
             ("identity_rollback", "Entra Identity Rollback"),
             ("maintenance_login", "Maintenance Administrator Login"),
         ],
         ondelete={
             "identity_sync": "cascade",
+            "identity_link": "cascade",
             "identity_rollback": "cascade",
             "maintenance_login": "cascade",
         },

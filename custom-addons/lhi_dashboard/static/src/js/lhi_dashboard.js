@@ -159,4 +159,4 @@ export class LhiDashboard extends Component {
 }
 
 // Register the dashboard as a client action
-actionRegistry.add("lhi_dashboard.dashboard_action", LhiDashboard);
+actionRegistry.add("lhi_dashboard.main", LhiDashboard);

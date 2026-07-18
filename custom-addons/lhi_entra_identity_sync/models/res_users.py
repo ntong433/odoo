@@ -1,5 +1,7 @@
 import logging
 
+import requests
+
 from odoo import SUPERUSER_ID, api, fields, models, _
 from odoo.exceptions import AccessDenied, AccessError, UserError, ValidationError
 
@@ -239,12 +241,67 @@ class ResUsers(models.Model):
         return bool(self.all_group_ids & protected)
 
     @api.model
+    def _auth_oauth_validate(self, provider, access_token):
+        """Keep native validation, then obtain the immutable Graph object ID.
+
+        The access token is used only for this bounded server-side request. It is
+        never logged, returned to custom JavaScript, or written by this method.
+        """
+        validation = super()._auth_oauth_validate(provider, access_token)
+        configuration = self.env["lhi.entra.configuration"]._get_for_company(
+            required=False
+        )
+        if not configuration or configuration.oauth_provider_id.id != provider:
+            return validation
+        try:
+            response = requests.get(
+                "https://graph.microsoft.com/v1.0/me",
+                params={
+                    "$select": (
+                        "id,userPrincipalName,mail,displayName,accountEnabled"
+                    )
+                },
+                headers={"Authorization": "Bearer %s" % access_token},
+                timeout=15,
+            )
+            response.raise_for_status()
+            profile = response.json()
+        except (requests.RequestException, ValueError):
+            _logger.warning(
+                "Entra OAuth Graph profile validation failed",
+                extra={"lhi_stage": "oauth_graph_me", "lhi_result": "denied"},
+            )
+            raise AccessDenied(
+                _(
+                    "Your Microsoft account was authenticated, but you are not "
+                    "currently authorized to access LHI ERP. Contact the LHI IT Helpdesk."
+                )
+            )
+        object_id = profile.get("id")
+        if not object_id or profile.get("accountEnabled") is False:
+            raise AccessDenied()
+        expected_tenant = configuration.connection_id._effective_tenant_id().casefold()
+        token_tenant = (validation.get("tid") or "").casefold()
+        if token_tenant and token_tenant != expected_tenant:
+            raise AccessDenied()
+        validation.update(profile)
+        validation["user_id"] = object_id
+        validation["lhi_tenant_id"] = expected_tenant
+        return validation
+
+    @api.model
     def _auth_oauth_signin(self, provider, validation, params):
         configuration = self.env["lhi.entra.configuration"]._get_for_company(
             required=False
         )
         if not configuration or configuration.oauth_provider_id.id != provider:
             return super()._auth_oauth_signin(provider, validation, params)
+        # Existing provider/UID links stay entirely on Odoo's native path.
+        login = super(
+            ResUsers, self.with_context(no_user_creation=True)
+        )._auth_oauth_signin(provider, validation, params)
+        if login:
+            return login
         object_id = validation.get("user_id")
         if not object_id:
             raise AccessDenied()
@@ -299,6 +356,16 @@ class ResUsers(models.Model):
             or not user.active
         ):
             raise AccessDenied(_("This Entra account is disabled for Odoo login."))
+        expected_tenant = configuration.connection_id._effective_tenant_id()
+        if (
+            validation.get("lhi_tenant_id")
+            and validation["lhi_tenant_id"].casefold() != expected_tenant.casefold()
+        ):
+            raise AccessDenied()
+        if user.entra_tenant_id and user.entra_tenant_id.casefold() != expected_tenant.casefold():
+            raise AccessDenied()
+        if not user.has_group("lhi_security.group_lhi_user"):
+            raise AccessDenied()
         user.with_context(lhi_entra_login_binding=True).write(
             {
                 "oauth_provider_id": provider,
@@ -319,6 +386,12 @@ class ResUsers(models.Model):
             "Entra OAuth identity bound to Odoo user ID %s using %s",
             user.id,
             match_method,
+        )
+        self.env["lhi.audit.log"].sudo().create_event(
+            event_type="identity_link",
+            res_model="res.users",
+            res_id=user.id,
+            description=_("Microsoft Entra identity linked after native OAuth validation."),
         )
         return user.login
 

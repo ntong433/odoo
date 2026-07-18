@@ -45,6 +45,8 @@
                         </group>
                         <group string="Synchronization Policy">
                             <field name="allow_controlled_first_match"/>
+                            <field name="create_missing_users"/>
+                            <field name="send_invitation_emails_after_sync"/>
                             <field name="user_scope_mode"/>
                             <field name="entra_scope_group_object_id" invisible="user_scope_mode != 'entra_group'"/>
                             <field name="sync_login_from_upn"/>

@@ -13,7 +13,8 @@ _logger = logging.getLogger(__name__)
 
 USER_SELECT = (
     "id,accountEnabled,businessPhones,department,displayName,givenName,"
-    "jobTitle,mail,mobilePhone,officeLocation,surname,userPrincipalName"
+    "jobTitle,mail,mobilePhone,officeLocation,surname,userPrincipalName,"
+    "employeeId,userType,createdDateTime"
 )
 
 
@@ -367,7 +368,12 @@ class LhiEntraSyncRun(models.Model):
             )
             return
         user, match_method = self._find_local_user(remote)
-        if not user:
+        create_user = (
+            not user
+            and match_method == "not_found"
+            and self.configuration_id.create_missing_users
+        )
+        if not user and not create_user:
             self._finding(
                 category="block",
                 severity="warning",
@@ -377,7 +383,7 @@ class LhiEntraSyncRun(models.Model):
                 % match_method,
             )
             return
-        if user._lhi_is_protected_entra_user():
+        if user and user._lhi_is_protected_entra_user():
             self._finding(
                 category="preserve",
                 severity="info",
@@ -398,7 +404,7 @@ class LhiEntraSyncRun(models.Model):
         )
         membership_ids = self._mapped_membership_ids(object_id, mappings)
         manager_object_id = self._manager_object_id(object_id)
-        current_group_ids = set(user.group_ids.ids)
+        current_group_ids = set(user.group_ids.ids) if user else set()
         add_ids = set()
         remove_ids = set()
 
@@ -460,7 +466,7 @@ class LhiEntraSyncRun(models.Model):
         add_ids, sod_blocked = self._filter_sod_conflicts(
             user, current_group_ids, add_ids, remove_ids
         )
-        employee = user.employee_id
+        employee = user.employee_id if user else self.env["hr.employee"]
         employee_vals = {}
         if employee:
             employee_vals = {
@@ -472,7 +478,7 @@ class LhiEntraSyncRun(models.Model):
                 "work_phone": (remote.get("businessPhones") or [False])[0],
                 "mobile_phone": remote.get("mobilePhone") or False,
             }
-        elif self.configuration_id.create_missing_employee:
+        elif user and self.configuration_id.create_missing_employee:
             employee_vals = {
                 "_create": True,
                 "name": remote.get("displayName") or user.name,
@@ -485,7 +491,7 @@ class LhiEntraSyncRun(models.Model):
                 "work_phone": (remote.get("businessPhones") or [False])[0],
                 "mobile_phone": remote.get("mobilePhone") or False,
             }
-        else:
+        elif user:
             self._finding(
                 category="block",
                 severity="warning",
@@ -580,20 +586,44 @@ class LhiEntraSyncRun(models.Model):
             "entra_given_name": remote.get("givenName") or False,
             "entra_family_name": remote.get("surname") or False,
             "entra_login_blocked": not account_enabled,
-            "name": remote.get("displayName") or user.name,
+            "name": remote.get("displayName")
+            or (user.name if user else remote.get("userPrincipalName")),
             "email": remote.get("mail")
             or remote.get("userPrincipalName")
-            or user.email,
+            or (user.email if user else False),
         }
+        if create_user:
+            login = remote.get("userPrincipalName") or remote.get("mail")
+            if not login:
+                self._finding(
+                    category="block",
+                    severity="error",
+                    entra_object_id=object_id,
+                    message=_("An Entra user without a UPN or mail value cannot be provisioned."),
+                )
+                return
+            user_vals.update(
+                {
+                    "login": login.strip().casefold(),
+                    "active": account_enabled,
+                    "share": False,
+                    "company_id": self.company_id.id,
+                    "company_ids": [(6, 0, self.company_id.ids)],
+                    "group_ids": [
+                        (6, 0, self.env.ref("lhi_security.group_lhi_employee").ids)
+                    ],
+                }
+            )
         if self.configuration_id.sync_login_from_upn and remote.get("userPrincipalName"):
-            user_vals["login"] = remote["userPrincipalName"]
+            user_vals["login"] = remote["userPrincipalName"].strip().casefold()
         if not account_enabled and self.configuration_id.deactivation_policy == "archive":
             user_vals["active"] = False
             if employee_vals:
                 employee_vals["active"] = False
 
         plan = {
-            "match_method": match_method,
+            "match_method": "create" if create_user else match_method,
+            "create_user": create_user,
             "user_vals": user_vals,
             "employee_vals": employee_vals,
             "organizational_vals": organizational_vals,
@@ -605,13 +635,15 @@ class LhiEntraSyncRun(models.Model):
         self.env["lhi.entra.sync.plan"].sudo().create(
             {
                 "run_id": self.id,
-                "user_id": user.id,
+                "user_id": user.id if user else False,
                 "entra_object_id": object_id,
                 "entra_upn": remote.get("userPrincipalName"),
-                "match_method": match_method,
+                "match_method": "create" if create_user else match_method,
                 "state": "blocked" if sod_blocked else "planned",
                 "plan_json": plan,
-                "local_state_hash": _stable_hash(self._snapshot_state(user)),
+                "local_state_hash": _stable_hash(
+                    self._snapshot_state(user) if user else {"missing": True}
+                ),
             }
         )
 
@@ -724,6 +756,7 @@ class LhiEntraSyncRun(models.Model):
                 "configuration": {
                     "connection_id": configuration.connection_id.id,
                     "allow_controlled_first_match": configuration.allow_controlled_first_match,
+                    "create_missing_users": configuration.create_missing_users,
                     "sync_login_from_upn": configuration.sync_login_from_upn,
                     "sync_organizational_scope": configuration.sync_organizational_scope,
                     "create_missing_employee": configuration.create_missing_employee,
@@ -794,19 +827,29 @@ class LhiEntraSyncRun(models.Model):
         for plan in self.plan_ids.filtered(lambda item: item.state == "planned"):
             try:
                 with self.env.cr.savepoint():
-                    current_hash = _stable_hash(self._snapshot_state(plan.user_id))
+                    current_hash = _stable_hash(
+                        self._snapshot_state(plan.user_id)
+                        if plan.user_id
+                        else {"missing": True}
+                    )
                     if current_hash != plan.local_state_hash:
                         raise ValidationError(
                             _("The local user changed after planning; run a fresh dry run.")
                         )
-                    before = self._snapshot_state(plan.user_id)
-                    self._apply_plan(plan)
-                    after = self._snapshot_state(plan.user_id)
+                    before = (
+                        self._snapshot_state(plan.user_id)
+                        if plan.user_id
+                        else {"created_user": True}
+                    )
+                    user = self._apply_plan(plan)
+                    if not plan.user_id:
+                        plan.sudo().write({"user_id": user.id})
+                    after = self._snapshot_state(user)
                     self.env["lhi.entra.sync.snapshot"].sudo().create(
                         {
                             "run_id": self.id,
                             "plan_id": plan.id,
-                            "user_id": plan.user_id.id,
+                            "user_id": user.id,
                             "before_json": before,
                             "after_json": after,
                             "before_hash": _stable_hash(before),
@@ -861,7 +904,6 @@ class LhiEntraSyncRun(models.Model):
 
     def _apply_plan(self, plan):
         payload = plan.plan_json or {}
-        user = plan.user_id.sudo().with_context(lhi_entra_sync=True)
         user_vals = dict(payload.get("user_vals") or {})
         organizational_vals = payload.get("organizational_vals") or {}
         if "department_ids" in organizational_vals:
@@ -882,8 +924,18 @@ class LhiEntraSyncRun(models.Model):
         group_commands = [(3, group_id) for group_id in remove_ids]
         group_commands += [(4, group_id) for group_id in add_ids]
         if group_commands:
-            user_vals["group_ids"] = group_commands
-        user.write(user_vals)
+            user_vals.setdefault("group_ids", []).extend(group_commands)
+        if payload.get("create_user"):
+            user = self.env["res.users"].sudo().with_context(
+                lhi_entra_sync=True,
+                no_reset_password=True,
+                mail_create_nosubscribe=True,
+                tracking_disable=True,
+                mail_notrack=True,
+            ).create(user_vals)
+        else:
+            user = plan.user_id.sudo().with_context(lhi_entra_sync=True)
+            user.write(user_vals)
 
         employee_vals = dict(payload.get("employee_vals") or {})
         create_employee = employee_vals.pop("_create", False)
@@ -895,6 +947,7 @@ class LhiEntraSyncRun(models.Model):
         elif employee and employee_vals:
             employee.sudo().with_context(lhi_entra_sync=True).write(employee_vals)
         self.env["lhi.sod.rule"].sudo().check_user_conflicts(user)
+        return user
 
     def _snapshot_state(self, user):
         user = user.sudo().with_context(active_test=False)
@@ -989,6 +1042,11 @@ class LhiEntraSyncRun(models.Model):
 
     def _restore_snapshot(self, snapshot):
         before = snapshot.before_json or {}
+        if before.get("created_user"):
+            snapshot.user_id.with_context(lhi_entra_rollback=True).write(
+                {"active": False, "entra_login_blocked": True}
+            )
+            return
         user_before = dict(before.get("user") or {})
         department_ids = user_before.pop("department_ids", [])
         office_ids = user_before.pop("office_ids", [])
@@ -1054,7 +1112,7 @@ class LhiEntraSyncPlan(models.Model):
         related="run_id.company_id", store=True, readonly=True, index=True
     )
     user_id = fields.Many2one(
-        "res.users", required=True, ondelete="restrict", index=True
+        "res.users", ondelete="restrict", index=True
     )
     entra_object_id = fields.Char(required=True, index=True)
     entra_upn = fields.Char(index=True)
@@ -1062,6 +1120,7 @@ class LhiEntraSyncPlan(models.Model):
         [
             ("object_id", "Immutable Object ID"),
             ("controlled_email", "Controlled UPN/Email First Match"),
+            ("create", "Create Odoo User"),
         ],
         required=True,
     )

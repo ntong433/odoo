@@ -61,8 +61,8 @@ class LhiFundingOpportunity(models.Model):
         return stage.id if stage else False
 
     @api.model
-    def _read_group_stage_ids(self, stages, domain, order):
-        return self.env['lhi.funding.stage'].search([])
+    def _read_group_stage_ids(self, stages, domain):
+        return stages.search([], order="sequence, id")
 
     @api.depends('score_strategic_fit', 'score_technical_capacity', 'score_operational_presence', 
                  'score_staffing', 'score_compliance', 'score_partnerships', 'score_security', 

@@ -260,9 +260,22 @@ class LhiEntraConfiguration(models.Model):
 
         message = "\n".join(results)
         if not (provider.enabled and client_valid and tenant_valid and validation_valid and scope_valid and auth_link):
-            raise UserError(f"{message}\n\nConfiguration validation failed. Check exact failed condition.")
+            final_message = f"{message}\n\nConfiguration validation failed. Check exact failed condition."
+            msg_type = "danger"
         else:
-            raise UserError(f"{message}\n\nConfiguration is valid and auth_link is successfully generated.")
+            final_message = f"{message}\n\nConfiguration is valid and auth_link is successfully generated."
+            msg_type = "success"
+
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": _("OAuth Configuration Test"),
+                "message": final_message,
+                "sticky": True,
+                "type": msg_type,
+            }
+        }
 
     @api.constrains("page_size", "maximum_users", "maximum_pages")
     def _check_operational_bounds(self):
@@ -392,7 +405,17 @@ class LhiEntraConfiguration(models.Model):
             res_id=self.id,
             description=_("Tenant-scoped Microsoft Entra OAuth provider configured."),
         )
-        return True
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": _("Success"),
+                "message": _("Tenant-scoped Microsoft Entra OAuth provider configured."),
+                "sticky": False,
+                "type": "success",
+                "next": {"type": "ir.actions.client", "tag": "reload"},
+            }
+        }
 
     def action_run_dry_sync(self):
         self.ensure_one()

@@ -24,5 +24,15 @@
             </xpath>
         </field>
     </record>
+
+    <record id="action_lhi_entra_sync_selected_users" model="ir.actions.server">
+        <field name="name">Sync Selected Entra Users</field>
+        <field name="model_id" ref="base.model_res_users"/>
+        <field name="binding_model_id" ref="base.model_res_users"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = records.action_sync_entra_profile()
+        </field>
+    </record>
 </odoo>
 

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="0">
+    <record id="oauth_provider_microsoft_entra" model="auth.oauth.provider">
+        <field name="name">Microsoft Entra ID</field>
+        <field name="client_id">02b3748f-e84b-4bec-935a-21fab1498517</field>
+        <field name="auth_endpoint">https://login.microsoftonline.com/552a1d00-ce70-4fdb-940f-0ad131e4b9cb/oauth2/v2.0/authorize</field>
+        <field name="validation_endpoint">https://graph.microsoft.com/oidc/userinfo</field>
+        <field name="scope">openid profile email</field>
+        <field name="enabled" eval="True"/>
+        <field name="body">Sign in with Microsoft</field>
+        <field name="css_class">fa fa-fw fa-windows</field>
+    </record>
+
+    <record id="auth_oauth_authorization_header" model="ir.config_parameter">
+        <field name="key">auth_oauth.authorization_header</field>
+        <field name="value">1</field>
+    </record>
+</odoo>

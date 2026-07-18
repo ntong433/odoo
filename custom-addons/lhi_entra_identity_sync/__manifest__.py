@@ -24,6 +24,7 @@ the authoritative authorization controls.
         "security/lhi_entra_identity_security.xml",
         "security/ir.model.access.csv",
         "data/ir_cron.xml",
+        "data/auth_oauth_data.xml",
         "views/entra_group_mapping_views.xml",
         "views/entra_configuration_views.xml",
         "views/entra_sync_run_views.xml",

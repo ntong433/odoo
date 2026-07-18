@@ -353,6 +353,38 @@ class LhiEntraConfiguration(models.Model):
             source="manual",
         ).get_form_action()
 
+    def action_test_graph_connection(self):
+        self.ensure_one()
+        self._check_admin()
+        return self.connection_id.action_test_connection()
+
+    def action_sync_first_two_pilot_users(self):
+        self.ensure_one()
+        self._check_admin()
+        users = self.connection_id.graph_get_all(
+            "/users",
+            params={"$select": "id", "$top": 2},
+            auth_context="application",
+            max_pages=1,
+            max_items=2,
+        )
+        object_ids = [u.get("id") for u in users if u.get("id")]
+        return self.env["lhi.entra.sync.run"].create_and_execute(
+            configuration=self,
+            apply=True,
+            source="manual",
+            entra_object_ids=object_ids,
+        ).get_form_action()
+
+    def action_run_full_sync(self):
+        self.ensure_one()
+        self._check_admin()
+        return self.env["lhi.entra.sync.run"].create_and_execute(
+            configuration=self,
+            apply=True,
+            source="manual",
+        ).get_form_action()
+
     def action_enable_write_mode(self):
         self.ensure_one()
         self._check_admin()

@@ -297,11 +297,14 @@ class ResUsers(models.Model):
         if not configuration or configuration.oauth_provider_id.id != provider:
             return super()._auth_oauth_signin(provider, validation, params)
         # Existing provider/UID links stay entirely on Odoo's native path.
-        login = super(
-            ResUsers, self.with_context(no_user_creation=True)
-        )._auth_oauth_signin(provider, validation, params)
-        if login:
-            return login
+        try:
+            login = super(
+                ResUsers, self.with_context(no_user_creation=True)
+            )._auth_oauth_signin(provider, validation, params)
+            if login:
+                return login
+        except AccessDenied:
+            pass
         object_id = validation.get("user_id")
         if not object_id:
             raise AccessDenied()

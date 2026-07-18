@@ -35,3 +35,13 @@ class TestLhiDashboard(TransactionCase):
         """ Test that active announcements are retrieved """
         announcements = self.Announcement.with_user(self.user).get_active_announcements()
         self.assertTrue(any(a['title'] == 'Test Announcement' for a in announcements))
+
+    def test_single_canonical_dashboard_client_action(self):
+        actions = self.env["ir.actions.client"].search(
+            [("tag", "ilike", "lhi_dashboard")]
+        )
+        self.assertEqual(len(actions), 1)
+        self.assertEqual(actions.tag, "lhi_dashboard.dashboard_action")
+        self.assertEqual(actions.target, "main")
+        menu = self.env.ref("lhi_dashboard.menu_lhi_dashboard_root")
+        self.assertEqual(menu.action, actions)

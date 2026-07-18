@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'LHI Role-Based Dashboard',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.0.1',
     'category': 'Productivity',
     'summary': 'Role-based dashboard and post-login routing for LHI ERP',
     'description': """

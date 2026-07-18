@@ -47,7 +47,7 @@ local session exists.
   mapped-group batching, protected-group handling, dry-run planning, idempotency
   keys, failure queue, and rollback snapshots remain in use.
 - The dashboard has one component registration:
-  `lhi_dashboard.main`. Its first root menu provides the normal Odoo home action;
+  `lhi_dashboard.dashboard_action`. Its first root menu provides the normal Odoo home action;
   explicit deep links remain under the standard Odoo router.
 
 ## Changed modules and schema
@@ -97,7 +97,7 @@ links, and dashboard registrations
 Results: Python compilation passed; patch whitespace validation passed; no custom
 `/auth_oauth/signin` route, hardcoded provider ID, or manual callback link was
 found. The login template uses `auth_link`, and the dashboard component has one
-`lhi_dashboard.main` registration.
+`lhi_dashboard.dashboard_action` registration.
 
 Automated Odoo tests were extended for dry-run creation, silent real-user
 provisioning, normalized login, approved baseline access, idempotent repeat sync,
@@ -133,3 +133,54 @@ one-time update for the three affected modules, and restore provider/system
 parameters from the pre-change export. Use run-level rollback only for applied
 identity plans whose snapshot drift check passes. Newly provisioned users are
 blocked and archived by run rollback; they are not destructively deleted.
+
+## Login and dashboard production repair
+
+The missing Microsoft button was caused by the custom QWeb template filtering the
+native `providers` context against `microsoft_provider_id`. That variable
+depended on a new external-ID alias which was not guaranteed to exist before the
+database module upgrade, so an enabled provider could be silently filtered out.
+The template now renders every enabled provider returned by Odoo when it has a
+generated `auth_link`, using the native dictionary's `body`, `css_class`,
+and `id` values. It displays a secret-safe fallback when no provider is
+available. The active custom template remains
+`lhi_web_shell.lhi_login_override`, inheriting `web.login`; native provider
+context comes from `auth_oauth.providers`, which extends `web.login_oauth`.
+
+The Dashboard crash was caused by changing the JavaScript registry key and server
+action tag to `lhi_dashboard.main` while the production database still invoked
+the established `lhi_dashboard.dashboard_action` tag. The final canonical tag
+is `lhi_dashboard.dashboard_action` in both
+`views/dashboard_action.xml` and `static/src/js/lhi_dashboard.js`. The
+JavaScript, Owl XML, widget JavaScript, and SCSS remain included once through
+`web.assets_backend`. The obsolete, unloaded
+`views/dashboard_views.xml` definition was removed.
+
+The scrollbar defect came from a `100vw` by `100vh` wrapper combined with
+nested padding and a mobile negative top margin. The login page now uses a
+`width: 100%`, `min-height: 100dvh` grid, global page box sizing, bounded
+card height, internal scrolling only on short screens, and tablet/mobile
+single-column breakpoints.
+
+Static verification covers Python compilation, XML parsing, manifest asset
+membership, canonical-tag scans, provider-`auth_link` scans, and
+`git diff --check`. Server and QUnit regression tests cover one client action,
+menu linkage, registry lookup, obsolete-key absence, native provider fields, and
+the `auth_oauth` dependency. Browser viewport checks at 1920×1080, 1600×900,
+1440×900, 1366×768, 1280×800, 1024×768, 768×1024, 390×844, and 360×800 require
+the upgraded deployed asset bundle and are not reported as passed until executed.
+
+Upgrade only:
+
+```bash
+python3 /opt/odoo/odoo-bin -c /tmp/lhi-odoo.conf -d lhi_erp \
+  -u lhi_dashboard,lhi_web_shell,lhi_entra_identity_sync \
+  --stop-after-init --no-http
+```
+
+After the upgrade, verify exactly one `ir.actions.client` whose tag is
+`lhi_dashboard.dashboard_action`, and remove only obsolete custom dashboard
+actions after confirming that no menu references them. Regenerate only Odoo's
+generated `/web/assets/` attachment bundles, restart normally, purge the
+Cloudflare cache for `work.lhinigeria.org`, and test local and Microsoft login
+in a clean browser session.

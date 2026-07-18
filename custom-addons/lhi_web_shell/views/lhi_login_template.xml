@@ -3,8 +3,8 @@
     <!-- Override the web login layout for a split-screen enterprise look -->
     <template id="lhi_login_layout_override" inherit_id="web.login_layout">
         <xpath expr="//div[contains(@t-attf-class, 'card')]" position="replace">
-            <div class="lhi-login-wrapper">
-                <div class="lhi-login-left">
+            <main class="lhi-login-page">
+                <section class="lhi-login-left lhi-login-visual" aria-label="Life Helpers Initiative">
                     <div class="lhi-login-branding">
                         <!-- Use standard company logo but heavily styled -->
                         <img t-attf-src="/logo.png?company={{ company.id if company else 1 }}" alt="LHI Nigeria Logo" class="lhi-logo" t-if="False"/>
@@ -12,7 +12,7 @@
                         <h1>Life Helpers Initiative</h1>
                         <p>Enterprise Resource Planning &amp; Management System</p>
                     </div>
-                </div>
+                </section>
                 <div class="lhi-login-right">
                     <div class="lhi-login-card">
                         <div class="text-center mb-4">
@@ -22,7 +22,7 @@
                         <t t-out="0"/>
                     </div>
                 </div>
-            </div>
+            </main>
         </xpath>
     </template>
 
@@ -31,20 +31,17 @@
         <xpath expr="//form" position="replace">
             <div class="lhi-login-methods">
                 <t t-if="providers">
-                    <t t-set="microsoft_provider"
-                       t-value="request.env.ref('lhi_entra_identity_sync.oauth_provider_microsoft_entra', raise_if_not_found=False)"/>
-                    <t t-set="microsoft_provider_id"
-                       t-value="microsoft_provider.id if microsoft_provider else False"/>
                     <div class="d-grid mb-3">
                         <t t-foreach="providers" t-as="provider">
                             <a
-                                t-if="provider.get('id') == microsoft_provider_id"
+                                t-if="provider.get('auth_link')"
                                 t-att-href="provider.get('auth_link')"
-                                class="btn btn-outline-dark lhi-ms-login-btn"
+                                t-att-data-provider-id="provider.get('id')"
+                                class="btn btn-outline-dark lhi-login__microsoft-button"
                                 role="button"
                             >
-                                <i class="fa fa-fw fa-windows me-2" aria-hidden="true"/>
-                                <span>Sign in with Microsoft</span>
+                                <i t-att-class="provider.get('css_class') or 'fa fa-fw fa-windows'" aria-hidden="true"/>
+                                <span t-out="provider.get('body') or provider.get('name') or 'Sign in with Microsoft'"/>
                             </a>
                         </t>
                     </div>
@@ -52,6 +49,13 @@
                         <span>or sign in locally</span>
                     </div>
                 </t>
+                <div t-else="" class="alert alert-warning lhi-login__oauth-unavailable" role="status">
+                    <t t-if="debug">Microsoft OAuth provider is unavailable or disabled.</t>
+                    <t t-else="">
+                        Microsoft sign-in is temporarily unavailable.
+                        Please contact the LHI IT Helpdesk.
+                    </t>
+                </div>
             </div>
 
             <form class="oe_login_form lhi_login_form" role="form" t-attf-action="/web/login" method="post" onsubmit="this.action = '/web/login' + location.hash">

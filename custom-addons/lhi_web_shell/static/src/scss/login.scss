@@ -4,6 +4,18 @@
 // ============================================================================
 
 // ── Root tokens on login page ─────────────────────────────────────────────────
+html,
+body {
+    width: 100%;
+    min-height: 100%;
+    margin: 0;
+}
+
+body,
+body.o_web_client {
+    overflow-x: hidden;
+}
+
 body.o_login_page,
 .o_web_login_signup {
     font-family:
@@ -15,40 +27,45 @@ body.o_login_page,
         "Helvetica Neue",
         Arial,
         sans-serif;
-    margin: 0;
     padding: 0;
     background-color: #f8f9fa;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    min-height: 100%;
 }
 
-// ── Split Screen Wrapper ──────────────────────────────────────────────────────
-.lhi-login-wrapper {
-    display: flex;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
+// ── Split Screen Page ─────────────────────────────────────────────────────────
+.lhi-login-page,
+.lhi-login-page *,
+.lhi-login-page *::before,
+.lhi-login-page *::after {
+    box-sizing: border-box;
+}
 
-    // Mobile fallback
-    @media (max-width: 991px) {
-        flex-direction: column;
-    }
+.lhi-login-page {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
+    align-items: stretch;
+    gap: clamp(24px, 4vw, 64px);
+    width: 100%;
+    min-height: 100dvh;
+    margin: 0;
+    padding: clamp(16px, 3vw, 40px);
+    overflow-x: hidden;
+    background: #f8f9fa;
 }
 
 // ── Left Side (Branding & Splash) ─────────────────────────────────────────────
 .lhi-login-left {
-    flex: 1.2;
     background: linear-gradient(135deg, #1A2540 0%, #0f1623 50%, #1a1520 100%);
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 3rem;
+    min-width: 0;
+    padding: clamp(32px, 5vw, 72px);
     color: white;
     overflow: hidden;
+    border-radius: 28px;
 
     // Decorative background orbs
     &::before,
@@ -105,43 +122,29 @@ body.o_login_page,
         }
     }
 
-    @media (max-width: 991px) {
-        flex: none;
-        padding: 3rem 2rem;
-        height: auto;
-        min-height: 300px;
-
-        .lhi-login-branding {
-            h1 { font-size: 1.8rem; }
-            .lhi-logo { max-width: 140px; margin-bottom: 1rem; }
-        }
-    }
 }
 
 // ── Right Side (Form Area) ────────────────────────────────────────────────────
 .lhi-login-right {
-    flex: 1;
-    background: #ffffff;
+    min-width: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2rem;
-
-    @media (max-width: 991px) {
-        flex: 1;
-        border-top-left-radius: 30px;
-        border-top-right-radius: 30px;
-        margin-top: -30px;
-        position: relative;
-        z-index: 10;
-        box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
-    }
+    padding: 0;
 }
 
 // ── Login Card (Inner container) ──────────────────────────────────────────────
 .lhi-login-card {
-    width: 100%;
-    max-width: 400px;
+    width: min(100%, 480px);
+    max-height: calc(100dvh - 32px);
+    margin-inline: auto;
+    padding: clamp(24px, 4vw, 42px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: #ffffff;
+    border: 1px solid rgba(26, 37, 64, 0.08);
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(26, 37, 64, 0.12);
     
     .lhi-login-title {
         color: #1A2540;
@@ -159,7 +162,7 @@ body.o_login_page,
 }
 
 // ── Authentication Methods (Microsoft / Local) ────────────────────────────────
-.lhi-ms-login-btn {
+.lhi-login__microsoft-button {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -172,17 +175,17 @@ body.o_login_page,
     border-radius: 8px;
     transition: all 0.2s ease;
 
-    .ms-logo {
-        width: 20px;
-        height: 20px;
-    }
-
     &:hover {
         background-color: #f9fafb;
         border-color: #9ca3af;
         color: #111827;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
+}
+
+.lhi-login__oauth-unavailable {
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
 }
 
 .lhi-divider {
@@ -294,5 +297,44 @@ body.o_login_page,
             color: #15803d;
             border-left: 4px solid #22c55e;
         }
+    }
+}
+
+@media (max-width: 991.98px) {
+    .lhi-login-page {
+        grid-template-columns: minmax(0, 1fr);
+        min-height: 100dvh;
+        padding: 20px;
+    }
+
+    .lhi-login-visual {
+        display: none;
+    }
+
+    .lhi-login-card {
+        width: min(100%, 480px);
+    }
+}
+
+@media (max-width: 575.98px) {
+    .lhi-login-page {
+        padding: 12px;
+    }
+
+    .lhi-login-card {
+        width: 100%;
+        max-height: calc(100dvh - 24px);
+        padding: 22px 18px;
+        border-radius: 16px;
+    }
+}
+
+@media (max-height: 720px) and (min-width: 992px) {
+    .lhi-login-page {
+        padding-block: 12px;
+    }
+
+    .lhi-login-card {
+        max-height: calc(100dvh - 24px);
     }
 }

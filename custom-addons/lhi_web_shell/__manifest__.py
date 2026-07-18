@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'LHI Web Shell',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.0.1',
     'category': 'Technical/UI',
     'summary': 'LHI design system, brand tokens, and web shell for the ERP',
     'description': """
@@ -24,7 +24,7 @@ Deliverables:
     'author': 'Life Helpers Initiative',
     'website': 'https://www.lhinigeria.org',
     'license': 'LGPL-3',
-    'depends': ['web', 'base', 'mail', 'lhi_base', 'lhi_security'],
+    'depends': ['web', 'auth_oauth', 'base', 'mail', 'lhi_base', 'lhi_security'],
     'data': [
         'security/ir.model.access.csv',
         'views/lhi_login_template.xml',

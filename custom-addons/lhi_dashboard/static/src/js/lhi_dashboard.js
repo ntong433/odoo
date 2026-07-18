@@ -7,6 +7,7 @@ import { useService } from "@web/core/utils/hooks";
 import { dashboardWidgetRegistry } from "./dashboard_widget_registry";
 
 const actionRegistry = registry.category("actions");
+export const DASHBOARD_ACTION_TAG = "lhi_dashboard.dashboard_action";
 
 export class LhiDashboard extends Component {
     static template = "lhi_dashboard.Dashboard";
@@ -158,5 +159,5 @@ export class LhiDashboard extends Component {
     }
 }
 
-// Register the dashboard as a client action
-actionRegistry.add("lhi_dashboard.main", LhiDashboard);
+// The server-side ir.actions.client tag must match this key exactly.
+actionRegistry.add(DASHBOARD_ACTION_TAG, LhiDashboard);

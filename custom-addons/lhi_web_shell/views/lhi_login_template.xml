@@ -79,11 +79,9 @@
                          and '/common/' not in provider.get('auth_endpoint')">
                     <t t-set="oauth_available" t-value="True"/>
                     <a t-att-href="provider.get('auth_link')"
-                       t-att-data-provider-id="provider.get('id')"
-                       class="btn lhi-microsoft-button"
-                       role="button">
-                        <i class="fa fa-windows" aria-hidden="true"/>
-                        <span t-out="provider.get('body') or 'Sign in with Microsoft'"/>
+                       class="lhi-microsoft-button">
+                        <i class="fa fa-windows"/>
+                        <span>Sign in with Microsoft</span>
                     </a>
                 </t>
             </t>

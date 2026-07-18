@@ -307,7 +307,7 @@ class ResUsers(models.Model):
             pass
         object_id = validation.get("user_id")
         if not object_id:
-            raise AccessDenied()
+            raise AccessDenied("Missing user_id from token validation.")
         users = self.sudo().with_context(active_test=False)
         user = users.search(
             [
@@ -364,11 +364,11 @@ class ResUsers(models.Model):
             validation.get("lhi_tenant_id")
             and validation["lhi_tenant_id"].casefold() != expected_tenant.casefold()
         ):
-            raise AccessDenied()
+            raise AccessDenied("Tenant mismatch in token validation.")
         if user.entra_tenant_id and user.entra_tenant_id.casefold() != expected_tenant.casefold():
-            raise AccessDenied()
+            raise AccessDenied("Tenant mismatch on user record.")
         if not user.has_group("lhi_security.group_lhi_user"):
-            raise AccessDenied()
+            raise AccessDenied("User is missing the LHI User group (lhi_security.group_lhi_user).")
         user.with_context(lhi_entra_login_binding=True).write(
             {
                 "oauth_provider_id": provider,

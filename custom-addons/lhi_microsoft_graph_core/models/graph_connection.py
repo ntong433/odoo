@@ -183,6 +183,9 @@ class LhiGraphConnection(models.Model):
             ("signed_documents", "Signed Documents"),
         ]
         for vals in vals_list:
+            for field in ["tenant_id", "client_id", "sharepoint_hostname", "sharepoint_site_path", "configured_site_id"]:
+                if isinstance(vals.get(field), str):
+                    vals[field] = vals[field].strip()
             if not vals.get("library_ids"):
                 vals["library_ids"] = [
                     (0, 0, {"sequence": index * 10, "code": code, "expected_name": name})
@@ -194,6 +197,9 @@ class LhiGraphConnection(models.Model):
         return records
 
     def write(self, vals):
+        for field in ["tenant_id", "client_id", "sharepoint_hostname", "sharepoint_site_path", "configured_site_id"]:
+            if isinstance(vals.get(field), str):
+                vals[field] = vals[field].strip()
         protected = {
             "sharepoint_site_id",
             "sharepoint_site_web_url",
@@ -384,14 +390,14 @@ class LhiGraphConnection(models.Model):
     def _required_environment_value(self, environment_name, label):
         self.ensure_one()
         value = os.environ.get(environment_name)
-        if not value:
+        if not value or not value.strip():
             raise UserError(
                 self.env._(
                     "%s is not configured in the protected runtime environment."
                 )
                 % label
             )
-        return value
+        return value.strip()
 
     def _effective_tenant_id(self):
         value = self._required_environment_value(

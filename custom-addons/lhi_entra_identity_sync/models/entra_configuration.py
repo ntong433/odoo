@@ -247,14 +247,25 @@ class LhiEntraConfiguration(models.Model):
         scope_valid = all(s in actual_scope for s in ["openid", "profile", "email"])
         results.append(f"Scope valid: {'Yes' if scope_valid else 'No'}")
 
-        try:
-            auth_link = request.env["auth.oauth.provider"].sudo()._get_auth_link(provider.id)
-            results.append("Generated auth_link: Yes")
-        except Exception:
-            auth_link = False
-            results.append("Generated auth_link: No")
+        import json
+        from werkzeug.urls import url_encode
 
-        base_url = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
+        try:
+            base_url = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
+            redirect_uri = f"{base_url}/auth_oauth/signin"
+            state = {"d": self.env.cr.dbname, "p": provider.id, "r": "/web"}
+            params = {
+                "response_type": "token",
+                "client_id": provider.client_id,
+                "redirect_uri": redirect_uri,
+                "scope": provider.scope,
+                "state": json.dumps(state),
+            }
+            auth_link = f"{provider.auth_endpoint}?{url_encode(params)}"
+            results.append("Generated auth_link: Yes")
+        except Exception as e:
+            auth_link = False
+            results.append(f"Generated auth_link: No ({str(e)})")
         redirect_uri = f"{base_url}/auth_oauth/signin"
         results.append(f"Redirect URI generated: {redirect_uri}")
 

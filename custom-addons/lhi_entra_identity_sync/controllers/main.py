@@ -17,49 +17,8 @@ MAINTENANCE_SESSION_KEY = "lhi_entra_maintenance_until"
 class LhiEntraLoginController(OAuthLogin):
     def list_providers(self):
         providers = super().list_providers()
-        valid_providers = []
-
-        canonical_provider = request.env.ref(
-            "lhi_entra_identity_sync.oauth_provider_microsoft_entra", raise_if_not_found=False
-        )
-        expected_client = "02b3748f-e84b-4bec-935a-21fab1498517"
-        expected_endpoint = (
-            "https://login.microsoftonline.com/552a1d00-ce70-4fdb-940f-0ad131e4b9cb/oauth2/v2.0/authorize"
-        )
-
-        for p in providers:
-            is_canonical = canonical_provider and p.get("id") == canonical_provider.id
-            client_id = str(p.get("client_id") or "").strip()
-
-            if not is_canonical and client_id != expected_client:
-                _logger.debug("Provider rejection: not canonical provider and client ID mismatch.")
-                continue
-
-            if not client_id:
-                _logger.debug("Provider rejection: client ID present but empty.")
-                continue
-
-            if "PLACEHOLDER" in client_id.upper():
-                _logger.debug("Provider rejection: client ID placeholder detected.")
-                continue
-
-            if client_id != expected_client:
-                _logger.debug("Provider rejection: client ID does not match expected value.")
-                continue
-
-            auth_endpoint = str(p.get("auth_endpoint") or "").strip().rstrip("/")
-            if auth_endpoint != expected_endpoint:
-                _logger.debug("Provider rejection: tenant endpoint matched failed. Expected %s, got %s", expected_endpoint, auth_endpoint)
-                continue
-
-            if not p.get("auth_link"):
-                _logger.debug("Provider rejection: auth_link not generated.")
-                continue
-
-            _logger.debug("Canonical XML ID resolved and provider validation passed.")
-            valid_providers.append(p)
-
-        return valid_providers
+        _logger.info(f"Odoo native list_providers returned: {providers}")
+        return providers
 
     @staticmethod
     def _client_ip():

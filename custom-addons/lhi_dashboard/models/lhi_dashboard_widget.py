@@ -67,7 +67,10 @@ class LhiDashboardWidget(models.Model):
                     'id': widget.id,
                     'name': widget.name,
                     'registry_key': widget.registry_key,
-                    'col_span': widget.col_span,
+                    # My Apps is a launcher section, not a KPI tile. Force the
+                    # full dashboard row even when an older noupdate database
+                    # record still contains the historical col_span=2 value.
+                    'col_span': 12 if widget.registry_key == 'lhi_dashboard.accessible_modules' else widget.col_span,
                     'sequence': widget.sequence,
                 })
         

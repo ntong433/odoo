@@ -7,14 +7,16 @@
         <field name="arch" type="xml">
             <kanban default_group_by="stage_id" class="o_kanban_small_column o_opportunity_kanban" quick_create="false">
                 <field name="name"/>
+                <field name="stage_id"/>
                 <field name="donor_id"/>
                 <field name="funding_ceiling"/>
                 <field name="currency_id"/>
                 <field name="probability"/>
                 <field name="submission_deadline"/>
+                <field name="user_id"/>
                 <templates>
-                    <t t-name="kanban-box">
-                        <div t-attf-class="oe_kanban_global_click">
+                    <t t-name="card">
+                        <div class="lhi-pipeline-kanban-card">
                             <div class="o_kanban_record_top">
                                 <div class="o_kanban_record_headings">
                                     <strong class="o_kanban_record_title"><field name="name"/></strong>
@@ -180,5 +182,14 @@
         <field name="res_model">lhi.funding.opportunity</field>
         <field name="view_mode">kanban,list,form,graph,pivot</field>
         <field name="context">{'search_default_user_id': uid}</field>
+    </record>
+
+    <!-- Bind the Odoo 19 card-based kanban explicitly so an older/default
+         database view cannot be selected ahead of the LHI Pipeline view. -->
+    <record id="action_lhi_funding_opportunity_view_kanban" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">kanban</field>
+        <field name="view_id" ref="view_lhi_funding_opportunity_kanban"/>
+        <field name="act_window_id" ref="action_lhi_funding_opportunity"/>
     </record>
 </odoo>

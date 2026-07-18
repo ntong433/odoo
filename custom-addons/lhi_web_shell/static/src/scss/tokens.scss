@@ -160,9 +160,13 @@ $lhi-z-toast:    500;
 // Override Odoo core brands and Bootstrap default SCSS variables.
 // This flows through the entire system compilation.
 
-$o-brand-odoo:        $lhi-primary !default;
-$o-brand-primary:     $lhi-primary !default;
-$o-brand-secondary:   $lhi-secondary !default;
+$o-community-color:   $lhi-primary;
+$o-enterprise-color:  $lhi-primary;
+$o-brand-odoo:        $lhi-primary;
+$o-brand-primary:     $lhi-primary;
+$o-brand-secondary:   $lhi-secondary;
+$o-action:            $lhi-primary;
+$o-main-link-color:   $lhi-primary;
 
 $primary:             $lhi-primary !default;
 $secondary:           $lhi-secondary !default;
@@ -190,12 +194,12 @@ $border-radius-lg:    $lhi-radius-lg !default;
     --lhi-sidebar-bg:      #{$lhi-sidebar};
     --lhi-sidebar-text:    rgba(255, 255, 255, 0.82);
     --lhi-sidebar-hover:   rgba(255, 255, 255, 0.08);
-    --lhi-sidebar-active:  #{$lhi-red-600};
+    --lhi-sidebar-active:  #{$lhi-primary};
     --lhi-sidebar-width:   #{$lhi-sidebar-width};
 
     // Topbar
-    --lhi-topbar-bg:       #ffffff;
-    --lhi-topbar-border:   #{$lhi-neutral-200};
+    --lhi-topbar-bg:       #{$lhi-secondary};
+    --lhi-topbar-border:   rgba(255, 255, 255, 0.18);
     --lhi-topbar-height:   #{$lhi-topbar-height};
 
     // Page canvas
@@ -226,7 +230,7 @@ $border-radius-lg:    $lhi-radius-lg !default;
 
 [data-bs-theme="dark"] {
     // Topbar
-    --lhi-topbar-bg:       #1f2937;
+    --lhi-topbar-bg:       #20212b;
     --lhi-topbar-border:   #374151;
 
     // Page canvas

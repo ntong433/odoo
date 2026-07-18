@@ -90,6 +90,28 @@
     }
 }
 
+.lhi-my-apps-section {
+    grid-column: 1 / -1 !important;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    overflow: visible;
+}
+
+.lhi-my-apps {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    margin-bottom: $lhi-space-4;
+}
+
+.lhi-my-apps__title {
+    margin: 0 0 $lhi-space-4;
+    color: var(--lhi-text-primary);
+    font-size: $lhi-font-size-lg;
+    font-weight: $lhi-font-weight-bold;
+}
+
 // ── LHI Cards ────────────────────────────────────────────────────────────────
 .lhi-card {
     background: var(--lhi-card-bg);
@@ -229,13 +251,14 @@
 
 // ── App Tiles Grid ───────────────────────────────────────────────────────────
 .lhi-app-grid {
+    width: 100%;
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 16px;
+    gap: 18px;
 }
 
-@media (max-width: 1599.98px) { .lhi-app-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-@media (max-width: 1199.98px) { .lhi-app-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 1399.98px) { .lhi-app-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 991.98px) { .lhi-app-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 767.98px) { .lhi-app-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 479.98px) { .lhi-app-grid { grid-template-columns: minmax(0, 1fr); } }
 
@@ -248,6 +271,7 @@
     transition: transform $lhi-transition-medium, box-shadow $lhi-transition-medium, border-color $lhi-transition-fast;
     cursor: pointer;
     min-height: 120px;
+    height: 132px;
     padding: $lhi-space-4;
     width: 100%;
 
@@ -279,9 +303,12 @@
     }
 
     .lhi-app-title {
+        max-width: 100%;
         font-size: $lhi-font-size-sm;
         font-weight: $lhi-font-weight-semibold;
         line-height: $lhi-line-height-tight;
+        overflow-wrap: anywhere;
+        text-wrap: balance;
     }
 }
 

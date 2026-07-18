@@ -38,23 +38,19 @@
 
     <!-- Accessible Modules Widget -->
     <t t-name="lhi_dashboard.AccessibleModulesWidget" owl="1">
-        <div t-if="state.apps.length" class="lhi-card rounded-4 mb-4">
-            <div class="lhi-card__header px-4 py-3 rounded-top-4">
-                <h3 class="lhi-card__title m-0 fw-bold">My Apps</h3>
+        <section t-if="state.apps.length" class="lhi-my-apps" aria-labelledby="lhi-my-apps-title">
+            <h2 id="lhi-my-apps-title" class="lhi-my-apps__title">My Apps</h2>
+            <div class="lhi-app-grid">
+                <t t-foreach="state.apps" t-as="app" t-key="app.xmlid">
+                    <button type="button" class="lhi-app-tile text-center d-flex flex-column align-items-center justify-content-center" t-on-click="() => this.onAppClick(app)">
+                        <span class="lhi-app-icon-bg d-flex align-items-center justify-content-center" aria-hidden="true">
+                            <img t-att-src="app.icon_url" class="lhi-app-icon-img" alt=""/>
+                        </span>
+                        <span class="lhi-app-title" t-esc="app.name"/>
+                    </button>
+                </t>
             </div>
-            <div class="lhi-card__body p-4 rounded-bottom-4" style="background-color: var(--lhi-bg-body);">
-                <div class="lhi-app-grid">
-                    <t t-foreach="state.apps" t-as="app" t-key="app.xmlid">
-                        <button type="button" class="lhi-app-tile text-center d-flex flex-column align-items-center justify-content-center" t-on-click="() => this.onAppClick(app)">
-                            <div class="lhi-app-icon-bg d-flex align-items-center justify-content-center">
-                                <img t-att-src="app.icon_url" class="lhi-app-icon-img" alt=""/>
-                            </div>
-                            <span class="lhi-app-title" t-esc="app.name"/>
-                        </button>
-                    </t>
-                </div>
-            </div>
-        </div>
+        </section>
     </t>
 
     <!-- My Approvals Widget -->

@@ -70,7 +70,7 @@
             
             <div t-elif="!state.error and state.widgets.length > 0" class="lhi-dashboard__grid mt-4">
                 <t t-foreach="state.widgets" t-as="widget" t-key="widget.id">
-                    <div t-attf-class="lhi-dashboard__widget-wrapper lhi-dashboard__widget--{{ widget.col_span === 12 ? 'full' : (widget.col_span > 6 ? 'wide' : 'standard') }}">
+                    <div t-attf-class="lhi-dashboard__widget-wrapper {{ widget.registry_key === 'lhi_dashboard.accessible_modules' ? 'lhi-my-apps-section' : '' }} lhi-dashboard__widget--{{ widget.col_span === 12 ? 'full' : (widget.col_span > 6 ? 'wide' : 'standard') }}">
                         <t t-component="widget.component" t-props="{ widgetInfo: widget }" />
                     </div>
                 </t>

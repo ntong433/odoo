@@ -105,6 +105,9 @@ body.o_web_client > .o_main_components_container > * {
 
 // The main topbar sits in row 1 of the content column
 body.o_web_client > .o_main_navbar {
+    --NavBar-entry-color: rgba(255, 255, 255, 0.92);
+    --NavBar-entry-color--hover: #ffffff;
+    --NavBar-brand-color: #ffffff;
     grid-column: 2 !important;
     grid-row: 1 !important;
     display: flex !important;
@@ -128,6 +131,21 @@ body.o_web_client > .o_main_navbar {
     .o_menu_systray .o_nav_entry:not(.lhi-keep) {
         // Keep systray but hide legacy breadcrumb area
     }
+}
+
+body.o_web_client > .o_main_navbar .o_navbar_apps_menu .dropdown-toggle,
+body.o_web_client > .o_main_navbar .o_menu_toggle,
+body.o_web_client > .o_main_navbar .o_nav_entry,
+body.o_web_client > .o_main_navbar .dropdown-toggle {
+    color: rgba(255, 255, 255, 0.92);
+}
+
+body.o_web_client > .o_main_navbar .o_navbar_apps_menu .dropdown-toggle:hover,
+body.o_web_client > .o_main_navbar .o_menu_toggle:hover,
+body.o_web_client > .o_main_navbar .o_nav_entry:hover,
+body.o_web_client > .o_main_navbar .dropdown-toggle:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.12);
 }
 
 // ── 5. Content area — full width in second column, own scrolling ─────────────

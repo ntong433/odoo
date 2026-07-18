@@ -46,3 +46,17 @@ class TestLhiFundingOpportunity(common.TransactionCase):
         })
         
         self.assertEqual(self.donor.opportunity_count, 2, "Donor should have 2 opportunities linked")
+
+    def test_pipeline_action_uses_odoo_19_card_kanban(self):
+        action = self.env.ref(
+            'lhi_funding_opportunity.action_lhi_funding_opportunity'
+        )
+        kanban_view = self.env.ref(
+            'lhi_funding_opportunity.view_lhi_funding_opportunity_kanban'
+        )
+        combined_arch = str(kanban_view.get_combined_arch())
+
+        self.assertIn('t-name="card"', combined_arch)
+        self.assertNotIn('t-name="kanban-box"', combined_arch)
+        self.assertIn('lhi-pipeline-kanban-card', combined_arch)
+        self.assertEqual(action.views[0], (kanban_view.id, 'kanban'))

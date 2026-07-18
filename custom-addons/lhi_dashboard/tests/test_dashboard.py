@@ -31,6 +31,11 @@ class TestLhiDashboard(TransactionCase):
         widgets = self.Widget.with_user(self.user).get_user_widgets()
         self.assertFalse(any(w['registry_key'] == 'test.widget.1' for w in widgets))
         self.assertTrue(any(w['registry_key'] == 'lhi_dashboard.my_tasks' for w in widgets))
+        my_apps = next(
+            w for w in widgets
+            if w['registry_key'] == 'lhi_dashboard.accessible_modules'
+        )
+        self.assertEqual(my_apps['col_span'], 12)
 
     def test_user_without_functional_assignment_has_no_apps(self):
         self.assertEqual(self.Widget.with_user(self.user).get_accessible_apps(), [])

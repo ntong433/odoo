@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'LHI Web Shell',
-    'version': '19.0.1.1.0',
+    'version': '19.0.1.1.1',
     'category': 'Technical/UI',
     'summary': 'LHI design system, brand tokens, and web shell for the ERP',
     'description': """
@@ -34,7 +34,7 @@ Deliverables:
         # ── 1. Primary Variables (loaded earliest — before Odoo/Bootstrap SCSS) ──
         # tokens.scss MUST be here so $lhi-* variables exist for all later files.
         'web._assets_primary_variables': [
-            'lhi_web_shell/static/src/scss/tokens.scss',
+            ('prepend', 'lhi_web_shell/static/src/scss/tokens.scss'),
         ],
 
         # ── 2. Backend Web Assets (compiled together after primary variables) ──

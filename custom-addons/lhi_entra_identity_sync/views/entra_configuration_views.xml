@@ -23,6 +23,7 @@
             <form>
                 <header>
                     <button name="action_configure_oauth_provider" type="object" string="Configure Tenant SSO"/>
+                    <button name="action_test_microsoft_login_configuration" type="object" string="Test Microsoft Login Configuration"/>
                     <button name="action_test_graph_connection" type="object" string="Test Graph Connection"/>
                     <button name="action_run_dry_sync" type="object" string="Run Dry Sync" class="oe_highlight"/>
                     <button name="action_sync_first_two_pilot_users" type="object" string="Sync First 2 Pilot Users"/>

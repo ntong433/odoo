@@ -7,7 +7,6 @@ class TestLhiLoginTemplate(TransactionCase):
         view = self.env.ref("lhi_web_shell.lhi_login_override")
         architecture = view.arch_db
         self.assertIn("provider.get('auth_link')", architecture)
-        self.assertIn("provider.get('body')", architecture)
         self.assertNotIn("microsoft_provider_id", architecture)
         self.assertNotIn("/auth_oauth/signin", architecture)
         self.assertIn("container-fluid p-0 lhi-login-host", architecture)

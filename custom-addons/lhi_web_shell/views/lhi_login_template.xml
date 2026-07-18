@@ -69,24 +69,19 @@
 
             <div class="lhi-login-divider"><span>or</span></div>
 
-            <t t-set="oauth_available" t-value="False"/>
-            <t t-foreach="providers or []" t-as="provider">
-                <t t-if="provider.get('enabled')
-                         and provider.get('auth_link')
-                         and provider.get('client_id')
-                         and 'PLACEHOLDER' not in provider.get('client_id').upper()
-                         and provider.get('auth_endpoint')
-                         and '/common/' not in provider.get('auth_endpoint')">
-                    <t t-set="oauth_available" t-value="True"/>
-                    <a t-att-href="provider.get('auth_link')"
-                       class="lhi-microsoft-button">
-                        <i class="fa fa-windows"/>
+            <t t-if="providers">
+                <t t-foreach="providers" t-as="provider">
+                    <a t-if="provider.get('auth_link')"
+                       t-att-href="provider.get('auth_link')"
+                       class="btn lhi-microsoft-button"
+                       role="button">
+                        <i class="fa fa-windows" aria-hidden="true"/>
                         <span>Sign in with Microsoft</span>
                     </a>
                 </t>
             </t>
 
-            <div t-if="not oauth_available"
+            <div t-if="not providers"
                  class="alert alert-warning lhi-login__oauth-unavailable"
                  role="status">
                 <t t-if="debug">

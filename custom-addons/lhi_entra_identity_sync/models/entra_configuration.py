@@ -183,6 +183,9 @@ class LhiEntraConfiguration(models.Model):
         provider = provider or self._ensure_oauth_provider_xmlid()
         if not provider:
             raise UserError(_("The Microsoft Entra OAuth provider record is missing."))
+        obsolete_provider = self.env.ref("lhi_integration.provider_microsoft_entra", raise_if_not_found=False)
+        if obsolete_provider and obsolete_provider != provider:
+            obsolete_provider.sudo().write({"enabled": False})
         tenant_id = (os.environ.get("ENTRA_TENANT_ID") or DEFAULT_ENTRA_TENANT_ID).strip()
         client_id = (os.environ.get("ENTRA_CLIENT_ID") or DEFAULT_ENTRA_CLIENT_ID).strip()
         try:
@@ -213,6 +216,57 @@ class LhiEntraConfiguration(models.Model):
             "auth_oauth.authorization_header", "1"
         )
         return provider
+
+    def action_test_microsoft_login_configuration(self):
+        self.ensure_one()
+        results = []
+        provider = self.env.ref("lhi_entra_identity_sync.oauth_provider_microsoft_entra", raise_if_not_found=False)
+        if provider:
+            results.append("Canonical provider found: Yes")
+        else:
+            results.append("Canonical provider found: No")
+            raise UserError("\n".join(results) + "\n\nTest failed. Canonical provider is missing.")
+
+        results.append(f"Provider enabled: {'Yes' if provider.enabled else 'No'}")
+        
+        expected_client = (os.environ.get("ENTRA_CLIENT_ID") or DEFAULT_ENTRA_CLIENT_ID).strip()
+        actual_client = (provider.client_id or "").strip()
+        client_valid = actual_client and actual_client == expected_client and "PLACEHOLDER" not in actual_client.upper()
+        results.append(f"Client ID valid: {'Yes' if client_valid else 'No'}")
+
+        tenant_id = (os.environ.get("ENTRA_TENANT_ID") or DEFAULT_ENTRA_TENANT_ID).strip()
+        expected_auth_endpoint = f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/authorize"
+        actual_auth_endpoint = (provider.auth_endpoint or "").strip().rstrip("/")
+        tenant_valid = actual_auth_endpoint == expected_auth_endpoint
+        results.append(f"Tenant endpoint valid: {'Yes' if tenant_valid else 'No'}")
+
+        expected_validation = "https://graph.microsoft.com/oidc/userinfo"
+        actual_validation = (provider.validation_endpoint or "").strip().rstrip("/")
+        validation_valid = actual_validation == expected_validation
+        results.append(f"Validation endpoint valid: {'Yes' if validation_valid else 'No'}")
+
+        actual_scope = (provider.scope or "").strip()
+        expected_scopes = {"openid", "profile", "email", "User.Read"}
+        # Ensure at least openid, profile, email are there
+        scope_valid = all(s in actual_scope for s in ["openid", "profile", "email"])
+        results.append(f"Scope valid: {'Yes' if scope_valid else 'No'}")
+
+        try:
+            auth_link = request.env["auth.oauth.provider"].sudo()._get_auth_link(provider.id)
+            results.append("Generated auth_link: Yes")
+        except Exception:
+            auth_link = False
+            results.append("Generated auth_link: No")
+
+        base_url = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
+        redirect_uri = f"{base_url}/auth_oauth/signin"
+        results.append(f"Redirect URI generated: {redirect_uri}")
+
+        message = "\n".join(results)
+        if not (provider.enabled and client_valid and tenant_valid and validation_valid and scope_valid and auth_link):
+            raise UserError(f"{message}\n\nConfiguration validation failed. Check exact failed condition.")
+        else:
+            raise UserError(f"{message}\n\nConfiguration is valid and auth_link is successfully generated.")
 
     @api.constrains("page_size", "maximum_users", "maximum_pages")
     def _check_operational_bounds(self):

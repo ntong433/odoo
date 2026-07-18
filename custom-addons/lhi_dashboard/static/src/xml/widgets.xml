@@ -38,25 +38,19 @@
 
     <!-- Accessible Modules Widget -->
     <t t-name="lhi_dashboard.AccessibleModulesWidget" owl="1">
-        <div class="lhi-card rounded-4 mb-4">
+        <div t-if="state.apps.length" class="lhi-card rounded-4 mb-4">
             <div class="lhi-card__header px-4 py-3 rounded-top-4">
                 <h3 class="lhi-card__title m-0 fw-bold">My Apps</h3>
             </div>
             <div class="lhi-card__body p-4 rounded-bottom-4" style="background-color: var(--lhi-bg-body);">
-                <div class="lhi-stat-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 1rem;">
-                    <t t-foreach="apps" t-as="app" t-key="app.id">
-                        <div class="lhi-app-tile text-center p-4 rounded-4 d-flex flex-column align-items-center justify-content-center" t-on-click="() => this.onAppClick(app)" style="cursor: pointer; min-height: 120px;">
-                            <div class="lhi-app-icon-bg p-3 rounded-circle mb-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                                <t t-set="icon" t-value="getIconProps(app)"/>
-                                <t t-if="icon.type === 'fa'">
-                                    <i t-attf-class="{{icon.class}} fa-2x"></i>
-                                </t>
-                                <t t-else="">
-                                    <img t-att-src="icon.src" class="lhi-app-icon-img" alt=""/>
-                                </t>
+                <div class="lhi-app-grid">
+                    <t t-foreach="state.apps" t-as="app" t-key="app.xmlid">
+                        <button type="button" class="lhi-app-tile text-center d-flex flex-column align-items-center justify-content-center" t-on-click="() => this.onAppClick(app)">
+                            <div class="lhi-app-icon-bg d-flex align-items-center justify-content-center">
+                                <img t-att-src="app.icon_url" class="lhi-app-icon-img" alt=""/>
                             </div>
-                            <div class="fw-bold" style="font-size: 14px;" t-esc="app.name"></div>
-                        </div>
+                            <span class="lhi-app-title" t-esc="app.name"/>
+                        </button>
                     </t>
                 </div>
             </div>

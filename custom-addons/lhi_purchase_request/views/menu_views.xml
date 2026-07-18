@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <menuitem id="menu_lhi_procurement_root" name="Procurement" sequence="45" web_icon="lhi_purchase_request,static/description/icon.png"/>
+    <menuitem id="menu_lhi_procurement_root" name="Procurement" sequence="45" web_icon="lhi_web_shell,static/src/img/module_icons/procurement.svg"/>
 
     <record id="action_lhi_purchase_request" model="ir.actions.act_window">
         <field name="name">Purchase Requests</field>

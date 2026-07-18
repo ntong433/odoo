@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'LHI Web Shell',
-    'version': '19.0.1.0.2',
+    'version': '19.0.1.1.0',
     'category': 'Technical/UI',
     'summary': 'LHI design system, brand tokens, and web shell for the ERP',
     'description': """
@@ -27,6 +27,7 @@ Deliverables:
     'depends': ['web', 'auth_oauth', 'base', 'mail', 'lhi_base', 'lhi_security'],
     'data': [
         'security/ir.model.access.csv',
+        'views/apps_security.xml',
         'views/lhi_login_template.xml',
     ],
     'assets': {
@@ -52,6 +53,7 @@ Deliverables:
             'lhi_web_shell/static/src/js/lhi_theme_service.js',
             'lhi_web_shell/static/src/js/lhi_theme_toggle.js',
             'lhi_web_shell/static/src/js/icon_utils.js',
+            'lhi_web_shell/static/src/js/preferences.js',
             'lhi_web_shell/static/src/js/lhi_sidebar.js',
             'lhi_web_shell/static/src/js/lhi_notification_badge.js',
         ],
@@ -64,6 +66,7 @@ Deliverables:
         # ── 5. Unit tests ──
         'web.assets_unit_tests': [
             'lhi_web_shell/static/tests/lhi_theme_service_tests.js',
+            'lhi_web_shell/static/tests/lhi_navigation_tests.js',
         ],
     },
     'installable': True,

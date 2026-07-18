@@ -44,3 +44,43 @@ Replace the generic Odoo experience with the LHI visual identity (Sprint 4). Del
 
 ---
 *Prepared by Antigravity — Senior Odoo 19 Architect*
+
+## 2026-07-18 Preferences and navigation correction
+
+### Changed files and behavior
+
+- `static/src/js/preferences.js`: executes Odoo 19's native `res.users.action_get`
+  action and binds it to the authenticated `user.userId` before dispatch.
+- `static/src/js/lhi_sidebar.js` and `static/src/xml/lhi_components.xml`: replace
+  the generic `base.action_res_users_my` URL with the native current-user flow.
+- `static/src/js/icon_utils.js`: maps stable menu XML IDs to supported Font
+  Awesome classes and supplies `fa fa-circle-o` for unknown applications.
+- `lhi_dashboard/static/src/js/widgets/accessible_modules_widget.js`: reuses the
+  shell's central icon resolver so the sidebar and dashboard stay consistent.
+- `static/tests/lhi_navigation_tests.js`: covers the current-user record ID,
+  required XML-ID mappings, and fallback icon.
+- `lhi_entra_identity_sync/tests/test_entra_identity_sync.py`: verifies provisioned
+  staff are internal users and do not receive Portal, Access Rights, or Settings.
+
+No models, fields, ACLs, record rules, database schema, migrations, environment
+variables, secrets, Entra/Graph permissions, or SharePoint configuration changed.
+No Odoo core files changed. The action retains Odoo's simplified preferences view
+and native self-writeable field restrictions.
+
+### Verification and deployment
+
+- Static JavaScript execution was not run locally because Node.js is unavailable.
+- Upgrade only `lhi_web_shell,lhi_dashboard`; the Entra change is test-only.
+- In Coolify, run the one-time upgrade with the deployed `odoo-bin`, runtime
+  configuration, and `lhi_erp` database using `--stop-after-init --no-http`, then
+  restore the normal command and restart only the application service.
+- Manually test local administrator and ordinary Entra users, both themes, all
+  four mapped icons, and denial of user/access-right administration.
+
+### Rollback
+
+Redeploy the previous application image, run the same scoped module upgrade for
+`lhi_web_shell,lhi_dashboard` if their asset records require refresh, restore the
+normal command, and restart only Odoo. No database, queue, webhook, configuration,
+document, or integration-state rollback is required because this change adds no
+schema or persistent business data.

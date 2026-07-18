@@ -60,7 +60,11 @@
         border-color: var(--lhi-card-border);
     }
 
-    .lhi-badge--soft-primary { background: rgba(200, 40, 26, 0.2); color: #f4a098; }
+    .lhi-badge--soft-primary { background: rgba(147, 23, 4, 0.28); color: #f4a098; }
+
+    .lhi-app-icon-img {
+        filter: brightness(0) invert(1);
+    }
     .lhi-badge--soft-success { background: rgba(25, 135, 84, 0.2); color: #86efac; }
     .lhi-badge--soft-warning { background: rgba(245, 158, 11, 0.2); color: #fde68a; }
     .lhi-badge--soft-info    { background: rgba(2, 132, 199, 0.2);  color: #7dd3fc; }

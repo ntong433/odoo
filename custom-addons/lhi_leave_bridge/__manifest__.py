@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Lhi Leave Bridge & Unified Inbox',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.0.1',
     'category': 'Human Resources',
     'summary': 'Integration with external Next.js/Supabase Leave Management and Unified Approval Inbox',
-    'depends': ['base', 'mail', 'hr', 'lhi_base', 'lhi_approval_matrix'],
+    'depends': ['base', 'mail', 'hr', 'lhi_base', 'lhi_approval_matrix', 'lhi_web_shell'],
     'data': [
         'security/ir.model.access.csv',
         'security/lhi_leave_security.xml',

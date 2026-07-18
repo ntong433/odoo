@@ -58,10 +58,13 @@
             </div>
             
             <div class="lhi-sidebar__footer">
-                <a class="lhi-sidebar__item lhi-sidebar__utility" href="/web#action=base.action_res_users_my" title="Preferences">
+                <button class="lhi-sidebar__item lhi-sidebar__utility border-0 bg-transparent"
+                        type="button"
+                        t-on-click="onPreferencesClick"
+                        title="Preferences">
                     <i class="fa fa-cog lhi-sidebar__icon"></i>
                     <span class="lhi-sidebar__label">Preferences</span>
-                </a>
+                </button>
                 <button class="lhi-sidebar__collapse-btn" t-on-click="toggleCollapse" t-att-title="state.collapsed ? 'Expand' : 'Collapse'">
                     <i t-attf-class="fa {{ state.collapsed ? 'fa-chevron-right' : 'fa-chevron-left' }}"></i>
                     <span class="lhi-sidebar__label" t-if="!state.collapsed">Collapse</span>
@@ -87,4 +90,3 @@
 
 
 </templates>
-

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'LHI Asset Management',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.0.1',
     'category': 'Operations',
     'summary': 'Operational Asset Register and Lifecycle Management',
-    'depends': ['mail', 'lhi_base', 'lhi_purchase_order', 'lhi_approval_matrix'],
+    'depends': ['mail', 'lhi_base', 'lhi_purchase_order', 'lhi_approval_matrix', 'lhi_web_shell'],
     'data': [
         'security/ir.model.access.csv',
         'security/lhi_asset_security.xml',

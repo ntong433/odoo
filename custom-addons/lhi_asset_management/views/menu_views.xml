@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <menuitem id="menu_lhi_operations_root" name="Operations &amp; Assets" sequence="60" web_icon="lhi_asset_management,static/description/icon.png"/>
+    <menuitem id="menu_lhi_operations_root" name="Operations &amp; Assets" sequence="60" web_icon="lhi_web_shell,static/src/img/module_icons/operations.svg"/>
 
     <record id="action_lhi_asset" model="ir.actions.act_window">
         <field name="name">Assets Register</field>

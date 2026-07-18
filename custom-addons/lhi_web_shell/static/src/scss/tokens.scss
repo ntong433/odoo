@@ -2,12 +2,8 @@
 // LHI BRAND TOKENS — Single source of truth for the design system
 // Sprint 4 · lhi_web_shell · tokens.scss
 //
-// Brand extraction rationale:
-//   • Primary Red   (#C8281A) — dominant logo hue, confirmed via lhinigeria.org
-//   • Orange        (#E8620A) — secondary accent visible in website CTAs
-//   • Navy          (#1A2540) — professional sidebar/header background
-//   • These are the only colours that appear consistently across the website,
-//     annual reports, and OpenSign branding already in use by LHI.
+// Exact values extracted from live lhinigeria.org CSS and its original logo
+// asset on 2026-07-18. See BRAND_SOURCES.md for selectors and provenance.
 // ============================================================================
 
 // ── Colour Palette ────────────────────────────────────────────────────────────
@@ -18,9 +14,9 @@ $lhi-red-200: #f9c8c2;
 $lhi-red-300: #f4a098;
 $lhi-red-400: #ec6b60;
 $lhi-red-500: #e0402f;
-$lhi-red-600: #c8281a;   // ← PRIMARY brand red
+$lhi-red-600: #ed3237;   // logo red
 $lhi-red-700: #a82015;
-$lhi-red-800: #8b1d13;
+$lhi-red-800: #931704;   // live deep-red button colour
 $lhi-red-900: #741c13;
 
 // Accent (LHI Orange)
@@ -29,7 +25,7 @@ $lhi-orange-100: #ffecdb;
 $lhi-orange-200: #ffd5b0;
 $lhi-orange-300: #ffb87d;
 $lhi-orange-400: #f98e42;
-$lhi-orange-500: #e8620a;  // ← PRIMARY brand orange
+$lhi-orange-500: #f58634;  // logo orange
 $lhi-orange-600: #c9520a;
 $lhi-orange-700: #a9440d;
 $lhi-orange-800: #8a380f;
@@ -45,7 +41,18 @@ $lhi-navy-500: #3b5c96;
 $lhi-navy-600: #2e4a7d;
 $lhi-navy-700: #243b63;
 $lhi-navy-800: #1a2d4e;
-$lhi-navy-900: #1A2540;   // ← PRIMARY sidebar navy
+$lhi-navy-900: #343877;   // navigation/submenu background
+
+$lhi-primary: #931704;
+$lhi-primary-hover: #da0102;
+$lhi-secondary: #343877;
+$lhi-accent: #efc940;
+$lhi-surface: #ffffff;
+$lhi-surface-muted: #f9f7f6;
+$lhi-border: #d4dad7;
+$lhi-text: #000000;
+$lhi-text-muted: #515266;
+$lhi-sidebar: #343877;
 
 // Neutral greys
 $lhi-neutral-50:  #f8f9fa;
@@ -153,12 +160,12 @@ $lhi-z-toast:    500;
 // Override Odoo core brands and Bootstrap default SCSS variables.
 // This flows through the entire system compilation.
 
-$o-brand-odoo:        $lhi-red-600 !default;
-$o-brand-primary:     $lhi-red-600 !default;
-$o-brand-secondary:   $lhi-navy-900 !default;
+$o-brand-odoo:        $lhi-primary !default;
+$o-brand-primary:     $lhi-primary !default;
+$o-brand-secondary:   $lhi-secondary !default;
 
-$primary:             $lhi-red-600 !default;
-$secondary:           $lhi-navy-900 !default;
+$primary:             $lhi-primary !default;
+$secondary:           $lhi-secondary !default;
 $info:                $lhi-info !default;
 $success:             $lhi-success !default;
 $warning:             $lhi-warning !default;
@@ -172,15 +179,15 @@ $border-radius-lg:    $lhi-radius-lg !default;
 // ── CSS Custom Properties (exposed to JS / runtime themes) ───────────────────
 :root, [data-bs-theme="light"] {
     // Brand primaries
-    --lhi-primary:         #{$lhi-red-600};
+    --lhi-primary:         #{$lhi-primary};
     --lhi-primary-light:   #{$lhi-red-400};
-    --lhi-primary-dark:    #{$lhi-red-800};
-    --lhi-accent:          #{$lhi-orange-500};
+    --lhi-primary-dark:    #{$lhi-primary-hover};
+    --lhi-accent:          #{$lhi-accent};
     --lhi-accent-light:    #{$lhi-orange-300};
     --lhi-accent-dark:     #{$lhi-orange-700};
 
     // Sidebar
-    --lhi-sidebar-bg:      #{$lhi-navy-900};
+    --lhi-sidebar-bg:      #{$lhi-sidebar};
     --lhi-sidebar-text:    rgba(255, 255, 255, 0.82);
     --lhi-sidebar-hover:   rgba(255, 255, 255, 0.08);
     --lhi-sidebar-active:  #{$lhi-red-600};
@@ -192,13 +199,13 @@ $border-radius-lg:    $lhi-radius-lg !default;
     --lhi-topbar-height:   #{$lhi-topbar-height};
 
     // Page canvas
-    --lhi-canvas-bg:       #{$lhi-neutral-50};
-    --lhi-card-bg:         #ffffff;
-    --lhi-card-border:     #{$lhi-neutral-200};
+    --lhi-canvas-bg:       #{$lhi-surface-muted};
+    --lhi-card-bg:         #{$lhi-surface};
+    --lhi-card-border:     #{$lhi-border};
 
     // Text
-    --lhi-text-primary:    #{$lhi-neutral-900};
-    --lhi-text-secondary:  #{$lhi-neutral-600};
+    --lhi-text-primary:    #{$lhi-text};
+    --lhi-text-secondary:  #{$lhi-text-muted};
     --lhi-text-muted:      #{$lhi-neutral-500};
     --lhi-text-inverse:    #ffffff;
 
@@ -243,5 +250,5 @@ $border-radius-lg:    $lhi-radius-lg !default;
     --bs-border-color:     var(--lhi-card-border);
     --bs-primary:          var(--lhi-primary);
 
-    --lhi-primary-bg-subtle: rgba(200, 40, 26, 0.2);
+    --lhi-primary-bg-subtle: rgba(147, 23, 4, 0.28);
 }

@@ -245,6 +245,7 @@ body.o_web_client > .o_action_manager .o_content {
             object-fit: contain;
             opacity: 0.9;
             border-radius: $lhi-radius-sm;
+            filter: brightness(0) invert(1);
         }
     }
 

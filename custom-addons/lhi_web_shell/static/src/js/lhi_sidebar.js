@@ -6,7 +6,9 @@
 
 import { Component, useState, onWillUnmount, onMounted } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
-import { resolveAppIcon } from "./icon_utils";
+import { user } from "@web/core/user";
+import { getAppIconProps } from "./icon_utils";
+import { openCurrentUserPreferences } from "./preferences";
 
 export class LhiSidebar extends Component {
     static template = "lhi_web_shell.Sidebar";
@@ -15,6 +17,7 @@ export class LhiSidebar extends Component {
     setup() {
         this.menuService = useService("menu");
         this.actionService = useService("action");
+        this.orm = useService("orm");
         
         const savedCollapsed = localStorage.getItem("lhi.sidebar.collapsed") === "true";
         this.state = useState({
@@ -66,42 +69,21 @@ export class LhiSidebar extends Component {
     }
 
     getIconProps(app) {
-        const faFallback = { type: 'fa', class: 'fa fa-th-large' };
-
-        if (!app.webIcon && !app.webIconData) return faFallback;
-
-        // Base64-encoded image data from Odoo (must be a valid non-empty string)
-        if (app.webIconData && typeof app.webIconData === 'string' && app.webIconData.length > 64) {
-            return { type: 'image', src: resolveAppIcon(app.webIconData) };
-        }
-
-        if (app.webIcon) {
-            // Module-relative static path: "module_name,path/to/icon.png"
-            if (app.webIcon.includes(',')) {
-                const [moduleName, iconPath] = app.webIcon.split(',');
-                if (moduleName && iconPath) {
-                    return { type: 'image', src: resolveAppIcon(`/${moduleName}/${iconPath}`) };
-                }
-            }
-
-            // FontAwesome class reference
-            if (app.webIcon.startsWith('fa-') || app.webIcon.startsWith('fa ')) {
-                return { type: 'fa', class: `fa ${app.webIcon.replace(/^fa\s+/, '')}` };
-            }
-            
-            // Raw paths or URLs
-            if (app.webIcon.startsWith('/') || app.webIcon.startsWith('http')) {
-                return { type: 'image', src: resolveAppIcon(app.webIcon) };
-            }
-        }
-
-        return faFallback;
+        return getAppIconProps(app);
     }
 
     toggleCollapse() {
         this.state.collapsed = !this.state.collapsed;
         localStorage.setItem("lhi.sidebar.collapsed", this.state.collapsed ? "true" : "false");
         this._applySidebarState();
+    }
+
+    async onPreferencesClick() {
+        await openCurrentUserPreferences({
+            orm: this.orm,
+            actionService: this.actionService,
+            userId: user.userId,
+        });
     }
 
     onAppClick(app) {

@@ -42,8 +42,9 @@ body.o_login_page,
 }
 
 .lhi-login-page {
-    --lhi-primary: #76205f;
-    --lhi-secondary: #15274b;
+    --lhi-primary: #931704;
+    --lhi-primary-hover: #da0102;
+    --lhi-secondary: #343877;
     --lhi-surface: #ffffff;
     --lhi-text: #20242c;
     --lhi-muted: #687182;
@@ -192,7 +193,7 @@ body.o_login_page,
 }
 
 .lhi_login_form .lhi-forgot-password:hover {
-    color: #5f194d;
+    color: var(--lhi-primary-hover);
     text-decoration: underline;
 }
 
@@ -228,7 +229,7 @@ body.o_login_page,
 
 .lhi-btn-primary:hover,
 .lhi-btn-primary:focus {
-    background: #5f194d;
+    background: var(--lhi-primary-hover);
     color: #ffffff;
 }
 

@@ -230,6 +230,10 @@ class TestLhiEntraIdentitySync(TransactionCase):
         self.assertEqual(user.login, "new.user@example.org")
         self.assertTrue(user.has_group("lhi_security.group_lhi_employee"))
         self.assertFalse(user.share)
+        self.assertTrue(user.has_group("base.group_user"))
+        self.assertFalse(user.has_group("base.group_portal"))
+        self.assertFalse(user.has_group("base.group_system"))
+        self.assertFalse(user.has_group("base.group_erp_manager"))
         self.assertEqual(self.env["mail.mail"].sudo().search_count([]), mail_count)
 
         with (

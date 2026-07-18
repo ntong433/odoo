@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'LHI Purchase Request',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.0.1',
     'category': 'Procurement',
     'summary': 'Purchase Requests with Approval Routing and Validations',
-    'depends': ['lhi_base', 'lhi_project_lifecycle', 'lhi_results_framework', 'lhi_approval_matrix', 'mail', 'lhi_sharepoint_storage'],
+    'depends': ['lhi_base', 'lhi_project_lifecycle', 'lhi_results_framework', 'lhi_approval_matrix', 'mail', 'lhi_sharepoint_storage', 'lhi_web_shell'],
     'data': [
         'security/ir.model.access.csv',
         'security/lhi_purchase_request_security.xml',

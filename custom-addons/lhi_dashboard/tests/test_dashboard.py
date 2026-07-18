@@ -27,9 +27,18 @@ class TestLhiDashboard(TransactionCase):
         })
 
     def test_widget_access(self):
-        """ Test that user can get user widgets """
+        """Only the maintained operational dashboard widgets are returned."""
         widgets = self.Widget.with_user(self.user).get_user_widgets()
-        self.assertTrue(any(w['registry_key'] == 'test.widget.1' for w in widgets))
+        self.assertFalse(any(w['registry_key'] == 'test.widget.1' for w in widgets))
+        self.assertTrue(any(w['registry_key'] == 'lhi_dashboard.my_tasks' for w in widgets))
+
+    def test_user_without_functional_assignment_has_no_apps(self):
+        self.assertEqual(self.Widget.with_user(self.user).get_accessible_apps(), [])
+
+    def test_app_definitions_use_xmlids_and_local_icons(self):
+        for key, _label, menu_xmlid, _groups, _departments in self.Widget._LHI_APP_DEFINITIONS:
+            self.assertIn('.', menu_xmlid)
+            self.assertNotEqual(key, menu_xmlid)
 
     def test_announcement_visibility(self):
         """ Test that active announcements are retrieved """

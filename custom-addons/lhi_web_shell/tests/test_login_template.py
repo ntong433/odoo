@@ -1,4 +1,4 @@
-from odoo.tests import TransactionCase, tagged
+from odoo.tests import TransactionCase, new_test_user, tagged
 
 
 @tagged("post_install", "-at_install")
@@ -25,3 +25,20 @@ class TestLhiLoginTemplate(TransactionCase):
             [("name", "=", "auth_oauth")], limit=1
         )
         self.assertEqual(module.state, "installed")
+
+    def test_apps_are_system_administrator_only(self):
+        ordinary_user = new_test_user(
+            self.env,
+            login="lhi_apps_security_user",
+            groups="base.group_user",
+        )
+        apps_menu = self.env.ref("base.menu_apps")
+        apps_action = self.env.ref("base.open_module_tree")
+        system_group = self.env.ref("base.group_system")
+        self.assertEqual(apps_menu.group_ids, system_group)
+        self.assertEqual(apps_action.group_ids, system_group)
+        self.assertFalse(
+            self.env["ir.module.module"].with_user(ordinary_user).check_access_rights(
+                "read", raise_exception=False
+            )
+        )

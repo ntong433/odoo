@@ -60,3 +60,8 @@ class TestLhiFundingOpportunity(common.TransactionCase):
         self.assertNotIn('t-name="kanban-box"', combined_arch)
         self.assertIn('lhi-pipeline-kanban-card', combined_arch)
         self.assertEqual(action.views[0], (kanban_view.id, 'kanban'))
+
+        root_menu = self.env.ref(
+            'lhi_funding_opportunity.menu_lhi_funding_root'
+        )
+        self.assertEqual(root_menu.action, action)

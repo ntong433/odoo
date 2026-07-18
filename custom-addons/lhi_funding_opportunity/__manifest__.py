@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'LHI Funding Opportunity Pipeline',
-    'version': '19.0.1.0.2',
+    'version': '19.0.1.0.3',
     'category': 'Sales/CRM',
     'summary': 'Manage funding opportunities and go/no-go decisions',
     'depends': ['lhi_donor_management', 'lhi_base', 'mail', 'lhi_approval_matrix', 'lhi_web_shell'],

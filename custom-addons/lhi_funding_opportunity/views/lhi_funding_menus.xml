@@ -3,6 +3,7 @@
     <!-- Main Menu -->
     <menuitem id="menu_lhi_funding_root" 
               name="Pipeline" 
+              action="action_lhi_funding_opportunity"
               web_icon="lhi_web_shell,static/src/img/module_icons/pipeline.svg"
               sequence="20" 
               groups="base.group_user"/>

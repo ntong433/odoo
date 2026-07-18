@@ -493,7 +493,7 @@ class LhiEntraSyncRun(models.Model):
             }
         elif user:
             self._finding(
-                category="block",
+                category="missing_mapping",
                 severity="warning",
                 user=user,
                 entra_object_id=object_id,

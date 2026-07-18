@@ -15,4 +15,6 @@
         <field name="key">auth_oauth.authorization_header</field>
         <field name="value">1</field>
     </record>
+
+    <function model="lhi.entra.configuration" name="_configure_interactive_oauth_provider"/>
 </odoo>

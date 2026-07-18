@@ -150,33 +150,29 @@ class LhiEntraConfiguration(models.Model):
     )
 
     def init(self):
-        provider = self._ensure_oauth_provider_xmlid()
-        if provider:
-            self._configure_interactive_oauth_provider(provider)
+        # Use raw SQL to map the old provider to the new XML ID before data files load.
+        # Using ORM here causes UndefinedColumn crashes if res_users schema isn't ready.
+        self.env.cr.execute("""
+            SELECT res_id FROM ir_model_data 
+            WHERE module = 'lhi_integration' AND name = 'provider_microsoft_entra'
+            ORDER BY id DESC LIMIT 1
+        """)
+        row = self.env.cr.fetchone()
+        if row:
+            provider_id = row[0]
+            self.env.cr.execute("""
+                SELECT 1 FROM ir_model_data 
+                WHERE module = 'lhi_entra_identity_sync' AND name = 'oauth_provider_microsoft_entra'
+            """)
+            if not self.env.cr.fetchone():
+                self.env.cr.execute("""
+                    INSERT INTO ir_model_data (module, name, model, res_id, noupdate)
+                    VALUES ('lhi_entra_identity_sync', 'oauth_provider_microsoft_entra', 'auth.oauth.provider', %s, true)
+                """, (provider_id,))
 
     @api.model
     def _ensure_oauth_provider_xmlid(self):
-        provider = self.env.ref(
-            "lhi_integration.provider_microsoft_entra", raise_if_not_found=False
-        )
-        provider_xmlid = self.env["ir.model.data"].sudo().search(
-            [
-                ("module", "=", "lhi_entra_identity_sync"),
-                ("name", "=", "oauth_provider_microsoft_entra"),
-            ],
-            limit=1,
-        )
-        if provider and not provider_xmlid:
-            self.env["ir.model.data"].sudo().create(
-                {
-                    "module": "lhi_entra_identity_sync",
-                    "name": "oauth_provider_microsoft_entra",
-                    "model": "auth.oauth.provider",
-                    "res_id": provider.id,
-                    "noupdate": True,
-                }
-            )
-        return provider
+        return self.env.ref("lhi_entra_identity_sync.oauth_provider_microsoft_entra", raise_if_not_found=False)
 
     @api.model
     def _configure_interactive_oauth_provider(self, provider=None):

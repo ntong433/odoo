@@ -3,17 +3,17 @@
     <data noupdate="1">
         <!-- Add Microsoft Entra ID OAuth Provider -->
         <record id="provider_microsoft_entra" model="auth.oauth.provider">
-            <field name="name">Microsoft Entra ID (LHI Sign-in)</field>
-            <field name="client_id">PLACEHOLDER_CLIENT_ID</field>
-            <field name="auth_endpoint">https://login.microsoftonline.com/common/oauth2/v2.0/authorize</field>
+            <field name="name">Microsoft Entra ID</field>
+            <field name="client_id">02b3748f-e84b-4bec-935a-21fab1498517</field>
+            <field name="auth_endpoint">https://login.microsoftonline.com/552a1d00-ce70-4fdb-940f-0ad131e4b9cb/oauth2/v2.0/authorize</field>
             <field name="scope">openid profile email User.Read</field>
             <field name="validation_endpoint">https://graph.microsoft.com/oidc/userinfo</field>
-            <field name="data_endpoint">https://graph.microsoft.com/oidc/userinfo</field>
+            <field name="data_endpoint" eval="False"/>
             <field name="body">Sign in with Microsoft</field>
-            <!-- Fresh databases must fail closed until an administrator replaces
-                 the placeholder client ID and validates the provider. Existing
-                 configured databases are not changed because this file is noupdate. -->
-            <field name="enabled" eval="False"/>
+            <field name="css_class">fa fa-windows</field>
+            <!-- Interactive provider identifiers are public, non-secret values.
+                 The client secret remains only in protected server configuration. -->
+            <field name="enabled" eval="True"/>
         </record>
     </data>
 </odoo>

@@ -433,6 +433,15 @@ class TestLhiEntraIdentitySync(TransactionCase):
             ):
                 self.configuration.action_configure_oauth_provider()
             provider = self.configuration.oauth_provider_id
+            self.assertEqual(provider.name, "Microsoft Entra ID")
+            self.assertEqual(provider.client_id, self.connection.client_id)
+            self.assertTrue(provider.enabled)
+            self.assertEqual(provider.scope, "openid profile email User.Read")
+            self.assertEqual(provider.body, "Sign in with Microsoft")
+            if "css_class" in provider._fields:
+                self.assertEqual(provider.css_class, "fa fa-windows")
+            self.assertNotIn("PLACEHOLDER", provider.client_id.upper())
+            self.assertNotIn("/common/", provider.auth_endpoint)
             self.assertEqual(
                 provider.auth_endpoint,
                 (
@@ -444,8 +453,27 @@ class TestLhiEntraIdentitySync(TransactionCase):
                 self.env["res.config.settings"].get_uri(),
                 "https://work.lhinigeria.org/auth_oauth/signin",
             )
+            self.assertEqual(
+                parameters.get_param("auth_oauth.authorization_header"), "1"
+            )
         finally:
             parameters.set_param("web.base.url", previous)
+
+    def test_placeholder_client_id_is_rejected(self):
+        with (
+            patch.dict(
+                os.environ,
+                {
+                    "ENTRA_TENANT_ID": self.connection.tenant_id,
+                    "ENTRA_CLIENT_ID": "PLACEHOLDER_CLIENT_ID",
+                },
+                clear=False,
+            ),
+            self.assertRaises(UserError),
+        ):
+            self.configuration._configure_interactive_oauth_provider(
+                self.configuration.oauth_provider_id
+            )
 
     def test_manager_approval_snapshots_approver(self):
         manager = self.env["res.users"].with_context(no_reset_password=True).create(

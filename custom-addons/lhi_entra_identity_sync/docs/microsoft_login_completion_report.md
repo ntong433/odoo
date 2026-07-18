@@ -184,3 +184,59 @@ actions after confirming that no menu references them. Regenerate only Odoo's
 generated `/web/assets/` attachment bundles, restart normally, purge the
 Cloudflare cache for `work.lhinigeria.org`, and test local and Microsoft login
 in a clean browser session.
+
+## SCSS and placeholder OAuth correction
+
+The deployed pre-fix `login.scss` from commit `eaf6118e216` was compiled
+locally with the target fork's pinned LibSass 0.22.0. The exact traceback was:
+
+```text
+sass.CompileError: Internal Error: Incompatible units: 'px' and '%'.
+```
+
+The first failing expression was
+`lhi_web_shell/static/src/scss/login.scss:138`:
+`width: min(100%, 480px)`; the same incompatible expression recurred at line
+315. LibSass treats CSS `min()` as Sass arithmetic. Replacing both expressions
+with `width: 100%; max-width: 480px` made the historical stylesheet compile.
+The final stylesheet removes all mixed-unit `min()` and `clamp()` dependencies,
+uses plain CSS custom properties, and compiles successfully with LibSass 0.22.0.
+
+Original login wrapper classes were `container py-5`, with the custom shell
+nested inside Odoo's constrained card host. Final wrapper classes are
+`container-fluid p-0 lhi-login-host`, containing `lhi-login-page`,
+`lhi-login-visual`, and `lhi-login-panel`. The native local form appears
+before `lhi-login-divider` and the independent `lhi-microsoft-button`.
+
+The rendered provider originally came from the noupdate record
+`lhi_integration.provider_microsoft_entra` with
+`client_id=PLACEHOLDER_CLIENT_ID` and the `/common/` authorization endpoint.
+Because the record is inside `<data noupdate="1">`, a normal data upgrade could
+not correct the existing database row. The `lhi_entra_identity_sync` model
+initialization and post-install hook now explicitly synchronize the provider from
+the protected server environment, validate both public UUIDs, reject placeholder
+values, enable the provider, and set
+`auth_oauth.authorization_header=1`.
+
+Production Coolify non-secret environment verification:
+
+- tenant ID: `552a1d00-ce70-4fdb-940f-0ad131e4b9cb`;
+- client ID: `02b3748f-e84b-4bec-935a-21fab1498517`.
+
+Final provider values after module upgrade:
+
+- XML ID: `lhi_entra_identity_sync.oauth_provider_microsoft_entra` (aliasing
+  the established provider record);
+- authorization endpoint:
+  `https://login.microsoftonline.com/552a1d00-ce70-4fdb-940f-0ad131e4b9cb/oauth2/v2.0/authorize`;
+- validation endpoint: `https://graph.microsoft.com/oidc/userinfo`;
+- scope: `openid profile email User.Read`;
+- button/CSS: `Sign in with Microsoft`, `fa fa-windows`;
+- enabled: true.
+
+The custom QWeb template validates the enabled provider dictionary before
+rendering and still uses only Odoo's generated `provider.get('auth_link')`.
+Production rendered URL, redirect/callback, local login, Microsoft login,
+viewport, asset URL, Entra delegated permission/implicit-token settings, and
+Coolify restart results remain pending until the code is deployed and the two
+affected modules are upgraded.

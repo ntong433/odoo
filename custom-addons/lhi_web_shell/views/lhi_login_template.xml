@@ -2,26 +2,29 @@
 <odoo>
     <!-- Override the web login layout for a split-screen enterprise look -->
     <template id="lhi_login_layout_override" inherit_id="web.login_layout">
+        <xpath expr="//div[@class='container py-5']" position="attributes">
+            <attribute name="class">container-fluid p-0 lhi-login-host</attribute>
+        </xpath>
         <xpath expr="//div[contains(@t-attf-class, 'card')]" position="replace">
             <main class="lhi-login-page">
-                <section class="lhi-login-left lhi-login-visual" aria-label="Life Helpers Initiative">
+                <section class="lhi-login-visual" aria-label="Life Helpers Initiative">
                     <div class="lhi-login-branding">
-                        <!-- Use standard company logo but heavily styled -->
-                        <img t-attf-src="/logo.png?company={{ company.id if company else 1 }}" alt="LHI Nigeria Logo" class="lhi-logo" t-if="False"/>
-                        <img src="/web/binary/company_logo" alt="LHI Nigeria Logo" class="lhi-logo"/>
+                        <img src="/web/binary/company_logo"
+                             alt="LHI Nigeria Logo"
+                             class="lhi-login-logo"/>
                         <h1>Life Helpers Initiative</h1>
                         <p>Enterprise Resource Planning &amp; Management System</p>
                     </div>
                 </section>
-                <div class="lhi-login-right">
+                <section class="lhi-login-panel">
                     <div class="lhi-login-card">
-                        <div class="text-center mb-4">
-                            <h2 class="lhi-login-title">Welcome Back</h2>
-                            <p class="lhi-login-subtitle">Please sign in to your account</p>
-                        </div>
+                        <header class="lhi-login-header">
+                            <h2>Welcome Back</h2>
+                            <p>Sign in to continue to LHI ERP</p>
+                        </header>
                         <t t-out="0"/>
                     </div>
-                </div>
+                </section>
             </main>
         </xpath>
     </template>
@@ -29,35 +32,6 @@
     <!-- Override the web login form -->
     <template id="lhi_login_override" inherit_id="web.login">
         <xpath expr="//form" position="replace">
-            <div class="lhi-login-methods">
-                <t t-if="providers">
-                    <div class="d-grid mb-3">
-                        <t t-foreach="providers" t-as="provider">
-                            <a
-                                t-if="provider.get('auth_link')"
-                                t-att-href="provider.get('auth_link')"
-                                t-att-data-provider-id="provider.get('id')"
-                                class="btn btn-outline-dark lhi-login__microsoft-button"
-                                role="button"
-                            >
-                                <i t-att-class="provider.get('css_class') or 'fa fa-fw fa-windows'" aria-hidden="true"/>
-                                <span t-out="provider.get('body') or provider.get('name') or 'Sign in with Microsoft'"/>
-                            </a>
-                        </t>
-                    </div>
-                    <div class="lhi-divider">
-                        <span>or sign in locally</span>
-                    </div>
-                </t>
-                <div t-else="" class="alert alert-warning lhi-login__oauth-unavailable" role="status">
-                    <t t-if="debug">Microsoft OAuth provider is unavailable or disabled.</t>
-                    <t t-else="">
-                        Microsoft sign-in is temporarily unavailable.
-                        Please contact the LHI IT Helpdesk.
-                    </t>
-                </div>
-            </div>
-
             <form class="oe_login_form lhi_login_form" role="form" t-attf-action="/web/login" method="post" onsubmit="this.action = '/web/login' + location.hash">
                 <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
 
@@ -73,7 +47,7 @@
                     </label>
                     <div class="input-group">
                         <input type="password" placeholder="••••••••" name="password" id="password" class="form-control" required="required" autocomplete="current-password" t-att-autofocus="'autofocus' if login else None" maxlength="4096"/>
-                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                        <button class="btn btn-outline-secondary o_show_password" type="button">
                             <i class="fa fa-eye"></i>
                         </button>
                     </div>
@@ -92,22 +66,44 @@
                 
                 <input type="hidden" name="redirect" t-att-value="redirect"/>
             </form>
-            
-            <script>
-                document.getElementById('togglePassword').addEventListener('click', function (e) {
-                    const password = document.getElementById('password');
-                    const icon = this.querySelector('i');
-                    if (password.type === 'password') {
-                        password.type = 'text';
-                        icon.classList.remove('fa-eye');
-                        icon.classList.add('fa-eye-slash');
-                    } else {
-                        password.type = 'password';
-                        icon.classList.remove('fa-eye-slash');
-                        icon.classList.add('fa-eye');
-                    }
-                });
-            </script>
+
+            <div class="lhi-login-divider"><span>or</span></div>
+
+            <t t-set="oauth_available" t-value="False"/>
+            <t t-foreach="providers or []" t-as="provider">
+                <t t-if="provider.get('enabled')
+                         and provider.get('auth_link')
+                         and provider.get('client_id')
+                         and 'PLACEHOLDER' not in provider.get('client_id').upper()
+                         and provider.get('auth_endpoint')
+                         and '/common/' not in provider.get('auth_endpoint')">
+                    <t t-set="oauth_available" t-value="True"/>
+                    <a t-att-href="provider.get('auth_link')"
+                       t-att-data-provider-id="provider.get('id')"
+                       class="btn lhi-microsoft-button"
+                       role="button">
+                        <i class="fa fa-windows" aria-hidden="true"/>
+                        <span t-out="provider.get('body') or 'Sign in with Microsoft'"/>
+                    </a>
+                </t>
+            </t>
+
+            <div t-if="not oauth_available"
+                 class="alert alert-warning lhi-login__oauth-unavailable"
+                 role="status">
+                <t t-if="debug">
+                    Microsoft OAuth provider is disabled or its client ID or
+                    tenant-specific authorization endpoint is invalid.
+                </t>
+                <t t-else="">
+                    Microsoft sign-in is temporarily unavailable.
+                    Please contact the LHI IT Helpdesk.
+                </t>
+            </div>
+
+            <p class="lhi-login-help">
+                Need help? Contact the LHI IT Helpdesk.
+            </p>
         </xpath>
     </template>
 </odoo>

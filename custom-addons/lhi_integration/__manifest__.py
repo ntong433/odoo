@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'LHI Integration and Identity',
-    'version': '19.0.1.0.1',
+    'version': '19.0.1.0.2',
     'category': 'Technical Settings',
     'summary': 'Shared organizational identity and reusable integration infrastructure',
     'description': """

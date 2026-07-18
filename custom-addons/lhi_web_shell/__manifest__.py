@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'LHI Web Shell',
-    'version': '19.0.1.0.1',
+    'version': '19.0.1.0.2',
     'category': 'Technical/UI',
     'summary': 'LHI design system, brand tokens, and web shell for the ERP',
     'description': """

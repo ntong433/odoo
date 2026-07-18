@@ -1,9 +1,5 @@
-// ============================================================================
-// LHI LOGIN PAGE — Custom branded sign-in screen
-// Sprint 4 · lhi_web_shell · login.scss
-// ============================================================================
+// LHI public login page. Keep this bundle independent from backend SCSS tokens.
 
-// ── Root tokens on login page ─────────────────────────────────────────────────
 html,
 body {
     width: 100%;
@@ -11,13 +7,15 @@ body {
     margin: 0;
 }
 
-body,
-body.o_web_client {
+body {
     overflow-x: hidden;
 }
 
 body.o_login_page,
 .o_web_login_signup {
+    min-height: 100%;
+    padding: 0;
+    background: #f5f7fb;
     font-family:
         "Inter",
         -apple-system,
@@ -27,12 +25,15 @@ body.o_login_page,
         "Helvetica Neue",
         Arial,
         sans-serif;
-    padding: 0;
-    background-color: #f8f9fa;
-    min-height: 100%;
 }
 
-// ── Split Screen Page ─────────────────────────────────────────────────────────
+.lhi-login-host {
+    width: 100%;
+    min-height: 100dvh;
+    margin: 0;
+    padding: 0;
+}
+
 .lhi-login-page,
 .lhi-login-page *,
 .lhi-login-page *::before,
@@ -41,300 +42,360 @@ body.o_login_page,
 }
 
 .lhi-login-page {
-    display: grid;
-    grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
-    align-items: stretch;
-    gap: clamp(24px, 4vw, 64px);
+    --lhi-primary: #76205f;
+    --lhi-secondary: #15274b;
+    --lhi-surface: #ffffff;
+    --lhi-text: #20242c;
+    --lhi-muted: #687182;
+    --lhi-border: #d9dee8;
+    --lhi-microsoft: #0078d4;
     width: 100%;
     min-height: 100dvh;
+    display: grid;
+    grid-template-columns: minmax(0, 46%) minmax(420px, 54%);
     margin: 0;
-    padding: clamp(16px, 3vw, 40px);
-    overflow-x: hidden;
-    background: #f8f9fa;
-}
-
-// ── Left Side (Branding & Splash) ─────────────────────────────────────────────
-.lhi-login-left {
-    background: linear-gradient(135deg, #1A2540 0%, #0f1623 50%, #1a1520 100%);
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-width: 0;
-    padding: clamp(32px, 5vw, 72px);
-    color: white;
     overflow: hidden;
-    border-radius: 28px;
-
-    // Decorative background orbs
-    &::before,
-    &::after {
-        content: '';
-        position: absolute;
-        border-radius: 50%;
-        pointer-events: none;
-        filter: blur(80px);
-        opacity: 0.15;
-    }
-
-    &::before {
-        width: 600px;
-        height: 600px;
-        background: #C8281A; // LHI Red
-        top: -200px;
-        left: -100px;
-    }
-
-    &::after {
-        width: 500px;
-        height: 500px;
-        background: #E8620A; // LHI Orange
-        bottom: -150px;
-        right: -80px;
-    }
-
-    .lhi-login-branding {
-        position: relative;
-        z-index: 2;
-        text-align: center;
-        max-width: 450px;
-
-        .lhi-logo {
-            max-width: 180px;
-            height: auto;
-            margin-bottom: 2rem;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
-        }
-
-        h1 {
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            letter-spacing: -0.02em;
-        }
-
-        p {
-            font-size: 1.1rem;
-            color: rgba(255,255,255,0.7);
-            font-weight: 300;
-            line-height: 1.6;
-        }
-    }
-
+    background: #f5f7fb;
 }
 
-// ── Right Side (Form Area) ────────────────────────────────────────────────────
-.lhi-login-right {
+.lhi-login-visual {
+    position: relative;
     min-width: 0;
+    min-height: 100dvh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0;
+    padding: 6vw;
+    overflow: hidden;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(21, 39, 75, 0.98),
+            rgba(118, 32, 95, 0.94)
+        );
 }
 
-// ── Login Card (Inner container) ──────────────────────────────────────────────
+.lhi-login-visual::before,
+.lhi-login-visual::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(80px);
+    opacity: 0.2;
+}
+
+.lhi-login-visual::before {
+    width: 520px;
+    height: 520px;
+    top: -180px;
+    left: -160px;
+    background: #c8281a;
+}
+
+.lhi-login-visual::after {
+    width: 460px;
+    height: 460px;
+    right: -140px;
+    bottom: -170px;
+    background: #e8620a;
+}
+
+.lhi-login-branding {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 560px;
+    color: #ffffff;
+}
+
+.lhi-login-logo {
+    display: block;
+    width: 190px;
+    max-width: 45%;
+    height: auto;
+    margin: 0 0 32px;
+    object-fit: contain;
+    filter: drop-shadow(0 5px 12px rgba(0, 0, 0, 0.28));
+}
+
+.lhi-login-branding h1 {
+    margin: 0 0 16px;
+    font-size: 64px;
+    line-height: 1.05;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+}
+
+.lhi-login-branding p {
+    max-width: 520px;
+    margin: 0;
+    font-size: 21px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.82);
+}
+
+.lhi-login-panel {
+    min-width: 0;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5vw;
+    background: #f5f7fb;
+}
+
 .lhi-login-card {
-    width: min(100%, 480px);
-    max-height: calc(100dvh - 32px);
-    margin-inline: auto;
-    padding: clamp(24px, 4vw, 42px);
+    width: 100%;
+    max-width: 480px;
+    max-height: calc(100dvh - 48px);
+    margin: 0 auto;
+    padding: 40px;
     overflow-y: auto;
     overscroll-behavior: contain;
-    background: #ffffff;
-    border: 1px solid rgba(26, 37, 64, 0.08);
+    border: 1px solid var(--lhi-border);
     border-radius: 24px;
-    box-shadow: 0 20px 60px rgba(26, 37, 64, 0.12);
-    
-    .lhi-login-title {
-        color: #1A2540;
-        font-size: 24px;
-        font-weight: 700;
-        margin: 0 0 8px;
-        letter-spacing: -0.01em;
-    }
-
-    .lhi-login-subtitle {
-        font-size: 14px;
-        color: #6c757d;
-        margin-bottom: 2rem;
-    }
+    background: var(--lhi-surface);
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.12);
 }
 
-// ── Authentication Methods (Microsoft / Local) ────────────────────────────────
-.lhi-login__microsoft-button {
+.lhi-login-header {
+    margin-bottom: 28px;
+    text-align: left;
+}
+
+.lhi-login-header h2 {
+    margin: 0 0 8px;
+    color: var(--lhi-secondary);
+    font-size: 28px;
+    line-height: 1.2;
+    font-weight: 700;
+}
+
+.lhi-login-header p {
+    margin: 0;
+    color: var(--lhi-muted);
+    font-size: 15px;
+}
+
+.lhi_login_form .form-label {
+    margin-bottom: 6px;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.lhi_login_form .lhi-forgot-password {
+    color: var(--lhi-primary);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.lhi_login_form .lhi-forgot-password:hover {
+    color: #5f194d;
+    text-decoration: underline;
+}
+
+.lhi_login_form .form-control {
+    min-height: 46px;
+    padding: 11px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    color: #111827;
+    font-size: 14px;
+}
+
+.lhi_login_form .form-control:focus {
+    border-color: var(--lhi-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(118, 32, 95, 0.14);
+}
+
+.lhi_login_form .input-group .btn {
+    border-color: #d1d5db;
+    color: #6b7280;
+}
+
+.lhi-btn-primary {
+    min-height: 48px;
+    border: 0;
+    border-radius: 12px;
+    background: var(--lhi-primary);
+    color: #ffffff;
+    font-weight: 600;
+    box-shadow: 0 5px 14px rgba(118, 32, 95, 0.2);
+}
+
+.lhi-btn-primary:hover,
+.lhi-btn-primary:focus {
+    background: #5f194d;
+    color: #ffffff;
+}
+
+.lhi-login-divider {
     display: flex;
+    align-items: center;
+    margin: 24px 0;
+    color: #8a93a3;
+    font-size: 13px;
+    text-align: center;
+}
+
+.lhi-login-divider::before,
+.lhi-login-divider::after {
+    content: "";
+    flex: 1;
+    border-bottom: 1px solid #e1e5ed;
+}
+
+.lhi-login-divider span {
+    padding: 0 12px;
+}
+
+.lhi-microsoft-button {
+    width: 100%;
+    min-height: 48px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 12px;
-    background-color: #ffffff;
-    border: 1px solid #d2d6dc;
-    color: #374151;
+    border: 1px solid #cbd2dc;
+    border-radius: 12px;
+    background: #ffffff;
+    color: var(--lhi-text);
     font-weight: 600;
-    padding: 12px;
-    border-radius: 8px;
-    transition: all 0.2s ease;
+    text-decoration: none;
+    transition:
+        border-color 160ms ease,
+        box-shadow 160ms ease,
+        transform 160ms ease;
+}
 
-    &:hover {
-        background-color: #f9fafb;
-        border-color: #9ca3af;
-        color: #111827;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    }
+.lhi-microsoft-button:hover,
+.lhi-microsoft-button:focus {
+    border-color: #6b7280;
+    color: var(--lhi-text);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+    transform: translateY(-1px);
+}
+
+.lhi-microsoft-button .fa-windows {
+    color: var(--lhi-microsoft);
+    font-size: 20px;
 }
 
 .lhi-login__oauth-unavailable {
-    margin-bottom: 1rem;
-    font-size: 0.875rem;
+    margin: 0;
+    font-size: 13px;
 }
 
-.lhi-divider {
-    display: flex;
-    align-items: center;
+.lhi-login-help {
+    margin: 20px 0 0;
+    color: var(--lhi-muted);
+    font-size: 13px;
     text-align: center;
-    margin: 1.5rem 0;
-    color: #9ca3af;
-    font-size: 0.875rem;
-
-    &::before,
-    &::after {
-        content: '';
-        flex: 1;
-        border-bottom: 1px solid #e5e7eb;
-    }
-
-    &::before { margin-right: 0.5em; }
-    &::after { margin-left: 0.5em; }
 }
 
-// ── Form Controls ─────────────────────────────────────────────────────────────
-.lhi_login_form {
-    .form-label {
-        font-size: 13px;
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: 6px;
+.lhi_login_form .alert {
+    margin-top: 16px;
+    padding: 10px 14px;
+    border: 0;
+    border-radius: 8px;
+    font-size: 13px;
+}
 
-        .lhi-forgot-password {
-            font-weight: 400;
-            color: #C8281A;
-            text-decoration: none;
-
-            &:hover { text-decoration: underline; color: #a82015; }
-        }
+@media (max-width: 1439.98px) {
+    .lhi-login-branding h1 {
+        font-size: 48px;
     }
 
-    .form-control {
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        padding: 12px 14px;
-        font-size: 14px;
-        color: #111827;
-        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-
-        &:focus {
-            border-color: #C8281A;
-            box-shadow: 0 0 0 3px rgba(200, 40, 26, 0.15);
-            outline: none;
-        }
-
-        &::placeholder {
-            color: #9ca3af;
-        }
+    .lhi-login-branding p {
+        font-size: 18px;
     }
 
-    .input-group {
-        .btn {
-            border-color: #d1d5db;
-            color: #6b7280;
-            
-            &:hover {
-                background-color: #f3f4f6;
-                color: #374151;
-            }
-        }
-        
-        .form-control:focus + .btn {
-            border-color: #C8281A;
-        }
-    }
-
-    .lhi-btn-primary {
-        background-color: #C8281A;
-        border: none;
-        padding: 12px;
-        font-weight: 600;
-        border-radius: 8px;
-        transition: all 0.2s ease;
-        box-shadow: 0 4px 6px rgba(200, 40, 26, 0.2);
-
-        &:hover {
-            background-color: #a82015;
-            box-shadow: 0 6px 12px rgba(200, 40, 26, 0.3);
-            transform: translateY(-1px);
-        }
-
-        &:active {
-            transform: translateY(0);
-        }
-    }
-
-    .alert {
-        border-radius: 8px;
-        font-size: 13px;
-        padding: 10px 14px;
-        margin-top: 1rem;
-        border: none;
-
-        &.alert-danger {
-            background-color: #fef2f2;
-            color: #b91c1c;
-            border-left: 4px solid #ef4444;
-        }
-        
-        &.alert-success {
-            background-color: #f0fdf4;
-            color: #15803d;
-            border-left: 4px solid #22c55e;
-        }
+    .lhi-login-card {
+        padding: 34px;
     }
 }
 
 @media (max-width: 991.98px) {
+    body.o_login_page,
+    .o_web_login_signup {
+        overflow-y: auto;
+    }
+
     .lhi-login-page {
         grid-template-columns: minmax(0, 1fr);
         min-height: 100dvh;
-        padding: 20px;
+        overflow: visible;
     }
 
     .lhi-login-visual {
-        display: none;
+        min-height: auto;
+        padding: 40px 24px;
+    }
+
+    .lhi-login-branding {
+        text-align: center;
+    }
+
+    .lhi-login-logo {
+        width: 120px;
+        margin: 0 auto 20px;
+    }
+
+    .lhi-login-branding h1 {
+        margin-bottom: 10px;
+        font-size: 32px;
+    }
+
+    .lhi-login-branding p {
+        margin: 0 auto;
+        font-size: 16px;
+    }
+
+    .lhi-login-panel {
+        min-height: auto;
+        padding: 28px 18px 48px;
     }
 
     .lhi-login-card {
-        width: min(100%, 480px);
+        max-height: none;
+        overflow: visible;
     }
 }
 
 @media (max-width: 575.98px) {
-    .lhi-login-page {
-        padding: 12px;
+    .lhi-login-visual {
+        padding: 30px 18px;
+    }
+
+    .lhi-login-branding h1 {
+        font-size: 28px;
+    }
+
+    .lhi-login-panel {
+        padding: 20px 12px 36px;
     }
 
     .lhi-login-card {
-        width: 100%;
-        max-height: calc(100dvh - 24px);
-        padding: 22px 18px;
-        border-radius: 16px;
+        padding: 26px 20px;
+        border-radius: 18px;
     }
 }
 
-@media (max-height: 720px) and (min-width: 992px) {
-    .lhi-login-page {
-        padding-block: 12px;
-    }
-
+@media (max-height: 760px) and (min-width: 992px) {
     .lhi-login-card {
         max-height: calc(100dvh - 24px);
+        padding-top: 26px;
+        padding-bottom: 26px;
+    }
+
+    .lhi-login-header {
+        margin-bottom: 18px;
+    }
+
+    .lhi-login-divider {
+        margin: 16px 0;
     }
 }

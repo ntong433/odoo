@@ -6,6 +6,10 @@ from odoo import api, fields, models, _
 from odoo.exceptions import AccessError, UserError, ValidationError
 
 
+DEFAULT_ENTRA_TENANT_ID = "552a1d00-ce70-4fdb-940f-0ad131e4b9cb"
+DEFAULT_ENTRA_CLIENT_ID = "02b3748f-e84b-4bec-935a-21fab1498517"
+
+
 class LhiEntraConfiguration(models.Model):
     _name = "lhi.entra.configuration"
     _description = "LHI Entra Identity Synchronization Configuration"
@@ -146,7 +150,9 @@ class LhiEntraConfiguration(models.Model):
     )
 
     def init(self):
-        self._ensure_oauth_provider_xmlid()
+        provider = self._ensure_oauth_provider_xmlid()
+        if provider:
+            self._configure_interactive_oauth_provider(provider)
 
     @api.model
     def _ensure_oauth_provider_xmlid(self):
@@ -170,6 +176,42 @@ class LhiEntraConfiguration(models.Model):
                     "noupdate": True,
                 }
             )
+        return provider
+
+    @api.model
+    def _configure_interactive_oauth_provider(self, provider=None):
+        provider = provider or self._ensure_oauth_provider_xmlid()
+        if not provider:
+            raise UserError(_("The Microsoft Entra OAuth provider record is missing."))
+        tenant_id = (os.environ.get("ENTRA_TENANT_ID") or DEFAULT_ENTRA_TENANT_ID).strip()
+        client_id = (os.environ.get("ENTRA_CLIENT_ID") or DEFAULT_ENTRA_CLIENT_ID).strip()
+        try:
+            uuid.UUID(tenant_id)
+            uuid.UUID(client_id)
+        except (ValueError, AttributeError, TypeError) as error:
+            raise UserError(
+                _("Microsoft Entra Tenant ID and Client ID must be valid UUIDs.")
+            ) from error
+        if "PLACEHOLDER" in client_id.upper():
+            raise UserError(_("Microsoft Entra Client ID still contains a placeholder value."))
+        values = {
+            "name": "Microsoft Entra ID",
+            "client_id": client_id,
+            "auth_endpoint": (
+                f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/authorize"
+            ),
+            "validation_endpoint": "https://graph.microsoft.com/oidc/userinfo",
+            "data_endpoint": False,
+            "scope": "openid profile email User.Read",
+            "body": "Sign in with Microsoft",
+            "enabled": True,
+        }
+        if "css_class" in provider._fields:
+            values["css_class"] = "fa fa-windows"
+        provider.sudo().write(values)
+        self.env["ir.config_parameter"].sudo().set_param(
+            "auth_oauth.authorization_header", "1"
+        )
         return provider
 
     @api.constrains("page_size", "maximum_users", "maximum_pages")
@@ -280,7 +322,7 @@ class LhiEntraConfiguration(models.Model):
                 "auth_endpoint": (
                     f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/authorize"
                 ),
-                "scope": "openid profile email",
+                "scope": "openid profile email User.Read",
                 "validation_endpoint": "https://graph.microsoft.com/oidc/userinfo",
                 "data_endpoint": False,
                 "enabled": True,

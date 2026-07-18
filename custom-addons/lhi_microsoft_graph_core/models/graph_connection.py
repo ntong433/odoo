@@ -80,6 +80,11 @@ class LhiGraphConnection(models.Model):
         help="Non-secret reference value. Runtime authentication requires ENTRA_CLIENT_ID.",
         tracking=True,
     )
+    client_secret_status = fields.Char(
+        string="Client Secret",
+        compute="_compute_client_secret_status",
+        help="Indicates whether ENTRA_CLIENT_SECRET is provided in the environment.",
+    )
     application_permission_mode = fields.Selection(
         [
             ("disabled", "Disabled"),
@@ -435,6 +440,13 @@ class LhiGraphConnection(models.Model):
             "client_id_configured": bool(os.environ.get("ENTRA_CLIENT_ID")),
             "client_secret_configured": bool(os.environ.get("ENTRA_CLIENT_SECRET")),
         }
+
+    def _compute_client_secret_status(self):
+        for record in self:
+            if os.environ.get("ENTRA_CLIENT_SECRET"):
+                record.client_secret_status = "******** (Environment-Managed)"
+            else:
+                record.client_secret_status = "Missing"
 
     def _token_cache_key(self, token_context, user=None):
         self.ensure_one()

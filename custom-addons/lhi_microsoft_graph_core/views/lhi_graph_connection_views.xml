@@ -59,6 +59,7 @@
                             <field name="active"/>
                             <field name="tenant_id" placeholder="Tenant UUID"/>
                             <field name="client_id" placeholder="Application UUID"/>
+                            <field name="client_secret_status" readonly="1"/>
                         </group>
                         <group>
                             <field name="last_test_at"/>

@@ -172,6 +172,30 @@ export class LhiDocumentWorkspace extends Component {
         });
     }
 
+    onSearchKeydown(event) {
+        if (event.key !== "Enter") {
+            return;
+        }
+        event.preventDefault();
+        this.loadWorkspace();
+    }
+
+    onTemplateKeydown(event) {
+        if (event.key !== "Enter") {
+            return;
+        }
+        event.preventDefault();
+        this.createFromTemplate();
+    }
+
+    onDocumentCardKeydown(event, document) {
+        if (event.key !== "Enter" && event.key !== " ") {
+            return;
+        }
+        event.preventDefault();
+        this.selectDocument(document);
+    }
+
     selectDocument(document) {
         if (!document.can_preview) {
             this.notification.add(_t("This document is not available for preview."), {

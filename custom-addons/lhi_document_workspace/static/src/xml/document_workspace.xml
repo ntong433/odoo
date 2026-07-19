@@ -9,13 +9,13 @@
             </div>
             <t t-else="">
                 <div class="lhi-document-workspace__toolbar">
-                    <div class="lhi-document-workspace__search">
+                    <form class="lhi-document-workspace__search-form" t-on-submit.prevent="loadWorkspace">
                         <i class="fa fa-search"/>
                         <input type="search"
                                placeholder="Search documents"
                                t-model="state.query"
-                               t-on-keydown.enter="loadWorkspace"/>
-                    </div>
+                               t-on-keydown="onSearchKeydown"/>
+                    </form>
                     <select t-model="state.category" t-on-change="loadWorkspace" aria-label="Document category">
                         <option value="">All categories</option>
                         <t t-foreach="[...new Set(state.documents.map((value) => value.category).filter(Boolean))]" t-as="category" t-key="category">
@@ -55,6 +55,9 @@
                         <article t-foreach="state.documents"
                                  t-as="document"
                                  t-key="document.uuid"
+                                 role="button"
+                                 tabindex="0"
+                                 t-on-keydown="(e) => this.onDocumentCardKeydown(e, document)"
                                  t-att-class="{
                                      'lhi-document-row': true,
                                      'lhi-document-row--selected': state.selectedUuid === document.uuid,
@@ -142,7 +145,7 @@
                             </option>
                         </select>
                         <label>Document name</label>
-                        <input class="form-control" type="text" maxlength="120" placeholder="e.g. Q3 Donor Report" t-model="state.templateFilename" t-on-keydown.enter="createFromTemplate"/>
+                        <input class="form-control" type="text" maxlength="120" placeholder="e.g. Q3 Donor Report" t-model="state.templateFilename" t-on-keydown="onTemplateKeydown"/>
                         <small class="text-muted">The approved template extension is added automatically when omitted.</small>
                     </div>
                     <div class="lhi-dialog__footer">

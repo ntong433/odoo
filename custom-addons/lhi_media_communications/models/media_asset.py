@@ -43,3 +43,16 @@ class MediaAsset(models.Model):
     keywords = fields.Char(string='Keywords/Tags')
     
     expiry_date = fields.Date(string='Expiry/Review Date', tracking=True)
+
+    sharepoint_site_id = fields.Char(string='SharePoint Site ID', readonly=True)
+    sharepoint_drive_id = fields.Char(string='SharePoint Drive ID', readonly=True)
+    sharepoint_item_id = fields.Char(string='SharePoint Item ID', readonly=True)
+    sharepoint_parent_item_id = fields.Char(string='SharePoint Parent Item ID', readonly=True)
+    sharepoint_web_url = fields.Char(string='SharePoint URL', readonly=True)
+    sharepoint_last_sync_at = fields.Datetime(string='Last Sync', readonly=True)
+    sharepoint_sync_status = fields.Selection([
+        ('pending', 'Pending'),
+        ('syncing', 'Syncing'),
+        ('synced', 'Synced'),
+        ('failed', 'Failed')
+    ], string='Sync Status', default='pending', readonly=True)

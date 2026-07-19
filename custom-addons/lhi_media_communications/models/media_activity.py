@@ -26,7 +26,7 @@ class MediaActivity(models.Model):
     project_id = fields.Many2one('lhi.project', string='Project', tracking=True)
     workplan_activity_id = fields.Many2one('lhi.workplan.activity', string='Workplan Activity')
     task_id = fields.Many2one('project.task', string='Task')
-    grant_id = fields.Many2one('lhi.grant.award', string='Grant/Donor')
+    grant_id = fields.Many2one('lhi.award', string='Grant/Donor')
     
     owner_id = fields.Many2one('res.users', string='Owner', default=lambda self: self.env.user, tracking=True)
     team_member_ids = fields.Many2many('res.users', string='Team Members')

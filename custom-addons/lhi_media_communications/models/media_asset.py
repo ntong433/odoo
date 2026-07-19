@@ -25,7 +25,7 @@ class MediaAsset(models.Model):
     project_id = fields.Many2one('lhi.project', string='Project', tracking=True)
     activity_id = fields.Many2one('lhi.media.activity', string='Activity')
     success_story_id = fields.Many2one('lhi.media.success.story', string='Success Story')
-    donor_id = fields.Many2one('lhi.grant.award', string='Donor')
+    donor_id = fields.Many2one('lhi.award', string='Donor')
     
     creator = fields.Char(string='Photographer/Creator')
     capture_date = fields.Date(string='Capture Date')

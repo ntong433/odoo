@@ -31,16 +31,17 @@ class LhiDashboardWidget(models.Model):
     _LHI_APP_DEFINITIONS = (
         ('pipeline', 'Pipeline', 'lhi_funding_opportunity.menu_lhi_funding_root', ('lhi_security.group_lhi_project_officer', 'lhi_security.group_lhi_project_manager', 'lhi_security.group_lhi_programme_director'), ('PIPELINE', 'PROGRAMME', 'PROGRAMMES')),
         ('procurement', 'Procurement', 'lhi_purchase_request.menu_lhi_procurement_root', ('lhi_security.group_lhi_procurement_officer', 'lhi_security.group_lhi_procurement_manager'), ('PROCUREMENT',)),
-        ('operations', 'Operations', 'lhi_asset_management.menu_lhi_operations_root', ('lhi_security.group_lhi_supervisor', 'lhi_security.group_lhi_manager'), ('OPERATIONS',)),
+        ('operations', 'Operations', 'lhi_dashboard.menu_lhi_operations_hub', ('lhi_security.group_lhi_supervisor', 'lhi_security.group_lhi_manager', 'lhi_security.group_lhi_procurement_officer', 'lhi_security.group_lhi_store_officer', 'lhi_security.group_lhi_fleet_officer'), ('OPERATIONS',)),
         ('assets', 'Assets', 'lhi_asset_management.menu_lhi_asset', ('lhi_security.group_lhi_store_officer',), ('ASSET', 'ASSETS', 'OPERATIONS')),
         ('accounting', 'Accounting', 'account.menu_finance', ('lhi_security.group_lhi_finance_reviewer', 'lhi_accounting_base.group_lhi_accounting_sandbox'), ('ACCOUNTING', 'FINANCE')),
         ('meal', 'MEAL', 'lhi_results_framework.menu_lhi_meal_root', ('lhi_security.group_lhi_meal_officer', 'lhi_meal.group_lhi_meal_sensitive'), ('MEAL',)),
         ('inventory', 'Inventory', 'stock.menu_stock_root', ('lhi_security.group_lhi_store_officer',), ('INVENTORY', 'STORE')),
         ('fleet', 'Fleet', 'fleet.fleet_menu_root', ('lhi_security.group_lhi_fleet_officer',), ('FLEET', 'OPERATIONS')),
         ('approvals', 'Approvals', 'lhi_approval_matrix.menu_lhi_approvals_root', ('lhi_security.group_lhi_executive_approver', 'lhi_security.group_lhi_manager'), ('APPROVALS',)),
-        ('projects', 'Projects & Grants', 'lhi_base.menu_lhi_project_root', ('lhi_security.group_lhi_project_officer', 'lhi_security.group_lhi_project_manager', 'lhi_security.group_lhi_programme_director'), ('PROJECTS', 'GRANTS', 'PROGRAMME', 'PROGRAMMES')),
+        ('grants', 'Grants & Funding', 'lhi_base.menu_lhi_project_root', ('lhi_security.group_lhi_project_officer', 'lhi_security.group_lhi_project_manager', 'lhi_security.group_lhi_programme_director'), ('PROJECTS', 'GRANTS', 'PROGRAMME', 'PROGRAMMES')),
         ('hr', 'Human Resources', 'hr.menu_hr_root', ('lhi_security.group_lhi_hr_officer',), ('HR', 'HUMAN_RESOURCES')),
         ('signatures', 'Signatures', 'lhi_signature_bridge.menu_lhi_opensign', ('lhi_security.group_lhi_procurement_officer', 'lhi_security.group_lhi_procurement_manager'), ('LEGAL', 'PROCUREMENT')),
+        ('media', 'Media & Communications', 'lhi_media_communications.menu_lhi_media_root', ('lhi_media_communications.group_lhi_media_viewer', 'lhi_media_communications.group_lhi_media_requester', 'lhi_media_communications.group_lhi_media_officer', 'lhi_media_communications.group_lhi_media_reviewer', 'lhi_media_communications.group_lhi_media_manager'), ('MEDIA',)),
         ('settings', 'Settings', 'base.menu_administration', ('base.group_system',), ()),
     )
 
@@ -212,3 +213,51 @@ class LhiDashboardWidget(models.Model):
         search_model('project.task', 'Task', 'tasks', desc_field='project_id.name')
 
         return results
+
+    @api.model
+    def get_accessible_operations(self):
+        """
+        Returns the operational modules accessible to the current user.
+        """
+        modules = []
+        
+        # Procurement
+        if self.env.user.has_group('lhi_security.group_lhi_procurement_officer') or self.env.user.has_group('lhi_security.group_lhi_procurement_manager') or self.env.user.has_group('lhi_security.group_lhi_supervisor'):
+            modules.append({
+                'key': 'procurement',
+                'name': 'Procurement',
+                'menu_id': self.env.ref('lhi_purchase_request.menu_lhi_procurement_root').id,
+                'icon': '/lhi_web_shell/static/src/img/module_icons/procurement.svg'
+            })
+            
+        # Assets
+        if self.env.user.has_group('lhi_security.group_lhi_store_officer') or self.env.user.has_group('lhi_security.group_lhi_supervisor'):
+            modules.append({
+                'key': 'assets',
+                'name': 'Assets',
+                'menu_id': self.env.ref('lhi_asset_management.menu_lhi_asset').id,
+                'icon': '/lhi_web_shell/static/src/img/module_icons/assets.svg'
+            })
+            
+        # Inventory
+        if self.env.user.has_group('lhi_security.group_lhi_store_officer') or self.env.user.has_group('lhi_security.group_lhi_supervisor'):
+            modules.append({
+                'key': 'inventory',
+                'name': 'Inventory',
+                'menu_id': self.env.ref('stock.menu_stock_root').id,
+                'icon': '/lhi_web_shell/static/src/img/module_icons/inventory.svg'
+            })
+            
+        # Fleet
+        if self.env.user.has_group('lhi_security.group_lhi_fleet_officer') or self.env.user.has_group('lhi_security.group_lhi_supervisor'):
+            try:
+                modules.append({
+                    'key': 'fleet',
+                    'name': 'Fleet',
+                    'menu_id': self.env.ref('fleet.fleet_menu_root').id,
+                    'icon': '/lhi_web_shell/static/src/img/module_icons/fleet.svg'
+                })
+            except ValueError:
+                pass # fleet not installed
+                
+        return modules

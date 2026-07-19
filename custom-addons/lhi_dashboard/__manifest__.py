@@ -36,6 +36,7 @@ Deliverables:
         'views/lhi_announcement_views.xml',
         'views/lhi_dashboard_widget_views.xml',
         'views/dashboard_action.xml',
+        'views/operations_hub_views.xml',
     ],
     'assets': {
         'web.assets_backend': [
@@ -48,8 +49,10 @@ Deliverables:
             'lhi_dashboard/static/src/js/widgets/notifications_widget.js',
             'lhi_dashboard/static/src/js/widgets/quick_actions_widget.js',
             'lhi_dashboard/static/src/js/lhi_dashboard.js',
+            'lhi_dashboard/static/src/js/operations_hub.js',
             'lhi_dashboard/static/src/xml/lhi_dashboard.xml',
             'lhi_dashboard/static/src/xml/widgets.xml',
+            'lhi_dashboard/static/src/xml/operations_hub.xml',
         ],
         'web.assets_unit_tests': [
             'lhi_dashboard/static/tests/dashboard_tests.js',

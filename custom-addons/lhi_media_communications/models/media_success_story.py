@@ -10,7 +10,7 @@ class MediaSuccessStory(models.Model):
     name = fields.Char(string='Story Title', required=True, tracking=True)
     
     project_id = fields.Many2one('lhi.project', string='Project', required=True, tracking=True)
-    grant_id = fields.Many2one('lhi.grant.award', string='Grant/Donor')
+    grant_id = fields.Many2one('lhi.award', string='Grant/Donor')
     workplan_activity_id = fields.Many2one('lhi.workplan.activity', string='Workplan Activity')
     
     author_id = fields.Many2one('res.users', string='Author/Interviewer', default=lambda self: self.env.user)

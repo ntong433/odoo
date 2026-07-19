@@ -5,5 +5,5 @@
 
     <!-- Operational Sub-menu -->
     <menuitem id="menu_lhi_operations" name="Operations" parent="menu_lhi_root" sequence="10"/>
-    <menuitem id="menu_lhi_project_root" name="Projects" parent="menu_lhi_root" sequence="20"/>
+    <menuitem id="menu_lhi_project_root" name="Projects" parent="menu_lhi_root" action="action_lhi_award" sequence="20"/>
 </odoo>

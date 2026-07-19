@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_lhi_operations_hub" model="ir.actions.client">
+        <field name="name">Operations Hub</field>
+        <field name="tag">lhi_dashboard.operations_hub</field>
+    </record>
+
+    <!-- Hidden menu targeted by the dashboard Operations card -->
+    <menuitem id="menu_lhi_operations_hub" 
+              name="Operations Hub" 
+              action="action_lhi_operations_hub"
+              groups="base.group_user"
+              sequence="100"/>
+</odoo>

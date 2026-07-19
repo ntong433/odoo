@@ -283,7 +283,7 @@
     </record>
 
     <!-- Menus -->
-    <menuitem id="menu_lhi_approvals_root" name="Approvals" parent="lhi_base.menu_lhi_root" sequence="20"/>
+    <menuitem id="menu_lhi_approvals_root" name="Approvals" parent="lhi_base.menu_lhi_root" action="action_lhi_approval_request" sequence="20"/>
     <menuitem id="menu_lhi_approval_request" name="Active Requests" parent="menu_lhi_approvals_root" action="action_lhi_approval_request" sequence="10"/>
     <menuitem id="menu_lhi_approval_matrix" name="Matrix Configurations" parent="menu_lhi_approvals_root" action="action_lhi_approval_matrix" sequence="20"/>
     <menuitem id="menu_lhi_approval_delegation" name="Approval Delegations" parent="menu_lhi_approvals_root" action="action_lhi_approval_delegation" sequence="30"/>

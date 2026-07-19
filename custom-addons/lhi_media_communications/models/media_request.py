@@ -14,7 +14,7 @@ class MediaRequest(models.Model):
     project_id = fields.Many2one('lhi.project', string='Project', tracking=True)
     task_id = fields.Many2one('project.task', string='Project Task')
     workplan_activity_id = fields.Many2one('lhi.workplan.activity', string='Workplan Activity')
-    grant_id = fields.Many2one('lhi.grant.award', string='Grant/Award')
+    grant_id = fields.Many2one('lhi.award', string='Grant/Award')
     
     activity_type = fields.Selection([
         ('outreach', 'Outreach Coverage'),

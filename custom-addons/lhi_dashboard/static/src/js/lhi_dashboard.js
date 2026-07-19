@@ -1,12 +1,9 @@
 /** @odoo-module **/
 
 import { Component, onWillStart, useState } from "@odoo/owl";
-import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { dashboardWidgetRegistry } from "./dashboard_widget_registry";
-
-export const DASHBOARD_ACTION_TAG = "lhi_dashboard.dashboard_action";
 
 export class LhiDashboard extends Component {
     static template = "lhi_dashboard.Dashboard";
@@ -157,7 +154,3 @@ export class LhiDashboard extends Component {
         }
     }
 }
-
-// Register at module load time. This key must exactly match the client action
-// tag on lhi_dashboard.action_lhi_dashboard.
-registry.category("actions").add(DASHBOARD_ACTION_TAG, LhiDashboard);

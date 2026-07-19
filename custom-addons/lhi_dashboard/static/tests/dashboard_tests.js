@@ -4,6 +4,7 @@ import { getFixture, mount } from "@web/../tests/helpers/utils";
 import { dashboardWidgetRegistry } from "@lhi_dashboard/js/dashboard_widget_registry";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
 import { LhiDashboard } from "@lhi_dashboard/js/lhi_dashboard";
+import { DASHBOARD_ACTION_TAG } from "@lhi_dashboard/js/dashboard_action";
 import { registry } from "@web/core/registry";
 
 QUnit.module("LHI Dashboard", (hooks) => {
@@ -26,7 +27,7 @@ QUnit.module("LHI Dashboard", (hooks) => {
     QUnit.test("canonical dashboard client action is registered once", (assert) => {
         const actions = registry.category("actions");
         assert.strictEqual(
-            actions.get("lhi_dashboard.dashboard_action"),
+            actions.get(DASHBOARD_ACTION_TAG),
             LhiDashboard,
             "The server action tag resolves to the LHI Dashboard component"
         );

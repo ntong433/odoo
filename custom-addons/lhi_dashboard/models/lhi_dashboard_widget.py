@@ -36,7 +36,7 @@ class LhiDashboardWidget(models.Model):
         ('accounting', 'Accounting', 'account.menu_finance', ('lhi_security.group_lhi_finance_reviewer', 'lhi_accounting_base.group_lhi_accounting_sandbox'), ('ACCOUNTING', 'FINANCE')),
         ('meal', 'MEAL', 'lhi_results_framework.menu_lhi_meal_root', ('lhi_security.group_lhi_meal_officer', 'lhi_meal.group_lhi_meal_sensitive'), ('MEAL',)),
         ('inventory', 'Inventory', 'stock.menu_stock_root', ('lhi_security.group_lhi_store_officer',), ('INVENTORY', 'STORE')),
-        ('fleet', 'Fleet', 'fleet.fleet_menu_root', ('lhi_security.group_lhi_fleet_officer',), ('FLEET', 'OPERATIONS')),
+        ('fleet', 'Fleet', 'fleet.menu_root', ('lhi_security.group_lhi_fleet_officer',), ('FLEET', 'OPERATIONS')),
         ('approvals', 'Approvals', 'lhi_approval_matrix.menu_lhi_my_pending_approvals', ('lhi_security.group_lhi_executive_approver', 'lhi_security.group_lhi_manager'), ('APPROVALS',)),
         ('projects', 'Programs & Projects', 'lhi_base.menu_lhi_project_root', ('lhi_security.group_lhi_project_officer', 'lhi_security.group_lhi_project_manager', 'lhi_security.group_lhi_programme_director'), ('PROJECTS', 'PROGRAMME', 'PROGRAMMES')),
         ('grants', 'Grants & Funding', 'lhi_funding_opportunity.menu_lhi_funding_root', ('lhi_security.group_lhi_project_officer', 'lhi_security.group_lhi_project_manager', 'lhi_security.group_lhi_programme_director'), ('GRANTS', 'FUNDING', 'PIPELINE')),
@@ -255,7 +255,7 @@ class LhiDashboardWidget(models.Model):
                 modules.append({
                     'key': 'fleet',
                     'name': 'Fleet',
-                    'menu_id': self.env.ref('fleet.fleet_menu_root').id,
+                    'menu_id': self.env.ref('fleet.menu_root').id,
                     'icon': '/lhi_web_shell/static/src/img/module_icons/fleet.svg'
                 })
             except ValueError:

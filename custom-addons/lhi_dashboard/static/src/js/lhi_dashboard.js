@@ -1,13 +1,9 @@
 /** @odoo-module **/
 
 import { Component, onWillStart, useState } from "@odoo/owl";
-import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { dashboardWidgetRegistry } from "./dashboard_widget_registry";
-
-const actionRegistry = registry.category("actions");
-export const DASHBOARD_ACTION_TAG = "lhi_dashboard.dashboard_action";
 
 export class LhiDashboard extends Component {
     static template = "lhi_dashboard.Dashboard";
@@ -158,6 +154,3 @@ export class LhiDashboard extends Component {
         }
     }
 }
-
-// The server-side ir.actions.client tag must match this key exactly.
-actionRegistry.add(DASHBOARD_ACTION_TAG, LhiDashboard);

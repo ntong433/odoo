@@ -47,3 +47,22 @@ Make the LHI dashboard the default landing experience while preserving deep-link
 
 ---
 *Prepared by Antigravity — Senior Odoo 19 Architect*
+
+## Production blocker correction — 2026-07-19
+
+- Added `static/src/js/dashboard_action.js` as the explicit backend asset entry
+  that registers `lhi_dashboard.dashboard_action` in the frontend actions
+  registry. The XML client-action tag and Owl template remain unchanged.
+- Corrected the Odoo 19 Fleet root menu XML ID to `fleet.menu_root` and added a
+  regression test covering all required launcher menu XML IDs.
+- Added explicit dependencies for Procurement, Assets, Inventory, and Fleet so
+  the launcher does not rely on manual module installation order.
+- No models, fields, database migrations, environment variables, secrets,
+  Microsoft permissions, SharePoint configuration, or production data changed.
+- Python compilation and XML well-formedness checks passed. The Odoo disposable
+  database install and browser checks remain deployment-environment verification
+  because the local workstation has no Odoo runtime configuration or database.
+- Deploy through Coolify at `https://work.lhinigeria.org`, update only
+  `lhi_dashboard,lhi_media_communications`, and rebuild browser assets. Roll back
+  by redeploying the preceding commit and updating only those modules against a
+  backed-up database; then restart Odoo and clear browser asset caches.

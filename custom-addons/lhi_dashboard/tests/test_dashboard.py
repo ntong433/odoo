@@ -61,6 +61,26 @@ class TestLhiDashboard(TransactionCase):
             action = self.env.ref(action_xmlid)
             self.assertEqual(menu.action, action)
 
+    def test_required_launcher_menu_xmlids_resolve(self):
+        required_keys = {
+            'procurement',
+            'operations',
+            'assets',
+            'meal',
+            'inventory',
+            'fleet',
+            'approvals',
+            'projects',
+            'grants',
+            'media',
+        }
+        definitions = {item[0]: item for item in self.Widget._LHI_APP_DEFINITIONS}
+        self.assertEqual(required_keys - definitions.keys(), set())
+        for key in required_keys:
+            menu_xmlid = definitions[key][2]
+            menu = self.env.ref(menu_xmlid)
+            self.assertEqual(menu._name, 'ir.ui.menu')
+
     def test_functional_assignment_controls_card_visibility(self):
         cases = (
             ('lhi_security.group_lhi_meal_officer', 'meal'),

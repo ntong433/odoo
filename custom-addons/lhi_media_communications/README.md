@@ -49,3 +49,14 @@ on a backed-up database. Do not roll back after Media records have been linked t
 awards without first checking those references. Production deployment remains a
 separate, approved Coolify maintenance operation for
 `https://work.lhinigeria.org` after disposable-database verification.
+
+## Project-view activation correction
+
+The Media integration inherits `lhi_base.view_lhi_project_form` on the canonical
+`lhi.project` model. That parent form contains a `sheet` but no `button_box`, so
+the Media view inserts its supported smart-button box through `//sheet`. All four
+buttons retain their existing computed count fields and server action methods.
+This correction adds no schema, migration, environment, secret-store, Microsoft,
+or SharePoint configuration changes. Python compilation and XML well-formedness
+checks passed; disposable database installation and production browser evidence
+must be collected in the Coolify runtime before production sign-off.

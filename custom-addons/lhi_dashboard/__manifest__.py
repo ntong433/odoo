@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'LHI Role-Based Dashboard',
-    'version': '19.0.1.2.0',
+    'version': '19.0.1.2.1',
     'category': 'Productivity',
     'summary': 'Role-based dashboard and post-login routing for LHI ERP',
     'description': """
@@ -27,10 +27,14 @@ Deliverables:
         'lhi_base', 
         'lhi_security', 
         'lhi_approval_matrix',
+        'lhi_purchase_request',
+        'lhi_asset_management',
         'lhi_funding_opportunity',
         'lhi_media_communications',
         'lhi_meal',
         'lhi_web_shell',
+        'stock',
+        'fleet',
     ],
     'data': [
         'security/ir.model.access.csv',
@@ -52,6 +56,7 @@ Deliverables:
             'lhi_dashboard/static/src/js/widgets/notifications_widget.js',
             'lhi_dashboard/static/src/js/widgets/quick_actions_widget.js',
             'lhi_dashboard/static/src/js/lhi_dashboard.js',
+            'lhi_dashboard/static/src/js/dashboard_action.js',
             'lhi_dashboard/static/src/js/operations_hub.js',
             'lhi_dashboard/static/src/xml/lhi_dashboard.xml',
             'lhi_dashboard/static/src/xml/widgets.xml',

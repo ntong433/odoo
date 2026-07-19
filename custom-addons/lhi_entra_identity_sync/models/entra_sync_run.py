@@ -466,32 +466,44 @@ class LhiEntraSyncRun(models.Model):
         add_ids, sod_blocked = self._filter_sod_conflicts(
             user, current_group_ids, add_ids, remove_ids
         )
+        Employees = self.env["hr.employee"].sudo().with_context(active_test=False)
         employee = user.employee_id if user else self.env["hr.employee"]
+        if not employee and user:
+            employee = Employees.search([("user_id", "=", user.id)], limit=1)
+        if not employee:
+            employee = Employees.search([("entra_object_id", "=", object_id)], limit=1)
+        if not employee and (remote.get("userPrincipalName") or remote.get("mail")):
+            upn = (remote.get("userPrincipalName") or "").strip()
+            mail = (remote.get("mail") or "").strip()
+            candidates = Employees.search([
+                "|",
+                ("work_email", "=ilike", upn if upn else "---"),
+                ("work_email", "=ilike", mail if mail else "---"),
+            ])
+            if len(candidates) == 1:
+                employee = candidates
+
+        is_guest = (remote.get("userType") or "").strip().casefold() == "guest"
         employee_vals = {}
         if employee:
             employee_vals = {
-                "name": remote.get("displayName") or user.name,
+                "name": remote.get("displayName") or (user.name if user else False),
                 "job_title": remote.get("jobTitle") or False,
-                "work_email": remote.get("mail")
-                or remote.get("userPrincipalName")
-                or False,
+                "work_email": remote.get("mail") or remote.get("userPrincipalName") or False,
                 "work_phone": (remote.get("businessPhones") or [False])[0],
                 "mobile_phone": remote.get("mobilePhone") or False,
             }
-        elif user and self.configuration_id.create_missing_employee:
+        elif self.configuration_id.create_missing_employee and not is_guest:
             employee_vals = {
                 "_create": True,
-                "name": remote.get("displayName") or user.name,
-                "user_id": user.id,
+                "name": remote.get("displayName") or (user.name if user else False),
                 "company_id": self.company_id.id,
                 "job_title": remote.get("jobTitle") or False,
-                "work_email": remote.get("mail")
-                or remote.get("userPrincipalName")
-                or False,
+                "work_email": remote.get("mail") or remote.get("userPrincipalName") or False,
                 "work_phone": (remote.get("businessPhones") or [False])[0],
                 "mobile_phone": remote.get("mobilePhone") or False,
             }
-        elif user:
+        elif not is_guest:
             self._finding(
                 category="missing_mapping",
                 severity="warning",
@@ -625,6 +637,7 @@ class LhiEntraSyncRun(models.Model):
             "match_method": "create" if create_user else match_method,
             "create_user": create_user,
             "user_vals": user_vals,
+            "employee_id": employee.id if employee else False,
             "employee_vals": employee_vals,
             "organizational_vals": organizational_vals,
             "group_add_ids": sorted(add_ids),
@@ -939,7 +952,11 @@ class LhiEntraSyncRun(models.Model):
 
         employee_vals = dict(payload.get("employee_vals") or {})
         create_employee = employee_vals.pop("_create", False)
-        employee = user.employee_id
+        employee_id = payload.get("employee_id")
+        employee = self.env["hr.employee"].browse(employee_id) if employee_id else user.employee_id
+        if not employee.user_id and user:
+            employee_vals["user_id"] = user.id
+
         if create_employee and not employee:
             employee = self.env["hr.employee"].sudo().with_context(
                 lhi_entra_sync=True

@@ -14,9 +14,11 @@ This module provides the Media and Communications workflows for LHI, integrating
 ## Dependencies and grant relationship
 
 The module depends on `lhi_base`, which defines the canonical awarded-grant
-model `lhi.award`. Media request, activity, success-story, and asset records use
-that model for their grant/donor relationships. `lhi_funding_opportunity` is a
-pre-award pipeline and is intentionally not used as the awarded-grant comodel.
+model `lhi.award`, and on `lhi_project_workplan`, which defines
+`lhi.workplan.activity`. Media request, activity, success-story, and asset
+records use those models for their grant/donor and workplan relationships.
+`lhi_funding_opportunity` is a pre-award pipeline and is intentionally not used
+as the awarded-grant comodel.
 
 ## Access roles
 

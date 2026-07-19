@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Media & Communications',
-    'version': '19.0.1.0.1',
+    'version': '19.0.1.0.2',
     'category': 'Media & Communications',
     'summary': 'LHI Media & Communications unit module',
     'depends': [
@@ -10,6 +10,7 @@
         'project',
         'hr',
         'lhi_base',
+        'lhi_project_workplan',
     ],
     'data': [
         'security/security_groups.xml',

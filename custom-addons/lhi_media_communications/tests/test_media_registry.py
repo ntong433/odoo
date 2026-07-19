@@ -34,3 +34,14 @@ class TestMediaRegistry(TransactionCase):
         menu = self.env.ref('lhi_media_communications.menu_lhi_media_root')
         action = self.env.ref('lhi_media_communications.action_lhi_media_request')
         self.assertEqual(menu.action, action)
+
+    def test_media_privilege_labels_are_safe_for_generated_user_view(self):
+        category = self.env.ref(
+            'lhi_media_communications.module_category_lhi_media'
+        )
+        privilege = self.env.ref(
+            'lhi_media_communications.res_groups_privilege_lhi_media'
+        )
+        self.assertEqual(category.name, 'Media and Communications')
+        self.assertEqual(privilege.name, 'Media and Communications')
+        self.assertEqual(privilege.category_id, category)

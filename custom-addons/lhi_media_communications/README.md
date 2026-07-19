@@ -60,3 +60,11 @@ This correction adds no schema, migration, environment, secret-store, Microsoft,
 or SharePoint configuration changes. Python compilation and XML well-formedness
 checks passed; disposable database installation and production browser evidence
 must be collected in the Coolify runtime before production sign-off.
+
+## User access-rights compatibility
+
+The stable Media module-category and `res.groups.privilege` records use the
+backend label `Media and Communications`. This avoids unsafe special characters
+in Odoo 19's generated user access-rights view while preserving the friendly
+`Media & Communications` application and menu labels. Existing XML IDs, group
+relationships, ACLs, and user assignments are unchanged.

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="module_category_lhi_media" model="ir.module.category">
-        <field name="name">Media &amp; Communications</field>
-        <field name="description">Access levels for LHI Media &amp; Communications</field>
+        <field name="name">Media and Communications</field>
+        <field name="description">Access levels for LHI Media and Communications</field>
         <field name="sequence">110</field>
     </record>
 
     <record id="res_groups_privilege_lhi_media" model="res.groups.privilege">
-        <field name="name">Media &amp; Communications</field>
+        <field name="name">Media and Communications</field>
         <field name="category_id" ref="module_category_lhi_media"/>
     </record>
 

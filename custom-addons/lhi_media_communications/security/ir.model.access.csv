@@ -1,0 +1,17 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lhi_media_request_viewer,lhi.media.request.viewer,model_lhi_media_request,group_lhi_media_viewer,1,0,0,0
+access_lhi_media_request_requester,lhi.media.request.requester,model_lhi_media_request,group_lhi_media_requester,1,1,1,0
+access_lhi_media_request_officer,lhi.media.request.officer,model_lhi_media_request,group_lhi_media_officer,1,1,1,1
+
+access_lhi_media_activity_viewer,lhi.media.activity.viewer,model_lhi_media_activity,group_lhi_media_viewer,1,0,0,0
+access_lhi_media_activity_requester,lhi.media.activity.requester,model_lhi_media_activity,group_lhi_media_requester,1,0,0,0
+access_lhi_media_activity_officer,lhi.media.activity.officer,model_lhi_media_activity,group_lhi_media_officer,1,1,1,1
+
+access_lhi_media_success_story_viewer,lhi.media.success.story.viewer,model_lhi_media_success_story,group_lhi_media_viewer,1,0,0,0
+access_lhi_media_success_story_requester,lhi.media.success.story.requester,model_lhi_media_success_story,group_lhi_media_requester,1,0,0,0
+access_lhi_media_success_story_officer,lhi.media.success.story.officer,model_lhi_media_success_story,group_lhi_media_officer,1,1,1,0
+access_lhi_media_success_story_reviewer,lhi.media.success.story.reviewer,model_lhi_media_success_story,group_lhi_media_reviewer,1,1,1,1
+
+access_lhi_media_asset_viewer,lhi.media.asset.viewer,model_lhi_media_asset,group_lhi_media_viewer,1,0,0,0
+access_lhi_media_asset_requester,lhi.media.asset.requester,model_lhi_media_asset,group_lhi_media_requester,1,0,0,0
+access_lhi_media_asset_officer,lhi.media.asset.officer,model_lhi_media_asset,group_lhi_media_officer,1,1,1,1

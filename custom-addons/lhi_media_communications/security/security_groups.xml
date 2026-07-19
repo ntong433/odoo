@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="module_category_lhi_media" model="ir.module.category">
+        <field name="name">Media &amp; Communications</field>
+        <field name="description">Access levels for LHI Media &amp; Communications</field>
+        <field name="sequence">110</field>
+    </record>
+
+    <record id="res_groups_privilege_lhi_media" model="res.groups.privilege">
+        <field name="name">Media &amp; Communications</field>
+        <field name="category_id" ref="module_category_lhi_media"/>
+    </record>
+
+    <record id="group_lhi_media_viewer" model="res.groups">
+        <field name="name">Media Viewer</field>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_media"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="comment">Can read approved/published content only.</field>
+    </record>
+
+    <record id="group_lhi_media_requester" model="res.groups">
+        <field name="name">Media Requester</field>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_media"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_media_viewer'))]"/>
+        <field name="comment">Can create and view own/project requests.</field>
+    </record>
+
+    <record id="group_lhi_media_officer" model="res.groups">
+        <field name="name">Media Officer</field>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_media"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_media_requester'))]"/>
+        <field name="comment">Manage assigned requests, activities and content.</field>
+    </record>
+
+    <record id="group_lhi_media_reviewer" model="res.groups">
+        <field name="name">Media Reviewer</field>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_media"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_media_officer'))]"/>
+        <field name="comment">Review content, consent and publication readiness.</field>
+    </record>
+
+    <record id="group_lhi_media_manager" model="res.groups">
+        <field name="name">Media Manager</field>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_media"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_media_reviewer'))]"/>
+        <field name="comment">Manage the unit, configuration and all records.</field>
+    </record>
+</odoo>

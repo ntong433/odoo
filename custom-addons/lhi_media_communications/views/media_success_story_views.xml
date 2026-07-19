@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_media_success_story_form" model="ir.ui.view">
+        <field name="name">lhi.media.success.story.form</field>
+        <field name="model">lhi.media.success.story</field>
+        <field name="arch" type="xml">
+            <form string="Media Success Story">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,consent_pending,safeguarding,communications,donor_review,approved,published,archived"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Story Title..."/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="author_id"/>
+                            <field name="collection_date"/>
+                            <field name="location"/>
+                        </group>
+                        <group>
+                            <field name="project_id"/>
+                            <field name="grant_id"/>
+                            <field name="workplan_activity_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Story Content" name="content">
+                            <group>
+                                <field name="situation_before"/>
+                                <field name="lhi_intervention"/>
+                                <field name="outcome_change"/>
+                                <field name="direct_quotation"/>
+                                <field name="quantitative_evidence"/>
+                                <field name="lessons_learned"/>
+                            </group>
+                        </page>
+                        <page string="Beneficiary Info" name="beneficiary" groups="lhi_media_communications.group_lhi_media_requester,lhi_media_communications.group_lhi_media_officer,lhi_media_communications.group_lhi_media_reviewer,lhi_media_communications.group_lhi_media_manager">
+                            <group>
+                                <field name="beneficiary_name"/>
+                                <field name="age_group"/>
+                                <field name="gender"/>
+                            </group>
+                        </page>
+                        <page string="Media" name="media">
+                            <group>
+                                <field name="photo_ids" widget="many2many_binary"/>
+                                <field name="video_ids" widget="many2many_binary"/>
+                                <field name="audio_ids" widget="many2many_binary"/>
+                            </group>
+                        </page>
+                        <page string="Compliance &amp; Review" name="compliance">
+                            <group>
+                                <group string="Consent">
+                                    <field name="consent_status"/>
+                                    <field name="guardian_consent"/>
+                                    <field name="anonymization_required"/>
+                                    <field name="consent_form_id"/>
+                                </group>
+                                <group string="Reviews">
+                                    <field name="safeguarding_review"/>
+                                    <field name="communications_review"/>
+                                    <field name="donor_approval"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Publication" name="publication">
+                            <group>
+                                <field name="publication_channels"/>
+                                <field name="publication_date"/>
+                                <field name="published_url" widget="url"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_media_success_story_list" model="ir.ui.view">
+        <field name="name">lhi.media.success.story.list</field>
+        <field name="model">lhi.media.success.story</field>
+        <field name="arch" type="xml">
+            <list string="Success Stories">
+                <field name="name"/>
+                <field name="project_id"/>
+                <field name="author_id"/>
+                <field name="collection_date"/>
+                <field name="consent_status"/>
+                <field name="state" widget="badge" decoration-info="state in ('consent_pending','safeguarding','communications','donor_review')" decoration-success="state == 'published'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_lhi_media_success_story" model="ir.actions.act_window">
+        <field name="name">Success Stories</field>
+        <field name="res_model">lhi.media.success.story</field>
+        <field name="view_mode">list,form,kanban</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Success Story
+            </p>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_media_request_form" model="ir.ui.view">
+        <field name="name">lhi.media.request.form</field>
+        <field name="model">lhi.media.request</field>
+        <field name="arch" type="xml">
+            <form string="Media Request">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,reviewed,approved,assigned,in_progress,completed,published"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                        <h2>
+                            <field name="title" placeholder="Request Title..."/>
+                        </h2>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="requesting_unit_id"/>
+                            <field name="requested_by_id"/>
+                            <field name="activity_type"/>
+                            <field name="priority" widget="priority"/>
+                        </group>
+                        <group>
+                            <field name="requested_date"/>
+                            <field name="required_completion_date"/>
+                            <field name="assigned_officer_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Details" name="details">
+                            <group>
+                                <field name="purpose"/>
+                                <field name="target_audience"/>
+                                <field name="location"/>
+                                <field name="key_message"/>
+                                <field name="donor_branding_requirements"/>
+                            </group>
+                        </page>
+                        <page string="Project &amp; Links" name="links">
+                            <group>
+                                <field name="project_id"/>
+                                <field name="task_id" domain="[('project_id', '=', project_id)]"/>
+                                <field name="workplan_activity_id"/>
+                                <field name="grant_id"/>
+                            </group>
+                        </page>
+                        <page string="Attachments" name="attachments">
+                            <field name="attachment_ids" widget="many2many_binary"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_media_request_list" model="ir.ui.view">
+        <field name="name">lhi.media.request.list</field>
+        <field name="model">lhi.media.request</field>
+        <field name="arch" type="xml">
+            <list string="Media Requests">
+                <field name="name"/>
+                <field name="title"/>
+                <field name="activity_type"/>
+                <field name="requesting_unit_id"/>
+                <field name="requested_by_id"/>
+                <field name="project_id"/>
+                <field name="required_completion_date"/>
+                <field name="state" widget="badge" decoration-info="state in ('submitted','reviewed','assigned')" decoration-success="state in ('completed','published')" decoration-danger="state in ('rejected','cancelled')"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_lhi_media_request" model="ir.actions.act_window">
+        <field name="name">Media Requests</field>
+        <field name="res_model">lhi.media.request</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Media Request
+            </p>
+        </field>
+    </record>
+</odoo>

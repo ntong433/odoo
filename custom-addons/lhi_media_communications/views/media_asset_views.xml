@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_media_asset_form" model="ir.ui.view">
+        <field name="name">lhi.media.asset.form</field>
+        <field name="model">lhi.media.asset</field>
+        <field name="arch" type="xml">
+            <form string="Media Asset">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="asset_title" placeholder="Asset Title..."/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="asset_type"/>
+                            <field name="creator"/>
+                            <field name="capture_date"/>
+                            <field name="location"/>
+                            <field name="expiry_date"/>
+                        </group>
+                        <group>
+                            <field name="project_id"/>
+                            <field name="activity_id"/>
+                            <field name="success_story_id"/>
+                            <field name="donor_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="File" name="file">
+                            <group>
+                                <field name="attachment_id"/>
+                            </group>
+                        </page>
+                        <page string="Metadata &amp; Rights" name="metadata">
+                            <group>
+                                <field name="consent_status"/>
+                                <field name="usage_restrictions"/>
+                                <field name="caption"/>
+                                <field name="keywords"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_media_asset_list" model="ir.ui.view">
+        <field name="name">lhi.media.asset.list</field>
+        <field name="model">lhi.media.asset</field>
+        <field name="arch" type="xml">
+            <list string="Media Assets">
+                <field name="asset_title"/>
+                <field name="asset_type"/>
+                <field name="project_id"/>
+                <field name="creator"/>
+                <field name="capture_date"/>
+                <field name="consent_status"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_lhi_media_asset" model="ir.actions.act_window">
+        <field name="name">Media Library</field>
+        <field name="res_model">lhi.media.asset</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Add a new Media Asset
+            </p>
+        </field>
+    </record>
+</odoo>

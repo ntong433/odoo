@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_media_activity_form" model="ir.ui.view">
+        <field name="name">lhi.media.activity.form</field>
+        <field name="model">lhi.media.activity</field>
+        <field name="arch" type="xml">
+            <form string="Media Activity">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="planned,in_progress,completed,cancelled"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Activity Title..."/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="activity_type"/>
+                            <field name="owner_id"/>
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                            <field name="location"/>
+                            <field name="state_id"/>
+                        </group>
+                        <group>
+                            <field name="project_id"/>
+                            <field name="workplan_activity_id"/>
+                            <field name="task_id" domain="[('project_id', '=', project_id)]"/>
+                            <field name="grant_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="General Info" name="general">
+                            <group>
+                                <group>
+                                    <field name="target_audience"/>
+                                    <field name="planned_reach"/>
+                                    <field name="actual_reach"/>
+                                </group>
+                                <group>
+                                    <field name="budget"/>
+                                    <field name="actual_cost"/>
+                                    <field name="channels"/>
+                                </group>
+                            </group>
+                            <field name="team_member_ids" widget="many2many_tags" placeholder="Team Members..."/>
+                            <separator string="Results &amp; Lessons"/>
+                            <field name="results" placeholder="Results achieved..."/>
+                            <field name="lessons_learned" placeholder="Lessons learned..."/>
+                            <field name="follow_up_actions" placeholder="Follow-up actions..."/>
+                        </page>
+                        <page string="Radio Programme Details" name="radio" invisible="activity_type != 'radio'">
+                            <group>
+                                <group>
+                                    <field name="radio_station"/>
+                                    <field name="programme_name"/>
+                                    <field name="episode_title"/>
+                                    <field name="broadcast_date"/>
+                                    <field name="duration"/>
+                                    <field name="language"/>
+                                    <field name="topic"/>
+                                    <field name="presenter"/>
+                                    <field name="guests"/>
+                                </group>
+                                <group>
+                                    <field name="estimated_audience"/>
+                                    <field name="call_ins"/>
+                                    <field name="broadcast_cost"/>
+                                    <field name="repeat_broadcast"/>
+                                </group>
+                            </group>
+                            <group>
+                                <field name="questions_received"/>
+                                <field name="listener_feedback"/>
+                                <field name="radio_outcome"/>
+                                <field name="recording"/>
+                            </group>
+                        </page>
+                        <page string="Outreach Details" name="outreach" invisible="activity_type != 'outreach'">
+                            <group>
+                                <group>
+                                    <field name="outreach_objective"/>
+                                    <field name="outreach_community"/>
+                                    <field name="outreach_target_population"/>
+                                    <field name="outreach_partners"/>
+                                </group>
+                                <group>
+                                    <field name="outreach_planned_participants"/>
+                                    <field name="outreach_actual_participants"/>
+                                    <field name="outreach_female"/>
+                                    <field name="outreach_male"/>
+                                    <field name="outreach_pwd"/>
+                                    <field name="outreach_children_youth"/>
+                                    <field name="outreach_leaders"/>
+                                    <field name="outreach_referrals"/>
+                                    <field name="outreach_follow_up"/>
+                                </group>
+                            </group>
+                            <group>
+                                <field name="outreach_key_messages"/>
+                                <field name="outreach_materials_distributed"/>
+                                <field name="outreach_questions"/>
+                                <field name="outreach_evidence_ids" widget="many2many_binary"/>
+                            </group>
+                        </page>
+                        <page string="Attachments" name="attachments">
+                            <field name="attachment_ids" widget="many2many_binary"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_media_activity_list" model="ir.ui.view">
+        <field name="name">lhi.media.activity.list</field>
+        <field name="model">lhi.media.activity</field>
+        <field name="arch" type="xml">
+            <list string="Media Activities">
+                <field name="name"/>
+                <field name="activity_type"/>
+                <field name="project_id"/>
+                <field name="start_date"/>
+                <field name="location"/>
+                <field name="owner_id"/>
+                <field name="state" widget="badge" decoration-info="state == 'in_progress'" decoration-success="state == 'completed'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_lhi_media_activity" model="ir.actions.act_window">
+        <field name="name">Media Activities</field>
+        <field name="res_model">lhi.media.activity</field>
+        <field name="view_mode">list,form,kanban,calendar,pivot,graph</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Media Activity
+            </p>
+        </field>
+    </record>
+</odoo>

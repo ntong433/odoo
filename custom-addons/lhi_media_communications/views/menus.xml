@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Root Menu restricted to Media Viewer (which is implied by all other media groups) -->
+    <menuitem id="menu_lhi_media_root" 
+              name="Media &amp; Communications" 
+              groups="lhi_media_communications.group_lhi_media_viewer" 
+              web_icon="lhi_media_communications,static/description/icon.png"
+              sequence="55"/>
+
+    <!-- Sub Menus -->
+    <menuitem id="menu_lhi_media_dashboard" 
+              name="Dashboard" 
+              parent="menu_lhi_media_root" 
+              sequence="10"/>
+
+    <menuitem id="menu_lhi_media_request" 
+              name="Requests" 
+              parent="menu_lhi_media_root" 
+              action="action_lhi_media_request" 
+              sequence="20"/>
+              
+    <menuitem id="menu_lhi_media_calendar" 
+              name="Content Calendar" 
+              parent="menu_lhi_media_root" 
+              sequence="30"/>
+
+    <menuitem id="menu_lhi_media_activity" 
+              name="Media Activities" 
+              parent="menu_lhi_media_root" 
+              action="action_lhi_media_activity" 
+              sequence="40"/>
+
+    <menuitem id="menu_lhi_media_success_story" 
+              name="Success Stories" 
+              parent="menu_lhi_media_root" 
+              action="action_lhi_media_success_story" 
+              sequence="50"/>
+
+    <menuitem id="menu_lhi_media_library" 
+              name="Media Library" 
+              parent="menu_lhi_media_root" 
+              action="action_lhi_media_asset" 
+              sequence="60"/>
+
+    <menuitem id="menu_lhi_media_approvals" 
+              name="Approvals" 
+              parent="menu_lhi_media_root" 
+              groups="lhi_media_communications.group_lhi_media_reviewer,lhi_media_communications.group_lhi_media_manager" 
+              sequence="70"/>
+
+    <menuitem id="menu_lhi_media_reports" 
+              name="Reports" 
+              parent="menu_lhi_media_root" 
+              sequence="80"/>
+
+    <menuitem id="menu_lhi_media_configuration" 
+              name="Configuration" 
+              parent="menu_lhi_media_root" 
+              groups="lhi_media_communications.group_lhi_media_manager" 
+              sequence="90"/>
+</odoo>

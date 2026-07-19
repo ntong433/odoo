@@ -16,5 +16,5 @@
     <!-- Create menus -->
     <menuitem id="menu_lhi_workplan_root" name="Workplans" parent="lhi_base.menu_lhi_project_root" sequence="20"/>
     <menuitem id="menu_lhi_workplan" name="Workplans" parent="menu_lhi_workplan_root" action="action_lhi_workplan" sequence="10"/>
-    <menuitem id="menu_lhi_workplan_activity" name="Activities" parent="menu_lhi_workplan_root" action="action_lhi_workplan_activity" sequence="20"/>
+    <menuitem id="menu_lhi_workplan_activity" name="Workplan Activities" parent="menu_lhi_workplan_root" action="action_lhi_workplan_activity" sequence="20"/>
 </odoo>

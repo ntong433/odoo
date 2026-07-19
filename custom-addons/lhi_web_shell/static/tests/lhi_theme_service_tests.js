@@ -21,36 +21,45 @@ QUnit.module("LHI Web Shell", (hooks) => {
         } else {
             localStorage.removeItem("lhi_theme");
         }
-        document.documentElement.removeAttribute("data-theme");
+        document.documentElement.removeAttribute("data-lhi-theme");
+        document.documentElement.removeAttribute("data-bs-theme");
     });
 
     QUnit.module("Theme Service");
 
-    QUnit.test("Service initializes with light theme by default", async (assert) => {
+    QUnit.test("Service initializes with system theme by default", async (assert) => {
         const env = await makeTestEnv();
         const service = lhiThemeService(env);
         
-        assert.strictEqual(service.theme, "light", "Default theme should be light");
-        assert.strictEqual(service.isDark, false, "isDark should be false");
-        assert.strictEqual(document.documentElement.getAttribute("data-theme"), null, "data-theme attribute should be null");
+        assert.strictEqual(service.theme, "system", "Default theme should be system");
+        assert.strictEqual(
+            document.documentElement.getAttribute("data-lhi-theme"),
+            window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light",
+            "Resolved theme attribute should match system preference"
+        );
     });
 
     QUnit.test("Service toggles theme and persists to localStorage", async (assert) => {
         const env = await makeTestEnv();
         const service = lhiThemeService(env);
         
+        // Starts at system, toggles to light
         service.toggle();
+        assert.strictEqual(service.theme, "light", "Theme should toggle to light");
+        assert.strictEqual(service.isDark, false, "isDark should be false");
+        assert.strictEqual(document.documentElement.getAttribute("data-lhi-theme"), "light", "data-lhi-theme should be light");
+        assert.strictEqual(localStorage.getItem("lhi_theme"), "light", "localStorage should persist light theme");
         
+        // Toggles to dark
+        service.toggle();
         assert.strictEqual(service.theme, "dark", "Theme should toggle to dark");
         assert.strictEqual(service.isDark, true, "isDark should be true");
-        assert.strictEqual(document.documentElement.getAttribute("data-theme"), "dark", "data-theme attribute should be dark");
+        assert.strictEqual(document.documentElement.getAttribute("data-lhi-theme"), "dark", "data-lhi-theme should be dark");
         assert.strictEqual(localStorage.getItem("lhi_theme"), "dark", "localStorage should persist dark theme");
-        
+
+        // Toggles to system
         service.toggle();
-        
-        assert.strictEqual(service.theme, "light", "Theme should toggle back to light");
-        assert.strictEqual(service.isDark, false, "isDark should be false");
-        assert.strictEqual(document.documentElement.getAttribute("data-theme"), null, "data-theme attribute should be removed");
-        assert.strictEqual(localStorage.getItem("lhi_theme"), "light", "localStorage should persist light theme");
+        assert.strictEqual(service.theme, "system", "Theme should toggle to system");
+        assert.strictEqual(localStorage.getItem("lhi_theme"), "system", "localStorage should persist system theme");
     });
 });

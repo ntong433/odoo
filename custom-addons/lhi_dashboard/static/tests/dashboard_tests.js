@@ -3,8 +3,10 @@
 import { getFixture, mount } from "@web/../tests/helpers/utils";
 import { dashboardWidgetRegistry } from "@lhi_dashboard/js/dashboard_widget_registry";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
-import { LhiDashboard } from "@lhi_dashboard/js/lhi_dashboard";
-import { DASHBOARD_ACTION_TAG } from "@lhi_dashboard/js/dashboard_action";
+import {
+    DASHBOARD_ACTION_TAG,
+    LhiDashboard,
+} from "@lhi_dashboard/js/lhi_dashboard";
 import { registry } from "@web/core/registry";
 
 QUnit.module("LHI Dashboard", (hooks) => {

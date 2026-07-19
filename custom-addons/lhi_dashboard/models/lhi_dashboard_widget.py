@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
+import logging
+
 from odoo import api, fields, models
+
+
+_logger = logging.getLogger(__name__)
 
 class LhiDashboardWidget(models.Model):
     _name = 'lhi.dashboard.widget'
@@ -29,7 +34,6 @@ class LhiDashboardWidget(models.Model):
     # XML IDs and department codes are stable; translated display names and
     # deployment-specific database IDs must never become authorization inputs.
     _LHI_APP_DEFINITIONS = (
-        ('pipeline', 'Pipeline', 'lhi_funding_opportunity.menu_lhi_funding_root', ('lhi_security.group_lhi_project_officer', 'lhi_security.group_lhi_project_manager', 'lhi_security.group_lhi_programme_director'), ('PIPELINE', 'PROGRAMME', 'PROGRAMMES')),
         ('procurement', 'Procurement', 'lhi_purchase_request.menu_lhi_procurement_root', ('lhi_security.group_lhi_procurement_officer', 'lhi_security.group_lhi_procurement_manager'), ('PROCUREMENT',)),
         ('operations', 'Operations', 'lhi_dashboard.menu_lhi_operations_hub', ('lhi_security.group_lhi_supervisor', 'lhi_security.group_lhi_manager', 'lhi_security.group_lhi_procurement_officer', 'lhi_security.group_lhi_store_officer', 'lhi_security.group_lhi_fleet_officer'), ('OPERATIONS',)),
         ('assets', 'Assets', 'lhi_asset_management.menu_lhi_asset', ('lhi_security.group_lhi_store_officer',), ('ASSET', 'ASSETS', 'OPERATIONS')),
@@ -79,6 +83,22 @@ class LhiDashboardWidget(models.Model):
         return result
 
     @api.model
+    def _deduplicate_dashboard_apps(self, apps):
+        """Return one launcher card per stable menu XML ID."""
+        unique_apps = []
+        seen_xmlids = set()
+        for app in apps:
+            menu_xmlid = app.get('xmlid')
+            if not menu_xmlid:
+                continue
+            if menu_xmlid in seen_xmlids:
+                _logger.warning("Duplicate dashboard module removed: %s", menu_xmlid)
+                continue
+            seen_xmlids.add(menu_xmlid)
+            unique_apps.append(app)
+        return unique_apps
+
+    @api.model
     def get_accessible_apps(self):
         """Return authorized native menus for the current user's launcher.
 
@@ -116,7 +136,7 @@ class LhiDashboardWidget(models.Model):
                 'xmlid': menu_xmlid,
                 'icon_url': f'/lhi_web_shell/static/src/img/module_icons/{key}.svg',
             })
-        return apps
+        return self._deduplicate_dashboard_apps(apps)
 
     @api.model
     def get_my_approval_summary(self):

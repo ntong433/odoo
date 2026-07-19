@@ -66,3 +66,12 @@ Make the LHI dashboard the default landing experience while preserving deep-link
   `lhi_dashboard,lhi_media_communications`, and rebuild browser assets. Roll back
   by redeploying the preceding commit and updating only those modules against a
   backed-up database; then restart Odoo and clear browser asset caches.
+
+## Accessible-module deduplication — 2026-07-19
+
+- Removed the redundant `Pipeline` launcher alias because it targeted the same
+  stable menu XML ID as the canonical `Grants & Funding` card.
+- Added server-side deduplication by menu XML ID before launcher data reaches
+  Owl. Duplicate removal emits a safe warning containing only the XML ID.
+- Kept `app.xmlid` as the stable Owl `t-key`; no array-index workaround was used.
+- Added tests for unique static definitions and defensive data deduplication.

@@ -41,10 +41,24 @@ class TestLhiDashboard(TransactionCase):
         self.assertEqual(self.Widget.with_user(self.user).get_accessible_apps(), [])
 
     def test_app_definitions_use_xmlids_and_local_icons(self):
+        menu_xmlids = []
         for key, _label, menu_xmlid, _groups, _departments in self.Widget._LHI_APP_DEFINITIONS:
             self.assertIn('.', menu_xmlid)
             self.assertNotEqual(key, menu_xmlid)
             self.assertFalse(menu_xmlid.isdigit())
+            menu_xmlids.append(menu_xmlid)
+        self.assertEqual(len(menu_xmlids), len(set(menu_xmlids)))
+
+    def test_accessible_apps_are_deduplicated_by_menu_xmlid(self):
+        duplicate_xmlid = 'lhi_funding_opportunity.menu_lhi_funding_root'
+        apps = [
+            {'key': 'grants', 'name': 'Grants & Funding', 'xmlid': duplicate_xmlid},
+            {'key': 'pipeline', 'name': 'Pipeline', 'xmlid': duplicate_xmlid},
+        ]
+        result = self.Widget._deduplicate_dashboard_apps(apps)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]['name'], 'Grants & Funding')
+        self.assertEqual(result[0]['xmlid'], duplicate_xmlid)
 
     def test_affected_dashboard_actions_resolve(self):
         expected = {

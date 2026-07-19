@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'LHI Base ERP Integration',
-    'version': '19.0.1.0.0',
+    'version': '19.0.1.0.1',
     'category': 'Operations',
     'summary': 'Core configuration and models for LHI Nigeria ERP system',
     'description': """

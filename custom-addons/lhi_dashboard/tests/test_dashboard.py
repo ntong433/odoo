@@ -44,6 +44,52 @@ class TestLhiDashboard(TransactionCase):
         for key, _label, menu_xmlid, _groups, _departments in self.Widget._LHI_APP_DEFINITIONS:
             self.assertIn('.', menu_xmlid)
             self.assertNotEqual(key, menu_xmlid)
+            self.assertFalse(menu_xmlid.isdigit())
+
+    def test_affected_dashboard_actions_resolve(self):
+        expected = {
+            'meal': ('lhi_results_framework.menu_lhi_meal_root', 'lhi_results_framework.action_lhi_results_framework'),
+            'projects': ('lhi_base.menu_lhi_project_root', 'lhi_base.action_lhi_project'),
+            'grants': ('lhi_funding_opportunity.menu_lhi_funding_root', 'lhi_funding_opportunity.action_lhi_funding_opportunity'),
+            'approvals': ('lhi_approval_matrix.menu_lhi_my_pending_approvals', 'lhi_approval_matrix.action_lhi_my_pending_approvals'),
+            'media': ('lhi_media_communications.menu_lhi_media_root', 'lhi_media_communications.action_lhi_media_request'),
+        }
+        definitions = {item[0]: item for item in self.Widget._LHI_APP_DEFINITIONS}
+        for key, (menu_xmlid, action_xmlid) in expected.items():
+            self.assertEqual(definitions[key][2], menu_xmlid)
+            menu = self.env.ref(menu_xmlid)
+            action = self.env.ref(action_xmlid)
+            self.assertEqual(menu.action, action)
+
+    def test_functional_assignment_controls_card_visibility(self):
+        cases = (
+            ('lhi_security.group_lhi_meal_officer', 'meal'),
+            ('lhi_security.group_lhi_project_officer', 'projects'),
+            ('lhi_security.group_lhi_project_officer', 'grants'),
+            ('lhi_security.group_lhi_executive_approver', 'approvals'),
+            ('lhi_media_communications.group_lhi_media_viewer', 'media'),
+        )
+        for index, (group_xmlid, expected_key) in enumerate(cases):
+            user = new_test_user(
+                self.env,
+                login=f'lhi_dashboard_role_user_{index}',
+                groups=f'base.group_user,{group_xmlid}',
+            )
+            keys = {
+                app['key']
+                for app in self.Widget.with_user(user).get_accessible_apps()
+            }
+            self.assertIn(expected_key, keys)
+
+    def test_approval_summary_uses_assigned_request_lines(self):
+        approver = new_test_user(
+            self.env,
+            login='lhi_dashboard_approval_summary_user',
+            groups='base.group_user,lhi_security.group_lhi_executive_approver',
+        )
+        summary = self.Widget.with_user(approver).get_my_approval_summary()
+        self.assertTrue(summary['available'])
+        self.assertEqual(summary['count'], 0)
 
     def test_announcement_visibility(self):
         """ Test that active announcements are retrieved """

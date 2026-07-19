@@ -3,6 +3,7 @@
     <!-- Root Menu restricted to Media Viewer (which is implied by all other media groups) -->
     <menuitem id="menu_lhi_media_root" 
               name="Media &amp; Communications" 
+              action="action_lhi_media_request"
               groups="lhi_media_communications.group_lhi_media_viewer" 
               web_icon="lhi_media_communications,static/description/icon.png"
               sequence="55"/>

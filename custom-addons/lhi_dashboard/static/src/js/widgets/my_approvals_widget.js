@@ -1,7 +1,6 @@
 /** @odoo-module **/
 
 import { Component, onWillStart, useState } from "@odoo/owl";
-import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { dashboardWidgetRegistry } from "../dashboard_widget_registry";
 
@@ -35,14 +34,7 @@ export class MyApprovalsWidget extends Component {
         if (!this.state.available) {
             return;
         }
-        this.actionService.doAction({
-            type: 'ir.actions.act_window',
-            name: 'My Pending Approvals',
-            res_model: 'lhi.approval.line',
-            view_mode: 'list,form',
-            domain: [['user_id', '=', user.userId], ['status', '=', 'pending']],
-            views: [[false, 'list'], [false, 'form']],
-        });
+        this.actionService.doAction("lhi_approval_matrix.action_lhi_my_pending_approvals");
     }
 }
 

@@ -37,8 +37,9 @@ class LhiDashboardWidget(models.Model):
         ('meal', 'MEAL', 'lhi_results_framework.menu_lhi_meal_root', ('lhi_security.group_lhi_meal_officer', 'lhi_meal.group_lhi_meal_sensitive'), ('MEAL',)),
         ('inventory', 'Inventory', 'stock.menu_stock_root', ('lhi_security.group_lhi_store_officer',), ('INVENTORY', 'STORE')),
         ('fleet', 'Fleet', 'fleet.fleet_menu_root', ('lhi_security.group_lhi_fleet_officer',), ('FLEET', 'OPERATIONS')),
-        ('approvals', 'Approvals', 'lhi_approval_matrix.menu_lhi_approvals_root', ('lhi_security.group_lhi_executive_approver', 'lhi_security.group_lhi_manager'), ('APPROVALS',)),
-        ('grants', 'Grants & Funding', 'lhi_base.menu_lhi_project_root', ('lhi_security.group_lhi_project_officer', 'lhi_security.group_lhi_project_manager', 'lhi_security.group_lhi_programme_director'), ('PROJECTS', 'GRANTS', 'PROGRAMME', 'PROGRAMMES')),
+        ('approvals', 'Approvals', 'lhi_approval_matrix.menu_lhi_my_pending_approvals', ('lhi_security.group_lhi_executive_approver', 'lhi_security.group_lhi_manager'), ('APPROVALS',)),
+        ('projects', 'Programs & Projects', 'lhi_base.menu_lhi_project_root', ('lhi_security.group_lhi_project_officer', 'lhi_security.group_lhi_project_manager', 'lhi_security.group_lhi_programme_director'), ('PROJECTS', 'PROGRAMME', 'PROGRAMMES')),
+        ('grants', 'Grants & Funding', 'lhi_funding_opportunity.menu_lhi_funding_root', ('lhi_security.group_lhi_project_officer', 'lhi_security.group_lhi_project_manager', 'lhi_security.group_lhi_programme_director'), ('GRANTS', 'FUNDING', 'PIPELINE')),
         ('hr', 'Human Resources', 'hr.menu_hr_root', ('lhi_security.group_lhi_hr_officer',), ('HR', 'HUMAN_RESOURCES')),
         ('signatures', 'Signatures', 'lhi_signature_bridge.menu_lhi_opensign', ('lhi_security.group_lhi_procurement_officer', 'lhi_security.group_lhi_procurement_manager'), ('LEGAL', 'PROCUREMENT')),
         ('media', 'Media & Communications', 'lhi_media_communications.menu_lhi_media_root', ('lhi_media_communications.group_lhi_media_viewer', 'lhi_media_communications.group_lhi_media_requester', 'lhi_media_communications.group_lhi_media_officer', 'lhi_media_communications.group_lhi_media_reviewer', 'lhi_media_communications.group_lhi_media_manager'), ('MEDIA',)),
@@ -119,7 +120,7 @@ class LhiDashboardWidget(models.Model):
 
     @api.model
     def get_my_approval_summary(self):
-        model_name = "lhi.approval.line"
+        model_name = "lhi.approval.request.line"
 
         if model_name not in self.env or not self.env[model_name].check_access_rights('read', raise_exception=False):
             return {
@@ -128,8 +129,8 @@ class LhiDashboardWidget(models.Model):
             }
 
         count = self.env[model_name].search_count([
-            ("user_id", "=", self.env.user.id),
-            ("status", "=", "pending"),
+            ("approver_ids", "in", [self.env.user.id]),
+            ("state", "=", "pending"),
         ])
 
         return {

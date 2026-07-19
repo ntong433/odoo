@@ -270,6 +270,16 @@
         <field name="view_mode">list,form</field>
     </record>
 
+    <record id="action_lhi_my_pending_approvals" model="ir.actions.act_window">
+        <field name="name">My Pending Approvals</field>
+        <field name="res_model">lhi.approval.request</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('state', '=', 'under_review'), ('current_line_id.approver_ids', 'in', [uid])]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No approvals are currently assigned to you.</p>
+        </field>
+    </record>
+
     <record id="action_lhi_sod_rule" model="ir.actions.act_window">
         <field name="name">Segregation of Duties Rules</field>
         <field name="res_model">lhi.sod.rule</field>
@@ -284,6 +294,7 @@
 
     <!-- Menus -->
     <menuitem id="menu_lhi_approvals_root" name="Approvals" parent="lhi_base.menu_lhi_root" action="action_lhi_approval_request" sequence="20"/>
+    <menuitem id="menu_lhi_my_pending_approvals" name="My Pending Approvals" parent="menu_lhi_approvals_root" action="action_lhi_my_pending_approvals" sequence="5"/>
     <menuitem id="menu_lhi_approval_request" name="Active Requests" parent="menu_lhi_approvals_root" action="action_lhi_approval_request" sequence="10"/>
     <menuitem id="menu_lhi_approval_matrix" name="Matrix Configurations" parent="menu_lhi_approvals_root" action="action_lhi_approval_matrix" sequence="20"/>
     <menuitem id="menu_lhi_approval_delegation" name="Approval Delegations" parent="menu_lhi_approvals_root" action="action_lhi_approval_delegation" sequence="30"/>

@@ -53,6 +53,13 @@
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="groups" eval="[(4, ref('lhi_meal.group_lhi_meal_sensitive'))]"/>
         </record>
+
+        <record id="rule_lhi_meal_initiative_company" model="ir.rule">
+            <field name="name">MEAL initiatives: multi-company</field>
+            <field name="model_id" ref="model_lhi_meal_initiative"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_meal_officer')), (4, ref('lhi_security.group_lhi_manager'))]"/>
+        </record>
         
         <record id="seq_lhi_meal_data" model="ir.sequence">
             <field name="name">MEAL Data Reference</field>

@@ -1,0 +1,27 @@
+{
+    "name": "LHI Programs and Grants",
+    "version": "19.0.1.0.0",
+    "category": "Programs and Grants",
+    "summary": "Donor-funded project lifecycle, memo, budget, request, and retirement control",
+    "author": "Life Helpers Initiative",
+    "website": "https://www.lhinigeria.org",
+    "license": "LGPL-3",
+    "depends": [
+        "mail", "lhi_security", "lhi_base", "lhi_grant_award",
+        "lhi_funding_opportunity", "lhi_project_workplan", "lhi_approval_matrix",
+        "lhi_meal", "lhi_media_communications", "lhi_purchase_request",
+        "lhi_fleet_operations", "lhi_inventory", "lhi_asset_management",
+        "lhi_sharepoint_storage",
+    ],
+    "data": [
+        "security/programme_security.xml",
+        "security/ir.model.access.csv",
+        "data/sequences.xml",
+        "views/programme_lifecycle_views.xml",
+        "views/department_extension_views.xml",
+        "views/project_context_views.xml",
+        "views/programme_menus.xml",
+    ],
+    "installable": True,
+    "application": True,
+}

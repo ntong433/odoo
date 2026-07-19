@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="seq_lhi_activity_memo" model="ir.sequence"><field name="name">Activity Memo</field><field name="code">lhi.activity.memo</field><field name="prefix">MEMO/%(year)s/</field><field name="padding">5</field><field name="company_id" eval="False"/></record>
+    <record id="seq_lhi_execution_request" model="ir.sequence"><field name="name">Execution Request</field><field name="code">lhi.execution.request</field><field name="prefix">REQ/%(year)s/</field><field name="padding">5</field><field name="company_id" eval="False"/></record>
+    <record id="seq_lhi_payment_retirement" model="ir.sequence"><field name="name">Payment Retirement</field><field name="code">lhi.payment.retirement</field><field name="prefix">RET/%(year)s/</field><field name="padding">5</field><field name="company_id" eval="False"/></record>
+</odoo>

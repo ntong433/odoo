@@ -63,8 +63,7 @@ class TestLhiDashboard(TransactionCase):
     def test_affected_dashboard_actions_resolve(self):
         expected = {
             'meal': ('lhi_results_framework.menu_lhi_meal_root', 'lhi_results_framework.action_lhi_results_framework'),
-            'projects': ('lhi_base.menu_lhi_project_root', 'lhi_base.action_lhi_project'),
-            'grants': ('lhi_funding_opportunity.menu_lhi_funding_root', 'lhi_funding_opportunity.action_lhi_funding_opportunity'),
+            'programmes': ('lhi_base.menu_lhi_root', 'lhi_base.action_lhi_project'),
             'approvals': ('lhi_approval_matrix.menu_lhi_my_pending_approvals', 'lhi_approval_matrix.action_lhi_my_pending_approvals'),
             'media': ('lhi_media_communications.menu_lhi_media_root', 'lhi_media_communications.action_lhi_media_request'),
         }
@@ -84,9 +83,9 @@ class TestLhiDashboard(TransactionCase):
             'inventory',
             'fleet',
             'approvals',
-            'projects',
-            'grants',
+            'programmes',
             'media',
+            'reports',
         }
         definitions = {item[0]: item for item in self.Widget._LHI_APP_DEFINITIONS}
         self.assertEqual(required_keys - definitions.keys(), set())
@@ -98,8 +97,7 @@ class TestLhiDashboard(TransactionCase):
     def test_functional_assignment_controls_card_visibility(self):
         cases = (
             ('lhi_security.group_lhi_meal_officer', 'meal'),
-            ('lhi_security.group_lhi_project_officer', 'projects'),
-            ('lhi_security.group_lhi_project_officer', 'grants'),
+            ('lhi_security.group_lhi_project_officer', 'programmes'),
             ('lhi_security.group_lhi_executive_approver', 'approvals'),
             ('lhi_media_communications.group_lhi_media_viewer', 'media'),
         )

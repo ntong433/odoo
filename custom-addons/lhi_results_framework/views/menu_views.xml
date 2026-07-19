@@ -13,7 +13,7 @@
         <field name="search_view_id" ref="view_lhi_indicator_search"/>
     </record>
 
-    <menuitem id="menu_lhi_meal_root" name="MEAL" parent="lhi_base.menu_lhi_project_root" action="action_lhi_results_framework" sequence="25"/>
+    <menuitem id="menu_lhi_meal_root" name="MEAL" action="action_lhi_results_framework" sequence="25" web_icon="lhi_web_shell,static/src/img/module_icons/meal.svg"/>
     <menuitem id="menu_lhi_results_framework" name="Results Framework" parent="menu_lhi_meal_root" action="action_lhi_results_framework" sequence="10"/>
     <menuitem id="menu_lhi_indicator" name="Indicators" parent="menu_lhi_meal_root" action="action_lhi_indicator" sequence="20"/>
 </odoo>

@@ -3,3 +3,5 @@ access_lhi_meal_data_user,lhi.meal.data.user,model_lhi_meal_data,base.group_user
 access_lhi_meal_data_admin,lhi.meal.data.admin,model_lhi_meal_data,base.group_erp_manager,1,1,1,1
 access_lhi_meal_evidence_user,lhi.meal.evidence.user,model_lhi_meal_evidence,base.group_user,1,1,1,0
 access_lhi_meal_evidence_admin,lhi.meal.evidence.admin,model_lhi_meal_evidence,base.group_erp_manager,1,1,1,1
+access_lhi_meal_initiative_officer,lhi.meal.initiative.officer,model_lhi_meal_initiative,lhi_security.group_lhi_meal_officer,1,1,1,0
+access_lhi_meal_initiative_manager,lhi.meal.initiative.manager,model_lhi_meal_initiative,lhi_security.group_lhi_manager,1,1,1,1

@@ -42,11 +42,11 @@ class LhiDashboardWidget(models.Model):
         ('inventory', 'Inventory', 'stock.menu_stock_root', ('lhi_security.group_lhi_store_officer',), ('INVENTORY', 'STORE')),
         ('fleet', 'Fleet', 'fleet.menu_root', ('lhi_security.group_lhi_fleet_officer',), ('FLEET', 'OPERATIONS')),
         ('approvals', 'Approvals', 'lhi_approval_matrix.menu_lhi_my_pending_approvals', ('lhi_security.group_lhi_executive_approver', 'lhi_security.group_lhi_manager'), ('APPROVALS',)),
-        ('projects', 'Programs & Projects', 'lhi_base.menu_lhi_project_root', ('lhi_security.group_lhi_project_officer', 'lhi_security.group_lhi_project_manager', 'lhi_security.group_lhi_programme_director'), ('PROJECTS', 'PROGRAMME', 'PROGRAMMES')),
-        ('grants', 'Grants & Funding', 'lhi_funding_opportunity.menu_lhi_funding_root', ('lhi_security.group_lhi_project_officer', 'lhi_security.group_lhi_project_manager', 'lhi_security.group_lhi_programme_director'), ('GRANTS', 'FUNDING', 'PIPELINE')),
+        ('programmes', 'Programs & Grants', 'lhi_base.menu_lhi_root', ('lhi_programme_management.group_lhi_programmes_viewer', 'lhi_security.group_lhi_project_officer', 'lhi_security.group_lhi_project_manager', 'lhi_security.group_lhi_programme_director'), ('PROJECTS', 'GRANTS', 'FUNDING', 'PIPELINE', 'PROGRAMME', 'PROGRAMMES')),
         ('hr', 'Human Resources', 'hr.menu_hr_root', ('lhi_security.group_lhi_hr_officer',), ('HR', 'HUMAN_RESOURCES')),
         ('signatures', 'Signatures', 'lhi_signature_bridge.menu_lhi_opensign', ('lhi_security.group_lhi_procurement_officer', 'lhi_security.group_lhi_procurement_manager'), ('LEGAL', 'PROCUREMENT')),
         ('media', 'Media & Communications', 'lhi_media_communications.menu_lhi_media_root', ('lhi_media_communications.group_lhi_media_viewer', 'lhi_media_communications.group_lhi_media_requester', 'lhi_media_communications.group_lhi_media_officer', 'lhi_media_communications.group_lhi_media_reviewer', 'lhi_media_communications.group_lhi_media_manager'), ('MEDIA',)),
+        ('reports', 'Reports', 'lhi_reporting_hub.menu_lhi_reporting_hub_root', ('lhi_security.group_lhi_manager', 'lhi_security.group_lhi_programme_director', 'lhi_security.group_lhi_finance_reviewer'), ('REPORTS', 'REPORTING', 'ANALYTICS')),
         ('settings', 'Settings', 'base.menu_administration', ('base.group_system',), ()),
     )
 
@@ -134,7 +134,7 @@ class LhiDashboardWidget(models.Model):
                 'name': label,
                 'menu_id': menu.id,
                 'xmlid': menu_xmlid,
-                'icon_url': f'/lhi_web_shell/static/src/img/module_icons/{key}.svg',
+                'icon_url': f'/lhi_web_shell/static/src/img/module_icons/{"projects" if key == "programmes" else key}.svg',
             })
         return self._deduplicate_dashboard_apps(apps)
 

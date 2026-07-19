@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'LHI Role-Based Dashboard',
-    'version': '19.0.1.2.2',
+    'version': '19.0.1.3.0',
     'category': 'Productivity',
     'summary': 'Role-based dashboard and post-login routing for LHI ERP',
     'description': """
@@ -30,6 +30,8 @@ Deliverables:
         'lhi_purchase_request',
         'lhi_asset_management',
         'lhi_funding_opportunity',
+        'lhi_programme_management',
+        'lhi_reporting_hub',
         'lhi_media_communications',
         'lhi_meal',
         'lhi_web_shell',

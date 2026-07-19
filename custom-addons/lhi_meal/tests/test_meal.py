@@ -8,7 +8,7 @@ class TestMeal(TransactionCase):
         cls.env = cls.env(context=dict(cls.env.context, tracking_disable=True))
         cls.project = cls.env['lhi.project'].create({
             'name': 'Test Project',
-            'status': 'draft'
+            'code': 'MEAL-TEST',
         })
         cls.framework = cls.env['lhi.results.framework'].create({
             'name': 'Global Framework 2030',
@@ -85,3 +85,27 @@ class TestMeal(TransactionCase):
         
         self.assertFalse(normal_env['lhi.meal.data'].search([('id', '=', sensitive_data.id)]))
         self.assertTrue(sensitive_env['lhi.meal.data'].search([('id', '=', sensitive_data.id)]))
+
+    def test_standalone_meal_initiative_submits_without_project(self):
+        initiative = self.env['lhi.meal.initiative'].create({
+            'name': 'Organization-wide learning review',
+            'initiative_type': 'learning',
+            'work_context': 'standalone_departmental',
+            'date_start': '2026-04-01',
+            'date_end': '2026-04-02',
+            'purpose': 'Review organizational learning outside a donor project.',
+        })
+        initiative.action_submit()
+        self.assertEqual(initiative.state, 'submitted')
+
+    def test_project_linked_meal_initiative_requires_project(self):
+        initiative = self.env['lhi.meal.initiative'].create({
+            'name': 'Project baseline',
+            'initiative_type': 'baseline',
+            'work_context': 'project_linked',
+            'date_start': '2026-05-01',
+            'date_end': '2026-05-02',
+            'purpose': 'Establish project baseline values.',
+        })
+        with self.assertRaises(ValidationError):
+            initiative.action_submit()

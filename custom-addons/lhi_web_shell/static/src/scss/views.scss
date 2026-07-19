@@ -380,27 +380,62 @@
 
 // ── Dialogs & Modals ─────────────────────────────────────────────────────────
 .modal-content {
-    background-color: var(--lhi-card-bg);
-    border: 1px solid var(--lhi-card-border);
-    border-radius: $lhi-radius-xl;
-    box-shadow: var(--lhi-shadow-xl);
+    background-color: var(--lhi-surface);
+    border: 1px solid var(--lhi-border);
+    border-radius: var(--lhi-radius-lg, 16px);
+    box-shadow: var(--lhi-shadow-md);
     font-family: $lhi-font-family-sans;
 
     .modal-header {
-        border-bottom: 1px solid var(--lhi-card-border);
+        border-bottom: 1px solid var(--lhi-border);
         .modal-title {
-            color: var(--lhi-text-primary);
+            color: var(--lhi-text);
             font-weight: $lhi-font-weight-semibold;
         }
     }
     .modal-body {
-        color: var(--lhi-text-primary);
+        color: var(--lhi-text);
     }
     .modal-footer {
-        border-top: 1px solid var(--lhi-card-border);
-        background-color: var(--lhi-canvas-bg);
-        border-bottom-left-radius: calc(#{$lhi-radius-xl} - 1px);
-        border-bottom-right-radius: calc(#{$lhi-radius-xl} - 1px);
+        border-top: 1px solid var(--lhi-border);
+        background-color: var(--lhi-surface-muted);
+        border-bottom-left-radius: calc(var(--lhi-radius-lg, 16px) - 1px);
+        border-bottom-right-radius: calc(var(--lhi-radius-lg, 16px) - 1px);
     }
 }
+
+// ── Native Odoo Notifications ────────────────────────────────────────────────
+.o_notification_manager {
+    z-index: var(--lhi-z-toast, 500) !important;
+
+    .o_notification {
+        background-color: var(--lhi-surface, #ffffff) !important;
+        border: 1px solid var(--lhi-border, #e2e8f0) !important;
+        border-radius: var(--lhi-radius-md, 12px) !important;
+        box-shadow: var(--lhi-shadow-md) !important;
+        color: var(--lhi-text, #172033) !important;
+        padding: $lhi-space-3 $lhi-space-4 !important;
+        font-family: $lhi-font-family-sans !important;
+        font-size: $lhi-font-size-sm !important;
+
+        .o_notification_header {
+            font-weight: $lhi-font-weight-semibold !important;
+            color: var(--lhi-text) !important;
+            border-bottom: none !important;
+            padding: 0 !important;
+            margin-bottom: $lhi-space-1 !important;
+        }
+
+        .o_notification_close {
+            color: var(--lhi-text-muted) !important;
+            &:hover { color: var(--lhi-text) !important; }
+        }
+
+        &.border-danger  { border-left: 4px solid var(--lhi-danger) !important; border-top-color: var(--lhi-border) !important; border-right-color: var(--lhi-border) !important; border-bottom-color: var(--lhi-border) !important; }
+        &.border-success { border-left: 4px solid var(--lhi-success) !important; border-top-color: var(--lhi-border) !important; border-right-color: var(--lhi-border) !important; border-bottom-color: var(--lhi-border) !important; }
+        &.border-warning { border-left: 4px solid var(--lhi-warning) !important; border-top-color: var(--lhi-border) !important; border-right-color: var(--lhi-border) !important; border-bottom-color: var(--lhi-border) !important; }
+        &.border-info    { border-left: 4px solid var(--lhi-info) !important; border-top-color: var(--lhi-border) !important; border-right-color: var(--lhi-border) !important; border-bottom-color: var(--lhi-border) !important; }
+    }
+}
+
 

@@ -181,78 +181,97 @@ $border-radius-sm:    $lhi-radius-sm !default;
 $border-radius-lg:    $lhi-radius-lg !default;
 
 // ── CSS Custom Properties (exposed to JS / runtime themes) ───────────────────
-:root, [data-bs-theme="light"] {
-    // Brand primaries
-    --lhi-primary:         #{$lhi-primary};
-    --lhi-primary-light:   #{$lhi-red-400};
-    --lhi-primary-dark:    #{$lhi-primary-hover};
-    --lhi-accent:          #{$lhi-accent};
-    --lhi-accent-light:    #{$lhi-orange-300};
-    --lhi-accent-dark:     #{$lhi-orange-700};
+:root, [data-lhi-theme="light"], [data-bs-theme="light"] {
+    // Brand colors
+    --lhi-primary: #931704;
+    --lhi-primary-hover: #da0102;
+    --lhi-primary-soft: rgba(147, 23, 4, 0.08);
+    --lhi-accent: #efc940;
 
-    // Sidebar
-    --lhi-sidebar-bg:      #{$lhi-sidebar};
-    --lhi-sidebar-text:    rgba(255, 255, 255, 0.82);
-    --lhi-sidebar-hover:   rgba(255, 255, 255, 0.08);
-    --lhi-sidebar-active:  #{$lhi-primary};
-    --lhi-sidebar-width:   #{$lhi-sidebar-width};
+    // Background & Surfaces
+    --lhi-bg: #f7f9fc;
+    --lhi-surface: #ffffff;
+    --lhi-surface-muted: #f1f5f9;
+    --lhi-border: #e2e8f0;
 
-    // Topbar
-    --lhi-topbar-bg:       #{$lhi-secondary};
-    --lhi-topbar-border:   rgba(255, 255, 255, 0.18);
-    --lhi-topbar-height:   #{$lhi-topbar-height};
+    // Typography
+    --lhi-text: #172033;
+    --lhi-text-muted: #64748b;
+    --lhi-text-inverse: #ffffff;
 
-    // Page canvas
-    --lhi-canvas-bg:       #{$lhi-surface-muted};
-    --lhi-card-bg:         #{$lhi-surface};
-    --lhi-card-border:     #{$lhi-border};
+    // Sidebar & Topbar (Matched Brand Color)
+    --lhi-sidebar-bg: #343877;
+    --lhi-sidebar-text: rgba(255, 255, 255, 0.85);
+    --lhi-sidebar-hover: rgba(255, 255, 255, 0.08);
+    --lhi-sidebar-active: #931704;
+    --lhi-sidebar-width: #{$lhi-sidebar-width};
 
-    // Text
-    --lhi-text-primary:    #{$lhi-text};
-    --lhi-text-secondary:  #{$lhi-text-muted};
-    --lhi-text-muted:      #{$lhi-neutral-500};
-    --lhi-text-inverse:    #ffffff;
+    --lhi-topbar-bg: #343877;
+    --lhi-topbar-border: rgba(255, 255, 255, 0.12);
+    --lhi-topbar-height: #{$lhi-topbar-height};
 
-    // Status
-    --lhi-success:         #{$lhi-success};
-    --lhi-warning:         #{$lhi-warning};
-    --lhi-danger:          #{$lhi-red-600};
-    --lhi-info:            #{$lhi-info};
+    // Border Radii
+    --lhi-radius-sm: 8px;
+    --lhi-radius-md: 12px;
+    --lhi-radius-lg: 16px;
+    --lhi-radius: 12px; // Default radius
 
-    // Misc
-    --lhi-radius:          #{$lhi-radius};
-    --lhi-radius-lg:       #{$lhi-radius-lg};
-    --lhi-shadow:          #{$lhi-shadow};
-    --lhi-shadow-md:       #{$lhi-shadow-md};
-    --lhi-transition:      #{$lhi-transition};
-    --lhi-primary-bg-subtle: #{$lhi-red-50};
+    // Shadows
+    --lhi-shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+    --lhi-shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+    --lhi-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+
+    // Motion & Transitions
+    --lhi-motion-fast: 140ms;
+    --lhi-motion-normal: 180ms;
+    --lhi-transition: 180ms ease;
+
+    // Status Colors
+    --lhi-success: #{$lhi-success};
+    --lhi-warning: #{$lhi-warning};
+    --lhi-danger: #{$lhi-red-600};
+    --lhi-info: #{$lhi-info};
+    --lhi-primary-bg-subtle: rgba(147, 23, 4, 0.08);
 }
 
-[data-bs-theme="dark"] {
-    // Topbar
-    --lhi-topbar-bg:       #20212b;
-    --lhi-topbar-border:   #374151;
+[data-lhi-theme="dark"], [data-bs-theme="dark"] {
+    // Brand colors
+    --lhi-primary: #931704;
+    --lhi-primary-hover: #da0102;
+    --lhi-primary-soft: rgba(147, 23, 4, 0.16);
+    --lhi-accent: #efc940;
 
-    // Page canvas
-    --lhi-canvas-bg:       #111827;
-    --lhi-card-bg:         #1f2937;
-    --lhi-card-border:     #374151;
+    // Background & Surfaces
+    --lhi-bg: #0f172a;
+    --lhi-surface: #172033;
+    --lhi-surface-muted: #1e293b;
+    --lhi-border: #334155;
 
-    // Text
-    --lhi-text-primary:    #f9fafb;
-    --lhi-text-secondary:  #9ca3af;
-    --lhi-text-muted:      #6b7280;
+    // Typography
+    --lhi-text: #f8fafc;
+    --lhi-text-muted: #a8b3c7;
+    --lhi-text-inverse: #ffffff;
 
-    // Sidebar - blend with dark mode
-    --lhi-sidebar-bg:      #0f172a;
+    // Sidebar & Topbar (Matched dark surfaces)
+    --lhi-sidebar-bg: #172033;
+    --lhi-sidebar-text: rgba(255, 255, 255, 0.85);
+    --lhi-sidebar-hover: rgba(255, 255, 255, 0.06);
+    --lhi-sidebar-active: #931704;
+
+    --lhi-topbar-bg: #172033;
+    --lhi-topbar-border: #334155;
+
+    // Shadows
+    --lhi-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.24);
+    --lhi-shadow-md: 0 12px 30px rgba(0, 0, 0, 0.3);
+    --lhi-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
 
     // Bootstrap overrides for dark mode native syncing
-    --bs-body-bg:          var(--lhi-canvas-bg);
-    --bs-body-color:       var(--lhi-text-primary);
-    --bs-tertiary-bg:      var(--lhi-card-bg);
-    --bs-secondary-bg:     var(--lhi-card-bg);
-    --bs-border-color:     var(--lhi-card-border);
-    --bs-primary:          var(--lhi-primary);
-
-    --lhi-primary-bg-subtle: rgba(147, 23, 4, 0.28);
+    --bs-body-bg: var(--lhi-bg);
+    --bs-body-color: var(--lhi-text);
+    --bs-tertiary-bg: var(--lhi-surface);
+    --bs-secondary-bg: var(--lhi-surface);
+    --bs-border-color: var(--lhi-border);
+    --bs-primary: var(--lhi-primary);
+    --lhi-primary-bg-subtle: rgba(147, 23, 4, 0.2);
 }

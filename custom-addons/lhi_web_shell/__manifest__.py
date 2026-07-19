@@ -29,6 +29,7 @@ Deliverables:
         'security/ir.model.access.csv',
         'views/apps_security.xml',
         'views/lhi_login_template.xml',
+        'views/web_layout_override.xml',
     ],
     'assets': {
         # ── 1. Primary Variables (loaded earliest — before Odoo/Bootstrap SCSS) ──

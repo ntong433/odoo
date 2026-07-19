@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inject early theme initialization in the head tag to prevent white theme flashes -->
+    <template id="lhi_early_theme_init" inherit_id="web.layout" name="LHI Early Theme Init">
+        <xpath expr="//head" position="first">
+            <script type="text/javascript">
+                (function () {
+                    const theme = localStorage.getItem("lhi_theme") || "system";
+                    let isDark = false;
+                    if (theme === "dark") {
+                        isDark = true;
+                    } else if (theme === "system") {
+                        isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+                    }
+                    const themeVal = isDark ? "dark" : "light";
+                    document.documentElement.setAttribute("data-lhi-theme", themeVal);
+                    document.documentElement.setAttribute("data-bs-theme", themeVal);
+                })();
+            </script>
+        </xpath>
+    </template>
+</odoo>

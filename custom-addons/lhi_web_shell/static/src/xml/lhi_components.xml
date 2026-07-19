@@ -5,10 +5,10 @@
     <t t-name="lhi_web_shell.ThemeToggle" owl="1">
         <button class="lhi-theme-toggle border-0 bg-transparent p-2 d-flex align-items-center" 
                 t-on-click="toggleTheme"
-                title="Toggle Dark Mode"
-                aria-label="Toggle dark mode">
-            <i t-attf-class="fa fa-lg {{ theme.isDark ? 'fa-sun-o' : 'fa-moon-o' }}" 
-               t-att-style="theme.isDark ? 'color: #f59e0b;' : 'color: var(--lhi-text-secondary);'"></i>
+                t-att-title="'Theme: ' + (theme.theme === 'dark' ? 'Dark' : (theme.theme === 'light' ? 'Light' : 'System'))"
+                aria-label="Toggle theme">
+            <i t-attf-class="fa fa-lg {{ theme.theme === 'dark' ? 'fa-moon-o' : (theme.theme === 'light' ? 'fa-sun-o' : 'fa-laptop') }}" 
+               t-att-style="theme.isDark ? 'color: #f59e0b;' : 'color: var(--lhi-text-muted);'"></i>
         </button>
     </t>
 

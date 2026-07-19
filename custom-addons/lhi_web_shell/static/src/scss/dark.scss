@@ -5,7 +5,7 @@
 // Applied by the lhi_theme_service.js toggling data-bs-theme on <html>.
 // ============================================================================
 
-[data-bs-theme="dark"] {
+[data-lhi-theme="dark"], [data-bs-theme="dark"] {
     // Topbar
     --lhi-topbar-border:   rgba(255, 255, 255, 0.08);
 

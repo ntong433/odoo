@@ -64,7 +64,7 @@ body.o_web_client > .lhi-sidebar {
     overflow: hidden;
     background: var(--lhi-sidebar-bg);
     z-index: $lhi-z-sidebar;
-    transition: width $lhi-transition-medium;
+    transition: width var(--lhi-motion-normal, 180ms) cubic-bezier(0.4, 0, 0.2, 1);
 
     // Custom scrollbar
     &::-webkit-scrollbar { width: 4px; }
@@ -239,22 +239,26 @@ body.o_web_client > .o_action_manager .o_content {
     gap: $lhi-space-3;
     padding: $lhi-space-2 $lhi-space-3;
     margin: 2px $lhi-space-2;
-    border-radius: $lhi-radius;
+    border-radius: var(--lhi-radius-sm, 8px);
     color: var(--lhi-sidebar-text);
     font-size: $lhi-font-size-sm;
     font-weight: $lhi-font-weight-medium;
     cursor: pointer;
-    transition: background $lhi-transition-fast, color $lhi-transition-fast;
+    transition:
+        background-color var(--lhi-motion-normal, 160ms) ease,
+        color var(--lhi-motion-normal, 160ms) ease,
+        transform var(--lhi-motion-normal, 160ms) ease,
+        opacity var(--lhi-motion-normal, 160ms) ease;
     white-space: nowrap;
     text-decoration: none !important;
     outline: none;
 
     .lhi-sidebar__icon {
-        width: 18px;
-        height: 18px;
+        width: 20px;
+        height: 20px;
         flex-shrink: 0;
         opacity: 0.72;
-        transition: opacity $lhi-transition-fast;
+        transition: opacity var(--lhi-motion-normal, 160ms) ease;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -262,7 +266,7 @@ body.o_web_client > .o_action_manager .o_content {
         &.lhi-sidebar__icon-img {
             object-fit: contain;
             opacity: 0.9;
-            border-radius: $lhi-radius-sm;
+            border-radius: var(--lhi-radius-sm, 8px);
             filter: brightness(0) invert(1);
         }
     }
@@ -271,16 +275,17 @@ body.o_web_client > .o_action_manager .o_content {
         flex: 1;
         overflow: hidden;
         text-overflow: ellipsis;
-        transition: opacity $lhi-transition-medium, max-width $lhi-transition-medium;
+        white-space: nowrap;
+        transition: opacity var(--lhi-motion-normal, 160ms) ease, max-width var(--lhi-motion-normal, 160ms) ease;
     }
 
     .lhi-sidebar__badge {
         background: var(--lhi-accent);
-        color: white;
+        color: var(--lhi-text);
         font-size: $lhi-font-size-xs;
         font-weight: $lhi-font-weight-bold;
         padding: 1px 6px;
-        border-radius: $lhi-radius-full;
+        border-radius: 9999px;
         min-width: 20px;
         text-align: center;
         flex-shrink: 0;
@@ -289,13 +294,31 @@ body.o_web_client > .o_action_manager .o_content {
     &:hover {
         background: var(--lhi-sidebar-hover);
         color: #ffffff;
+        transform: translateX(3px);
         .lhi-sidebar__icon { opacity: 1; }
     }
 
     &.lhi-sidebar__item--active {
         background: var(--lhi-sidebar-active);
         color: #ffffff;
+        position: relative;
         .lhi-sidebar__icon { opacity: 1; }
+
+        &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 25%;
+            height: 50%;
+            width: 3px;
+            background: var(--lhi-accent);
+            border-radius: 0 4px 4px 0;
+        }
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--lhi-accent) !important;
+        outline-offset: -2px !important;
     }
 }
 
@@ -584,4 +607,15 @@ body.o_web_client > .o_action_manager .o_content {
 @keyframes lhi-slide-in-left {
     from { transform: translateX(-100%); }
     to   { transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }

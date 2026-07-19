@@ -3,8 +3,8 @@
 
     <!-- Announcements Widget -->
     <t t-name="lhi_dashboard.AnnouncementsWidget" owl="1">
-        <div class="lhi-card rounded-4 mb-4">
-            <div class="lhi-card__header px-4 py-3 rounded-top-4">
+        <div class="lhi-card mb-4">
+            <div class="lhi-card__header px-4 py-3">
                 <h3 class="lhi-card__title m-0 fw-bold">Announcements</h3>
             </div>
             <div class="lhi-card__body p-0">
@@ -15,7 +15,7 @@
                     <i class="fa fa-bullhorn fa-2x mb-3 opacity-25"></i>
                     <p class="mb-0">No active announcements.</p>
                 </div>
-                <div t-else="" class="list-group list-group-flush rounded-bottom-4">
+                <div t-else="" class="list-group list-group-flush">
                     <t t-foreach="state.announcements" t-as="ann" t-key="ann.id">
                         <div class="list-group-item p-4 border-bottom-0">
                             <div class="d-flex w-100 justify-content-between align-items-center mb-2">
@@ -55,25 +55,25 @@
 
     <!-- My Approvals Widget -->
     <t t-name="lhi_dashboard.MyApprovalsWidget" owl="1">
-        <div t-attf-class="lhi-card lhi-kpi-secondary rounded-4 mb-4 overflow-hidden #{state.available ? 'lhi-card--interactive' : ''}" t-on-click="openApprovals" style="transition: transform 0.2s ease, box-shadow 0.2s ease;">
+        <div t-attf-class="lhi-card lhi-kpi-secondary mb-4 overflow-hidden #{state.available ? 'lhi-card--interactive' : ''}" t-on-click="openApprovals">
             <div class="lhi-card__body p-4 position-relative">
                 <div class="d-flex justify-content-between align-items-center position-relative z-index-1">
                     <div>
-                        <div class="fw-medium opacity-75 text-uppercase tracking-wide" style="font-size: 12px; letter-spacing: 1px;">Pending Approvals</div>
-                        <div class="fw-bold mt-1" style="font-size: 2.5rem;" t-if="!state.loading">
+                        <div class="fw-medium opacity-75 text-uppercase tracking-wide" style="font-size: 11px; letter-spacing: 0.5px;">Pending Approvals</div>
+                        <div class="fw-bold mt-1" style="font-size: 2.25rem;" t-if="!state.loading">
                             <t t-if="state.available"><t t-esc="state.count"/></t>
-                            <t t-else=""><span style="font-size: 1.5rem;">N/A</span></t>
+                            <t t-else=""><span style="font-size: 1.25rem;">N/A</span></t>
                         </div>
-                        <div class="lhi-skeleton lhi-skeleton--text mt-2 bg-white opacity-25" t-else="" style="width: 50px; height: 40px;"></div>
+                        <div class="lhi-skeleton lhi-skeleton--text mt-2 bg-white opacity-25" t-else="" style="width: 45px; height: 35px;"></div>
                     </div>
-                    <div class="opacity-25">
-                        <i class="fa fa-check-circle" style="font-size: 4rem;"></i>
+                    <div class="opacity-20">
+                        <i class="fa fa-check-circle" style="font-size: 3.5rem;"></i>
                     </div>
                 </div>
                 <!-- Decorative background -->
                 <div class="lhi-kpi-bg-overlay"></div>
             </div>
-            <div class="lhi-kpi-footer px-4 py-3 fw-bold text-center" t-att-style="state.available ? 'cursor: pointer;' : 'cursor: not-allowed; opacity: 0.5;'">
+            <div class="lhi-kpi-footer px-4 py-2 fw-bold text-center" t-att-style="state.available ? 'cursor: pointer;' : 'cursor: not-allowed; opacity: 0.5;'">
                 Review Approvals <i class="fa fa-arrow-right ms-1"></i>
             </div>
         </div>
@@ -81,21 +81,21 @@
 
     <!-- My Tasks Widget -->
     <t t-name="lhi_dashboard.MyTasksWidget" owl="1">
-        <div class="lhi-card lhi-kpi-primary rounded-4 mb-4 overflow-hidden lhi-card--interactive" t-on-click="openTasks" style="transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer;">
+        <div class="lhi-card lhi-kpi-primary mb-4 overflow-hidden lhi-card--interactive" t-on-click="openTasks">
             <div class="lhi-card__body p-4 position-relative">
                 <div class="d-flex justify-content-between align-items-center position-relative z-index-1">
                     <div>
-                        <div class="fw-medium opacity-75 text-uppercase tracking-wide" style="font-size: 12px; letter-spacing: 1px;">My Activities</div>
-                        <div class="fw-bold mt-1" style="font-size: 2.5rem;" t-if="!state.loading"><t t-esc="state.count"/></div>
-                        <div class="lhi-skeleton lhi-skeleton--text mt-2 bg-white opacity-25" t-else="" style="width: 50px; height: 40px;"></div>
+                        <div class="fw-medium opacity-75 text-uppercase tracking-wide" style="font-size: 11px; letter-spacing: 0.5px;">My Activities</div>
+                        <div class="fw-bold mt-1" style="font-size: 2.25rem;" t-if="!state.loading"><t t-esc="state.count"/></div>
+                        <div class="lhi-skeleton lhi-skeleton--text mt-2 bg-white opacity-25" t-else="" style="width: 45px; height: 35px;"></div>
                     </div>
-                    <div class="opacity-25">
-                        <i class="fa fa-tasks" style="font-size: 4rem;"></i>
+                    <div class="opacity-20">
+                        <i class="fa fa-tasks" style="font-size: 3.5rem;"></i>
                     </div>
                 </div>
                 <div class="lhi-kpi-bg-overlay"></div>
             </div>
-            <div class="lhi-kpi-footer px-4 py-3 fw-bold text-center">
+            <div class="lhi-kpi-footer px-4 py-2 fw-bold text-center">
                 View Tasks <i class="fa fa-arrow-right ms-1"></i>
             </div>
         </div>
@@ -103,20 +103,20 @@
 
     <!-- Notifications Widget -->
     <t t-name="lhi_dashboard.NotificationsWidget" owl="1">
-        <div class="lhi-card lhi-kpi-accent rounded-4 mb-4 overflow-hidden lhi-card--interactive" t-on-click="openInbox" style="transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer;">
+        <div class="lhi-card lhi-kpi-accent mb-4 overflow-hidden lhi-card--interactive" t-on-click="openInbox">
             <div class="lhi-card__body p-4 position-relative">
                 <div class="d-flex justify-content-between align-items-center position-relative z-index-1">
                     <div>
-                        <div class="fw-medium opacity-75 text-uppercase tracking-wide" style="font-size: 12px; letter-spacing: 1px;">Messages &amp; Alerts</div>
-                        <div class="fw-bold mt-1" style="font-size: 2.5rem;">Inbox</div>
+                        <div class="fw-medium opacity-75 text-uppercase tracking-wide" style="font-size: 11px; letter-spacing: 0.5px;">Messages &amp; Alerts</div>
+                        <div class="fw-bold mt-1" style="font-size: 2.25rem;">Inbox</div>
                     </div>
-                    <div class="opacity-25">
-                        <i class="fa fa-envelope" style="font-size: 4rem;"></i>
+                    <div class="opacity-20">
+                        <i class="fa fa-envelope" style="font-size: 3.5rem;"></i>
                     </div>
                 </div>
                 <div class="lhi-kpi-bg-overlay"></div>
             </div>
-            <div class="lhi-kpi-footer px-4 py-3 fw-bold text-center">
+            <div class="lhi-kpi-footer px-4 py-2 fw-bold text-center">
                 Open Discuss <i class="fa fa-arrow-right ms-1"></i>
             </div>
         </div>
@@ -124,20 +124,20 @@
 
     <!-- Quick Actions Widget -->
     <t t-name="lhi_dashboard.QuickActionsWidget" owl="1">
-        <div class="lhi-card rounded-4 mb-4" t-if="!state.loading and state.actions.length > 0">
-            <div class="lhi-card__header px-4 py-3 rounded-top-4">
+        <div class="lhi-card mb-4" t-if="!state.loading and state.actions.length > 0">
+            <div class="lhi-card__header px-4 py-3">
                 <h3 class="lhi-card__title m-0 fw-bold">Quick Actions</h3>
             </div>
-            <div class="lhi-card__body p-0 rounded-bottom-4 overflow-hidden">
+            <div class="lhi-card__body p-0 overflow-hidden">
                 <div class="list-group list-group-flush">
                     <t t-foreach="state.actions" t-as="action" t-key="action.id">
                         <button class="list-group-item list-group-item-action p-3 d-flex align-items-center gap-3 border-0 border-bottom text-start" t-on-click="() => this.executeAction(action)">
-                            <div class="lhi-app-icon-bg d-flex align-items-center justify-content-center rounded-circle" style="width: 40px; height: 40px;">
+                            <div class="lhi-app-icon-bg d-flex align-items-center justify-content-center rounded-circle" style="width: 36px; height: 36px; margin: 0;">
                                 <i t-attf-class="fa #{action.icon}"></i>
                             </div>
                             <div>
-                                <span class="fw-bold text-dark d-block"><t t-esc="action.name"/></span>
-                                <span class="text-muted small"><t t-esc="action.description"/></span>
+                                <span class="fw-bold text-dark d-block" style="font-size: 13px;"><t t-esc="action.name"/></span>
+                                <span class="text-muted small" style="font-size: 11px;"><t t-esc="action.description"/></span>
                             </div>
                         </button>
                     </t>

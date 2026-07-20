@@ -8,9 +8,10 @@ import { dashboardWidgetRegistry } from "./dashboard_widget_registry";
 
 export const DASHBOARD_ACTION_TAG = "lhi_dashboard.dashboard_action";
 
-export class LhiDashboardAction extends Component {
-    static template = "lhi_dashboard.Dashboard";
+import { LhiDashboardAction } from "./dashboard_action";
+import { patch } from "@web/core/utils/patch";
 
+patch(LhiDashboardAction.prototype, {
     setup() {
         this.orm = useService("orm");
         this.actionService = useService("action");
@@ -156,11 +157,4 @@ export class LhiDashboardAction extends Component {
             });
         }
     }
-}
-
-// Register synchronously at module evaluation time. Component setup and
-// optional dashboard-card resolution happen only after the action is opened.
-registry.category("actions").add(
-    "lhi_dashboard.dashboard_action",
-    LhiDashboardAction
-);
+});

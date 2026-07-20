@@ -57,6 +57,7 @@ Deliverables:
             'lhi_dashboard/static/src/js/widgets/my_tasks_widget.js',
             'lhi_dashboard/static/src/js/widgets/notifications_widget.js',
             'lhi_dashboard/static/src/js/widgets/quick_actions_widget.js',
+            'lhi_dashboard/static/src/js/dashboard_action.js',
             'lhi_dashboard/static/src/js/lhi_dashboard.js',
             'lhi_dashboard/static/src/js/operations_hub.js',
             'lhi_dashboard/static/src/xml/lhi_dashboard.xml',

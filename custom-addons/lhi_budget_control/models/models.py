@@ -29,6 +29,7 @@ class LhiBudget(models.Model):
 class LhiBudgetLine(models.Model):
     _name = 'lhi.budget.line'
     _description = 'LHI Budget Line'
+    _inherit = ['mail.thread']
 
     budget_id = fields.Many2one('lhi.budget', string='Budget', required=True, ondelete='cascade')
     general_account_id = fields.Many2one('account.account', string='GL Account', required=True)

@@ -3,7 +3,6 @@ from odoo import models, fields, api
 WORK_CONTEXT = [("project_linked", "Project-linked"), ("standalone_departmental", "Standalone departmental")]
 
 class StockMove(models.Model):
-    _name = "stock.move"
     _inherit = ["stock.move", "lhi.project.funded.gate.mixin"]
 
     lhi_grant_id = fields.Many2one("lhi.award", string="Grant/Award")

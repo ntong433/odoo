@@ -41,3 +41,23 @@ Rollback consists of restoring the pre-deployment Git revision and the matching
 database backup, then restarting Odoo. Reconcile any execution requests,
 retirements, Enterprise payment references, and SharePoint metadata created
 after the backup before restoring; there are no new queues or webhooks.
+
+## Recovery validation recorded on 2026-07-20
+
+- Replaced the invalid translated-label purchase-request view selector with
+  the unique technical field anchor `activity_id`.
+- Replaced positional Fleet, MEAL, and Asset locators with unique technical
+  field anchors. The existing Media locator uses the stable page name `links`.
+- Each of the six parent anchors matched exactly one node in its inspected
+  source architecture; no related `@string` or positional XPath remains.
+- Restored dashboard assets to `web.assets_backend`, which the inspected Odoo
+  19 `web` manifest includes in the active `web.assets_web` webclient bundle.
+- Confirmed one dashboard action registration, matching XML tag and template,
+  and 14 existing dashboard backend asset paths.
+- Parsed 38 affected XML files successfully, compiled all affected Python
+  packages, confirmed an acyclic dependency graph, and resolved Media grant
+  relations to canonical `lhi.award` through `lhi_base`.
+- `xmllint`, the production Odoo runtime/configuration, database access,
+  Coolify metadata, and Docker access are unavailable in this shell. Therefore
+  disposable and production module operations and browser validation remain
+  mandatory deployment gates and are not reported as passed.

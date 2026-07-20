@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'LHI Role-Based Dashboard',
-    'version': '19.0.1.3.2',
+    'version': '19.0.1.3.3',
     'category': 'Productivity',
     'summary': 'Role-based dashboard and post-login routing for LHI ERP',
     'description': """
@@ -48,7 +48,7 @@ Deliverables:
         'views/operations_hub_views.xml',
     ],
     'assets': {
-        'web.assets_web': [
+        'web.assets_backend': [
             'lhi_dashboard/static/src/scss/dashboard.scss',
             'lhi_dashboard/static/src/js/dashboard_widget_registry.js',
             'lhi_dashboard/static/src/js/widgets/accessible_modules_widget.js',

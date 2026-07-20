@@ -1,6 +1,6 @@
 {
     "name": "LHI Programs and Grants",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.0.1",
     "category": "Programs and Grants",
     "summary": "Donor-funded project lifecycle, memo, budget, request, and retirement control",
     "author": "Life Helpers Initiative",

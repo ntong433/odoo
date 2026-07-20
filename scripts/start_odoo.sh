@@ -157,7 +157,7 @@ if [ -n "$bootstrap_modules" ]; then
                     FROM unnest(string_to_array('$bootstrap_modules', ',')) AS requested(name)
                     LEFT JOIN ir_module_module AS module
                         ON module.name = requested.name
-                    WHERE module.state IS DISTINCT FROM 'installed'
+                    WHERE module.id IS NULL
                 )
             "
     )"

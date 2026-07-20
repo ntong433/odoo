@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_fleet_trip_programme_context" model="ir.ui.view">
+        <field name="name">lhi.fleet.trip.programme.context</field>
+        <field name="model">lhi.fleet.trip</field>
+        <field name="inherit_id" ref="lhi_fleet_operations.view_lhi_fleet_trip_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='lhi_activity_id']" position="after">
+                <field name="work_context"/>
+                <field name="grant_id" invisible="work_context != 'project_linked'"/>
+                <field name="memo_id" invisible="work_context != 'project_linked'"/>
+                <field name="project_budget_line_id" invisible="work_context != 'project_linked'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

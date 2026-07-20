@@ -9,8 +9,6 @@
     "depends": [
         "mail", "lhi_security", "lhi_base", "lhi_grant_award",
         "lhi_funding_opportunity", "lhi_project_workplan", "lhi_approval_matrix",
-        "lhi_meal", "lhi_media_communications", "lhi_purchase_request",
-        "lhi_fleet_operations", "lhi_inventory", "lhi_asset_management",
         "lhi_sharepoint_storage",
     ],
     "data": [
@@ -18,7 +16,6 @@
         "security/ir.model.access.csv",
         "data/sequences.xml",
         "views/programme_lifecycle_views.xml",
-        "views/department_extension_views.xml",
         "views/project_context_views.xml",
         "views/programme_menus.xml",
     ],

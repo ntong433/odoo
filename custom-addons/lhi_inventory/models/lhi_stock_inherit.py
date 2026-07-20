@@ -4,8 +4,8 @@ from odoo import models, fields, api, _
 class StockMove(models.Model):
     _inherit = 'stock.move'
 
-    lhi_project_id = fields.Many2one('lhi.project', string='Project Allocation', tracking=True)
-    lhi_donor_id = fields.Many2one('res.partner', string='Donor Ownership', tracking=True)
+    lhi_project_id = fields.Many2one('lhi.project', string='Project Allocation')
+    lhi_donor_id = fields.Many2one('res.partner', string='Donor Ownership')
     lhi_activity_id = fields.Many2one('lhi.workplan.activity', string='Activity Usage')
     
     def _get_new_picking_values(self):

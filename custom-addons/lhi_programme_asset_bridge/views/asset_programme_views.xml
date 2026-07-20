@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_asset_programme_context" model="ir.ui.view">
+        <field name="name">lhi.asset.programme.context</field>
+        <field name="model">lhi.asset</field>
+        <field name="inherit_id" ref="lhi_asset_management.view_lhi_asset_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='asset_type']" position="after">
+                <field name="work_context"/>
+                <field name="project_id" invisible="work_context != 'project_linked'"/>
+                <field name="award_id" invisible="work_context != 'project_linked'"/>
+                <field name="workplan_activity_id" invisible="work_context != 'project_linked'"/>
+                <field name="memo_id" invisible="work_context != 'project_linked'"/>
+                <field name="project_budget_line_id" invisible="work_context != 'project_linked'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

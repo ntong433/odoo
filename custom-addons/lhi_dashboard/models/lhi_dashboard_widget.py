@@ -134,7 +134,7 @@ class LhiDashboardWidget(models.Model):
                 'name': label,
                 'menu_id': menu.id,
                 'xmlid': menu_xmlid,
-                'icon_url': f'/lhi_web_shell/static/src/img/module_icons/{"projects" if key == "programmes" else key}.svg',
+                'icon_url': f'/lhi_web_shell/static/src/img/module_icons/{"projects" if key == "programmes" else "reporting" if key == "reports" else key}.svg',
             })
         return self._deduplicate_dashboard_apps(apps)
 
@@ -241,44 +241,50 @@ class LhiDashboardWidget(models.Model):
         Returns the operational modules accessible to the current user.
         """
         modules = []
+        visible_menu_ids = self.env['ir.ui.menu']._visible_menu_ids()
         
         # Procurement
         if self.env.user.has_group('lhi_security.group_lhi_procurement_officer') or self.env.user.has_group('lhi_security.group_lhi_procurement_manager') or self.env.user.has_group('lhi_security.group_lhi_supervisor'):
-            modules.append({
-                'key': 'procurement',
-                'name': 'Procurement',
-                'menu_id': self.env.ref('lhi_purchase_request.menu_lhi_procurement_root').id,
-                'icon': '/lhi_web_shell/static/src/img/module_icons/procurement.svg'
-            })
+            menu = self.env.ref('lhi_purchase_request.menu_lhi_procurement_root', raise_if_not_found=False)
+            if menu and menu.id in visible_menu_ids:
+                modules.append({
+                    'key': 'procurement',
+                    'name': 'Procurement',
+                    'menu_id': menu.id,
+                    'icon': '/lhi_web_shell/static/src/img/module_icons/procurement.svg'
+                })
             
         # Assets
         if self.env.user.has_group('lhi_security.group_lhi_store_officer') or self.env.user.has_group('lhi_security.group_lhi_supervisor'):
-            modules.append({
-                'key': 'assets',
-                'name': 'Assets',
-                'menu_id': self.env.ref('lhi_asset_management.menu_lhi_asset').id,
-                'icon': '/lhi_web_shell/static/src/img/module_icons/assets.svg'
-            })
+            menu = self.env.ref('lhi_asset_management.menu_lhi_asset', raise_if_not_found=False)
+            if menu and menu.id in visible_menu_ids:
+                modules.append({
+                    'key': 'assets',
+                    'name': 'Assets',
+                    'menu_id': menu.id,
+                    'icon': '/lhi_web_shell/static/src/img/module_icons/assets.svg'
+                })
             
         # Inventory
         if self.env.user.has_group('lhi_security.group_lhi_store_officer') or self.env.user.has_group('lhi_security.group_lhi_supervisor'):
-            modules.append({
-                'key': 'inventory',
-                'name': 'Inventory',
-                'menu_id': self.env.ref('stock.menu_stock_root').id,
-                'icon': '/lhi_web_shell/static/src/img/module_icons/inventory.svg'
-            })
+            menu = self.env.ref('stock.menu_stock_root', raise_if_not_found=False)
+            if menu and menu.id in visible_menu_ids:
+                modules.append({
+                    'key': 'inventory',
+                    'name': 'Inventory',
+                    'menu_id': menu.id,
+                    'icon': '/lhi_web_shell/static/src/img/module_icons/inventory.svg'
+                })
             
         # Fleet
         if self.env.user.has_group('lhi_security.group_lhi_fleet_officer') or self.env.user.has_group('lhi_security.group_lhi_supervisor'):
-            try:
+            menu = self.env.ref('fleet.menu_root', raise_if_not_found=False)
+            if menu and menu.id in visible_menu_ids:
                 modules.append({
                     'key': 'fleet',
                     'name': 'Fleet',
-                    'menu_id': self.env.ref('fleet.menu_root').id,
+                    'menu_id': menu.id,
                     'icon': '/lhi_web_shell/static/src/img/module_icons/fleet.svg'
                 })
-            except ValueError:
-                pass # fleet not installed
                 
         return modules

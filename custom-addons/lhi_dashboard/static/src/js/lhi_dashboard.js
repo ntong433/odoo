@@ -31,7 +31,7 @@ patch(LhiDashboardAction.prototype, {
         onWillStart(async () => {
             await this.loadWidgets();
         });
-    }
+    },
 
     async loadWidgets() {
         const delays = [0, 500, 1500, 3000];
@@ -78,20 +78,20 @@ patch(LhiDashboardAction.prototype, {
         }
 
         this.state.loading = false;
-    }
+    },
 
     onSearchFocus() {
         if (this.state.searchQuery.length > 0) {
             this.state.showSearchResults = true;
         }
-    }
+    },
 
     onSearchBlur() {
         // Delay hiding to allow click events on results to fire
         setTimeout(() => {
             this.state.showSearchResults = false;
         }, 200);
-    }
+    },
 
     onSearchInput(ev) {
         const query = ev.target.value.toLowerCase();
@@ -138,7 +138,7 @@ patch(LhiDashboardAction.prototype, {
                 
             this.state.isSearching = false;
         }, 300);
-    }
+    },
 
     onSearchSelect(result) {
         this.state.showSearchResults = false;

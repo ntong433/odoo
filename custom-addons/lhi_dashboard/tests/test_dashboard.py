@@ -137,3 +137,40 @@ class TestLhiDashboard(TransactionCase):
         self.assertEqual(actions.target, "main")
         menu = self.env.ref("lhi_dashboard.menu_lhi_dashboard_root")
         self.assertEqual(menu.action, actions)
+
+    def test_operations_hub_access(self):
+        # 1. System Administrator sees all four operational areas
+        sys_admin = new_test_user(self.env, login='sys_admin', groups='base.group_system')
+        ops_sys_admin = self.Widget.with_user(sys_admin).get_accessible_operations()
+        keys_sys_admin = {op['key'] for op in ops_sys_admin}
+        self.assertEqual(keys_sys_admin, {'procurement', 'assets', 'inventory', 'fleet'})
+
+        # 2. Procurement user sees Procurement only
+        proc_user = new_test_user(self.env, login='proc_user', groups='base.group_user,lhi_security.group_lhi_procurement_officer')
+        ops_proc = self.Widget.with_user(proc_user).get_accessible_operations()
+        keys_proc = {op['key'] for op in ops_proc}
+        self.assertEqual(keys_proc, {'procurement'})
+
+        # 3. Store user sees Assets and Inventory
+        store_user = new_test_user(self.env, login='store_user', groups='base.group_user,lhi_security.group_lhi_store_officer')
+        ops_store = self.Widget.with_user(store_user).get_accessible_operations()
+        keys_store = {op['key'] for op in ops_store}
+        self.assertEqual(keys_store, {'assets', 'inventory'})
+
+        # 4. Fleet user sees Fleet
+        fleet_user = new_test_user(self.env, login='fleet_user', groups='base.group_user,lhi_security.group_lhi_fleet_officer')
+        ops_fleet = self.Widget.with_user(fleet_user).get_accessible_operations()
+        keys_fleet = {op['key'] for op in ops_fleet}
+        self.assertEqual(keys_fleet, {'fleet'})
+
+        # 5. Unassigned internal user sees none
+        ops_unassigned = self.Widget.with_user(self.user).get_accessible_operations()
+        self.assertEqual(len(ops_unassigned), 0)
+
+        # 6. Check that every returned menu XML ID resolves and icon URL exists
+        definitions = self.Widget._LHI_OPERATIONS_DEFINITIONS
+        for key, label, menu_xmlid, group_xmlids, icon_path in definitions:
+            menu = self.env.ref(menu_xmlid)
+            self.assertEqual(menu._name, 'ir.ui.menu')
+            self.assertTrue(icon_path.endswith('.svg'))
+

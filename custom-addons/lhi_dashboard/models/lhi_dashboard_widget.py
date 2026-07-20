@@ -235,56 +235,35 @@ class LhiDashboardWidget(models.Model):
 
         return results
 
+    _LHI_OPERATIONS_DEFINITIONS = (
+        ('procurement', 'Procurement', 'lhi_purchase_request.menu_lhi_procurement_root', ('lhi_security.group_lhi_procurement_officer', 'lhi_security.group_lhi_procurement_manager', 'lhi_security.group_lhi_supervisor'), '/lhi_web_shell/static/src/img/module_icons/procurement.svg'),
+        ('assets', 'Assets', 'lhi_asset_management.menu_lhi_asset', ('lhi_security.group_lhi_store_officer', 'lhi_security.group_lhi_supervisor'), '/lhi_web_shell/static/src/img/module_icons/assets.svg'),
+        ('inventory', 'Inventory', 'stock.menu_stock_root', ('lhi_security.group_lhi_store_officer', 'lhi_security.group_lhi_supervisor'), '/lhi_web_shell/static/src/img/module_icons/inventory.svg'),
+        ('fleet', 'Fleet', 'fleet.menu_root', ('lhi_security.group_lhi_fleet_officer', 'lhi_security.group_lhi_supervisor'), '/lhi_web_shell/static/src/img/module_icons/fleet.svg'),
+    )
+
     @api.model
     def get_accessible_operations(self):
         """
         Returns the operational modules accessible to the current user.
         """
+        user = self.env.user
+        is_system_admin = user.has_group('base.group_system')
         modules = []
         visible_menu_ids = self.env['ir.ui.menu']._visible_menu_ids()
-        
-        # Procurement
-        if self.env.user.has_group('lhi_security.group_lhi_procurement_officer') or self.env.user.has_group('lhi_security.group_lhi_procurement_manager') or self.env.user.has_group('lhi_security.group_lhi_supervisor'):
-            menu = self.env.ref('lhi_purchase_request.menu_lhi_procurement_root', raise_if_not_found=False)
-            if menu and menu.id in visible_menu_ids:
+
+        for key, label, menu_xmlid, group_xmlids, icon_path in self._LHI_OPERATIONS_DEFINITIONS:
+            menu = self.env.ref(menu_xmlid, raise_if_not_found=False)
+            if not menu or menu.id not in visible_menu_ids:
+                continue
+
+            group_match = any(user.has_group(xmlid) for xmlid in group_xmlids)
+            if is_system_admin or group_match:
                 modules.append({
-                    'key': 'procurement',
-                    'name': 'Procurement',
+                    'key': key,
+                    'name': label,
                     'menu_id': menu.id,
-                    'icon': '/lhi_web_shell/static/src/img/module_icons/procurement.svg'
-                })
-            
-        # Assets
-        if self.env.user.has_group('lhi_security.group_lhi_store_officer') or self.env.user.has_group('lhi_security.group_lhi_supervisor'):
-            menu = self.env.ref('lhi_asset_management.menu_lhi_asset', raise_if_not_found=False)
-            if menu and menu.id in visible_menu_ids:
-                modules.append({
-                    'key': 'assets',
-                    'name': 'Assets',
-                    'menu_id': menu.id,
-                    'icon': '/lhi_web_shell/static/src/img/module_icons/assets.svg'
-                })
-            
-        # Inventory
-        if self.env.user.has_group('lhi_security.group_lhi_store_officer') or self.env.user.has_group('lhi_security.group_lhi_supervisor'):
-            menu = self.env.ref('stock.menu_stock_root', raise_if_not_found=False)
-            if menu and menu.id in visible_menu_ids:
-                modules.append({
-                    'key': 'inventory',
-                    'name': 'Inventory',
-                    'menu_id': menu.id,
-                    'icon': '/lhi_web_shell/static/src/img/module_icons/inventory.svg'
-                })
-            
-        # Fleet
-        if self.env.user.has_group('lhi_security.group_lhi_fleet_officer') or self.env.user.has_group('lhi_security.group_lhi_supervisor'):
-            menu = self.env.ref('fleet.menu_root', raise_if_not_found=False)
-            if menu and menu.id in visible_menu_ids:
-                modules.append({
-                    'key': 'fleet',
-                    'name': 'Fleet',
-                    'menu_id': menu.id,
-                    'icon': '/lhi_web_shell/static/src/img/module_icons/fleet.svg'
+                    'icon': icon_path
                 })
                 
         return modules

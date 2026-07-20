@@ -63,10 +63,9 @@
                 <field name="group_id"/>
                 <field name="menu_id"/>
                 <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
-                <group expand="0" string="Group By">
-                    <filter string="Manager Group" name="group_id" context="{'group_by':'group_id'}"/>
-                    <filter string="Target Menu" name="menu_id" context="{'group_by':'menu_id'}"/>
-                </group>
+                <separator/>
+                <filter string="Manager Group" name="group_by_group_id" context="{'group_by': 'group_id'}"/>
+                <filter string="Target Menu" name="group_by_menu_id" context="{'group_by': 'menu_id'}"/>
             </search>
         </field>
     </record>

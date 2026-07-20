@@ -1,62 +1,89 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Root Menu restricted to Media Viewer (which is implied by all other media groups) -->
+    <!-- Root Menu: Removed explicit groups to allow native model-level fallback, giving Admin visibility -->
     <menuitem id="menu_lhi_media_root" 
               name="Media &amp; Communications" 
-              action="action_lhi_media_request"
-              groups="lhi_media_communications.group_lhi_media_viewer" 
               web_icon="lhi_media_communications,static/description/icon.png"
               sequence="55"/>
 
     <!-- Sub Menus -->
     <menuitem id="menu_lhi_media_dashboard" 
-              name="Dashboard" 
+              name="Media Dashboard" 
               parent="menu_lhi_media_root" 
+              action="action_lhi_media_request"
               sequence="10"/>
 
     <menuitem id="menu_lhi_media_request" 
-              name="Requests" 
+              name="Media Requests" 
               parent="menu_lhi_media_root" 
               action="action_lhi_media_request" 
               sequence="20"/>
-              
-    <menuitem id="menu_lhi_media_calendar" 
-              name="Content Calendar" 
-              parent="menu_lhi_media_root" 
-              sequence="30"/>
 
-    <menuitem id="menu_lhi_media_activity" 
-              name="Media Activities" 
+    <!-- The user wanted specific Initiatives, Success Stories, etc. 
+         We'll reuse action_lhi_media_activity or action_lhi_media_request with context/domains for these.
+         For now, we define the menu structure. -->
+         
+    <menuitem id="menu_lhi_media_initiatives" 
+              name="Initiatives" 
               parent="menu_lhi_media_root" 
               action="action_lhi_media_activity" 
-              sequence="40"/>
+              sequence="30"/>
 
     <menuitem id="menu_lhi_media_success_story" 
               name="Success Stories" 
               parent="menu_lhi_media_root" 
               action="action_lhi_media_success_story" 
+              sequence="40"/>
+
+    <menuitem id="menu_lhi_media_photos_videos" 
+              name="Photos and Videos" 
+              parent="menu_lhi_media_root" 
+              action="action_lhi_media_asset"
               sequence="50"/>
 
-    <menuitem id="menu_lhi_media_library" 
-              name="Media Library" 
+    <menuitem id="menu_lhi_media_consent_records" 
+              name="Consent Records" 
               parent="menu_lhi_media_root" 
-              action="action_lhi_media_asset" 
+              action="action_lhi_media_consent_records"
               sequence="60"/>
 
-    <menuitem id="menu_lhi_media_approvals" 
-              name="Approvals" 
+    <menuitem id="menu_lhi_media_donor_visibility" 
+              name="Donor Visibility" 
               parent="menu_lhi_media_root" 
-              groups="lhi_media_communications.group_lhi_media_reviewer,lhi_media_communications.group_lhi_media_manager" 
+              action="action_lhi_media_donor_visibility"
               sequence="70"/>
+
+    <menuitem id="menu_lhi_media_radio_tv" 
+              name="Radio and TV Engagements" 
+              parent="menu_lhi_media_root" 
+              action="action_lhi_media_radio_tv"
+              sequence="80"/>
+
+    <menuitem id="menu_lhi_media_outreach_events" 
+              name="Outreach and Events" 
+              parent="menu_lhi_media_root" 
+              action="action_lhi_media_outreach_events"
+              sequence="90"/>
+
+    <menuitem id="menu_lhi_media_calendar" 
+              name="Communications Calendar" 
+              parent="menu_lhi_media_root" 
+              sequence="100"/>
+
+    <menuitem id="menu_lhi_media_library" 
+              name="Media Asset Library" 
+              parent="menu_lhi_media_root" 
+              action="action_lhi_media_asset" 
+              sequence="110"/>
 
     <menuitem id="menu_lhi_media_reports" 
               name="Reports" 
               parent="menu_lhi_media_root" 
-              sequence="80"/>
+              sequence="120"/>
 
     <menuitem id="menu_lhi_media_configuration" 
               name="Configuration" 
               parent="menu_lhi_media_root" 
               groups="lhi_media_communications.group_lhi_media_manager" 
-              sequence="90"/>
+              sequence="130"/>
 </odoo>

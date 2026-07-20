@@ -5,14 +5,6 @@
         <field name="model">lhi.media.request</field>
         <field name="inherit_id" ref="lhi_media_communications.view_lhi_media_request_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//page[@name='links']//field[@name='project_id']" position="before">
-                <field name="work_context"/>
-            </xpath>
-
-            <xpath expr="//page[@name='links']//field[@name='workplan_activity_id']" position="attributes">
-                <attribute name="invisible">work_context != 'project_linked'</attribute>
-            </xpath>
-
             <xpath expr="//page[@name='links']//field[@name='grant_id']" position="after">
                 <field name="memo_id" invisible="work_context != 'project_linked'"/>
                 <field name="project_budget_line_id" invisible="work_context != 'project_linked'"/>

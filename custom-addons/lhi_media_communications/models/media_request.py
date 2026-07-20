@@ -11,6 +11,17 @@ class MediaRequest(models.Model):
     requesting_unit_id = fields.Many2one('hr.department', string='Requesting Unit', tracking=True)
     requested_by_id = fields.Many2one('res.users', string='Requested By', default=lambda self: self.env.user, tracking=True)
     
+    work_context = fields.Selection(
+        [
+            ("standalone_departmental", "Standalone Departmental"),
+            ("project_linked", "Project-linked")
+        ],
+        string="Work Context",
+        default="standalone_departmental",
+        required=True,
+        tracking=True
+    )
+    
     project_id = fields.Many2one('lhi.project', string='Project', tracking=True)
     task_id = fields.Many2one('project.task', string='Project Task')
     workplan_activity_id = fields.Many2one('lhi.workplan.activity', string='Workplan Activity')
@@ -54,12 +65,13 @@ class MediaRequest(models.Model):
     state = fields.Selection([
         ('draft', 'Draft'),
         ('submitted', 'Submitted'),
-        ('reviewed', 'Reviewed'),
+        ('comm_review', 'Communications Review'),
+        ('consent_review', 'Safeguarding/Consent Review'),
         ('approved', 'Approved'),
         ('assigned', 'Assigned'),
         ('in_progress', 'In Progress'),
-        ('completed', 'Completed'),
-        ('published', 'Published/Closed'),
+        ('completed', 'Completed or Published'),
+        ('closed', 'Closed'),
         ('rejected', 'Rejected'),
         ('cancelled', 'Cancelled'),
         ('revision', 'Revision Requested')

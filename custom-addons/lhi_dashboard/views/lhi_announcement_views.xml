@@ -47,6 +47,6 @@
     <record id="action_lhi_announcement" model="ir.actions.act_window">
         <field name="name">Announcements</field>
         <field name="res_model">lhi.announcement</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 </odoo>

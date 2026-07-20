@@ -9,7 +9,23 @@
                 </div>
             </div>
             
-            <div class="row" t-if="state.modules.length > 0">
+            <div class="row" t-if="state.loading">
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row" t-elif="state.error">
+                <div class="col-12">
+                    <div class="alert alert-danger">
+                        Failed to load operations. Please try again later.
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" t-elif="state.modules.length > 0">
                 <t t-foreach="state.modules" t-as="module" t-key="module.key">
                     <div class="col-md-6 col-lg-4 mb-4">
                         <div class="card h-100 shadow-sm cursor-pointer lhi-dashboard-card" t-on-click="() => this.onModuleClick(module)">

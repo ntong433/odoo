@@ -38,7 +38,7 @@ class LhiDashboardWidget(models.Model):
         ('operations', 'Operations', 'lhi_dashboard.menu_lhi_operations_hub', ('lhi_security.group_lhi_supervisor', 'lhi_security.group_lhi_manager', 'lhi_security.group_lhi_procurement_officer', 'lhi_security.group_lhi_store_officer', 'lhi_security.group_lhi_fleet_officer'), ('OPERATIONS',)),
         ('assets', 'Assets', 'lhi_asset_management.menu_lhi_asset', ('lhi_security.group_lhi_store_officer',), ('ASSET', 'ASSETS', 'OPERATIONS')),
         ('accounting', 'Accounting', 'account.menu_finance', ('lhi_security.group_lhi_finance_reviewer', 'lhi_accounting_base.group_lhi_accounting_sandbox'), ('ACCOUNTING', 'FINANCE')),
-        ('meal', 'MEAL', 'lhi_results_framework.menu_lhi_meal_root', ('lhi_security.group_lhi_meal_officer', 'lhi_meal.group_lhi_meal_sensitive'), ('MEAL',)),
+        ('meal', 'MEAL', 'lhi_meal.menu_lhi_meal_initiative', ('lhi_security.group_lhi_meal_officer', 'lhi_meal.group_lhi_meal_sensitive'), ('MEAL',)),
         ('inventory', 'Inventory', 'stock.menu_stock_root', ('lhi_security.group_lhi_store_officer',), ('INVENTORY', 'STORE')),
         ('fleet', 'Fleet', 'fleet.menu_root', ('lhi_security.group_lhi_fleet_officer',), ('FLEET', 'OPERATIONS')),
         ('approvals', 'Approvals', 'lhi_approval_matrix.menu_lhi_my_pending_approvals', ('lhi_security.group_lhi_executive_approver', 'lhi_security.group_lhi_manager'), ('APPROVALS',)),

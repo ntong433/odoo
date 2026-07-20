@@ -20,8 +20,20 @@ export class AccessibleModulesWidget extends Component {
         });
     }
 
-    onAppClick(app) {
-        this.menuService.selectMenu(app.menu_id);
+    async onAppClick(app) {
+        if (app.menu_id) {
+            try {
+                await this.menuService.selectMenu(app.menu_id);
+            } catch (error) {
+                console.error("[LHI Dashboard] Unable to select app menu", error);
+                this.env.services.notification.add(
+                    "Unable to open this module. Please refresh and try again.", 
+                    { type: "warning", sticky: false }
+                );
+            }
+        } else {
+            console.warn("[LHI Dashboard] App has no menu_id mapped", app);
+        }
     }
 }
 

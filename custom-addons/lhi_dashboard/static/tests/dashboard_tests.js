@@ -3,8 +3,10 @@
 import { getFixture, mount } from "@web/../tests/helpers/utils";
 import { dashboardWidgetRegistry } from "@lhi_dashboard/js/dashboard_widget_registry";
 import { makeTestEnv } from "@web/../tests/helpers/mock_env";
-import { DASHBOARD_ACTION_TAG } from "@lhi_dashboard/js/dashboard_action";
-import { LhiDashboard } from "@lhi_dashboard/js/lhi_dashboard";
+import {
+    DASHBOARD_ACTION_TAG,
+    LhiDashboardAction,
+} from "@lhi_dashboard/js/lhi_dashboard";
 import { registry } from "@web/core/registry";
 
 QUnit.module("LHI Dashboard", (hooks) => {
@@ -28,7 +30,7 @@ QUnit.module("LHI Dashboard", (hooks) => {
         const actions = registry.category("actions");
         assert.strictEqual(
             actions.get(DASHBOARD_ACTION_TAG),
-            LhiDashboard,
+            LhiDashboardAction,
             "The server action tag resolves to the LHI Dashboard component"
         );
     });

@@ -1,11 +1,14 @@
 /** @odoo-module **/
 
 import { Component, onWillStart, useState } from "@odoo/owl";
+import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { dashboardWidgetRegistry } from "./dashboard_widget_registry";
 
-export class LhiDashboard extends Component {
+export const DASHBOARD_ACTION_TAG = "lhi_dashboard.dashboard_action";
+
+export class LhiDashboardAction extends Component {
     static template = "lhi_dashboard.Dashboard";
 
     setup() {
@@ -154,3 +157,10 @@ export class LhiDashboard extends Component {
         }
     }
 }
+
+// Register synchronously at module evaluation time. Component setup and
+// optional dashboard-card resolution happen only after the action is opened.
+registry.category("actions").add(
+    "lhi_dashboard.dashboard_action",
+    LhiDashboardAction
+);

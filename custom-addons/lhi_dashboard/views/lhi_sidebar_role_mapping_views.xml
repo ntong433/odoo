@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form View -->
+    <record id="view_lhi_sidebar_role_mapping_form" model="ir.ui.view">
+        <field name="name">lhi.sidebar.role.mapping.form</field>
+        <field name="model">lhi.sidebar.role.mapping</field>
+        <field name="arch" type="xml">
+            <form string="Sidebar Role Mapping">
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" attrs="{'invisible': [('active', '=', True)]}"/>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Operations Manager -> Fleet Menu"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="group_id" options="{'no_create': True}"/>
+                            <field name="menu_id" domain="[('parent_id', '=', False)]" options="{'no_create': True}"/>
+                        </group>
+                        <group>
+                            <field name="sequence"/>
+                            <field name="active" widget="boolean_toggle"/>
+                            <field name="include_for_manager"/>
+                            <field name="include_for_director"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Notes" name="notes">
+                            <field name="notes" placeholder="Additional context about this mapping..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree View -->
+    <record id="view_lhi_sidebar_role_mapping_tree" model="ir.ui.view">
+        <field name="name">lhi.sidebar.role.mapping.tree</field>
+        <field name="model">lhi.sidebar.role.mapping</field>
+        <field name="arch" type="xml">
+            <tree string="Sidebar Role Mappings">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="group_id"/>
+                <field name="menu_id"/>
+                <field name="include_for_manager"/>
+                <field name="include_for_director"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_lhi_sidebar_role_mapping_search" model="ir.ui.view">
+        <field name="name">lhi.sidebar.role.mapping.search</field>
+        <field name="model">lhi.sidebar.role.mapping</field>
+        <field name="arch" type="xml">
+            <search string="Search Sidebar Role Mappings">
+                <field name="name"/>
+                <field name="group_id"/>
+                <field name="menu_id"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Manager Group" name="group_id" context="{'group_by':'group_id'}"/>
+                    <filter string="Target Menu" name="menu_id" context="{'group_by':'menu_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_lhi_sidebar_role_mapping" model="ir.actions.act_window">
+        <field name="name">Role Mappings</field>
+        <field name="res_model">lhi.sidebar.role.mapping</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Sidebar Role Mapping
+            </p>
+            <p>
+                Configure which module menus are shown to specific manager or director groups.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menus -->
+    <menuitem id="menu_lhi_erp_settings_root" 
+              name="LHI ERP" 
+              parent="base.menu_administration" 
+              sequence="100"/>
+              
+    <menuitem id="menu_lhi_sidebar_configuration" 
+              name="Sidebar Configuration" 
+              parent="menu_lhi_erp_settings_root" 
+              sequence="10"/>
+
+    <menuitem id="menu_lhi_sidebar_role_mapping" 
+              name="Role Mappings" 
+              parent="menu_lhi_sidebar_configuration" 
+              action="action_lhi_sidebar_role_mapping" 
+              sequence="10"/>
+</odoo>

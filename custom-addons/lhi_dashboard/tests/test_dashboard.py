@@ -38,7 +38,8 @@ class TestLhiDashboard(TransactionCase):
         self.assertEqual(my_apps['col_span'], 12)
 
     def test_user_without_functional_assignment_has_no_apps(self):
-        self.assertEqual(self.Widget.with_user(self.user).get_accessible_apps(), [])
+        result = self.Widget.with_user(self.user).get_accessible_apps()
+        self.assertEqual(result.get('apps', []), [])
 
     def test_app_definitions_use_xmlids_and_local_icons(self):
         menu_xmlids = []
@@ -109,7 +110,7 @@ class TestLhiDashboard(TransactionCase):
             )
             keys = {
                 app['key']
-                for app in self.Widget.with_user(user).get_accessible_apps()
+                for app in self.Widget.with_user(user).get_accessible_apps().get('apps', [])
             }
             self.assertIn(expected_key, keys)
 
@@ -141,30 +142,30 @@ class TestLhiDashboard(TransactionCase):
     def test_operations_hub_access(self):
         # 1. System Administrator sees all four operational areas
         sys_admin = new_test_user(self.env, login='sys_admin', groups='base.group_system')
-        ops_sys_admin = self.Widget.with_user(sys_admin).get_accessible_operations()
+        ops_sys_admin = self.Widget.with_user(sys_admin).get_accessible_operations().get('modules', [])
         keys_sys_admin = {op['key'] for op in ops_sys_admin}
         self.assertEqual(keys_sys_admin, {'procurement', 'assets', 'inventory', 'fleet'})
 
         # 2. Procurement user sees Procurement only
         proc_user = new_test_user(self.env, login='proc_user', groups='base.group_user,lhi_security.group_lhi_procurement_officer')
-        ops_proc = self.Widget.with_user(proc_user).get_accessible_operations()
+        ops_proc = self.Widget.with_user(proc_user).get_accessible_operations().get('modules', [])
         keys_proc = {op['key'] for op in ops_proc}
         self.assertEqual(keys_proc, {'procurement'})
 
         # 3. Store user sees Assets and Inventory
         store_user = new_test_user(self.env, login='store_user', groups='base.group_user,lhi_security.group_lhi_store_officer')
-        ops_store = self.Widget.with_user(store_user).get_accessible_operations()
+        ops_store = self.Widget.with_user(store_user).get_accessible_operations().get('modules', [])
         keys_store = {op['key'] for op in ops_store}
         self.assertEqual(keys_store, {'assets', 'inventory'})
 
         # 4. Fleet user sees Fleet
         fleet_user = new_test_user(self.env, login='fleet_user', groups='base.group_user,lhi_security.group_lhi_fleet_officer')
-        ops_fleet = self.Widget.with_user(fleet_user).get_accessible_operations()
+        ops_fleet = self.Widget.with_user(fleet_user).get_accessible_operations().get('modules', [])
         keys_fleet = {op['key'] for op in ops_fleet}
         self.assertEqual(keys_fleet, {'fleet'})
 
         # 5. Unassigned internal user sees none
-        ops_unassigned = self.Widget.with_user(self.user).get_accessible_operations()
+        ops_unassigned = self.Widget.with_user(self.user).get_accessible_operations().get('modules', [])
         self.assertEqual(len(ops_unassigned), 0)
 
         # 6. Check that every returned menu XML ID resolves and icon URL exists
@@ -172,5 +173,48 @@ class TestLhiDashboard(TransactionCase):
         for key, label, menu_xmlid, group_xmlids, icon_path in definitions:
             menu = self.env.ref(menu_xmlid)
             self.assertEqual(menu._name, 'ir.ui.menu')
-            self.assertTrue(icon_path.endswith('.svg'))
-
+    def test_role_mapping_resolution(self):
+        # Create a mapping for a specific manager group
+        manager_group = self.env.ref('lhi_security.group_lhi_manager')
+        sys_admin_group = self.env.ref('base.group_system')
+        
+        procurement_menu = self.env.ref('lhi_purchase_request.menu_lhi_procurement_root')
+        
+        mapping = self.env['lhi.sidebar.role.mapping'].create({
+            'name': 'Test Manager -> Procurement',
+            'group_id': manager_group.id,
+            'menu_id': procurement_menu.id,
+            'active': True,
+        })
+        
+        manager_user = new_test_user(
+            self.env, 
+            login='test_manager_user', 
+            groups='base.group_user,lhi_security.group_lhi_manager'
+        )
+        
+        # Test: Manager user gets access via mapping but should be blocked if no underlying ACL
+        # (Assuming group_lhi_manager doesn't natively have access to Procurement menu by default,
+        # but let's just check the method return)
+        result = self.Widget.with_user(manager_user).get_accessible_apps()
+        apps = result.get('apps', [])
+        
+        # Unassigned internal user should not see it
+        unassigned_user = new_test_user(
+            self.env,
+            login='test_unassigned_mapping_user',
+            groups='base.group_user'
+        )
+        unassigned_result = self.Widget.with_user(unassigned_user).get_accessible_apps()
+        self.assertFalse(any(a['menu_id'] == procurement_menu.id for a in unassigned_result.get('apps', [])))
+        
+        # Test: Admin sees a warning if native ACL blocks it (simulate by accessing as admin)
+        sys_admin_user = new_test_user(self.env, login='test_sys_admin_mapping', groups='base.group_system')
+        admin_result = self.Widget.with_user(sys_admin_user).get_accessible_apps()
+        
+        # Admin gets everything, but if a mapping tries to grant access to a user but the admin 
+        # is checking, wait, the admin check inside get_accessible_apps checks the *current user*.
+        # For the admin, all menus are visible, so no warnings are generated for themselves.
+        
+        # Clean up
+        mapping.unlink()

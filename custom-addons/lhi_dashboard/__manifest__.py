@@ -36,6 +36,7 @@ Deliverables:
         'views/lhi_dashboard_widget_views.xml',
         'views/dashboard_action.xml',
         'views/operations_hub_views.xml',
+        'views/lhi_sidebar_role_mapping_views.xml',
     ],
     'assets': {
         'web.assets_backend': [

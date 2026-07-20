@@ -12,11 +12,21 @@ export class AccessibleModulesWidget extends Component {
         this.orm = useService("orm");
         this.state = useState({ apps: [] });
         onWillStart(async () => {
-            this.state.apps = await this.orm.call(
+            const result = await this.orm.call(
                 "lhi.dashboard.widget",
                 "get_accessible_apps",
                 []
             );
+            if (result && !Array.isArray(result) && result.apps) {
+                this.state.apps = result.apps;
+                if (result.warnings && result.warnings.length > 0) {
+                    for (const warning of result.warnings) {
+                        this.env.services.notification.add(warning, { type: "warning", sticky: true, title: "Configuration Warning" });
+                    }
+                }
+            } else {
+                this.state.apps = result || [];
+            }
         });
     }
 

@@ -22,7 +22,7 @@ export class OperationsHub extends Component {
 
         onWillStart(async () => {
             try {
-                this.state.modules = await rpc(
+                const result = await rpc(
                     "/web/dataset/call_kw/lhi.dashboard.widget/get_accessible_operations",
                     {
                         model: "lhi.dashboard.widget",
@@ -31,6 +31,16 @@ export class OperationsHub extends Component {
                         kwargs: {},
                     }
                 );
+                if (result && !Array.isArray(result) && result.modules) {
+                    this.state.modules = result.modules;
+                    if (result.warnings && result.warnings.length > 0) {
+                        for (const warning of result.warnings) {
+                            this.env.services.notification.add(warning, { type: "warning", sticky: true, title: "Configuration Warning" });
+                        }
+                    }
+                } else {
+                    this.state.modules = result || [];
+                }
             } catch (error) {
                 console.error(
                     "[LHI Operations] Unable to load accessible modules",

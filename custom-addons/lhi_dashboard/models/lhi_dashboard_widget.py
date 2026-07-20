@@ -113,12 +113,15 @@ class LhiDashboardWidget(models.Model):
         }
         visible_menu_ids = self.env['ir.ui.menu']._visible_menu_ids()
         apps = []
+        warnings = []
 
+        # 1. Base static apps definition
         for key, label, menu_xmlid, group_xmlids, department_codes_allowed in self._LHI_APP_DEFINITIONS:
             menu = self.env.ref(menu_xmlid, raise_if_not_found=False)
-            if not menu or menu.id not in visible_menu_ids:
+            if not menu:
                 continue
 
+            # Standard visibility check
             group_match = any(user.has_group(xmlid) for xmlid in group_xmlids)
             department_match = bool(department_codes.intersection(department_codes_allowed))
             if not is_system and not (group_match or department_match):
@@ -129,6 +132,12 @@ class LhiDashboardWidget(models.Model):
                 if not is_system and not action.group_ids & user.all_group_ids:
                     continue
 
+            # Native ACL visibility check
+            if menu.id not in visible_menu_ids:
+                if is_system:
+                    warnings.append(f"Base Module '{label}' is authorized by department/group but native ACLs block it.")
+                continue
+
             apps.append({
                 'key': key,
                 'name': label,
@@ -136,7 +145,50 @@ class LhiDashboardWidget(models.Model):
                 'xmlid': menu_xmlid,
                 'icon_url': f'/lhi_web_shell/static/src/img/module_icons/{"projects" if key == "programmes" else "reporting" if key == "reports" else key}.svg',
             })
-        return self._deduplicate_dashboard_apps(apps)
+
+        # 2. Dynamic Sidebar Role Mapping (Manager / Director specific)
+        # Check active mappings
+        if 'lhi.sidebar.role.mapping' in self.env:
+            mappings = self.env['lhi.sidebar.role.mapping'].search([('active', '=', True)])
+            for mapping in mappings:
+                if not mapping.menu_id:
+                    continue
+                
+                # Retrieve the XML ID of the mapped group
+                group_xml_id_dict = mapping.group_id.get_external_id()
+                group_xml_id = group_xml_id_dict.get(mapping.group_id.id)
+                if not group_xml_id:
+                    continue
+
+                if user.has_group(group_xml_id):
+                    # User qualifies for this mapping. Check if menu is natively visible.
+                    menu = mapping.menu_id
+                    
+                    if menu.id not in visible_menu_ids:
+                        if is_system:
+                            warnings.append(f"Role Mapping '{mapping.name}' grants access to '{menu.name}' but native ACLs/record rules deny access.")
+                        continue
+                    
+                    # Ensure we have a valid icon for the mapping. 
+                    # Defaulting to generic 'operations' if not easily deducible.
+                    menu_xml_id_dict = menu.get_external_id()
+                    menu_xmlid = menu_xml_id_dict.get(menu.id)
+                    key = str(menu.name).lower().replace(' ', '_')
+                    
+                    apps.append({
+                        'key': key,
+                        'name': menu.name,
+                        'menu_id': menu.id,
+                        'xmlid': menu_xmlid,
+                        'icon_url': f'/lhi_web_shell/static/src/img/module_icons/operations.svg',
+                    })
+
+        unique_apps = self._deduplicate_dashboard_apps(apps)
+        
+        return {
+            'apps': unique_apps,
+            'warnings': warnings
+        }
 
     @api.model
     def get_my_approval_summary(self):
@@ -250,20 +302,67 @@ class LhiDashboardWidget(models.Model):
         user = self.env.user
         is_system_admin = user.has_group('base.group_system')
         modules = []
+        warnings = []
         visible_menu_ids = self.env['ir.ui.menu']._visible_menu_ids()
 
+        # 1. Base static operations definition
         for key, label, menu_xmlid, group_xmlids, icon_path in self._LHI_OPERATIONS_DEFINITIONS:
             menu = self.env.ref(menu_xmlid, raise_if_not_found=False)
-            if not menu or menu.id not in visible_menu_ids:
+            if not menu:
                 continue
 
             group_match = any(user.has_group(xmlid) for xmlid in group_xmlids)
             if is_system_admin or group_match:
+                if menu.id not in visible_menu_ids:
+                    if is_system_admin:
+                        warnings.append(f"Base Operation '{label}' is authorized but native ACLs block it.")
+                    continue
+
                 modules.append({
                     'key': key,
                     'name': label,
                     'menu_id': menu.id,
-                    'icon': icon_path
+                    'icon': icon_path,
+                    'xmlid': menu_xmlid,
                 })
                 
-        return modules
+        # 2. Dynamic Sidebar Role Mapping (Manager / Director specific)
+        if 'lhi.sidebar.role.mapping' in self.env:
+            mappings = self.env['lhi.sidebar.role.mapping'].search([('active', '=', True)])
+            for mapping in mappings:
+                if not mapping.menu_id:
+                    continue
+                
+                # Retrieve the XML ID of the mapped group
+                group_xml_id_dict = mapping.group_id.get_external_id()
+                group_xml_id = group_xml_id_dict.get(mapping.group_id.id)
+                if not group_xml_id:
+                    continue
+
+                # For operations, we probably only want to include mappings where include_for_manager/director is relevant.
+                # However, the user specifically mentioned: Operations Manager sees all Operations modules.
+                if user.has_group(group_xml_id):
+                    menu = mapping.menu_id
+                    if menu.id not in visible_menu_ids:
+                        if is_system_admin:
+                            warnings.append(f"Role Mapping '{mapping.name}' grants access to '{menu.name}' but native ACLs deny access.")
+                        continue
+                    
+                    menu_xml_id_dict = menu.get_external_id()
+                    menu_xmlid = menu_xml_id_dict.get(menu.id)
+                    key = str(menu.name).lower().replace(' ', '_')
+                    
+                    modules.append({
+                        'key': key,
+                        'name': menu.name,
+                        'menu_id': menu.id,
+                        'icon': '/lhi_web_shell/static/src/img/module_icons/operations.svg',
+                        'xmlid': menu_xmlid,
+                    })
+
+        unique_modules = self._deduplicate_dashboard_apps(modules)
+
+        return {
+            'modules': unique_modules,
+            'warnings': warnings
+        }

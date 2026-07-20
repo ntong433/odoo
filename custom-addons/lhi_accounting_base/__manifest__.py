@@ -10,7 +10,6 @@
         'security/lhi_accounting_security.xml',
         'data/ir_config_parameter_data.xml',
         'views/res_config_settings_views.xml',
-        'views/menu_overrides.xml',
     ],
     'installable': True,
     'application': True,

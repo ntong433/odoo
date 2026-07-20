@@ -9,5 +9,6 @@
     "application": False,
     "data": [
         "views/procurement_programme_views.xml",
+        "views/project_context_bridge_views.xml",
     ],
 }

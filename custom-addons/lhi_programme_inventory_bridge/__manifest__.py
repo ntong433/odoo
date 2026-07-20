@@ -8,4 +8,7 @@
     "auto_install": True,
     "installable": True,
     "application": False,
+    "data": [
+        "views/project_context_bridge_views.xml",
+    ],
 }

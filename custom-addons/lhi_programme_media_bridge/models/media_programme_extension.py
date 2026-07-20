@@ -12,6 +12,11 @@ class LhiMediaRequest(models.Model):
                 raise ValidationError(_("Only draft or returned Media requests can be submitted."))
         self.write({"state": "submitted"})
 
+class LhiProject(models.Model):
+    _inherit = "lhi.project"
+
+    media_request_ids = fields.One2many("lhi.media.request", "project_id")
+
 class LhiWorkplanActivity(models.Model):
     _inherit = "lhi.workplan.activity"
 

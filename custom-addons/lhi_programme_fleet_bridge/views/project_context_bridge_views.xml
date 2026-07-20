@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_project_fleet_context" model="ir.ui.view">
+        <field name="name">lhi.project.fleet.context</field>
+        <field name="model">lhi.project</field>
+        <field name="inherit_id" ref="lhi_programme_management.view_lhi_project_programme_context"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook[@name='programmes_grants_context']" position="inside">
+                <page string="Fleet">
+                    <field name="programme_fleet_trip_ids" readonly="1"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_workplan_activity_fleet_context" model="ir.ui.view">
+        <field name="name">lhi.workplan.activity.fleet.context</field>
+        <field name="model">lhi.workplan.activity</field>
+        <field name="inherit_id" ref="lhi_programme_management.view_workplan_activity_programme_context"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Fleet">
+                    <field name="programme_fleet_trip_ids" readonly="1"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

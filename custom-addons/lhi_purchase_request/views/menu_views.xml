@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <menuitem id="menu_lhi_procurement_root" name="Procurement" sequence="45" web_icon="lhi_web_shell,static/src/img/module_icons/procurement.svg" action="action_lhi_purchase_request"/>
+
     <record id="action_lhi_purchase_request" model="ir.actions.act_window">
         <field name="name">Purchase Requests</field>
         <field name="res_model">lhi.purchase.request</field>
         <field name="view_mode">list,form</field>
     </record>
-
-    <menuitem id="menu_lhi_procurement_root" name="Procurement" sequence="45" web_icon="lhi_web_shell,static/src/img/module_icons/procurement.svg" action="action_lhi_purchase_request"/>
 
     <record id="action_lhi_budget_line" model="ir.actions.act_window">
         <field name="name">Budget Lines</field>

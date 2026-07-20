@@ -15,8 +15,8 @@ Defines foundational models, common partner data, and organizational structures.
     'data': [
         'security/ir.model.access.csv',
         'data/ir_sequence_data.xml',
-        'views/lhi_master_data_views.xml',
         'views/menus.xml',
+        'views/lhi_master_data_views.xml',
     ],
     'installable': True,
     'application': True,

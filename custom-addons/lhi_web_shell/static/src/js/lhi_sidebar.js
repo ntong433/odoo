@@ -23,6 +23,7 @@ export class LhiSidebar extends Component {
         this.state = useState({
             collapsed: savedCollapsed,
             activeAppId: this.menuService.getCurrentApp()?.id || null,
+            apps: [],
         });
 
         const updateActiveApp = () => {
@@ -32,16 +33,28 @@ export class LhiSidebar extends Component {
             }
         };
 
-        // Listen for route changes to update active app
         this.env.bus.addEventListener("ROUTE_CHANGE", updateActiveApp);
         
-        onMounted(() => {
+        onMounted(async () => {
             this._applySidebarState();
+            await this._fetchAccessibleApps();
         });
 
         onWillUnmount(() => {
             this.env.bus.removeEventListener("ROUTE_CHANGE", updateActiveApp);
         });
+    }
+
+    async _fetchAccessibleApps() {
+        try {
+            const result = await this.orm.call("lhi.dashboard.widget", "get_accessible_apps", []);
+            if (result && result.apps) {
+                // The backend returns an array of objects: {key, name, menu_id, xmlid, icon_url}
+                this.state.apps = result.apps;
+            }
+        } catch (e) {
+            console.error("LHI Sidebar could not fetch accessible apps.", e);
+        }
     }
 
     _applySidebarState() {
@@ -58,17 +71,11 @@ export class LhiSidebar extends Component {
     }
 
     get apps() {
-        const EXCLUDED_SIDEBAR_ROOTS = new Set([
-            "lhi_dashboard.menu_lhi_dashboard_root",
-            "lhi_base.menu_lhi_root",
-            "lhi_integration.menu_lhi_erp_root"
-        ]);
-        return this.menuService.getApps().filter(
-            (app) => !EXCLUDED_SIDEBAR_ROOTS.has(app.xmlid)
-        );
+        return this.state.apps;
     }
 
     getIconProps(app) {
+        // Fallback to getting icon from the xmlid mapping
         return getAppIconProps(app);
     }
 
@@ -94,9 +101,21 @@ export class LhiSidebar extends Component {
             return;
         }
 
-        this.state.activeAppId = app.id;
-        this.menuService.selectMenu(app);
+        this.state.activeAppId = app.menu_id || app.id;
         
+        // Let the actionService resolve the menu's action dynamically without us reading ir.actions directly
+        const actionTarget = app.xmlid || app.menu_id;
+        if (actionTarget) {
+            this.actionService.doAction(actionTarget, {
+                clearBreadcrumbs: true,
+            });
+            // Update the menu service state silently if possible
+            const nativeMenuApp = this.menuService.getApps().find(a => a.id === app.menu_id);
+            if (nativeMenuApp) {
+                this.menuService.selectMenu(nativeMenuApp);
+            }
+        }
+
         // Handle mobile sidebar auto-close
         const webClient = document.querySelector(".o_web_client");
         if (webClient && window.innerWidth <= 992) {

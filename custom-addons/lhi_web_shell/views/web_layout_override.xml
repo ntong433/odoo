@@ -2,7 +2,7 @@
 <odoo>
     <!-- Inject early theme initialization in the head tag to prevent white theme flashes -->
     <template id="lhi_early_theme_init" inherit_id="web.layout" name="LHI Early Theme Init">
-        <xpath expr="//head" position="first">
+        <xpath expr="//head/*[1]" position="before">
             <script type="text/javascript">
                 (function () {
                     const theme = localStorage.getItem("lhi_theme") || "system";

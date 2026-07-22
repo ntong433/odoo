@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from odoo.tests.common import TransactionCase, tagged
-from odoo.exceptions import AccessError
 
 @tagged('post_install', '-at_install')
 class TestLhiSecurityRules(TransactionCase):
@@ -10,8 +9,10 @@ class TestLhiSecurityRules(TransactionCase):
         super(TestLhiSecurityRules, cls).setUpClass()
         
         # Setup groups
+        cls.group_user = cls.env.ref('lhi_security.group_lhi_user')
         cls.group_employee = cls.env.ref('lhi_security.group_lhi_employee')
         cls.group_manager = cls.env.ref('lhi_security.group_lhi_manager')
+        cls.group_erp_admin = cls.env.ref('lhi_security.group_lhi_erp_admin')
 
         # Setup standard company
         cls.company = cls.env.company
@@ -83,6 +84,34 @@ class TestLhiSecurityRules(TransactionCase):
             'email': 'mgr@lhinigeria.org',
             'group_ids': [(6, 0, [cls.group_employee.id, cls.group_manager.id])],
         })
+
+    def test_00_erp_administrator_inherits_manager_and_employee(self):
+        """Protected ERP administrators inherit both organization-wide roles."""
+        administrator = self.env.ref('base.user_admin')
+
+        self.assertTrue(administrator.has_group('lhi_security.group_lhi_erp_admin'))
+        self.assertTrue(administrator.has_group('lhi_security.group_lhi_manager'))
+        self.assertTrue(administrator.has_group('lhi_security.group_lhi_employee'))
+        self.assertIn(self.group_manager, self.group_erp_admin.implied_ids)
+        self.assertIn(self.group_employee, self.group_erp_admin.implied_ids)
+
+    def test_00_ordinary_employee_and_manager_hierarchy_is_unchanged(self):
+        """The ERP-admin fix does not broaden ordinary employee or manager roles."""
+        manager_only = self.env['res.users'].create({
+            'name': 'LHI Manager Only',
+            'login': 'lhi_manager_only',
+            'email': 'manager.only@lhinigeria.org',
+            'group_ids': [(6, 0, [self.group_manager.id])],
+        })
+
+        self.assertTrue(self.user_employee.has_group('lhi_security.group_lhi_employee'))
+        self.assertFalse(self.user_employee.has_group('lhi_security.group_lhi_manager'))
+        self.assertTrue(manager_only.has_group('lhi_security.group_lhi_manager'))
+        self.assertFalse(manager_only.has_group('lhi_security.group_lhi_employee'))
+        self.assertIn(self.group_user, self.group_employee.implied_ids)
+        self.assertIn(self.group_user, self.group_manager.implied_ids)
+        self.assertNotIn(self.group_employee, self.group_manager.implied_ids)
+        self.assertNotIn(self.group_manager, self.group_employee.implied_ids)
 
     def test_01_no_restrictions_employee(self):
         """When an employee has no restrictions set, they can see all records."""

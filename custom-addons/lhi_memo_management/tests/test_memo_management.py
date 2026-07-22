@@ -349,6 +349,35 @@ class TestMemoManagement(TransactionCase):
         )
         self.assertIn(signature_menu.id, admin_visible_menu_ids)
 
+    def test_erp_administrator_has_employee_memo_access_and_protected_roles(self):
+        administrator = self.env.ref("base.user_admin")
+        memo_menu = self.env.ref("lhi_memo_management.menu_lhi_memo_root")
+        erp_admin_group = self.env.ref("lhi_security.group_lhi_erp_admin")
+        memo_admin_group = self.env.ref(
+            "lhi_memo_management.group_lhi_memo_admin"
+        )
+
+        self.assertTrue(
+            administrator.has_group("lhi_security.group_lhi_erp_admin")
+        )
+        self.assertTrue(administrator.has_group("lhi_security.group_lhi_manager"))
+        self.assertTrue(administrator.has_group("lhi_security.group_lhi_employee"))
+        self.assertTrue(
+            self.env["lhi.memo"]
+            .with_user(administrator)
+            .check_access_rights("read", raise_exception=False)
+        )
+        visible_menu_ids = (
+            self.env["ir.ui.menu"]
+            .with_user(administrator)
+            ._visible_menu_ids()
+        )
+        self.assertIn(memo_menu.id, visible_menu_ids)
+
+        protected_groups = self.env["res.groups"]._lhi_entra_protected_groups()
+        self.assertIn(erp_admin_group, protected_groups)
+        self.assertIn(memo_admin_group, protected_groups)
+
     def test_exact_word_version_is_captured_and_hashed(self):
         memo = self._create_memo()
         pdf = b"%PDF-1.7\nTwo-page representative payload\n%%EOF"

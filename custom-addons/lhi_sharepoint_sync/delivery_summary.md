@@ -29,3 +29,21 @@ Successfully addressed the Microsoft SharePoint 5,000 list-view threshold constr
 ## Security & Reliability
 - No unique item-level permissions are dynamically generated; security leverages inherited scopes per folder/site.
 - Python tests cover partition routing and scoped queries, successfully passing in the containerized environment.
+
+## Odoo 19 Cron Compatibility Update (19.0.1.0.1)
+
+- Removed the obsolete `ir.cron.numbercall` value from the subscription-renewal
+  and delta-synchronization records while preserving their stable XML IDs,
+  schedules, model methods, and active state.
+- Changed files: `__manifest__.py`, `data/cron_jobs.xml`, and this delivery
+  summary. No `lhi_memo_management` source file or Odoo core file was changed.
+- XML parsing and Odoo `import_xml.rng` validation passed for all four module XML
+  files. Python compilation, manifest validation, `git diff --check`, and the
+  custom-addons-wide deprecated-field audit passed.
+- Disposable installs were attempted for `lhi_sharepoint_sync` and
+  `lhi_memo_management`. Both were blocked before module loading because this
+  workstation has no running or configured PostgreSQL service; both commands
+  exited `1` with a missing `/var/run/postgresql/.s.PGSQL.5432` socket. They must
+  be rerun against a disposable PostgreSQL database in the Coolify runtime, and
+  must exit `0`, before any production deployment is approved.
+- No production database install or upgrade was performed.

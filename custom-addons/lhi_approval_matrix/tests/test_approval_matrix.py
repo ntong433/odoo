@@ -128,6 +128,27 @@ class TestLhiApprovalMatrix(TransactionCase):
         self.assertEqual(req.current_line_id.name, 'Technical Review')
         self.assertIn(self.user_reviewer.id, req.current_line_id.approver_ids.ids)
 
+    def test_02b_prepare_snapshots_route_without_starting_approval(self):
+        """Signature workflows may prepare recipients before active review."""
+        req = self.env['lhi.approval.request'].create({
+            'res_model': 'lhi.project',
+            'res_id': self.project.id,
+            'document_type': 'purchase',
+            'amount': 10000.0,
+            'currency_id': self.company.currency_id.id,
+            'creator_id': self.user_creator.id,
+            'project_id': self.project.id,
+            'company_id': self.company.id,
+        })
+
+        req.action_prepare()
+        self.assertEqual(req.state, 'draft')
+        self.assertEqual(len(req.line_ids), 2)
+        self.assertTrue(req.matrix_id)
+
+        req.action_activate()
+        self.assertEqual(req.state, 'under_review')
+
     def test_03_self_approval_prevention(self):
         """Verify creator cannot approve their own document step."""
         req = self.env['lhi.approval.request'].create({

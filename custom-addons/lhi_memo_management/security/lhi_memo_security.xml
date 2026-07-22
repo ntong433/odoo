@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="module_category_lhi_memo" model="ir.module.category">
+        <field name="name">LHI Memo Management</field>
+        <field name="sequence">45</field>
+    </record>
+
+    <record id="privilege_lhi_memo" model="res.groups.privilege">
+        <field name="name">Memo Management</field>
+        <field name="category_id" ref="module_category_lhi_memo"/>
+        <field name="sequence">45</field>
+    </record>
+
+    <record id="group_lhi_memo_user" model="res.groups">
+        <field name="name">Memo User</field>
+        <field name="privilege_id" ref="privilege_lhi_memo"/>
+        <field name="implied_ids" eval="[(4, ref('lhi_security.group_lhi_employee'))]"/>
+    </record>
+    <record id="group_lhi_memo_approver" model="res.groups">
+        <field name="name">Memo Approver</field>
+        <field name="privilege_id" ref="privilege_lhi_memo"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_memo_user'))]"/>
+    </record>
+    <record id="group_lhi_department_memo_manager" model="res.groups">
+        <field name="name">Department Memo Manager</field>
+        <field name="privilege_id" ref="privilege_lhi_memo"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_memo_user'))]"/>
+    </record>
+    <record id="group_lhi_records_officer" model="res.groups">
+        <field name="name">Memo Records Officer</field>
+        <field name="privilege_id" ref="privilege_lhi_memo"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_memo_user'))]"/>
+    </record>
+    <record id="group_lhi_memo_admin" model="res.groups">
+        <field name="name">Memo Administrator</field>
+        <field name="privilege_id" ref="privilege_lhi_memo"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_department_memo_manager')), (4, ref('group_lhi_records_officer'))]"/>
+    </record>
+
+    <record id="rule_lhi_memo_company" model="ir.rule">
+        <field name="name">Memo multi-company isolation</field>
+        <field name="model_id" ref="model_lhi_memo"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        <field name="global" eval="True"/>
+    </record>
+
+    <record id="rule_lhi_memo_employee_scope" model="ir.rule">
+        <field name="name">Employees see owned and addressed memos</field>
+        <field name="model_id" ref="model_lhi_memo"/>
+        <field name="domain_force">['|', ('requester_id', '=', user.id), ('recipient_user_ids', 'in', [user.id])]</field>
+        <field name="groups" eval="[(4, ref('lhi_security.group_lhi_employee'))]"/>
+    </record>
+
+    <record id="rule_lhi_memo_approver_scope" model="ir.rule">
+        <field name="name">Approvers see assigned memos</field>
+        <field name="model_id" ref="model_lhi_memo"/>
+        <field name="domain_force">[('approver_line_ids.approver_user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('group_lhi_memo_approver'))]"/>
+    </record>
+
+    <record id="rule_lhi_memo_participant_scope" model="ir.rule">
+        <field name="name">Assigned participants see their memo</field>
+        <field name="model_id" ref="model_lhi_memo"/>
+        <field name="domain_force">[('approver_line_ids.approver_user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('lhi_security.group_lhi_employee'))]"/>
+    </record>
+
+    <record id="rule_lhi_memo_preparation_scope" model="ir.rule">
+        <field name="name">Preparation officers see explicitly assigned memos</field>
+        <field name="model_id" ref="model_lhi_memo"/>
+        <field name="domain_force">[('preparation_officer_ids', 'in', [user.id])]</field>
+        <field name="groups" eval="[(4, ref('lhi_signature_bridge.group_lhi_signature_preparation_officer'))]"/>
+    </record>
+
+    <record id="rule_lhi_memo_department_scope" model="ir.rule">
+        <field name="name">Department memo managers see assigned departments</field>
+        <field name="model_id" ref="model_lhi_memo"/>
+        <field name="domain_force">[('department_id', 'in', user.lhi_department_ids.ids)]</field>
+        <field name="groups" eval="[(4, ref('group_lhi_department_memo_manager'))]"/>
+    </record>
+
+    <record id="rule_lhi_memo_records_scope" model="ir.rule">
+        <field name="name">Records officers see approved records</field>
+        <field name="model_id" ref="model_lhi_memo"/>
+        <field name="domain_force">[('state', 'in', ('final_signature_pending', 'completed'))]</field>
+        <field name="groups" eval="[(4, ref('group_lhi_records_officer'))]"/>
+    </record>
+
+    <record id="rule_lhi_memo_admin_scope" model="ir.rule">
+        <field name="name">Memo administrators see company memos</field>
+        <field name="model_id" ref="model_lhi_memo"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_lhi_memo_admin'))]"/>
+    </record>
+
+    <record id="rule_lhi_memo_category_company" model="ir.rule">
+        <field name="name">Memo category company isolation</field>
+        <field name="model_id" ref="model_lhi_memo_category"/>
+        <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        <field name="global" eval="True"/>
+    </record>
+
+    <record id="rule_lhi_memo_starter_document_admin" model="ir.rule">
+        <field name="name">Memo administrators select available company Word starters</field>
+        <field name="model_id" ref="lhi_sharepoint_storage.model_lhi_document_item"/>
+        <field name="domain_force">[('company_id', 'in', company_ids), ('storage_state', '=', 'available'), ('mime_type', '=', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document')]</field>
+        <field name="groups" eval="[(4, ref('group_lhi_memo_admin'))]"/>
+    </record>
+
+    <record id="rule_lhi_memo_matrix_admin_scope" model="ir.rule">
+        <field name="name">Memo administrators manage company memo routes</field>
+        <field name="model_id" ref="lhi_approval_matrix.model_lhi_approval_matrix"/>
+        <field name="domain_force">[('document_type', '=', 'memo'), ('company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[(4, ref('group_lhi_memo_admin'))]"/>
+    </record>
+
+    <record id="rule_lhi_memo_matrix_line_admin_scope" model="ir.rule">
+        <field name="name">Memo administrators manage company memo route lines</field>
+        <field name="model_id" ref="lhi_approval_matrix.model_lhi_approval_matrix_line"/>
+        <field name="domain_force">[('matrix_id.document_type', '=', 'memo'), ('matrix_id.company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[(4, ref('group_lhi_memo_admin'))]"/>
+    </record>
+
+    <record id="rule_lhi_approval_matrix_manager_company_scope" model="ir.rule">
+        <field name="name">Approval managers manage matrices in allowed companies</field>
+        <field name="model_id" ref="lhi_approval_matrix.model_lhi_approval_matrix"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[(4, ref('lhi_security.group_lhi_manager'))]"/>
+    </record>
+
+    <record id="rule_lhi_approval_matrix_line_manager_company_scope" model="ir.rule">
+        <field name="name">Approval managers manage matrix lines in allowed companies</field>
+        <field name="model_id" ref="lhi_approval_matrix.model_lhi_approval_matrix_line"/>
+        <field name="domain_force">[('matrix_id.company_id', 'in', company_ids)]</field>
+        <field name="groups" eval="[(4, ref('lhi_security.group_lhi_manager'))]"/>
+    </record>
+
+    <record id="rule_lhi_memo_approver_line_employee" model="ir.rule">
+        <field name="name">Employees see relevant memo approval participants</field>
+        <field name="model_id" ref="model_lhi_memo_approver_line"/>
+        <field name="domain_force">['|', '|', ('memo_id.requester_id', '=', user.id), ('memo_id.recipient_user_ids', 'in', [user.id]), ('memo_id.approver_line_ids.approver_user_id', '=', user.id)]</field>
+        <field name="groups" eval="[(4, ref('lhi_security.group_lhi_employee'))]"/>
+    </record>
+
+    <record id="rule_lhi_memo_approver_line_company" model="ir.rule">
+        <field name="name">Memo participant multi-company isolation</field>
+        <field name="model_id" ref="model_lhi_memo_approver_line"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        <field name="global" eval="True"/>
+    </record>
+
+    <record id="rule_lhi_memo_approver_line_department" model="ir.rule">
+        <field name="name">Department managers see department memo participants</field>
+        <field name="model_id" ref="model_lhi_memo_approver_line"/>
+        <field name="domain_force">[('memo_id.department_id', 'in', user.lhi_department_ids.ids)]</field>
+        <field name="groups" eval="[(4, ref('group_lhi_department_memo_manager'))]"/>
+    </record>
+
+    <record id="rule_lhi_memo_approver_line_records" model="ir.rule">
+        <field name="name">Records officers see approved memo participants</field>
+        <field name="model_id" ref="model_lhi_memo_approver_line"/>
+        <field name="domain_force">[('memo_id.state', 'in', ('final_signature_pending', 'completed'))]</field>
+        <field name="groups" eval="[(4, ref('group_lhi_records_officer'))]"/>
+    </record>
+
+    <record id="rule_lhi_memo_approver_line_admin" model="ir.rule">
+        <field name="name">Memo administrators see participant history</field>
+        <field name="model_id" ref="model_lhi_memo_approver_line"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[(4, ref('group_lhi_memo_admin'))]"/>
+    </record>
+
+    <record id="rule_lhi_approval_request_memo_scope" model="ir.rule">
+        <field name="name">Memo approval request participant isolation</field>
+        <field name="model_id" ref="lhi_approval_matrix.model_lhi_approval_request"/>
+        <field name="domain_force">['|', ('document_type', '!=', 'memo'), '&amp;', ('company_id', 'in', company_ids), '|', ('creator_id', '=', user.id), ('line_ids.approver_ids', 'in', [user.id])]</field>
+        <field name="global" eval="True"/>
+    </record>
+
+    <record id="rule_lhi_approval_request_line_memo_scope" model="ir.rule">
+        <field name="name">Memo approval line participant isolation</field>
+        <field name="model_id" ref="lhi_approval_matrix.model_lhi_approval_request_line"/>
+        <field name="domain_force">['|', ('request_id.document_type', '!=', 'memo'), '&amp;', ('request_id.company_id', 'in', company_ids), '|', ('request_id.creator_id', '=', user.id), ('approver_ids', 'in', [user.id])]</field>
+        <field name="global" eval="True"/>
+    </record>
+
+    <record id="rule_lhi_approval_history_memo_scope" model="ir.rule">
+        <field name="name">Memo approval history participant isolation</field>
+        <field name="model_id" ref="lhi_approval_matrix.model_lhi_approval_history"/>
+        <field name="domain_force">['|', ('request_line_id.request_id.document_type', '!=', 'memo'), '&amp;', ('request_line_id.request_id.company_id', 'in', company_ids), '|', ('request_line_id.request_id.creator_id', '=', user.id), ('request_line_id.approver_ids', 'in', [user.id])]</field>
+        <field name="global" eval="True"/>
+    </record>
+</odoo>

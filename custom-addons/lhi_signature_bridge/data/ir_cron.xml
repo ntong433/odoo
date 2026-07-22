@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="ir_cron_lhi_opensign_reconcile" model="ir.cron">
+        <field name="name">LHI Sign: Reconcile active requests</field>
+        <field name="model_id" ref="model_lhi_opensign_request"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_reconcile_requests()</field>
+        <field name="interval_number">15</field>
+        <field name="interval_type">minutes</field>
+        <field name="active">True</field>
+    </record>
+</odoo>

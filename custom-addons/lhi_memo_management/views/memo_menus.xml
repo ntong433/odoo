@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_lhi_memo_root" name="Memos" action="action_lhi_memo" sequence="35" groups="lhi_security.group_lhi_employee" web_icon="lhi_memo_management,static/description/icon.svg"/>
+    <menuitem id="menu_lhi_memo_raise" name="Raise Memo" parent="menu_lhi_memo_root" action="action_lhi_memo_raise" sequence="10" groups="lhi_security.group_lhi_employee"/>
+    <menuitem id="menu_lhi_memo_my_drafts" name="My Drafts" parent="menu_lhi_memo_root" action="action_lhi_memo_my_drafts" sequence="20" groups="lhi_security.group_lhi_employee"/>
+    <menuitem id="menu_lhi_memo_my_submitted" name="My Submitted Memos" parent="menu_lhi_memo_root" action="action_lhi_memo_my_submitted" sequence="30" groups="lhi_security.group_lhi_employee"/>
+    <menuitem id="menu_lhi_memo_awaiting_action" name="Awaiting My Action" parent="menu_lhi_memo_root" action="action_lhi_memo_awaiting_action" sequence="40" groups="lhi_security.group_lhi_employee"/>
+    <menuitem id="menu_lhi_memo_returned" name="Returned for Correction" parent="menu_lhi_memo_root" action="action_lhi_memo_returned" sequence="50" groups="lhi_security.group_lhi_employee"/>
+    <menuitem id="menu_lhi_memo_approved" name="Approved Memos" parent="menu_lhi_memo_root" action="action_lhi_memo_approved" sequence="60" groups="lhi_security.group_lhi_employee"/>
+    <menuitem id="menu_lhi_memo_completed" name="Signed and Completed Memos" parent="menu_lhi_memo_root" action="action_lhi_memo_completed" sequence="70" groups="lhi_security.group_lhi_employee"/>
+    <menuitem id="menu_lhi_memo_department" name="Department Memos" parent="menu_lhi_memo_root" action="action_lhi_memo_department" sequence="80" groups="lhi_memo_management.group_lhi_department_memo_manager"/>
+    <menuitem id="menu_lhi_memo_configuration" name="Configuration" parent="menu_lhi_memo_root" sequence="90" groups="lhi_memo_management.group_lhi_memo_admin"/>
+    <menuitem id="menu_lhi_memo_categories" name="Memo Categories" parent="menu_lhi_memo_configuration" action="action_lhi_memo_category" sequence="10" groups="lhi_memo_management.group_lhi_memo_admin"/>
+    <menuitem id="menu_lhi_memo_approval_routes" name="Memo Approval Routes" parent="menu_lhi_memo_configuration" action="action_lhi_memo_approval_matrix" sequence="20" groups="lhi_memo_management.group_lhi_memo_admin"/>
+</odoo>

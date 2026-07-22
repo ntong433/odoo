@@ -74,6 +74,14 @@ export class LhiSidebar extends Component {
         return this.state.apps;
     }
 
+    get generalApps() {
+        return this.state.apps.filter((app) => app.key === "memos");
+    }
+
+    get businessApps() {
+        return this.state.apps.filter((app) => app.key !== "memos");
+    }
+
     getIconProps(app) {
         // Fallback to getting icon from the xmlid mapping
         return getAppIconProps(app);

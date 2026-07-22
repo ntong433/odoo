@@ -34,21 +34,36 @@ QUnit.module("LHI Web Shell Navigation", () => {
 
     QUnit.test("stable XML IDs resolve the required sidebar icons", (assert) => {
         const mappings = {
-            "lhi_funding_opportunity.menu_lhi_funding_root": "fa fa-filter",
-            "lhi_purchase_request.menu_lhi_procurement_root": "fa fa-shopping-cart",
-            "lhi_base.menu_lhi_operations": "fa fa-cogs",
-            "lhi_asset_management.menu_lhi_asset": "fa fa-cubes",
+            "lhi_funding_opportunity.menu_lhi_funding_root": "pipeline.svg",
+            "lhi_purchase_request.menu_lhi_procurement_root": "procurement.svg",
+            "lhi_base.menu_lhi_operations": "operations.svg",
+            "lhi_asset_management.menu_lhi_asset": "assets.svg",
+            "lhi_memo_management.menu_lhi_memo_root": "memos.svg",
         };
-        for (const [xmlid, expectedClass] of Object.entries(mappings)) {
-            assert.deepEqual(getAppIconProps({ xmlid }), { type: "fa", class: expectedClass });
+        for (const [xmlid, expectedFilename] of Object.entries(mappings)) {
+            const icon = getAppIconProps({ xmlid });
+            assert.strictEqual(icon.type, "image");
+            assert.true(icon.src.endsWith(`/${expectedFilename}`));
         }
     });
 
     QUnit.test("unknown apps receive a supported fallback icon", (assert) => {
-        assert.deepEqual(getAppIconProps({ xmlid: "example.unknown" }), {
-            type: "fa",
-            class: "fa fa-circle-o",
-        });
+        const icon = getAppIconProps({ xmlid: "example.unknown" });
+        assert.strictEqual(icon.type, "image");
+        assert.true(icon.src.endsWith("/default.svg"));
+    });
+
+    QUnit.test("Memos is isolated in the General sidebar section", (assert) => {
+        const sidebar = Object.create(LhiSidebar.prototype);
+        sidebar.state = {
+            apps: [
+                { id: 10, key: "memos", name: "Memos" },
+                { id: 20, key: "procurement", name: "Procurement" },
+            ],
+        };
+
+        assert.deepEqual(sidebar.generalApps.map((app) => app.key), ["memos"]);
+        assert.deepEqual(sidebar.businessApps.map((app) => app.key), ["procurement"]);
     });
 
     QUnit.test("Sidebar navigation: child menu with action (MEAL)", async (assert) => {

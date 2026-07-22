@@ -49,6 +49,17 @@ class TestLhiDashboard(TransactionCase):
             self.assertFalse(menu_xmlid.isdigit())
             menu_xmlids.append(menu_xmlid)
         self.assertEqual(len(menu_xmlids), len(set(menu_xmlids)))
+        definitions = {item[0]: item for item in self.Widget._LHI_APP_DEFINITIONS}
+        self.assertIn('memos', definitions)
+        self.assertNotIn('signatures', definitions)
+        self.assertEqual(
+            definitions['memos'][2],
+            'lhi_memo_management.menu_lhi_memo_root',
+        )
+        self.assertIn(
+            'lhi_security.group_lhi_employee',
+            definitions['memos'][3],
+        )
 
     def test_accessible_apps_are_deduplicated_by_menu_xmlid(self):
         duplicate_xmlid = 'lhi_funding_opportunity.menu_lhi_funding_root'

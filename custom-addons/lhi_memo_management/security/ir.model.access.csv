@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lhi_memo_employee,lhi.memo.employee,model_lhi_memo,lhi_security.group_lhi_employee,1,1,1,0
+access_lhi_memo_admin,lhi.memo.admin,model_lhi_memo,lhi_memo_management.group_lhi_memo_admin,1,1,1,1
+access_lhi_memo_category_employee,lhi.memo.category.employee,model_lhi_memo_category,lhi_security.group_lhi_employee,1,0,0,0
+access_lhi_memo_category_admin,lhi.memo.category.admin,model_lhi_memo_category,lhi_memo_management.group_lhi_memo_admin,1,1,1,1
+access_lhi_memo_approver_line_employee,lhi.memo.approver.line.employee,model_lhi_memo_approver_line,lhi_security.group_lhi_employee,1,0,0,0
+access_lhi_memo_approver_line_admin,lhi.memo.approver.line.admin,model_lhi_memo_approver_line,lhi_memo_management.group_lhi_memo_admin,1,0,0,0
+access_lhi_memo_matrix_admin,lhi.approval.matrix.memo.admin,lhi_approval_matrix.model_lhi_approval_matrix,lhi_memo_management.group_lhi_memo_admin,1,1,1,1
+access_lhi_memo_matrix_line_admin,lhi.approval.matrix.line.memo.admin,lhi_approval_matrix.model_lhi_approval_matrix_line,lhi_memo_management.group_lhi_memo_admin,1,1,1,1
+access_lhi_document_item_memo_admin,lhi.document.item.memo.starter.admin,lhi_sharepoint_storage.model_lhi_document_item,lhi_memo_management.group_lhi_memo_admin,1,0,0,0

@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_memo_search" model="ir.ui.view">
+        <field name="name">lhi.memo.search</field>
+        <field name="model">lhi.memo</field>
+        <field name="arch" type="xml">
+            <search string="Search Memos">
+                <field name="name"/>
+                <field name="title"/>
+                <field name="subject"/>
+                <field name="requester_id"/>
+                <field name="department_id"/>
+                <field name="memo_category_id"/>
+                <field name="recipient_user_ids"/>
+                <filter name="my_memos" string="My Memos" domain="[('requester_id', '=', uid)]"/>
+                <filter name="my_action" string="Awaiting My Action" domain="[('current_recipient_id.user_id', '=', uid)]"/>
+                <filter name="returned" string="Returned" domain="[('state', '=', 'returned')]"/>
+                <filter name="completed" string="Completed" domain="[('state', '=', 'completed')]"/>
+                <separator/>
+                <filter name="group_department" string="Department" context="{'group_by': 'department_id'}"/>
+                <filter name="group_category" string="Category" context="{'group_by': 'memo_category_id'}"/>
+                <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_lhi_memo_list" model="ir.ui.view">
+        <field name="name">lhi.memo.list</field>
+        <field name="model">lhi.memo</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="state == 'rejected'" decoration-warning="state in ('returned', 'failed')" decoration-success="state == 'completed'">
+                <field name="name"/>
+                <field name="title"/>
+                <field name="memo_category_id"/>
+                <field name="requester_id"/>
+                <field name="department_id"/>
+                <field name="priority" widget="badge"/>
+                <field name="required_date" optional="show"/>
+                <field name="current_recipient_id" optional="show"/>
+                <field name="state" widget="badge"/>
+                <field name="create_date" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_memo_form" model="ir.ui.view">
+        <field name="name">lhi.memo.form</field>
+        <field name="model">lhi.memo</field>
+        <field name="arch" type="xml">
+            <form string="Memo">
+                <header>
+                    <button name="action_open_word" string="Open in Word" type="object" class="btn-primary" invisible="not has_word_document"/>
+                    <button name="action_refresh_document_status" string="Refresh Document Status" type="object" invisible="not source_docx_item_id or state in ('completed', 'cancelled', 'superseded')"/>
+                    <button name="action_preview_document" string="Preview Document" type="object" invisible="not has_word_document"/>
+                    <button name="action_retry_word_document" string="Retry Word Document" type="object" class="btn-primary" invisible="state != 'failed' or has_word_document"/>
+                    <button name="action_mark_ready" string="Finish Authoring" type="object" class="btn-primary" invisible="state not in ('authoring', 'returned', 'failed') or not has_word_document"/>
+                    <button name="action_prepare_and_sign" string="Prepare and Sign" type="object" class="btn-primary" invisible="state not in ('ready_for_preparation', 'returned', 'failed') or not has_word_document"/>
+                    <button name="action_continue_preparation" string="Continue Preparation" type="object" class="btn-primary" invisible="state != 'preparing' or not signature_request_id"/>
+                    <button name="action_sign_and_submit" string="Sign and Submit for Approval" type="object" class="btn-primary" invisible="state not in ('preparing', 'requester_signature_pending') or requester_id != uid"/>
+                    <button name="action_approve" string="Open Approval in LHI Sign" type="object" class="btn-primary" invisible="state not in ('under_approval', 'final_signature_pending') or current_recipient_user_id != uid"/>
+                    <button name="action_return_for_correction" string="Return for Correction" type="object" invisible="state not in ('under_approval', 'final_signature_pending') or current_recipient_user_id != uid" confirm="Return this memo for correction and supersede the active signature request?"/>
+                    <button name="action_reject" string="Reject in LHI Sign" type="object" invisible="state not in ('under_approval', 'final_signature_pending') or current_recipient_user_id != uid"/>
+                    <button name="action_track_approval" string="Track Approval" type="object" invisible="not approval_request_id"/>
+                    <button name="action_refresh_provider_status" string="Refresh Signature Status" type="object" invisible="not signature_request_id or state in ('completed', 'cancelled', 'superseded')"/>
+                    <button name="action_view_submitted_pdf" string="View Submitted PDF" type="object" invisible="not has_submitted_pdf"/>
+                    <button name="action_view_signed_memo" string="View Signed Memo" type="object" invisible="not has_signed_pdf"/>
+                    <button name="action_view_audit_certificate" string="View Audit Certificate" type="object" invisible="not has_certificate"/>
+                    <button name="action_withdraw" string="Withdraw" type="object" invisible="requester_id != uid or state in ('completed', 'rejected', 'expired', 'cancelled', 'superseded')" confirm="Withdraw this memo and cancel its active signature request?"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,authoring,ready_for_preparation,preparing,requester_signature_pending,under_approval,final_signature_pending,completed"/>
+                </header>
+                <sheet>
+                    <field name="has_word_document" invisible="1"/>
+                    <field name="has_submitted_pdf" invisible="1"/>
+                    <field name="has_signed_pdf" invisible="1"/>
+                    <field name="has_certificate" invisible="1"/>
+                    <field name="current_recipient_user_id" invisible="1"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name"/></h1>
+                        <h2><field name="title" placeholder="Memo title" readonly="state not in ('draft', 'authoring', 'returned', 'failed')"/></h2>
+                    </div>
+                    <group>
+                        <group string="Memo">
+                            <field name="memo_category_id" readonly="state not in ('draft', 'authoring', 'returned', 'failed')"/>
+                            <field name="subject" readonly="state not in ('draft', 'authoring', 'returned', 'failed')"/>
+                            <field name="priority" readonly="state not in ('draft', 'authoring', 'returned', 'failed')"/>
+                            <field name="draft_date"/>
+                            <field name="required_date" readonly="state not in ('draft', 'authoring', 'returned', 'failed')"/>
+                            <field name="expiry_date"/>
+                        </group>
+                        <group string="Ownership and Recipients">
+                            <field name="requester_id"/>
+                            <field name="requester_employee_id"/>
+                            <field name="department_id" readonly="state not in ('draft', 'authoring', 'returned', 'failed')"/>
+                            <field name="office_id" readonly="state not in ('draft', 'authoring', 'returned', 'failed')"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="recipient_user_ids" widget="many2many_tags" readonly="state not in ('draft', 'authoring', 'returned', 'failed')"/>
+                            <field name="recipient_description" readonly="state not in ('draft', 'authoring', 'returned', 'failed')"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="purpose" readonly="state not in ('draft', 'authoring', 'returned', 'failed')"/>
+                    </group>
+                    <group string="Work Context">
+                        <group>
+                            <field name="work_context" readonly="state not in ('draft', 'authoring', 'returned', 'failed')"/>
+                            <field name="project_id" invisible="work_context != 'project_linked'" readonly="state not in ('draft', 'authoring', 'returned', 'failed')"/>
+                            <field name="grant_id" invisible="work_context != 'grant_linked'" readonly="state not in ('draft', 'authoring', 'returned', 'failed')"/>
+                            <field name="procurement_reference_id" invisible="work_context != 'procurement_related'" readonly="state not in ('draft', 'authoring', 'returned', 'failed')"/>
+                        </group>
+                        <group>
+                            <field name="amount" readonly="state not in ('draft', 'authoring', 'returned', 'failed')"/>
+                            <field name="currency_id" invisible="not amount" readonly="state not in ('draft', 'authoring', 'returned', 'failed')"/>
+                        </group>
+                    </group>
+                    <group string="Decision Notes" invisible="state not in ('under_approval', 'final_signature_pending', 'returned', 'rejected')">
+                        <field name="return_reason" placeholder="Required before Return for Correction" readonly="state in ('returned', 'rejected', 'completed')"/>
+                        <field name="rejection_reason" placeholder="Explain the rejection, then complete the decline in LHI Sign" readonly="state in ('returned', 'rejected', 'completed')"/>
+                    </group>
+                    <notebook>
+                        <page string="Approval Timeline">
+                            <field name="approver_line_ids" readonly="1">
+                                <list>
+                                    <field name="cycle_number"/>
+                                    <field name="sequence"/>
+                                    <field name="stage_name"/>
+                                    <field name="approver_user_id"/>
+                                    <field name="participant_role"/>
+                                    <field name="state" widget="badge"/>
+                                    <field name="acted_at"/>
+                                    <field name="comments"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Document Status">
+                            <group>
+                                <field name="source_docx_web_url" widget="url"/>
+                                <field name="provider_status"/>
+                                <field name="preparation_completed"/>
+                                <field name="requester_signature_completed"/>
+                                <field name="final_signature_completed"/>
+                                <field name="current_recipient_id"/>
+                                <field name="submitted_at"/>
+                                <field name="requester_signed_at"/>
+                                <field name="approved_at"/>
+                                <field name="final_signed_at"/>
+                                <field name="completed_at"/>
+                            </group>
+                        </page>
+                        <page string="Technical Information" groups="lhi_signature_bridge.group_lhi_signature_admin">
+                            <group>
+                                <group string="SharePoint">
+                                    <field name="source_docx_item_id"/>
+                                    <field name="source_docx_version_id"/>
+                                    <field name="source_docx_etag"/>
+                                    <field name="source_pdf_item_id"/>
+                                    <field name="source_pdf_hash"/>
+                                    <field name="signed_pdf_item_id"/>
+                                    <field name="signed_pdf_hash"/>
+                                    <field name="certificate_item_id"/>
+                                </group>
+                                <group string="LHI Sign">
+                                    <field name="signature_request_id"/>
+                                    <field name="provider_request_id"/>
+                                    <field name="provider_preparation_url"/>
+                                    <field name="last_sync_at"/>
+                                    <field name="integration_error_code"/>
+                                    <field name="integration_error_message"/>
+                                    <field name="approval_request_id"/>
+                                    <field name="related_model"/>
+                                    <field name="related_record_id"/>
+                                </group>
+                            </group>
+                            <field name="signature_request_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="provider_request_id"/>
+                                    <field name="source_pdf_hash"/>
+                                    <field name="status"/>
+                                    <field name="create_date"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Preparation Access" groups="lhi_memo_management.group_lhi_memo_admin">
+                            <field name="preparation_officer_ids" widget="many2many_tags"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_lhi_memo" model="ir.actions.act_window">
+        <field name="name">Memos</field>
+        <field name="res_model">lhi.memo</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_lhi_memo_search"/>
+    </record>
+    <record id="action_lhi_memo_raise" model="ir.actions.act_window">
+        <field name="name">Raise Memo</field>
+        <field name="res_model">lhi.memo</field>
+        <field name="view_mode">form</field>
+        <field name="target">current</field>
+    </record>
+    <record id="action_lhi_memo_my_drafts" model="ir.actions.act_window">
+        <field name="name">My Drafts</field>
+        <field name="res_model">lhi.memo</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('requester_id', '=', uid), ('state', 'in', ('draft', 'authoring', 'ready_for_preparation', 'preparing', 'requester_signature_pending', 'failed'))]</field>
+    </record>
+    <record id="action_lhi_memo_my_submitted" model="ir.actions.act_window">
+        <field name="name">My Submitted Memos</field>
+        <field name="res_model">lhi.memo</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('requester_id', '=', uid), ('state', 'in', ('submitted', 'under_approval', 'final_signature_pending'))]</field>
+    </record>
+    <record id="action_lhi_memo_awaiting_action" model="ir.actions.act_window">
+        <field name="name">Awaiting My Action</field>
+        <field name="res_model">lhi.memo</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('current_recipient_id.user_id', '=', uid), ('state', 'in', ('under_approval', 'final_signature_pending'))]</field>
+    </record>
+    <record id="action_lhi_memo_returned" model="ir.actions.act_window">
+        <field name="name">Returned for Correction</field>
+        <field name="res_model">lhi.memo</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('requester_id', '=', uid), ('state', '=', 'returned')]</field>
+    </record>
+    <record id="action_lhi_memo_approved" model="ir.actions.act_window">
+        <field name="name">Approved Memos</field>
+        <field name="res_model">lhi.memo</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('approval_request_id.state', '=', 'approved')]</field>
+    </record>
+    <record id="action_lhi_memo_completed" model="ir.actions.act_window">
+        <field name="name">Signed and Completed Memos</field>
+        <field name="res_model">lhi.memo</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('state', '=', 'completed')]</field>
+    </record>
+    <record id="action_lhi_memo_department" model="ir.actions.act_window">
+        <field name="name">Department Memos</field>
+        <field name="res_model">lhi.memo</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_group_department': 1}</field>
+    </record>
+</odoo>

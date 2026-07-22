@@ -1,3 +1,6 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_lhi_opensign_request_user,lhi.opensign.request.user,model_lhi_opensign_request,base.group_user,1,1,1,0
-access_lhi_opensign_request_admin,lhi.opensign.request.admin,model_lhi_opensign_request,base.group_erp_manager,1,1,1,1
+access_lhi_opensign_request_user,lhi.opensign.request.legacy.user,model_lhi_opensign_request,lhi_signature_bridge.group_lhi_signature_admin,1,1,1,0
+access_lhi_opensign_request_admin,lhi.opensign.request.admin,model_lhi_opensign_request,lhi_signature_bridge.group_lhi_signature_admin,1,1,1,0
+access_lhi_opensign_recipient_admin,lhi.opensign.recipient.admin,model_lhi_opensign_recipient,lhi_signature_bridge.group_lhi_signature_admin,1,1,1,0
+access_lhi_opensign_configuration_admin,lhi.opensign.configuration.admin,model_lhi_opensign_configuration,lhi_signature_bridge.group_lhi_signature_admin,1,1,1,0
+access_lhi_opensign_webhook_event_admin,lhi.opensign.webhook.event.admin,model_lhi_opensign_webhook_event,lhi_signature_bridge.group_lhi_signature_admin,1,1,0,0

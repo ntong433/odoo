@@ -34,14 +34,18 @@ class LhiPurchaseOrderSignatureInherit(models.Model):
                 'lhi_signature_bridge.action_report_lhi_purchase_order',
                 res_ids=[po.id],
             )
-            req = self.env['lhi.opensign.request'].create({
+            # The bridge is a protected technical model. Elevate only the
+            # deterministic request creation after the purchase-order access
+            # checks above; normal users never receive direct request access.
+            req = self.env['lhi.opensign.request'].sudo().create({
                 'res_model': self._name,
                 'res_id': po.id,
+                'company_id': po.company_id.id,
                 'source_pdf': base64.b64encode(pdf_content),
                 'source_pdf_hash': hashlib.sha256(pdf_content).hexdigest(),
                 'signatories': '{"signatories": [{"email": "vendor@example.com", "role": "Vendor"}, {"email": "director@lhi.org", "role": "Director"}]}',
             })
-            req.action_send()
+            req.sudo().action_send()
             po.opensign_request_id = req.id
             if req.status != 'sent':
                 po.message_post(
@@ -82,6 +86,6 @@ class LhiPurchaseOrderSignatureInherit(models.Model):
     def action_cancel_signature(self):
         for po in self:
             if po.opensign_request_id and po.signature_status != 'signed':
-                po.opensign_request_id.action_cancel()
+                po.opensign_request_id.sudo().action_cancel()
             po.signature_status = 'cancelled'
             po.message_post(body=_("Signature process was cancelled. Commercial fields are unlocked if PO state permits."))

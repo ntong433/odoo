@@ -40,8 +40,24 @@
                     <span class="lhi-sidebar__label">Dashboard</span>
                 </a>
 
-                <div class="lhi-sidebar__section-label">Apps</div>
-                <t t-foreach="apps" t-as="app" t-key="app.id">
+                <div t-if="generalApps.length" class="lhi-sidebar__section-label">General</div>
+                <t t-foreach="generalApps" t-as="app" t-key="app.id">
+                    <a t-attf-class="lhi-sidebar__item {{ state.activeAppId === app.id ? 'lhi-sidebar__item--active' : '' }}"
+                       t-on-click="() => this.onAppClick(app)"
+                       t-att-title="app.name">
+                        <t t-set="icon" t-value="getIconProps(app)"/>
+                        <t t-if="icon.type === 'fa'">
+                            <i t-attf-class="{{icon.class}} lhi-sidebar__icon"></i>
+                        </t>
+                        <t t-else="">
+                            <img t-att-src="icon.src" class="lhi-sidebar__icon lhi-sidebar__icon-img" alt=""/>
+                        </t>
+                        <span class="lhi-sidebar__label" t-esc="app.name"></span>
+                    </a>
+                </t>
+
+                <div t-if="businessApps.length" class="lhi-sidebar__section-label">Apps</div>
+                <t t-foreach="businessApps" t-as="app" t-key="app.id">
                     <a t-attf-class="lhi-sidebar__item {{ state.activeAppId === app.id ? 'lhi-sidebar__item--active' : '' }}"
                        t-on-click="() => this.onAppClick(app)"
                        t-att-title="app.name">

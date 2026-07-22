@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Memos">
+  <rect width="64" height="64" rx="12" fill="#176b4d"/>
+  <path d="M17 12h23l9 9v31H17z" fill="#fff"/>
+  <path d="M40 12v10h9" fill="#d8eee6"/>
+  <path d="M24 30h18M24 37h18M24 44h12" stroke="#176b4d" stroke-width="3" stroke-linecap="round"/>
+</svg>

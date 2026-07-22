@@ -4,81 +4,217 @@
         <field name="name">lhi.opensign.request.form</field>
         <field name="model">lhi.opensign.request</field>
         <field name="arch" type="xml">
-            <form string="OpenSign Request">
+            <form string="LHI Sign Request" create="0">
                 <header>
-                    <button name="action_send" string="Send" type="object" class="oe_highlight" invisible="status != 'draft'"/>
-                    <button name="action_cancel" string="Cancel" type="object" invisible="status in ('completed', 'cancelled')"/>
+                    <button name="action_send" string="Create Provider Draft" type="object" class="oe_highlight" invisible="status != 'draft'"/>
+                    <button name="action_confirm_preparation" string="Validate Preparation" type="object" invisible="status not in ('preparing', 'failed') or not provider_request_id"/>
+                    <button name="action_reset_uncertain_creation" string="Reset Uncertain Draft" type="object" invisible="status != 'failed' or not provider_creation_uncertain or provider_request_id" confirm="Confirm in LHI Sign that no provider document was created before resetting. Retrying without that check can create a duplicate envelope."/>
+                    <button name="action_reconcile" string="Reconcile" type="object" invisible="not provider_request_id or status in ('completed', 'cancelled', 'superseded')"/>
+                    <button name="action_cancel" string="Cancel" type="object" invisible="status in ('completed', 'cancelled', 'superseded')"/>
                     <button name="action_download_source_document" string="Open Source" type="object" invisible="not source_stored"/>
                     <button name="action_download_signed_document" string="Open Signed PDF" type="object" invisible="not signed_stored"/>
                     <button name="action_download_audit_certificate" string="Open Certificate" type="object" invisible="not certificate_stored"/>
-                    <field name="status" widget="statusbar" statusbar_visible="draft,sent,completed"/>
+                    <field name="status" widget="statusbar" statusbar_visible="draft,preparing,requester_signature_pending,in_progress,completed"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
                         <h1><field name="name" readonly="1"/></h1>
                     </div>
                     <group>
-                        <group>
-                            <field name="res_model"/>
-                            <field name="res_id"/>
+                        <group string="Source">
+                            <field name="res_model" readonly="1"/>
+                            <field name="res_id" readonly="1"/>
+                            <field name="company_id" readonly="1" groups="base.group_multi_company"/>
+                            <field name="source_document_item_id" readonly="1"/>
+                            <field name="source_pdf_hash"/>
                             <field name="sequence_type"/>
                             <field name="expiry_date"/>
                         </group>
-                        <group>
-                            <field name="source_pdf" filename="source_pdf_name"/>
-                            <field name="source_pdf_hash"/>
-                            <field name="signed_pdf"/>
-                            <field name="signed_pdf_hash"/>
-                            <field name="audit_certificate"/>
-                            <field name="source_stored" invisible="1"/>
-                            <field name="signed_stored" invisible="1"/>
-                            <field name="certificate_stored" invisible="1"/>
-                            <field name="source_document_item_id" readonly="1" groups="lhi_security.group_lhi_erp_admin"/>
-                            <field name="signed_document_item_id" readonly="1" groups="lhi_security.group_lhi_erp_admin"/>
-                            <field name="certificate_document_item_id" readonly="1" groups="lhi_security.group_lhi_erp_admin"/>
+                        <group string="Provider">
+                            <field name="configuration_id"/>
+                            <field name="provider_request_id"/>
+                            <field name="provider_status"/>
+                            <field name="preparation_completed"/>
+                            <field name="provider_creation_uncertain"/>
+                            <field name="current_recipient_id"/>
+                            <field name="last_sync_at"/>
+                            <field name="retry_count"/>
                         </group>
                     </group>
                     <notebook>
-                        <page string="Signatories">
-                            <field name="signatories"/>
+                        <page string="Recipients">
+                            <field name="recipient_ids" readonly="1">
+                                <list>
+                                    <field name="sequence"/>
+                                    <field name="name"/>
+                                    <field name="email"/>
+                                    <field name="participant_role"/>
+                                    <field name="provider_role"/>
+                                    <field name="status"/>
+                                    <field name="completed_at"/>
+                                </list>
+                            </field>
                         </page>
-                        <page string="Logs &amp; Callbacks">
+                        <page string="Documents">
                             <group>
-                                <field name="retry_count"/>
-                                <field name="error_message"/>
+                                <field name="signed_document_item_id"/>
+                                <field name="signed_pdf_hash"/>
+                                <field name="certificate_document_item_id"/>
+                                <field name="source_stored" invisible="1"/>
+                                <field name="signed_stored" invisible="1"/>
+                                <field name="certificate_stored" invisible="1"/>
                             </group>
+                        </page>
+                        <page string="Technical Log">
+                            <field name="idempotency_key"/>
+                            <field name="supersedes_request_id"/>
+                            <field name="superseded_by_request_id"/>
+                            <field name="error_message"/>
                             <field name="callback_logs"/>
                         </page>
                     </notebook>
                 </sheet>
-                <div class="oe_chatter">
-                    <field name="message_follower_ids"/>
-                    <field name="activity_ids"/>
-                    <field name="message_ids"/>
-                </div>
+                <chatter/>
             </form>
         </field>
     </record>
 
-    <record id="view_lhi_opensign_request_tree" model="ir.ui.view">
-        <field name="name">lhi.opensign.request.tree</field>
+    <record id="view_lhi_opensign_request_list" model="ir.ui.view">
+        <field name="name">lhi.opensign.request.list</field>
         <field name="model">lhi.opensign.request</field>
         <field name="arch" type="xml">
-            <list string="OpenSign Requests">
+            <list string="LHI Sign Requests" create="0">
                 <field name="name"/>
                 <field name="res_model"/>
+                <field name="provider_request_id"/>
                 <field name="status" widget="badge"/>
+                <field name="provider_status"/>
                 <field name="expiry_date"/>
+                <field name="last_sync_at"/>
             </list>
         </field>
     </record>
-    
+
+    <record id="view_lhi_opensign_configuration_form" model="ir.ui.view">
+        <field name="name">lhi.opensign.configuration.form</field>
+        <field name="model">lhi.opensign.configuration</field>
+        <field name="arch" type="xml">
+            <form string="LHI Sign Configuration">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="company_id"/>
+                            <field name="active"/>
+                            <field name="api_base_url" placeholder="https://sign.example.org/api/v1.2"/>
+                            <field name="api_token_parameter"/>
+                            <field name="webhook_secret_parameter"/>
+                        </group>
+                        <group>
+                            <field name="allowed_preparation_hosts"/>
+                            <field name="allowed_download_hosts"/>
+                            <field name="timeout_seconds"/>
+                            <field name="maximum_download_mb"/>
+                            <field name="maximum_retries"/>
+                            <field name="backoff_base_seconds"/>
+                            <field name="last_success_at" readonly="1"/>
+                            <field name="last_error" readonly="1"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="alert">
+                        API and webhook secrets are read from protected environment variables or system parameters and are never displayed on this form.
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_opensign_configuration_list" model="ir.ui.view">
+        <field name="name">lhi.opensign.configuration.list</field>
+        <field name="model">lhi.opensign.configuration</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="company_id"/>
+                <field name="api_base_url"/>
+                <field name="active"/>
+                <field name="last_success_at"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_opensign_webhook_event_list" model="ir.ui.view">
+        <field name="name">lhi.opensign.webhook.event.list</field>
+        <field name="model">lhi.opensign.webhook.event</field>
+        <field name="arch" type="xml">
+            <list create="0" edit="0" delete="0">
+                <field name="received_at"/>
+                <field name="provider_event_id"/>
+                <field name="request_id"/>
+                <field name="event_type"/>
+                <field name="state" widget="badge"/>
+                <field name="processed_at"/>
+                <field name="safe_message"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_opensign_webhook_event_form" model="ir.ui.view">
+        <field name="name">lhi.opensign.webhook.event.form</field>
+        <field name="model">lhi.opensign.webhook.event</field>
+        <field name="arch" type="xml">
+            <form create="0" edit="0" delete="0">
+                <sheet>
+                    <group>
+                        <field name="provider_event_id"/>
+                        <field name="request_id"/>
+                        <field name="company_id"/>
+                        <field name="event_type"/>
+                        <field name="state"/>
+                        <field name="provider_timestamp"/>
+                        <field name="received_at"/>
+                        <field name="processed_at"/>
+                        <field name="payload_digest"/>
+                        <field name="safe_message"/>
+                    </group>
+                    <notebook>
+                        <page string="Restricted Raw Provider Payload">
+                            <field name="raw_payload" widget="text"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
     <record id="action_lhi_opensign_request" model="ir.actions.act_window">
-        <field name="name">OpenSign Requests</field>
+        <field name="name">Signature Requests</field>
         <field name="res_model">lhi.opensign.request</field>
         <field name="view_mode">list,form</field>
     </record>
 
-    <menuitem id="menu_lhi_opensign" name="OpenSign Integration" parent="lhi_purchase_request.menu_lhi_procurement_root" action="action_lhi_opensign_request" sequence="80"/>
-    <menuitem id="menu_lhi_opensign_requests" name="Signature Requests" parent="menu_lhi_opensign" action="action_lhi_opensign_request" sequence="10"/>
+    <record id="action_lhi_opensign_failed_request" model="ir.actions.act_window">
+        <field name="name">Failed Signature Requests</field>
+        <field name="res_model">lhi.opensign.request</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('status', '=', 'failed')]</field>
+    </record>
+
+    <record id="action_lhi_opensign_configuration" model="ir.actions.act_window">
+        <field name="name">Provider Configuration</field>
+        <field name="res_model">lhi.opensign.configuration</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_lhi_opensign_webhook_event" model="ir.actions.act_window">
+        <field name="name">Webhook Events</field>
+        <field name="res_model">lhi.opensign.webhook.event</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_lhi_opensign" name="Signature Administration" sequence="95" groups="lhi_signature_bridge.group_lhi_signature_admin" web_icon="lhi_web_shell,static/src/img/module_icons/signatures.svg"/>
+    <menuitem id="menu_lhi_opensign_requests" name="Signature Requests" parent="menu_lhi_opensign" action="action_lhi_opensign_request" sequence="10" groups="lhi_signature_bridge.group_lhi_signature_admin"/>
+    <menuitem id="menu_lhi_opensign_failed_requests" name="Failed Requests" parent="menu_lhi_opensign" action="action_lhi_opensign_failed_request" sequence="20" groups="lhi_signature_bridge.group_lhi_signature_admin"/>
+    <menuitem id="menu_lhi_opensign_webhooks" name="Webhook Events" parent="menu_lhi_opensign" action="action_lhi_opensign_webhook_event" sequence="30" groups="lhi_signature_bridge.group_lhi_signature_admin"/>
+    <menuitem id="menu_lhi_opensign_configuration" name="Configuration" parent="menu_lhi_opensign" action="action_lhi_opensign_configuration" sequence="40" groups="lhi_signature_bridge.group_lhi_signature_admin"/>
 </odoo>

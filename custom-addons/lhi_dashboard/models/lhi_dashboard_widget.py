@@ -42,9 +42,9 @@ class LhiDashboardWidget(models.Model):
         ('inventory', 'Inventory', 'stock.menu_stock_root', ('lhi_security.group_lhi_store_officer',), ('INVENTORY', 'STORE')),
         ('fleet', 'Fleet', 'fleet.menu_root', ('lhi_security.group_lhi_fleet_officer',), ('FLEET', 'OPERATIONS')),
         ('approvals', 'Approvals', 'lhi_approval_matrix.menu_lhi_my_pending_approvals', ('lhi_security.group_lhi_executive_approver', 'lhi_security.group_lhi_manager'), ('APPROVALS',)),
+        ('memos', 'Memos', 'lhi_memo_management.menu_lhi_memo_root', ('lhi_security.group_lhi_employee',), ()),
         ('programmes', 'Programs & Grants', 'lhi_base.menu_lhi_root', ('lhi_programme_management.group_lhi_programmes_viewer', 'lhi_security.group_lhi_project_officer', 'lhi_security.group_lhi_project_manager', 'lhi_security.group_lhi_programme_director'), ('PROJECTS', 'GRANTS', 'FUNDING', 'PIPELINE', 'PROGRAMME', 'PROGRAMMES')),
         ('hr', 'Human Resources', 'hr.menu_hr_root', ('lhi_security.group_lhi_hr_officer',), ('HR', 'HUMAN_RESOURCES')),
-        ('signatures', 'Signatures', 'lhi_signature_bridge.menu_lhi_opensign', ('lhi_security.group_lhi_procurement_officer', 'lhi_security.group_lhi_procurement_manager'), ('LEGAL', 'PROCUREMENT')),
         ('media', 'Media & Communications', 'lhi_media_communications.menu_lhi_media_root', ('lhi_media_communications.group_lhi_media_viewer', 'lhi_media_communications.group_lhi_media_requester', 'lhi_media_communications.group_lhi_media_officer', 'lhi_media_communications.group_lhi_media_reviewer', 'lhi_media_communications.group_lhi_media_manager'), ('MEDIA',)),
         ('reports', 'Reports', 'lhi_reporting_hub.menu_lhi_reporting_hub_root', ('lhi_security.group_lhi_manager', 'lhi_security.group_lhi_programme_director', 'lhi_security.group_lhi_finance_reviewer'), ('REPORTS', 'REPORTING', 'ANALYTICS')),
         ('settings', 'Settings', 'base.menu_administration', ('base.group_system',), ()),
@@ -60,6 +60,7 @@ class LhiDashboardWidget(models.Model):
             'lhi_dashboard.my_approvals',
             'lhi_dashboard.notifications',
             'lhi_dashboard.accessible_modules',
+            'lhi_dashboard.quick_actions',
         }
         
         result = []
@@ -179,7 +180,7 @@ class LhiDashboardWidget(models.Model):
                         'name': menu.name,
                         'menu_id': menu.id,
                         'xmlid': menu_xmlid,
-                        'icon_url': f'/lhi_web_shell/static/src/img/module_icons/operations.svg',
+                        'icon_url': '/lhi_web_shell/static/src/img/module_icons/operations.svg',
                     })
 
         unique_apps = self._deduplicate_dashboard_apps(apps)
@@ -234,6 +235,22 @@ class LhiDashboardWidget(models.Model):
                 'res_model': 'lhi.approval.request',
                 'view_mode': 'form',
                 'target': 'new'
+            })
+
+        if (
+            'lhi.memo' in self.env
+            and self.env.user.has_group('lhi_security.group_lhi_employee')
+            and self.env['lhi.memo'].check_access_rights('create', raise_exception=False)
+        ):
+            actions.append({
+                'id': 'raise_memo',
+                'name': 'Raise Memo',
+                'description': 'Start a Word-based internal memo',
+                'icon': 'fa-file-word-o',
+                'action_type': 'ir.actions.act_window',
+                'res_model': 'lhi.memo',
+                'view_mode': 'form',
+                'target': 'current',
             })
             
         return actions

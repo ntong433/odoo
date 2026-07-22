@@ -70,20 +70,56 @@ class LhiApprovalRequest(models.Model):
         if self.state not in ['draft', 'returned']:
             raise UserError(_("Only draft or returned requests can be submitted."))
 
-        # Find matching matrix
-        matrix = self.env['lhi.approval.matrix'].find_matching_matrix(
-            document_type=self.document_type,
-            amount=self.amount,
-            currency_id=self.currency_id.id,
-            department_id=self.department_id.id,
-            office_id=self.office_id.id,
-            donor_id=self.donor_id.id,
-            award_id=self.award_id.id,
-            project_id=self.project_id.id,
-            funding_source_id=self.funding_source_id.id,
-            procurement_method=self.procurement_method,
-            company_id=self.company_id.id
-        )
+        self.action_prepare()
+        return self.action_activate()
+
+    def _lhi_resolve_matrix(self):
+        """Resolve a matrix, allowing a source model to make a constrained choice.
+
+        The source hook is useful for document categories (for example, a memo
+        category) which select an existing matrix.  It deliberately receives the
+        request record and must return an active matrix for the same company and
+        document type.  Arbitrary client context cannot force a matrix.
+        """
+        self.ensure_one()
+        source = self.env[self.res_model].browse(self.res_id).exists()
+        matrix = self.env['lhi.approval.matrix']
+        if source and hasattr(source, '_lhi_approval_matrix_for_request'):
+            matrix = source._lhi_approval_matrix_for_request(self)
+        if not matrix:
+            matrix = self.env['lhi.approval.matrix'].find_matching_matrix(
+                document_type=self.document_type,
+                amount=self.amount,
+                currency_id=self.currency_id.id,
+                department_id=self.department_id.id,
+                office_id=self.office_id.id,
+                donor_id=self.donor_id.id,
+                award_id=self.award_id.id,
+                project_id=self.project_id.id,
+                funding_source_id=self.funding_source_id.id,
+                procurement_method=self.procurement_method,
+                company_id=self.company_id.id,
+            )
+        if matrix and (
+            not matrix.active
+            or matrix.company_id != self.company_id
+            or matrix.document_type != self.document_type
+        ):
+            raise UserError(_("The selected approval matrix is not valid for this request."))
+        return matrix
+
+    def action_prepare(self):
+        """Snapshot the approval route without starting active approval.
+
+        Signature-backed documents need to know the full recipient order while
+        the provider draft is prepared, but the approval clock must only start
+        after the requester's first signature is confirmed.
+        """
+        self.ensure_one()
+        if self.state not in ['draft', 'returned']:
+            raise UserError(_("Only draft or returned requests can be prepared."))
+
+        matrix = self._lhi_resolve_matrix()
 
         if not matrix:
             raise UserError(_("No matching approval matrix found for the selected criteria and amount."))
@@ -118,12 +154,20 @@ class LhiApprovalRequest(models.Model):
             })
 
         self.env['lhi.approval.request.line'].sudo().create(line_vals)
-        self.write({
-            'matrix_id': matrix.id,
-            'state': 'under_review',
-        })
+        self.write({'matrix_id': matrix.id})
+        self.message_post(body=_("Approval route prepared using matrix: %s") % matrix.name)
+        return True
+
+    def action_activate(self):
+        """Start a previously snapshotted route."""
+        self.ensure_one()
+        if self.state not in ['draft', 'returned']:
+            raise UserError(_("Only a draft or returned request can be activated."))
+        if not self.matrix_id or not self.line_ids:
+            raise UserError(_("Prepare the approval route before activating it."))
+        self.write({'state': 'under_review'})
         self._update_source_document('under_review')
-        self.message_post(body=_("Approval Request submitted using matrix: %s") % matrix.name)
+        self.message_post(body=_("Approval Request submitted using matrix: %s") % self.matrix_id.name)
 
         # Log audit event
         self.env['lhi.audit.log'].create_event(
@@ -132,6 +176,7 @@ class LhiApprovalRequest(models.Model):
             res_id=self.id,
             description=_("Approval Request submitted: %s") % self.name
         )
+        return True
 
     def action_approve(self, notes=None):
         self.ensure_one()

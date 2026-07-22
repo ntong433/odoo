@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="memo_category_general" model="lhi.memo.category">
+            <field name="name">General Internal Memo</field>
+            <field name="code">GENERAL</field>
+            <field name="sequence">10</field>
+        </record>
+        <record id="memo_category_procurement" model="lhi.memo.category">
+            <field name="name">Procurement Request Memo</field>
+            <field name="code">PROCUREMENT</field>
+            <field name="sequence">20</field>
+        </record>
+        <record id="memo_category_payment" model="lhi.memo.category">
+            <field name="name">Payment Approval Memo</field>
+            <field name="code">PAYMENT</field>
+            <field name="sequence">30</field>
+        </record>
+        <record id="memo_category_operations" model="lhi.memo.category">
+            <field name="name">Operations Memo</field>
+            <field name="code">OPERATIONS</field>
+            <field name="sequence">40</field>
+        </record>
+        <record id="memo_category_it" model="lhi.memo.category">
+            <field name="name">IT Request Memo</field>
+            <field name="code">IT</field>
+            <field name="sequence">50</field>
+        </record>
+        <record id="memo_category_hr" model="lhi.memo.category">
+            <field name="name">HR Memo</field>
+            <field name="code">HR</field>
+            <field name="sequence">60</field>
+        </record>
+        <record id="memo_category_field_activity" model="lhi.memo.category">
+            <field name="name">Field Activity Memo</field>
+            <field name="code">FIELD</field>
+            <field name="sequence">70</field>
+        </record>
+        <record id="memo_category_travel" model="lhi.memo.category">
+            <field name="name">Travel Memo</field>
+            <field name="code">TRAVEL</field>
+            <field name="sequence">80</field>
+        </record>
+        <record id="memo_category_project" model="lhi.memo.category">
+            <field name="name">Project Memo</field>
+            <field name="code">PROJECT</field>
+            <field name="sequence">90</field>
+        </record>
+        <record id="memo_category_grant" model="lhi.memo.category">
+            <field name="name">Grant Memo</field>
+            <field name="code">GRANT</field>
+            <field name="sequence">100</field>
+        </record>
+        <record id="memo_category_other" model="lhi.memo.category">
+            <field name="name">Other</field>
+            <field name="code">OTHER</field>
+            <field name="sequence">110</field>
+        </record>
+    </data>
+</odoo>

@@ -134,6 +134,22 @@
         </field>
     </record>
 
+    <record id="view_lhi_media_activity_calendar" model="ir.ui.view">
+        <field name="name">lhi.media.activity.calendar</field>
+        <field name="model">lhi.media.activity</field>
+        <field name="priority" eval="10"/>
+        <field name="arch" type="xml">
+            <calendar string="Media Activities" date_start="start_date" date_stop="end_date" color="owner_id" mode="month" quick_create="false" event_open_popup="true">
+                <field name="name"/>
+                <field name="activity_type"/>
+                <field name="owner_id"/>
+                <field name="project_id"/>
+                <field name="location"/>
+                <field name="state"/>
+            </calendar>
+        </field>
+    </record>
+
     <record id="action_lhi_media_activity" model="ir.actions.act_window">
         <field name="name">Media Activities</field>
         <field name="res_model">lhi.media.activity</field>

@@ -93,33 +93,84 @@ export class LhiSidebar extends Component {
         });
     }
 
-    onAppClick(app) {
-        if (app.id === 'dashboard') {
-            this.state.activeAppId = 'dashboard';
-            // Trigger Odoo's action manager to go to home or dashboard action.
-            this.actionService.doAction("lhi_dashboard.action_lhi_dashboard");
-            return;
+    _findFirstActionableMenu(menu) {
+        if (!menu) {
+            return null;
         }
 
-        this.state.activeAppId = app.menu_id || app.id;
-        
-        // Let the actionService resolve the menu's action dynamically without us reading ir.actions directly
-        const actionTarget = app.xmlid || app.menu_id;
-        if (actionTarget) {
-            this.actionService.doAction(actionTarget, {
-                clearBreadcrumbs: true,
-            });
-            // Update the menu service state silently if possible
-            const nativeMenuApp = this.menuService.getApps().find(a => a.id === app.menu_id);
-            if (nativeMenuApp) {
-                this.menuService.selectMenu(nativeMenuApp);
+        if (menu.actionID) {
+            return menu;
+        }
+
+        for (const childId of menu.children || []) {
+            const child = this.menuService.getMenu(childId);
+            const target = this._findFirstActionableMenu(child);
+
+            if (target) {
+                return target;
             }
         }
 
-        // Handle mobile sidebar auto-close
-        const webClient = document.querySelector(".o_web_client");
+        return null;
+    }
+
+    async onAppClick(app) {
+        if (app.id === "dashboard" || app.key === "dashboard") {
+            this.state.activeAppId = "dashboard";
+
+            await this.actionService.doAction(
+                "lhi_dashboard.action_lhi_dashboard",
+                {
+                    clearBreadcrumbs: true,
+                }
+            );
+
+            return;
+        }
+
+        if (!app.menu_id) {
+            console.error(
+                "LHI Sidebar entry has no menu ID.",
+                app
+            );
+            return;
+        }
+
+        const configuredMenu = this.menuService.getMenu(app.menu_id);
+
+        if (!configuredMenu) {
+            console.error(
+                "LHI Sidebar menu is unavailable to the current user.",
+                app.menu_id
+            );
+            return;
+        }
+
+        const targetMenu =
+            this._findFirstActionableMenu(configuredMenu);
+
+        if (!targetMenu) {
+            console.error(
+                "LHI Sidebar menu has no actionable visible child.",
+                app.menu_id
+            );
+            return;
+        }
+
+        this.state.activeAppId =
+            configuredMenu.appID ||
+            targetMenu.appID ||
+            app.menu_id;
+
+        await this.menuService.selectMenu(targetMenu);
+
+        const webClient =
+            document.querySelector(".o_web_client");
+
         if (webClient && window.innerWidth <= 992) {
-            webClient.classList.remove("lhi-sidebar-open");
+            webClient.classList.remove(
+                "lhi-sidebar-open"
+            );
         }
     }
 }

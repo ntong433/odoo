@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'LHI SharePoint Sync & Scale Controls',
-    'version': '19.0.1.0.1',
+    'version': '19.0.1.0.2',
     'category': 'Document Management',
     'summary': 'SharePoint 5,000 threshold protection, Graph notifications, and Delta Sync',
     'depends': ['base', 'mail', 'lhi_base'],

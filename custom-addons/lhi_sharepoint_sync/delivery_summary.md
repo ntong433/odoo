@@ -47,3 +47,25 @@ Successfully addressed the Microsoft SharePoint 5,000 list-view threshold constr
   be rerun against a disposable PostgreSQL database in the Coolify runtime, and
   must exit `0`, before any production deployment is approved.
 - No production database install or upgrade was performed.
+
+## Odoo 19 List View Compatibility Update (19.0.1.0.2)
+
+- Converted the Storage Partitions and Graph Subscriptions view architectures
+  from the removed `<tree>` syntax to Odoo 19 `<list>` syntax and changed their
+  window-action modes from `tree,form` to `list,form`.
+- Preserved the existing view, action, and menu XML IDs. Only the non-external
+  technical view names were updated from `.tree` to `.list`; fields,
+  decorations, models, methods, and ACLs were not changed.
+- Changed files: `__manifest__.py`, `views/sharepoint_partition_views.xml`,
+  `views/sharepoint_subscription_views.xml`, and this delivery summary. No
+  `lhi_memo_management` source file or Odoo core file was changed.
+- XML parsing, Odoo `import_xml.rng` validation, Odoo `list_view.rng`
+  validation for both views, Python compilation, manifest validation,
+  `git diff --check`, and both module-wide obsolete-syntax audits passed.
+- Disposable installs were attempted for `lhi_sharepoint_sync` and
+  `lhi_memo_management`, but this workstation still has no running or
+  configured PostgreSQL service. Both commands stopped before module loading
+  with a missing `/var/run/postgresql/.s.PGSQL.5432` socket and exited `1`.
+  Rerun both against a disposable Coolify database and require exit `0` before
+  approving production installation.
+- No production database install or upgrade was performed.

@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="view_lhi_sharepoint_partition_tree" model="ir.ui.view">
-        <field name="name">lhi.sharepoint.partition.tree</field>
+        <field name="name">lhi.sharepoint.partition.list</field>
         <field name="model">lhi.sharepoint.partition</field>
         <field name="arch" type="xml">
-            <tree decoration-danger="item_count &gt;= routing_threshold" decoration-warning="item_count &gt;= warning_threshold and item_count &lt; routing_threshold">
+            <list decoration-danger="item_count &gt;= routing_threshold" decoration-warning="item_count &gt;= warning_threshold and item_count &lt; routing_threshold">
                 <field name="name"/>
                 <field name="domain"/>
                 <field name="project"/>
                 <field name="item_count"/>
                 <field name="active"/>
                 <field name="read_only"/>
-            </tree>
+            </list>
         </field>
     </record>
 
     <record id="action_lhi_sharepoint_partition" model="ir.actions.act_window">
         <field name="name">Storage Partitions</field>
         <field name="res_model">lhi.sharepoint.partition</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 </odoo>

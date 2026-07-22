@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <record id="view_lhi_sharepoint_subscription_tree" model="ir.ui.view">
-        <field name="name">lhi.sharepoint.subscription.tree</field>
+        <field name="name">lhi.sharepoint.subscription.list</field>
         <field name="model">lhi.sharepoint.subscription</field>
         <field name="arch" type="xml">
-            <tree>
+            <list>
                 <field name="name"/>
                 <field name="resource"/>
                 <field name="expiration_date"/>
                 <field name="active"/>
-            </tree>
+            </list>
         </field>
     </record>
 
     <record id="action_lhi_sharepoint_subscription" model="ir.actions.act_window">
         <field name="name">Graph Subscriptions</field>
         <field name="res_model">lhi.sharepoint.subscription</field>
-        <field name="view_mode">tree,form</field>
+        <field name="view_mode">list,form</field>
     </record>
 </odoo>

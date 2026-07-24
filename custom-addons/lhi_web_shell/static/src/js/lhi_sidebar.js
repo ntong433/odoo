@@ -18,12 +18,15 @@ export class LhiSidebar extends Component {
         this.menuService = useService("menu");
         this.actionService = useService("action");
         this.orm = useService("orm");
+        this._appsFetchPromise = null;
         
         const savedCollapsed = localStorage.getItem("lhi.sidebar.collapsed") === "true";
         this.state = useState({
             collapsed: savedCollapsed,
             activeAppId: this.menuService.getCurrentApp()?.id || null,
             apps: [],
+            isLoading: false,
+            loadError: false,
         });
 
         const updateActiveApp = () => {
@@ -45,15 +48,116 @@ export class LhiSidebar extends Component {
         });
     }
 
+    _normalizeAccessibleApps(rawApps) {
+        const normalizedApps = [];
+        const usedKeys = new Set();
+
+        for (const app of rawApps || []) {
+            if (!app || typeof app !== "object") {
+                console.warn(
+                    "[LHI Sidebar] Ignoring invalid application entry",
+                    app
+                );
+                continue;
+            }
+
+            console.debug("[LHI Sidebar] raw application", {
+                id: app.id,
+                xmlid: app.xmlid,
+                actionID: app.actionID,
+                menu_id: app.menu_id,
+                menuID: app.menuID,
+                name: app.name,
+            });
+
+            const sourceKey =
+                app.xmlid ||
+                app.key ||
+                app.id ||
+                app.menu_id ||
+                app.menuID ||
+                app.actionID;
+
+            if (
+                sourceKey === undefined ||
+                sourceKey === null ||
+                sourceKey === ""
+            ) {
+                console.warn(
+                    "[LHI Sidebar] Ignoring application without a stable key",
+                    {
+                        name: app.name,
+                        id: app.id,
+                        xmlid: app.xmlid,
+                        menu_id: app.menu_id,
+                        menuID: app.menuID,
+                        actionID: app.actionID,
+                    }
+                );
+                continue;
+            }
+
+            const stableKey = `lhi_app_${String(sourceKey)}`;
+
+            if (usedKeys.has(stableKey)) {
+                console.warn(
+                    "[LHI Sidebar] Ignoring duplicate application",
+                    {
+                        stableKey,
+                        name: app.name,
+                    }
+                );
+                continue;
+            }
+
+            usedKeys.add(stableKey);
+
+            const resolvedId = app.id || app.key || String(app.menu_id || app.xmlid || sourceKey);
+
+            normalizedApps.push({
+                ...app,
+                id: resolvedId,
+                _lhiSidebarKey: stableKey,
+            });
+        }
+
+        return normalizedApps;
+    }
+
     async _fetchAccessibleApps() {
+        if (this._appsFetchPromise) {
+            return this._appsFetchPromise;
+        }
+
+        this._appsFetchPromise = this._loadAccessibleApps();
+
+        try {
+            return await this._appsFetchPromise;
+        } finally {
+            this._appsFetchPromise = null;
+        }
+    }
+
+    async _loadAccessibleApps() {
+        this.state.isLoading = true;
+        this.state.loadError = false;
+
         try {
             const result = await this.orm.call("lhi.dashboard.widget", "get_accessible_apps", []);
-            if (result && result.apps) {
-                // The backend returns an array of objects: {key, name, menu_id, xmlid, icon_url}
-                this.state.apps = result.apps;
-            }
-        } catch (e) {
-            console.error("LHI Sidebar could not fetch accessible apps.", e);
+            const rawApps = (result && result.apps) ? result.apps : [];
+            this.state.apps = this._normalizeAccessibleApps(rawApps);
+        } catch (error) {
+            console.error(
+                "[LHI Sidebar] Failed to load accessible applications",
+                {
+                    message: error?.message,
+                    name: error?.name,
+                }
+            );
+            this.state.apps = [];
+            this.state.loadError = true;
+        } finally {
+            this.state.isLoading = false;
         }
     }
 

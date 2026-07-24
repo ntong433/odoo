@@ -41,7 +41,7 @@
                 </a>
 
                 <div t-if="generalApps.length" class="lhi-sidebar__section-label">General</div>
-                <t t-foreach="generalApps" t-as="app" t-key="app.id">
+                <t t-foreach="generalApps" t-as="app" t-key="app._lhiSidebarKey">
                     <a t-attf-class="lhi-sidebar__item {{ state.activeAppId === app.id ? 'lhi-sidebar__item--active' : '' }}"
                        t-on-click="() => this.onAppClick(app)"
                        t-att-title="app.name">
@@ -57,7 +57,7 @@
                 </t>
 
                 <div t-if="businessApps.length" class="lhi-sidebar__section-label">Apps</div>
-                <t t-foreach="businessApps" t-as="app" t-key="app.id">
+                <t t-foreach="businessApps" t-as="app" t-key="app._lhiSidebarKey">
                     <a t-attf-class="lhi-sidebar__item {{ state.activeAppId === app.id ? 'lhi-sidebar__item--active' : '' }}"
                        t-on-click="() => this.onAppClick(app)"
                        t-att-title="app.name">

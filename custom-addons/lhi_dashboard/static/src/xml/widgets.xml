@@ -41,7 +41,7 @@
         <section t-if="state.apps.length" class="lhi-my-apps" aria-labelledby="lhi-my-apps-title">
             <h2 id="lhi-my-apps-title" class="lhi-my-apps__title">My Apps</h2>
             <div class="lhi-app-grid">
-                <t t-foreach="state.apps" t-as="app" t-key="app.xmlid">
+                <t t-foreach="state.apps" t-as="app" t-key="app._lhiSidebarKey || app.xmlid || app.key || app.menu_id">
                     <button type="button" class="lhi-app-tile text-center d-flex flex-column align-items-center justify-content-center" t-on-click="() => this.onAppClick(app)">
                         <span class="lhi-app-icon-bg d-flex align-items-center justify-content-center" aria-hidden="true">
                             <img t-att-src="app.icon_url" class="lhi-app-icon-img" alt=""/>

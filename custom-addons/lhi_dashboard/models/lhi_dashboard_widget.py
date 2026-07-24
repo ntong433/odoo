@@ -85,17 +85,17 @@ class LhiDashboardWidget(models.Model):
 
     @api.model
     def _deduplicate_dashboard_apps(self, apps):
-        """Return one launcher card per stable menu XML ID."""
+        """Return one launcher card per stable app entry."""
         unique_apps = []
-        seen_xmlids = set()
+        seen_keys = set()
         for app in apps:
-            menu_xmlid = app.get('xmlid')
-            if not menu_xmlid:
+            stable_key = app.get('xmlid') or app.get('key') or (str(app.get('menu_id')) if app.get('menu_id') else None)
+            if not stable_key:
                 continue
-            if menu_xmlid in seen_xmlids:
-                _logger.warning("Duplicate dashboard module removed: %s", menu_xmlid)
+            if stable_key in seen_keys:
+                _logger.warning("Duplicate dashboard module removed: %s", stable_key)
                 continue
-            seen_xmlids.add(menu_xmlid)
+            seen_keys.add(stable_key)
             unique_apps.append(app)
         return unique_apps
 

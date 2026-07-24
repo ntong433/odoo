@@ -192,4 +192,19 @@ QUnit.module("LHI Web Shell Navigation", () => {
         assert.strictEqual(selectedMenu, null, "Dashboard client action does not call selectMenu");
         assert.strictEqual(sidebar.state.activeAppId, "dashboard");
     });
+
+    QUnit.test("_normalizeAccessibleApps generates stable keys and deduplicates apps", (assert) => {
+        const sidebar = Object.create(LhiSidebar.prototype);
+        const rawApps = [
+            { key: "memos", name: "Memos", menu_id: 10 },
+            { key: "memos", name: "Memos Duplicate", menu_id: 10 },
+            { key: "procurement", name: "Procurement", xmlid: "lhi_procurement.menu_root" },
+            { name: "No Key App" },
+            null,
+        ];
+        const normalized = sidebar._normalizeAccessibleApps(rawApps);
+        assert.strictEqual(normalized.length, 2, "Filters invalid and duplicate applications");
+        assert.strictEqual(normalized[0]._lhiSidebarKey, "lhi_app_memos");
+        assert.strictEqual(normalized[1]._lhiSidebarKey, "lhi_app_lhi_procurement.menu_root");
+    });
 });

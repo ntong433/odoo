@@ -141,10 +141,17 @@ class TestMemoManagement(TransactionCase):
         }
         if cls.configuration:
             cls.configuration.write(config_values)
-        else:
-            cls.configuration = cls.env["lhi.opensign.configuration"].create(
-                {"company_id": cls.company.id, **config_values}
-            )
+        cls.doc_template = cls.env["lhi.memo.document.template"].create({
+            "name": "Default Test Memo Template",
+            "code": "MEMO-TEST-TPL",
+            "version": "1.0",
+            "sharepoint_version": "1.0",
+            "sharepoint_drive_id": "memo-test-drive",
+            "sharepoint_item_id": "memo-template-item-1",
+            "is_default": True,
+            "active": True,
+            "company_id": cls.company.id,
+        })
 
     @classmethod
     def _new_employee(cls, login, name, department, object_id, extra_group=False):
@@ -201,6 +208,19 @@ class TestMemoManagement(TransactionCase):
             document._remove_spool()
         return True
 
+    def _create_test_template_bytes(self):
+        from docxtpl import DocxTemplate
+        doc = DocxTemplate(io.BytesIO())
+        doc.add_paragraph("REF: {{ memo_reference }}")
+        doc.add_paragraph("FROM: {{ from_display }}")
+        doc.add_paragraph("TO: {{ to_display }}")
+        doc.add_paragraph("DATE: {{ memo_date }}")
+        doc.add_paragraph("SUBJECT: {{ subject }}")
+        doc.add_paragraph("{{ memo_body }}")
+        out = io.BytesIO()
+        doc.save(out)
+        return out.getvalue()
+
     def _create_memo(self, requester=None, department=None, **extra):
         requester = requester or self.requester
         department = department or self.department
@@ -212,12 +232,21 @@ class TestMemoManagement(TransactionCase):
             "department_id": department.id,
             **extra,
         }
-        with patch.object(
-            self.env.registry["lhi.document.item"],
-            "action_upload",
-            self._confirm_upload,
+        with (
+            patch.object(
+                self.env.registry["lhi.document.item"],
+                "action_upload",
+                self._confirm_upload,
+            ),
+            patch.object(
+                self.env.registry["lhi.memo"],
+                "_download_master_template_bytes",
+                lambda *args, **kwargs: self._create_test_template_bytes(),
+            ),
         ):
-            return self.env["lhi.memo"].with_user(requester).create(values)
+            memo = self.env["lhi.memo"].with_user(requester).create(values)
+            memo.action_open_word()
+            return memo
 
     def _capture_pdf(
         self,

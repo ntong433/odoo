@@ -226,6 +226,49 @@ class LhiMemo(models.Model):
         copy=False,
         groups="lhi_signature_bridge.group_lhi_signature_admin",
     )
+    document_template_id = fields.Many2one(
+        "lhi.memo.document.template",
+        string="Assigned Template",
+        readonly=True,
+        copy=False,
+        ondelete="restrict",
+    )
+    template_version_snapshot = fields.Char(
+        string="Template Version Snapshot", readonly=True, copy=False
+    )
+    template_sharepoint_version_snapshot = fields.Char(
+        string="SharePoint Template Version Snapshot", readonly=True, copy=False
+    )
+    template_sharepoint_drive_id_snapshot = fields.Char(
+        string="Template Drive ID Snapshot", readonly=True, copy=False
+    )
+    template_sharepoint_item_id_snapshot = fields.Char(
+        string="Template Item ID Snapshot", readonly=True, copy=False
+    )
+    template_sharepoint_etag_snapshot = fields.Char(
+        string="Template ETag Snapshot", readonly=True, copy=False
+    )
+    document_created_at = fields.Datetime(
+        string="Document Created At", readonly=True, copy=False
+    )
+    document_created_by = fields.Many2one(
+        "res.users", string="Document Created By", readonly=True, copy=False
+    )
+    document_state = fields.Selection(
+        [
+            ("not_created", "Not Created"),
+            ("creating", "Creating"),
+            ("created", "Created"),
+            ("failed", "Failed"),
+        ],
+        string="Document Status",
+        default="not_created",
+        required=True,
+        readonly=True,
+        copy=False,
+        tracking=True,
+    )
+
     source_pdf_item_id = fields.Many2one(
         "lhi.document.item", readonly=True, copy=False, ondelete="restrict"
     )
@@ -444,21 +487,25 @@ class LhiMemo(models.Model):
             category = self.env["lhi.memo.category"].browse(
                 vals.get("memo_category_id")
             )
-            if category:
-                vals.setdefault(
-                    "recipient_user_ids", [(6, 0, category.default_recipient_ids.ids)]
-                )
-                vals.setdefault(
-                    "expiry_date",
-                    fields.Datetime.now()
-                    + timedelta(days=category.default_expiry_days),
-                )
+            company_id = vals.get("company_id") or requester.company_id.id or self.env.company.id
+            template = self.env["lhi.memo.document.template"].search(
+                [
+                    ("is_default", "=", True),
+                    ("active", "=", True),
+                    ("company_id", "=", company_id),
+                ],
+                limit=1,
+            )
+            if template:
+                vals.setdefault("document_template_id", template.id)
+                vals.setdefault("template_version_snapshot", template.version)
+                vals.setdefault("template_sharepoint_version_snapshot", template.sharepoint_version)
+                vals.setdefault("template_sharepoint_drive_id_snapshot", template.sharepoint_drive_id)
+                vals.setdefault("template_sharepoint_item_id_snapshot", template.sharepoint_item_id)
+                vals.setdefault("template_sharepoint_etag_snapshot", template.sharepoint_etag)
+
+            vals.setdefault("document_state", "not_created")
         records = super().create(vals_list)
-        for memo in records:
-            try:
-                memo._create_word_document()
-            except Exception as error:
-                memo._record_integration_failure("sharepoint_word_create", error)
         return records
 
     def write(self, vals):
@@ -614,48 +661,203 @@ class LhiMemo(models.Model):
                 result.writestr(info, payload)
         return output.getvalue()
 
-    def _create_word_document(self, *, retry_failed=False):
+    def _safe_memo_filename(self):
         self.ensure_one()
-        if (
-            self.source_docx_item_id
-            and self.source_docx_item_id.storage_state == "available"
-        ):
-            return self.source_docx_item_id
-        content = self._starter_docx()
-        filename = f"{self._safe_filename(self.name)}.docx"
-        item = self.env["lhi.document.item"].create_from_bytes(
-            name=filename,
-            content=content,
-            mime_type=DOCX_MIME,
-            linked_model=self._name,
-            linked_record_id=self.id,
-            linked_field="source_docx_item_id",
-            requested_by=self.requester_id,
-            synchronous=True,
+        ref_part = (self.name or "MEMO").replace("/", "-").replace("\\", "-")
+        subject_part = (self.subject or "").strip()
+        invalid_chars = r'["*:<>?/\\|]'
+        sanitized_subject = re.sub(invalid_chars, "", subject_part).strip()
+        if sanitized_subject:
+            if len(sanitized_subject) > 60:
+                sanitized_subject = sanitized_subject[:60].strip()
+            return f"{ref_part} - {sanitized_subject}.docx"
+        return f"{ref_part}.docx"
+
+    def _validate_before_opening_word(self):
+        self.ensure_one()
+        missing_fields = []
+        if not self.name or self.name == "New":
+            missing_fields.append("Memo Reference")
+        if not self.requester_id:
+            missing_fields.append("Requester (FROM)")
+        if not self.recipient_user_ids and not self.recipient_description:
+            missing_fields.append("Recipients (TO)")
+        if not self.draft_date and not self.create_date:
+            missing_fields.append("Memo Date")
+        if not self.subject:
+            missing_fields.append("Subject")
+
+        if not self.document_template_id:
+            template = self.env["lhi.memo.document.template"].search(
+                [
+                    ("is_default", "=", True),
+                    ("active", "=", True),
+                    ("company_id", "=", self.company_id.id),
+                ],
+                limit=1,
+            )
+            if template:
+                self.sudo().write({
+                    "document_template_id": template.id,
+                    "template_version_snapshot": template.version,
+                    "template_sharepoint_version_snapshot": template.sharepoint_version,
+                    "template_sharepoint_drive_id_snapshot": template.sharepoint_drive_id,
+                    "template_sharepoint_item_id_snapshot": template.sharepoint_item_id,
+                    "template_sharepoint_etag_snapshot": template.sharepoint_etag,
+                })
+            else:
+                missing_fields.append("Active Default Memo Template Configuration")
+
+        if self.document_template_id and not self.template_sharepoint_drive_id_snapshot:
+            missing_fields.append("SharePoint Drive ID in Active Template")
+        if self.document_template_id and not self.template_sharepoint_item_id_snapshot:
+            missing_fields.append("SharePoint Template File Item ID in Active Template")
+
+        if self.state in ("cancelled", "superseded"):
+            raise UserError(_("Cannot create or open a Word document for a cancelled or superseded memo."))
+
+        if missing_fields:
+            bullet_list = "\n".join(f"• {field}" for field in missing_fields)
+            raise UserError(
+                _("The memo document cannot be created because the following required details are missing:\n\n%s\n\nPlease complete these details before proceeding.")
+                % bullet_list
+            )
+
+    def _download_master_template_bytes(self):
+        self.ensure_one()
+        drive_id = self.template_sharepoint_drive_id_snapshot or (
+            self.document_template_id and self.document_template_id.sharepoint_drive_id
         )
-        if retry_failed and item.storage_state != "available":
-            try:
-                item.sudo().write(
-                    {
-                        "storage_state": "pending",
-                        "upload_state": "pending",
-                        "last_error": False,
-                    }
-                )
-                item.sudo().action_upload()
-            except Exception as error:
-                item.sudo()._mark_failed(error, enqueue=True)
-                raise
-        if item.storage_state != "available" or not item.sharepoint_item_id:
-            raise UserError(_("SharePoint did not confirm the memo Word document."))
-        self.sudo().write(
-            {
+        item_id = self.template_sharepoint_item_id_snapshot or (
+            self.document_template_id and self.document_template_id.sharepoint_item_id
+        )
+
+        if not drive_id or not item_id:
+            raise UserError(_("No active default memo template has been configured."))
+
+        connection = self.env["lhi.graph.connection"]._get_active_connection(self.company_id)
+        if not connection:
+            raise UserError(_("The official memo template could not be retrieved from SharePoint because no active Microsoft Graph connection exists."))
+
+        try:
+            payload = connection.graph_request(
+                "GET",
+                f"/drives/{quote(drive_id)}/items/{quote(item_id)}",
+                auth_context="application",
+                params={"$select": "id,name,eTag,cTag,size,lastModifiedDateTime,@microsoft.graph.downloadUrl"},
+            )
+        except Exception as error:
+            raise UserError(_("The official memo template could not be retrieved from SharePoint. Please contact the Memo Administrator."))
+
+        download_url = payload.get("@microsoft.graph.downloadUrl")
+        if not download_url:
+            raise UserError(_("The official memo template download URL could not be acquired from SharePoint."))
+
+        response = connection.lhi_upload_session_request(
+            "GET",
+            download_url,
+            expected_statuses={200},
+            auth_context="application",
+        )
+        return response.content
+
+    def _build_template_rendering_context(self):
+        self.ensure_one()
+        memo_date_val = self.draft_date or self.create_date or fields.Datetime.now()
+        formatted_date = memo_date_val.strftime("%d %B %Y")
+
+        from_name = self.requester_id.name or ""
+        from_title = getattr(self.requester_id, "job_title", False) or (
+            self.requester_employee_id.job_title if hasattr(self, "requester_employee_id") and self.requester_employee_id else ""
+        )
+        from_display = f"{from_name} ({from_title})" if from_title else from_name
+
+        if self.recipient_description:
+            to_display = self.recipient_description
+        elif self.recipient_user_ids:
+            to_display = ", ".join(self.recipient_user_ids.mapped("name"))
+        else:
+            to_display = ""
+
+        project_name = self.project_id.name if hasattr(self, "project_id") and self.project_id else ""
+        project_code = getattr(self.project_id, "code", "") if hasattr(self, "project_id") and self.project_id else ""
+        priority_label = dict(self._fields["priority"].selection).get(self.priority, "") if hasattr(self, "priority") and self.priority else ""
+
+        return {
+            "memo_reference": self.name or "",
+            "from_display": from_display,
+            "from_name": from_name,
+            "from_designation": from_title or "",
+            "to_display": to_display,
+            "memo_date": formatted_date,
+            "subject": self.subject or "",
+            "memo_body": self.purpose or "",
+            "priority": priority_label,
+            "project_name": project_name,
+            "project_code": project_code,
+            "revision_number": str(getattr(self, "revision_number", 1) or 1),
+        }
+
+    def _create_word_document_from_template(self):
+        self.ensure_one()
+        # Acquire row lock
+        self.env.cr.execute("SELECT id FROM lhi_memo WHERE id = %s FOR UPDATE NOWAIT", [self.id])
+
+        if self.source_docx_item_id and self.source_docx_item_id.storage_state == "available":
+            return self.source_docx_item_id
+
+        self.sudo().write({"document_state": "creating"})
+
+        try:
+            template_bytes = self._download_master_template_bytes()
+
+            from ..services.word_template_service import WordTemplateService
+
+            WordTemplateService.validate_template(template_bytes)
+
+            context = self._build_template_rendering_context()
+            rendered_bytes = WordTemplateService.render_template(template_bytes, context)
+
+            filename = self._safe_memo_filename()
+            item = self.env["lhi.document.item"].create_from_bytes(
+                name=filename,
+                content=rendered_bytes,
+                mime_type=DOCX_MIME,
+                linked_model=self._name,
+                linked_record_id=self.id,
+                linked_field="source_docx_item_id",
+                requested_by=self.requester_id or self.env.user,
+                synchronous=True,
+            )
+
+            if item.storage_state != "available" or not item.sharepoint_item_id:
+                raise UserError(_("SharePoint did not confirm the generated memo Word document."))
+
+            self.sudo().write({
                 "source_docx_item_id": item.id,
                 "source_docx_web_url": item.sharepoint_web_url,
+                "document_created_at": fields.Datetime.now(),
+                "document_created_by": self.env.user.id,
+                "document_state": "created",
                 "integration_error_code": False,
                 "integration_error_message": False,
-            }
-        )
+            })
+
+            if self.state not in ("authoring", "ready_for_preparation", "preparing", "submitted", "under_approval", "completed"):
+                self._transition("authoring")
+
+            self.message_post(
+                body=_("Word document created successfully from template '%s' (v%s) and saved to SharePoint.")
+                % (self.document_template_id.name if self.document_template_id else "Default", self.template_version_snapshot or "1.0")
+            )
+            return item
+        except Exception as error:
+            self.sudo().write({"document_state": "failed"})
+            _logger.error("Failed to create Word document from template for memo %s: %s", self.name, error)
+            raise
+
+    def _create_word_document(self, *, retry_failed=False):
+        return self._create_word_document_from_template()
         if self.state != "authoring":
             self._transition("authoring")
         self.message_post(
@@ -1444,8 +1646,14 @@ class LhiMemo(models.Model):
 
     def action_open_word(self):
         self.ensure_one()
-        if not self.has_word_document or not self.source_docx_web_url:
-            raise UserError(_("The SharePoint Word document is not available."))
+        self._validate_before_opening_word()
+
+        if not self.source_docx_item_id or self.source_docx_item_id.storage_state != "available":
+            self._create_word_document_from_template()
+
+        if not self.source_docx_web_url:
+            raise UserError(_("The SharePoint Word document URL is not available."))
+
         self.source_docx_item_id.with_user(self.env.user).check_linked_access("read")
         return {
             "type": "ir.actions.act_url",

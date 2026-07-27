@@ -12,4 +12,5 @@
     <menuitem id="menu_lhi_memo_configuration" name="Configuration" parent="menu_lhi_memo_root" sequence="90" groups="lhi_memo_management.group_lhi_memo_admin"/>
     <menuitem id="menu_lhi_memo_categories" name="Memo Categories" parent="menu_lhi_memo_configuration" action="action_lhi_memo_category" sequence="10" groups="lhi_memo_management.group_lhi_memo_admin"/>
     <menuitem id="menu_lhi_memo_approval_routes" name="Memo Approval Routes" parent="menu_lhi_memo_configuration" action="action_lhi_memo_approval_matrix" sequence="20" groups="lhi_memo_management.group_lhi_memo_admin"/>
+    <menuitem id="menu_lhi_memo_document_templates" name="Memo Templates" parent="menu_lhi_memo_configuration" action="action_lhi_memo_document_template" sequence="30" groups="lhi_memo_management.group_lhi_memo_admin"/>
 </odoo>

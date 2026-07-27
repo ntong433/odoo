@@ -35,6 +35,7 @@ electronic-signature provider.
         "data/memo_category_data.xml",
         "data/ir_cron.xml",
         "views/memo_category_views.xml",
+        "views/memo_document_template_views.xml",
         "views/memo_views.xml",
         "views/memo_menus.xml",
     ],

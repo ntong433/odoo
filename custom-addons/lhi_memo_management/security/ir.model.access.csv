@@ -8,3 +8,6 @@ access_lhi_memo_approver_line_admin,lhi.memo.approver.line.admin,model_lhi_memo_
 access_lhi_memo_matrix_admin,lhi.approval.matrix.memo.admin,lhi_approval_matrix.model_lhi_approval_matrix,lhi_memo_management.group_lhi_memo_admin,1,1,1,1
 access_lhi_memo_matrix_line_admin,lhi.approval.matrix.line.memo.admin,lhi_approval_matrix.model_lhi_approval_matrix_line,lhi_memo_management.group_lhi_memo_admin,1,1,1,1
 access_lhi_document_item_memo_admin,lhi.document.item.memo.starter.admin,lhi_sharepoint_storage.model_lhi_document_item,lhi_memo_management.group_lhi_memo_admin,1,0,0,0
+access_lhi_memo_document_template_employee,lhi.memo.document.template.employee,model_lhi_memo_document_template,lhi_security.group_lhi_employee,1,0,0,0
+access_lhi_memo_document_template_admin,lhi.memo.document.template.admin,model_lhi_memo_document_template,lhi_memo_management.group_lhi_memo_admin,1,1,1,1
+

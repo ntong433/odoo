@@ -49,7 +49,7 @@
         <field name="arch" type="xml">
             <form string="Memo">
                 <header>
-                    <button name="action_open_word" string="Open in Word" type="object" class="btn-primary" invisible="not has_word_document"/>
+                    <button name="action_open_word" string="Open in Word" type="object" class="btn-primary" invisible="state in ('cancelled', 'superseded')"/>
                     <button name="action_refresh_document_status" string="Refresh Document Status" type="object" invisible="not source_docx_item_id or state in ('completed', 'cancelled', 'superseded')"/>
                     <button name="action_preview_document" string="Preview Document" type="object" invisible="not has_word_document"/>
                     <button name="action_retry_word_document" string="Retry Word Document" type="object" class="btn-primary" invisible="state != 'failed' or has_word_document"/>
@@ -96,6 +96,18 @@
                             <field name="company_id" groups="base.group_multi_company"/>
                             <field name="recipient_user_ids" widget="many2many_tags" readonly="state not in ('draft', 'authoring', 'returned', 'failed')"/>
                             <field name="recipient_description" readonly="state not in ('draft', 'authoring', 'returned', 'failed')"/>
+                        </group>
+                    </group>
+                    <group string="SharePoint Document Information">
+                        <group>
+                            <field name="document_template_id"/>
+                            <field name="template_version_snapshot"/>
+                            <field name="document_state" widget="badge"/>
+                        </group>
+                        <group>
+                            <field name="document_created_at"/>
+                            <field name="document_created_by"/>
+                            <field name="source_docx_web_url" widget="url" invisible="not source_docx_web_url"/>
                         </group>
                     </group>
                     <group>

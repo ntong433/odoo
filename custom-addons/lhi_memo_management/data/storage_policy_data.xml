@@ -10,7 +10,7 @@
             <field name="document_category">Internal Memo</field>
             <field name="confidentiality">internal</field>
             <field name="retention_category">Controlled Record</field>
-            <field name="conflict_behavior">fail</field>
+            <field name="conflict_behavior">rename</field>
         </record>
     </data>
 </odoo>

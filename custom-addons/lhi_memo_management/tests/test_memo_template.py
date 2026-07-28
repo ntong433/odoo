@@ -187,3 +187,35 @@ class TestMemoWordTemplate(TransactionCase):
             with self.assertRaises(UserError) as cm:
                 memo._download_master_template_bytes()
             self.assertIn("downloaded from SharePoint is empty", str(cm.exception))
+
+    def test_10_ordinary_requester_can_open_word_without_direct_document_item_acl(self):
+        """Ordinary memo requester without lhi.document.item ACL can open Word document safely."""
+        employee_group = self.env.ref("lhi_security.group_lhi_employee")
+        ordinary_user = self.env["res.users"].create({
+            "name": "Ordinary Memo User",
+            "login": "ordinary_memo_user",
+            "email": "ordinary_memo_user@example.test",
+            "groups_id": [(6, 0, [self.env.ref("base.group_user").id, employee_group.id])],
+        })
+
+        memo = self.env["lhi.memo"].with_user(ordinary_user).create({
+            "subject": "Ordinary User Operations Request",
+            "memo_category_id": self.category.id,
+            "requester_id": ordinary_user.id,
+        })
+
+        valid_docx = self._create_valid_template_bytes()
+        mock_response = MagicMock()
+        mock_response.content = valid_docx
+
+        connection = self.env["lhi.graph.connection"]._get_active_connection(self.company)
+
+        with (
+            patch.object(connection, "lhi_binary_request", return_value=mock_response),
+            patch.object(self.env.registry["lhi.document.item"], "action_upload", lambda *args, **kwargs: True),
+        ):
+            action = memo.with_user(ordinary_user).action_open_word()
+            self.assertEqual(action.get("type"), "ir.actions.act_url")
+            self.assertTrue(memo.has_word_document)
+            self.assertEqual(memo.document_state, "created")
+

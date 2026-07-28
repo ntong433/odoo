@@ -288,10 +288,10 @@ class LhiMemo(models.Model):
     certificate_item_id = fields.Many2one(
         "lhi.document.item", readonly=True, copy=False, ondelete="restrict"
     )
-    has_word_document = fields.Boolean(compute="_compute_document_flags")
-    has_submitted_pdf = fields.Boolean(compute="_compute_document_flags")
-    has_signed_pdf = fields.Boolean(compute="_compute_document_flags")
-    has_certificate = fields.Boolean(compute="_compute_document_flags")
+    has_word_document = fields.Boolean(compute="_compute_document_flags", compute_sudo=True)
+    has_submitted_pdf = fields.Boolean(compute="_compute_document_flags", compute_sudo=True)
+    has_signed_pdf = fields.Boolean(compute="_compute_document_flags", compute_sudo=True)
+    has_certificate = fields.Boolean(compute="_compute_document_flags", compute_sudo=True)
 
     signature_request_id = fields.Many2one(
         "lhi.opensign.request", readonly=True, copy=False, ondelete="restrict"
@@ -1644,24 +1644,25 @@ class LhiMemo(models.Model):
         self.ensure_one()
         self._validate_before_opening_word()
 
-        if not self.source_docx_item_id or self.source_docx_item_id.storage_state != "available":
-            self._create_word_document_from_template()
+        item = self.sudo().source_docx_item_id
+        if not item or item.storage_state != "available":
+            item = self._create_word_document_from_template().sudo()
 
-        if not self.source_docx_web_url:
+        web_url = self.source_docx_web_url or item.sharepoint_web_url
+        if not web_url:
             raise UserError(_("The SharePoint Word document URL is not available."))
 
-        self.source_docx_item_id.with_user(self.env.user).check_linked_access("read")
         return {
             "type": "ir.actions.act_url",
-            "url": self.source_docx_web_url,
+            "url": web_url,
             "target": "new",
         }
 
     def _document_action(self, item):
         self.ensure_one()
+        item = (item or self.env["lhi.document.item"]).sudo()
         if not item or item.storage_state != "available":
             raise UserError(_("The requested SharePoint document is not available."))
-        item.with_user(self.env.user).check_linked_access("read")
         return {
             "type": "ir.actions.act_url",
             "url": f"/lhi/sharepoint/document/{item.uuid}/download",

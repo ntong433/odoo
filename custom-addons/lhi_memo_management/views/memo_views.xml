@@ -50,7 +50,7 @@
             <form string="Memo">
                 <header>
                     <button name="action_open_word" string="Open in Word" type="object" class="btn-primary" invisible="state in ('cancelled', 'superseded')"/>
-                    <button name="action_refresh_document_status" string="Refresh Document Status" type="object" invisible="not source_docx_item_id or state in ('completed', 'cancelled', 'superseded')"/>
+                    <button name="action_refresh_document_status" string="Refresh Document Status" type="object" invisible="not has_word_document or state in ('completed', 'cancelled', 'superseded')"/>
                     <button name="action_preview_document" string="Preview Document" type="object" invisible="not has_word_document"/>
                     <button name="action_retry_word_document" string="Retry Word Document" type="object" class="btn-primary" invisible="state != 'failed' or has_word_document"/>
                     <button name="action_mark_ready" string="Finish Authoring" type="object" class="btn-primary" invisible="state not in ('authoring', 'returned', 'failed') or not has_word_document"/>
@@ -162,7 +162,7 @@
                         <page string="Technical Information" groups="lhi_signature_bridge.group_lhi_signature_admin">
                             <group>
                                 <group string="SharePoint">
-                                    <field name="source_docx_item_id"/>
+                                    <field name="source_docx_item_id" groups="lhi_memo_management.group_lhi_memo_admin"/>
                                     <field name="source_docx_version_id"/>
                                     <field name="source_docx_etag"/>
                                     <field name="source_pdf_item_id"/>

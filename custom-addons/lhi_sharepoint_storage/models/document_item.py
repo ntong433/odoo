@@ -400,7 +400,8 @@ class LhiDocumentItem(models.Model):
             try:
                 item.action_upload()
             except Exception as error:
-                item._mark_failed(error, enqueue=True)
+                item._mark_failed(error, enqueue=False)
+                raise
         else:
             item._enqueue("upload")
         return item
@@ -576,9 +577,33 @@ class LhiDocumentItem(models.Model):
         self._apply_drive_item(payload)
         return payload
 
-    def _calculate_remote_hashes(self, auth_context="delegated", user=None):
+    def _calculate_remote_hashes(self, auth_context="application", user=None):
         self.ensure_one()
         user = user or self.env.user
+        response = self.graph_connection_id.lhi_binary_request(
+            "GET",
+            (
+                f"/drives/{quote(self.sharepoint_drive_id)}/items/"
+                f"{quote(self.sharepoint_item_id)}/content"
+            ),
+            auth_context=auth_context,
+            user=user,
+            expected_statuses={200},
+            allow_redirects=True,
+        )
+        if not response or not response.content:
+            raise UserError(_("SharePoint remote file content is empty."))
+        content = response.content
+        sha256 = hashlib.sha256(content).hexdigest()
+        sha1 = hashlib.sha1(content).hexdigest()
+        size = len(content)
+        self.sudo().write(
+            {"checksum": sha256, "sha1_checksum": sha1, "file_size": size}
+        )
+        return True
+
+    def _refresh_drive_item_after_metadata(self, auth_context="application", user=None):
+        self.ensure_one()
         payload = self.graph_connection_id.graph_request(
             "GET",
             (
@@ -587,33 +612,24 @@ class LhiDocumentItem(models.Model):
             ),
             auth_context=auth_context,
             user=user,
-            params={"$select": "id,@microsoft.graph.downloadUrl"},
+            params={
+                "$select": (
+                    "id,name,size,eTag,cTag,webUrl,lastModifiedDateTime,"
+                    "lastModifiedBy,parentReference,file"
+                )
+            },
         )
-        if payload.get("id") != self.sharepoint_item_id:
-            raise UserError(_("SharePoint hash verification failed."))
-        response = self.graph_connection_id.lhi_upload_session_request(
-            "GET",
-            payload.get("@microsoft.graph.downloadUrl"),
-            expected_statuses={200},
-            stream=True,
-            auth_context=auth_context,
-            user=user,
-        )
-        sha256 = hashlib.sha256()
-        sha1 = hashlib.sha1()
-        size = 0
-        for chunk in response.iter_content(chunk_size=1024 * 1024):
-            if not chunk:
-                continue
-            size += len(chunk)
-            sha256.update(chunk)
-            sha1.update(chunk)
-        if size != self.file_size:
-            raise UserError(_("SharePoint hash verification returned the wrong file size."))
-        self.sudo().write(
-            {"checksum": sha256.hexdigest(), "sha1_checksum": sha1.hexdigest()}
-        )
-        return True
+        if not payload or payload.get("id") != self.sharepoint_item_id:
+            raise UserError(_("SharePoint DriveItem post-metadata verification failed."))
+        self._apply_drive_item(payload)
+        if payload.get("name"):
+            self.sudo().write({"name": payload.get("name")})
+        final_size = int(payload.get("size") or 0)
+        if final_size <= 0:
+            raise UserError(_("Invalid remote file size after metadata promotion."))
+        self.sudo().write({"file_size": final_size})
+        self._calculate_remote_hashes(auth_context=auth_context, user=user)
+        return payload
 
     def _upload_large(self, library, parent_id, content):
         self.ensure_one()
@@ -699,7 +715,11 @@ class LhiDocumentItem(models.Model):
                     "sharepoint_parent_item_id": parent_id,
                 }
             )
-            if len(content) <= policy.small_upload_limit_mb * 1024 * 1024:
+            use_small_upload = (
+                len(content) <= policy.small_upload_limit_mb * 1024 * 1024
+                and policy.conflict_behavior == "replace"
+            )
+            if use_small_upload:
                 payload = item.graph_connection_id.lhi_upload_small(
                     library,
                     parent_id,
@@ -711,9 +731,12 @@ class LhiDocumentItem(models.Model):
             else:
                 payload = item._upload_large(library, parent_id, content)
             item._apply_drive_item(payload)
+            if payload.get("name"):
+                item.sudo().write({"name": payload.get("name")})
             item.sudo().write({"upload_state": "verifying"})
-            item._patch_sharepoint_metadata()
             item._verify_drive_item()
+            item._patch_sharepoint_metadata()
+            item._refresh_drive_item_after_metadata()
             item.sudo().write(
                 {
                     "storage_state": "available",

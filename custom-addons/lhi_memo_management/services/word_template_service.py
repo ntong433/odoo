@@ -51,7 +51,7 @@ class WordTemplateService:
         template_io = io.BytesIO(template_bytes)
         try:
             doc_tpl = DocxTemplate(template_io)
-            undeclared_vars = doc_tpl.get_undeclared_variables()
+            undeclared_vars = doc_tpl.get_undeclared_template_variables()
         except Exception as error:
             raise UserError(f"Failed to parse Word document template: {error}")
 

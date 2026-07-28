@@ -80,7 +80,7 @@
                 <field name="sharepoint_item_id"/>
                 <filter string="Active" name="active" domain="[('active', '=', True)]"/>
                 <filter string="Default" name="default" domain="[('is_default', '=', True)]"/>
-                <group expand="0" string="Group By">
+                <group>
                     <filter string="Company" name="group_company" domain="[]" context="{'group_by': 'company_id'}"/>
                 </group>
             </search>

@@ -740,25 +740,21 @@ class LhiMemo(models.Model):
             raise UserError(_("The official memo template could not be retrieved from SharePoint because no active Microsoft Graph connection exists."))
 
         try:
-            payload = connection.graph_request(
+            response = connection.lhi_binary_request(
                 "GET",
-                f"/drives/{quote(drive_id)}/items/{quote(item_id)}",
+                f"/drives/{quote(drive_id)}/items/{quote(item_id)}/content",
                 auth_context="application",
-                params={"$select": "id,name,eTag,cTag,size,lastModifiedDateTime,@microsoft.graph.downloadUrl"},
+                expected_statuses={200},
+                allow_redirects=True,
             )
         except Exception as error:
             raise UserError(_("The official memo template could not be retrieved from SharePoint. Please contact the Memo Administrator."))
 
-        download_url = payload.get("@microsoft.graph.downloadUrl")
-        if not download_url:
-            raise UserError(_("The official memo template download URL could not be acquired from SharePoint."))
+        if not response or not response.content:
+            raise UserError(
+                _("The official memo template downloaded from SharePoint is empty.")
+            )
 
-        response = connection.lhi_upload_session_request(
-            "GET",
-            download_url,
-            expected_statuses={200},
-            auth_context="application",
-        )
         return response.content
 
     def _build_template_rendering_context(self):

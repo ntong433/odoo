@@ -17,10 +17,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# Install python dependencies from local requirements.txt
+# Install python dependencies from local requirements.txt and custom requirements
 COPY odoo/requirements.txt /tmp/requirements.txt
+COPY custom-addons/requirements.txt /tmp/custom-requirements.txt
 RUN pip install --no-cache-dir "cython<3.0" "setuptools<60" "wheel" && \
-    pip install --no-build-isolation --no-cache-dir -r /tmp/requirements.txt
+    pip install --no-build-isolation --no-cache-dir -r /tmp/requirements.txt -r /tmp/custom-requirements.txt
 
 # Create Odoo home directory and user
 RUN useradd -m -U -s /bin/bash odoo

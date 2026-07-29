@@ -42,7 +42,7 @@ Stop on unsafe conflicts. Do not overwrite legacy identifiers.
 5. Run:
 
    ```bash
-   odoo-bin -d <staging_db> -u lhi_security,lhi_approval_matrix,lhi_asset_management,lhi_hub_management --stop-after-init
+   odoo-bin server -d <staging_db> -u lhi_security,lhi_approval_matrix,lhi_asset_management,lhi_hub_management --stop-after-init
    ```
 
 6. Run the tagged Python tests and browser persona checklist on staging.

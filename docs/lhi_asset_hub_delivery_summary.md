@@ -188,11 +188,11 @@ from staging:
 Suggested staging commands, adjusted to the approved configuration:
 
 ```bash
-.venv/bin/python odoo/odoo-bin -c <staging.conf> -d <clean_test_db> \
+.venv/bin/python odoo/odoo-bin server -c <staging.conf> -d <clean_test_db> \
   -i lhi_hub_management --test-enable \
   --test-tags /lhi_asset_management,/lhi_hub_management --stop-after-init
 
-.venv/bin/python odoo/odoo-bin -c <staging.conf> -d <upgrade_copy_db> \
+.venv/bin/python odoo/odoo-bin server -c <staging.conf> -d <upgrade_copy_db> \
   -u lhi_security,lhi_asset_management,lhi_programme_asset_bridge,\
 lhi_approval_matrix,lhi_hub_management --test-enable --stop-after-init
 ```

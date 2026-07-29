@@ -30,7 +30,7 @@ run_test() {
         docker compose exec db createdb -U "${POSTGRES_USER:-odoo}" "$DB_NAME" || true
         
         # Run Odoo install & test
-        docker compose run --rm odoo python3 /opt/odoo/odoo/odoo-bin \
+        docker compose run --rm odoo python3 /opt/odoo/odoo/odoo-bin server \
             -c /etc/odoo/odoo.conf \
             -d "$DB_NAME" \
             -i "$MODULES" \
@@ -42,7 +42,7 @@ run_test() {
         echo "Running Module Upgrade Test ($mode mode)"
         echo "=========================================================="
         
-        docker compose run --rm odoo python3 /opt/odoo/odoo/odoo-bin \
+        docker compose run --rm odoo python3 /opt/odoo/odoo/odoo-bin server \
             -c /etc/odoo/odoo.conf \
             -d "$DB_NAME" \
             -u "$MODULES" \
@@ -58,7 +58,7 @@ run_test() {
         createdb -h localhost -U "${POSTGRES_USER:-odoo}" "$DB_NAME" || true
         
         # Run Odoo install & test
-        python3 ./odoo/odoo-bin \
+        python3 ./odoo/odoo-bin server \
             -c "$CONFIG_FILE" \
             -d "$DB_NAME" \
             -i "$MODULES" \
@@ -69,7 +69,7 @@ run_test() {
         echo "Running Module Upgrade Test ($mode mode)"
         echo "=========================================================="
         
-        python3 ./odoo/odoo-bin \
+        python3 ./odoo/odoo-bin server \
             -c "$CONFIG_FILE" \
             -d "$DB_NAME" \
             -u "$MODULES" \

@@ -2,6 +2,18 @@
 set -eu
 
 runtime_config="${ODOO_RUNTIME_CONFIG:-/tmp/lhi-odoo.conf}"
+odoo_bin="${ODOO_BIN_PATH:-/opt/odoo/odoo-bin}"
+
+# The immutable staging image copies the repository's `odoo/` contents to
+# /opt/odoo, while the development Compose file bind-mounts them one directory
+# lower. Resolve both layouts explicitly and fail closed on an invalid image.
+if [ ! -f "$odoo_bin" ] && [ -f /opt/odoo/odoo/odoo-bin ]; then
+    odoo_bin=/opt/odoo/odoo/odoo-bin
+fi
+if [ ! -f "$odoo_bin" ]; then
+    echo "Odoo startup failed: odoo-bin was not found in the deployed image." >&2
+    exit 1
+fi
 
 python3 - "$runtime_config" <<'PY'
 import configparser
@@ -108,7 +120,7 @@ case "$database_initialized" in
         case "${ODOO_INITIALIZE_DATABASE_IF_EMPTY:-true}" in
             true|TRUE|1|yes|YES)
                 echo "Odoo database schema is absent; initializing the base module."
-                python3 /opt/odoo/odoo-bin \
+                python3 "$odoo_bin" server \
                     -c "$runtime_config" \
                     --init=base \
                     --without-demo=all \
@@ -165,7 +177,7 @@ if [ -n "$bootstrap_modules" ]; then
     case "$bootstrap_required" in
         t)
             echo "Installing the approved LHI foundation module set."
-            python3 /opt/odoo/odoo-bin \
+            python3 "$odoo_bin" server \
                 -c "$runtime_config" \
                 --init="$bootstrap_modules" \
                 --without-demo=all \
@@ -183,4 +195,4 @@ if [ -n "$bootstrap_modules" ]; then
     esac
 fi
 
-exec python3 /opt/odoo/odoo-bin -c "$runtime_config"
+exec python3 "$odoo_bin" server -c "$runtime_config"

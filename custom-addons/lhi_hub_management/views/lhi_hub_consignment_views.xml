@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_hub_consignment_list" model="ir.ui.view">
+        <field name="name">lhi.hub.consignment.list</field>
+        <field name="model">lhi.hub.consignment</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="state == 'discrepancy'">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="hub_id"/>
+                <field name="delivery_date"/>
+                <field name="ownership_status"/>
+                <field name="total_declared_value"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_lhi_hub_consignment_form" model="ir.ui.view">
+        <field name="name">lhi.hub.consignment.form</field>
+        <field name="model">lhi.hub.consignment</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_submit" type="object" string="Submit" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_mark_expected" type="object" string="Mark Expected" class="btn-primary" invisible="state != 'submitted'"/>
+                    <button name="action_mark_received" type="object" string="Record Physical Receipt" class="btn-primary" invisible="state != 'expected'"/>
+                    <button name="action_inspect" type="object" string="Complete Inspection" class="btn-primary" invisible="state != 'received'"/>
+                    <button name="action_post_accepted_stock" type="object" string="Post Accepted Stock" class="btn-primary" invisible="state not in ['inspected', 'discrepancy']"/>
+                    <button name="action_close" type="object" string="Close" invisible="state != 'posted'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="funding_agreement"/>
+                            <field name="donor_reference"/>
+                            <field name="waybill"/>
+                            <field name="delivery_date"/>
+                        </group>
+                        <group>
+                            <field name="hub_id"/>
+                            <field name="project_id"/>
+                            <field name="programme_id"/>
+                            <field name="award_id"/>
+                            <field name="ownership_status"/>
+                            <field name="usage_restrictions"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Items">
+                            <field name="line_ids" readonly="state in ['posted', 'closed']">
+                                <list editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="uom_id"/>
+                                    <field name="expected_quantity"/>
+                                    <field name="received_quantity"/>
+                                    <field name="accepted_quantity"/>
+                                    <field name="rejected_quantity"/>
+                                    <field name="unit_operational_value"/>
+                                    <field name="batch_or_serial_number"/>
+                                    <field name="manufacturing_date"/>
+                                    <field name="expiry_date"/>
+                                    <field name="removal_date"/>
+                                    <field name="discrepancy_notes"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Inspection and Evidence">
+                            <group>
+                                <field name="inspection_status"/>
+                                <field name="discrepancies"/>
+                                <field name="received_by_id"/>
+                                <field name="picking_id"/>
+                                <field name="supporting_document_ids" widget="many2many_binary"/>
+                            </group>
+                            <field name="notes"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_lhi_hub_consignment" model="ir.actions.act_window">
+        <field name="name">Donor and Partner Consignments</field>
+        <field name="res_model">lhi.hub.consignment</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

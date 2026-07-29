@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_hub_approval_matrix_form" model="ir.ui.view">
+        <field name="name">lhi.approval.matrix.form.hub</field>
+        <field name="model">lhi.approval.matrix</field>
+        <field name="inherit_id" ref="lhi_approval_matrix.view_lhi_approval_matrix_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@string='Organizational Constraints']" position="inside">
+                <field name="lhi_requesting_hub_ids" widget="many2many_tags" invisible="document_type != 'hub_stock_request'"/>
+                <field name="lhi_supplying_hub_ids" widget="many2many_tags" invisible="document_type != 'hub_stock_request'"/>
+                <field name="lhi_state_ids" widget="many2many_tags" invisible="document_type != 'hub_stock_request'"/>
+                <field name="lhi_inter_state" invisible="document_type != 'hub_stock_request'"/>
+                <field name="lhi_programme_ids" widget="many2many_tags" invisible="document_type != 'hub_stock_request'"/>
+                <field name="lhi_donor_partner_ids" widget="many2many_tags" invisible="document_type != 'hub_stock_request'"/>
+                <field name="lhi_min_quantity" invisible="document_type != 'hub_stock_request'"/>
+                <field name="lhi_max_quantity" invisible="document_type != 'hub_stock_request'"/>
+                <field name="lhi_priority" invisible="document_type != 'hub_stock_request'"/>
+                <field name="lhi_emergency_rule" invisible="document_type != 'hub_stock_request'"/>
+                <field name="lhi_item_category_ids" widget="many2many_tags" invisible="document_type != 'hub_stock_request'"/>
+                <field name="lhi_product_ids" widget="many2many_tags" invisible="document_type != 'hub_stock_request'"/>
+                <field name="lhi_requires_pharmaceuticals" invisible="document_type != 'hub_stock_request'"/>
+                <field name="lhi_requires_controlled_items" invisible="document_type != 'hub_stock_request'"/>
+                <field name="lhi_requires_serialized" invisible="document_type != 'hub_stock_request'"/>
+                <field name="lhi_requires_consignment_restriction" invisible="document_type != 'hub_stock_request'"/>
+                <field name="lhi_effective_from" invisible="document_type != 'hub_stock_request'"/>
+                <field name="lhi_effective_to" invisible="document_type != 'hub_stock_request'"/>
+            </xpath>
+            <xpath expr="//field[@name='line_ids']/list/field[@name='approval_type']" position="after">
+                <field name="lhi_signature_required"/>
+                <field name="lhi_approval_role"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_lhi_hub_partner_form" model="ir.ui.view">
+        <field name="name">res.partner.form.lhi.hub.recipient</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="HUB Recipient">
+                    <group>
+                        <field name="lhi_external_recipient"/>
+                        <field name="lhi_recipient_type" invisible="not lhi_external_recipient"/>
+                        <field name="lhi_beneficiary_reference" invisible="not lhi_external_recipient"/>
+                        <field name="lhi_community" invisible="not lhi_external_recipient"/>
+                        <field name="lhi_lga" invisible="not lhi_external_recipient"/>
+                        <field name="lhi_state" invisible="not lhi_external_recipient"/>
+                        <field name="lhi_project_id" invisible="not lhi_external_recipient"/>
+                        <field name="lhi_programme_id" invisible="not lhi_external_recipient"/>
+                        <field name="lhi_activity_id" invisible="not lhi_external_recipient"/>
+                        <field name="lhi_recipient_consent_reference" invisible="not lhi_external_recipient"/>
+                        <field name="lhi_recipient_supporting_document_ids"
+                               widget="many2many_binary"
+                               context="{'default_res_field': 'lhi_recipient_supporting_document_ids'}"
+                               invisible="not lhi_external_recipient"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_lhi_hub_payment_method_list" model="ir.ui.view">
+        <field name="name">lhi.hub.payment.method.list</field>
+        <field name="model">lhi.hub.payment.method</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="requires_reference"/>
+                <field name="company_id"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_lhi_hub_payment_method" model="ir.actions.act_window">
+        <field name="name">Operational Payment Methods</field>
+        <field name="res_model">lhi.hub.payment.method</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_lhi_hub_notifications" model="ir.actions.act_window">
+        <field name="name">Notification Delivery Queue</field>
+        <field name="res_model">lhi.hub.notification</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'create': False, 'edit': False, 'delete': False}</field>
+    </record>
+    <record id="view_lhi_hub_notification_list" model="ir.ui.view">
+        <field name="name">lhi.hub.notification.list</field>
+        <field name="model">lhi.hub.notification</field>
+        <field name="arch" type="xml">
+            <list create="false" edit="false" delete="false"
+                  decoration-danger="state == 'failed'"
+                  decoration-warning="state == 'no_transport'">
+                <field name="create_date"/>
+                <field name="source_reference"/>
+                <field name="event_type"/>
+                <field name="recipient_id"/>
+                <field name="state" widget="badge"/>
+                <field name="in_system_delivered"/>
+                <field name="email_queued"/>
+                <field name="attempt_count"/>
+                <field name="last_error"/>
+                <button name="action_requeue" type="object" string="Resend"
+                        invisible="state not in ['failed', 'no_transport']"/>
+            </list>
+        </field>
+    </record>
+    <record id="action_lhi_hub_recipients" model="ir.actions.act_window">
+        <field name="name">External Recipients</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('lhi_external_recipient', '=', True)]</field>
+        <field name="context">{'default_lhi_external_recipient': True}</field>
+    </record>
+</odoo>

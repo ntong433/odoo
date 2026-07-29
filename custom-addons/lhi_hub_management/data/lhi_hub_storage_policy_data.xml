@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="policy_hub_consignment" model="lhi.document.storage.policy">
+            <field name="name">HUB Consignment Evidence</field>
+            <field name="model_name">lhi.hub.consignment</field>
+            <field name="library_code">operations</field>
+            <field name="folder_strategy">model_record</field>
+            <field name="document_category">HUB Consignment</field>
+            <field name="retention_category">Operational</field>
+            <field name="confidentiality">internal</field>
+        </record>
+        <record id="policy_hub_stock_request" model="lhi.document.storage.policy">
+            <field name="name">HUB Stock Request Evidence</field>
+            <field name="model_name">lhi.hub.stock.request</field>
+            <field name="library_code">operations</field>
+            <field name="folder_strategy">model_record</field>
+            <field name="document_category">HUB Stock Request</field>
+            <field name="retention_category">Operational Approval</field>
+            <field name="confidentiality">restricted</field>
+        </record>
+        <record id="policy_hub_request_version_source" model="lhi.document.storage.policy">
+            <field name="name">HUB Request Submitted PDF</field>
+            <field name="model_name">lhi.hub.stock.request.document.version</field>
+            <field name="field_name">source_pdf</field>
+            <field name="library_code">controlled_documents</field>
+            <field name="folder_strategy">model_record</field>
+            <field name="document_category">HUB Request Source</field>
+            <field name="retention_category">Signed Record</field>
+            <field name="confidentiality">restricted</field>
+            <field name="direct_browser_upload" eval="False"/>
+        </record>
+        <record id="policy_hub_request_version_signed" model="lhi.document.storage.policy">
+            <field name="name">HUB Request Signed PDF</field>
+            <field name="model_name">lhi.hub.stock.request.document.version</field>
+            <field name="field_name">signed_pdf</field>
+            <field name="library_code">signed_documents</field>
+            <field name="folder_strategy">model_record</field>
+            <field name="document_category">HUB Request Signed</field>
+            <field name="retention_category">Signed Record</field>
+            <field name="confidentiality">restricted</field>
+            <field name="direct_browser_upload" eval="False"/>
+        </record>
+        <record id="policy_hub_request_version_certificate" model="lhi.document.storage.policy">
+            <field name="name">HUB Request Audit Certificate</field>
+            <field name="model_name">lhi.hub.stock.request.document.version</field>
+            <field name="field_name">audit_certificate</field>
+            <field name="library_code">signed_documents</field>
+            <field name="folder_strategy">model_record</field>
+            <field name="document_category">HUB Signature Certificate</field>
+            <field name="retention_category">Signed Record</field>
+            <field name="confidentiality">restricted</field>
+            <field name="direct_browser_upload" eval="False"/>
+        </record>
+        <record id="policy_hub_request_artifact" model="lhi.document.storage.policy">
+            <field name="name">HUB Dispatch and Receipt Artifacts</field>
+            <field name="model_name">lhi.hub.stock.request.artifact</field>
+            <field name="library_code">operations</field>
+            <field name="folder_strategy">model_record</field>
+            <field name="document_category">HUB Movement Artifact</field>
+            <field name="retention_category">Operational</field>
+            <field name="confidentiality">internal</field>
+            <field name="direct_browser_upload" eval="False"/>
+        </record>
+        <record id="policy_hub_external_issue" model="lhi.document.storage.policy">
+            <field name="name">HUB External Issue Evidence</field>
+            <field name="model_name">lhi.hub.external.issue</field>
+            <field name="library_code">operations</field>
+            <field name="folder_strategy">model_record</field>
+            <field name="document_category">HUB External Issue</field>
+            <field name="retention_category">Operational</field>
+            <field name="confidentiality">restricted</field>
+        </record>
+        <record id="policy_hub_external_recipient" model="lhi.document.storage.policy">
+            <field name="name">External Recipient Evidence</field>
+            <field name="model_name">res.partner</field>
+            <field name="field_name">lhi_recipient_supporting_document_ids</field>
+            <field name="library_code">operations</field>
+            <field name="folder_strategy">model_record</field>
+            <field name="document_category">External Recipient</field>
+            <field name="retention_category">Operational</field>
+            <field name="confidentiality">restricted</field>
+        </record>
+        <record id="policy_hub_lease" model="lhi.document.storage.policy">
+            <field name="name">HUB Equipment Lease Evidence</field>
+            <field name="model_name">lhi.hub.equipment.lease</field>
+            <field name="library_code">operations</field>
+            <field name="folder_strategy">model_record</field>
+            <field name="document_category">HUB Equipment Lease</field>
+            <field name="retention_category">Operational</field>
+            <field name="confidentiality">restricted</field>
+        </record>
+    </data>
+</odoo>

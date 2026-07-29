@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_hub_stock_request" model="ir.actions.report">
+        <field name="name">Immutable HUB Stock Request</field>
+        <field name="model">lhi.hub.stock.request</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lhi_hub_management.report_hub_stock_request</field>
+        <field name="report_file">lhi_hub_management.report_hub_stock_request</field>
+        <field name="print_report_name">'HUB-Request-%s-V%s' % (object.name, object.document_version_number)</field>
+        <field name="binding_model_id" ref="model_lhi_hub_stock_request"/>
+        <field name="binding_type">report</field>
+    </record>
+    <record id="action_report_hub_dispatch_note" model="ir.actions.report">
+        <field name="name">HUB Dispatch Note</field>
+        <field name="model">lhi.hub.stock.request</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lhi_hub_management.report_hub_dispatch_note</field>
+        <field name="report_file">lhi_hub_management.report_hub_dispatch_note</field>
+    </record>
+    <record id="action_report_hub_goods_receipt" model="ir.actions.report">
+        <field name="name">HUB Goods Receipt Confirmation</field>
+        <field name="model">lhi.hub.stock.request</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lhi_hub_management.report_hub_goods_receipt</field>
+        <field name="report_file">lhi_hub_management.report_hub_goods_receipt</field>
+    </record>
+    <record id="action_report_hub_external_issue" model="ir.actions.report">
+        <field name="name">HUB External Issue Note</field>
+        <field name="model">lhi.hub.external.issue</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lhi_hub_management.report_hub_external_issue</field>
+        <field name="report_file">lhi_hub_management.report_hub_external_issue</field>
+        <field name="binding_model_id" ref="model_lhi_hub_external_issue"/>
+        <field name="binding_type">report</field>
+    </record>
+    <record id="action_report_hub_equipment_lease" model="ir.actions.report">
+        <field name="name">HUB Equipment Lease Record</field>
+        <field name="model">lhi.hub.equipment.lease</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lhi_hub_management.report_hub_equipment_lease</field>
+        <field name="report_file">lhi_hub_management.report_hub_equipment_lease</field>
+        <field name="binding_model_id" ref="model_lhi_hub_equipment_lease"/>
+        <field name="binding_type">report</field>
+    </record>
+    <record id="action_report_hub_consignment_receipt" model="ir.actions.report">
+        <field name="name">HUB Consignment Receipt</field>
+        <field name="model">lhi.hub.consignment</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lhi_hub_management.report_hub_consignment</field>
+        <field name="report_file">lhi_hub_management.report_hub_consignment</field>
+        <field name="binding_model_id" ref="model_lhi_hub_consignment"/>
+        <field name="binding_type">report</field>
+    </record>
+    <record id="action_report_hub_lease_return" model="ir.actions.report">
+        <field name="name">Equipment Return Inspection</field>
+        <field name="model">lhi.hub.equipment.lease</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lhi_hub_management.report_hub_lease_return</field>
+        <field name="report_file">lhi_hub_management.report_hub_lease_return</field>
+        <field name="binding_model_id" ref="model_lhi_hub_equipment_lease"/>
+        <field name="binding_type">report</field>
+    </record>
+    <record id="action_report_hub_stock_summary" model="ir.actions.report">
+        <field name="name">Stock by HUB / Donor / Project</field>
+        <field name="model">stock.quant</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lhi_hub_management.report_hub_stock_summary</field>
+        <field name="report_file">lhi_hub_management.report_hub_stock_summary</field>
+        <field name="binding_model_id" ref="stock.model_stock_quant"/>
+        <field name="binding_type">report</field>
+    </record>
+    <record id="action_report_hub_expiry" model="ir.actions.report">
+        <field name="name">HUB Expiry Report</field>
+        <field name="model">stock.lot</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lhi_hub_management.report_hub_expiry</field>
+        <field name="report_file">lhi_hub_management.report_hub_expiry</field>
+        <field name="binding_model_id" ref="stock.model_stock_lot"/>
+        <field name="binding_type">report</field>
+    </record>
+    <record id="action_report_hub_operational_revenue" model="ir.actions.report">
+        <field name="name">Operational Revenue Report</field>
+        <field name="model">lhi.hub.operational.revenue</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lhi_hub_management.report_hub_operational_revenue</field>
+        <field name="report_file">lhi_hub_management.report_hub_operational_revenue</field>
+        <field name="binding_model_id" ref="model_lhi_hub_operational_revenue"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

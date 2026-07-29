@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_hub_stock_request">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Internal HUB Stock Request</h2>
+                        <p><strong>Reference:</strong> <span t-field="o.name"/> · <strong>Document version:</strong> <span t-field="o.document_version_number"/></p>
+                        <p><strong>Requesting HUB:</strong> <span t-field="o.requesting_hub_id"/> · <strong>Supplying HUB:</strong> <span t-field="o.supplying_hub_id"/></p>
+                        <p><strong>Request date:</strong> <span t-field="o.request_date"/> · <strong>Requested by:</strong> <span t-field="o.requested_by_id"/> · <strong>Priority:</strong> <span t-field="o.priority"/></p>
+                        <p><strong>Project:</strong> <span t-field="o.project_id"/> · <strong>Programme:</strong> <span t-field="o.programme_id"/> · <strong>Grant/Award:</strong> <span t-field="o.award_id"/></p>
+                        <p><strong>Donor:</strong> <span t-field="o.donor_id"/> · <strong>Activity:</strong> <span t-field="o.activity_id"/> · <strong>Approval matrix:</strong> <span t-field="o.approval_matrix_id"/></p>
+                        <p><strong>Total Operational Value:</strong> <span t-field="o.total_operational_value"/></p>
+                        <p><strong>Purpose:</strong> <span t-field="o.purpose"/></p>
+                        <table class="table table-sm">
+                            <thead><tr><th>Item Description</th><th>Unit of Measure</th><th class="text-end">Quantity Requested</th><th class="text-end">Available</th><th class="text-end">Quantity Approved</th><th>Purpose/Remarks</th><th>Partial reason</th></tr></thead>
+                            <tbody>
+                                <tr t-foreach="o.line_ids" t-as="line">
+                                    <td><span t-field="line.item_description"/></td>
+                                    <td><span t-field="line.uom_id"/></td>
+                                    <td class="text-end"><span t-field="line.quantity_requested"/></td>
+                                    <td class="text-end"><span t-field="line.quantity_available"/></td>
+                                    <td class="text-end"><span t-field="line.quantity_approved"/></td>
+                                    <td><span t-field="line.purpose_remarks"/></td>
+                                    <td><span t-field="line.partial_fulfilment_reason"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <h4>Immutable Approval and Signature Route</h4>
+                        <table class="table table-sm">
+                            <thead><tr><th>Sequence</th><th>Approval Role</th><th>Approver Name</th><th>Signature</th><th>Date</th><th>Decision</th><th>Comments</th></tr></thead>
+                            <tbody>
+                                <tr t-foreach="o.approval_request_id.line_ids.sorted('sequence')" t-as="stage">
+                                    <td><span t-field="stage.sequence"/></td>
+                                    <td><span t-field="stage.lhi_approval_role"/></td>
+                                    <td><span t-field="stage.lhi_signer_name"/></td>
+                                    <td>________________</td>
+                                    <td><span t-field="stage.lhi_signed_at"/></td>
+                                    <td><span t-field="stage.state"/></td>
+                                    <td><span t-if="stage.history_ids" t-esc="stage.history_ids[-1].notes"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p class="text-muted">Stock availability is a reviewed snapshot. Stock changes only through validated Odoo movements. Final signatures are completed through LHI Sign and retained in SharePoint.</p>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_hub_dispatch_note">
+        <t t-call="web.html_container"><t t-foreach="docs" t-as="o"><t t-call="web.external_layout">
+            <div class="page"><h2>HUB Dispatch Note</h2><p><strong>Request:</strong> <span t-field="o.name"/></p>
+                <table class="table table-sm"><thead><tr><th>Item</th><th>Lot/Serial</th><th class="text-end">Dispatched</th></tr></thead>
+                    <tbody><tr t-foreach="o.line_ids" t-as="line"><td><span t-field="line.item_description"/></td><td><span t-field="line.selected_lot_id"/></td><td class="text-end"><span t-field="line.quantity_dispatched"/></td></tr></tbody>
+                </table><p><strong>Route:</strong> <span t-field="o.supplying_hub_id"/> → <span t-field="o.requesting_hub_id"/></p></div>
+        </t></t></t>
+    </template>
+
+    <template id="report_hub_goods_receipt">
+        <t t-call="web.html_container"><t t-foreach="docs" t-as="o"><t t-call="web.external_layout">
+            <div class="page"><h2>HUB Goods Receipt Confirmation</h2><p><strong>Request:</strong> <span t-field="o.name"/></p>
+                <table class="table table-sm"><thead><tr><th>Item</th><th class="text-end">Dispatched</th><th class="text-end">Received</th><th class="text-end">Outstanding</th></tr></thead>
+                    <tbody><tr t-foreach="o.line_ids" t-as="line"><td><span t-field="line.item_description"/></td><td class="text-end"><span t-field="line.quantity_dispatched"/></td><td class="text-end"><span t-field="line.quantity_received"/></td><td class="text-end"><span t-field="line.outstanding_quantity"/></td></tr></tbody>
+                </table></div>
+        </t></t></t>
+    </template>
+
+    <template id="report_hub_external_issue">
+        <t t-call="web.html_container"><t t-foreach="docs" t-as="o"><t t-call="web.external_layout">
+            <div class="page">
+                <h2 t-if="o.issue_type == 'sale'">External Sale Receipt</h2>
+                <h2 t-elif="o.issue_type in ['free', 'programme']">Free-issue / Distribution Acknowledgement</h2>
+                <h2 t-else="">HUB External Issue Note</h2>
+                <p><strong>Reference:</strong> <span t-field="o.name"/> · <strong>Recipient:</strong> <span t-field="o.recipient_id"/></p>
+                <table class="table table-sm"><thead><tr><th>Item</th><th>Lot/Serial</th><th class="text-end">Quantity</th><th class="text-end">Operational amount</th></tr></thead>
+                    <tbody><tr t-foreach="o.line_ids" t-as="line"><td><span t-field="line.product_id"/></td><td><span t-field="line.lot_id"/></td><td class="text-end"><span t-field="line.quantity"/></td><td class="text-end"><span t-field="line.line_total"/></td></tr></tbody>
+                </table><p>This document records an operational stock movement. It is not an accounting invoice or receipt.</p></div>
+        </t></t></t>
+    </template>
+
+    <template id="report_hub_equipment_lease">
+        <t t-call="web.html_container"><t t-foreach="docs" t-as="o"><t t-call="web.external_layout">
+            <div class="page"><h2>HUB Equipment Lease Record</h2><p><strong>Reference:</strong> <span t-field="o.name"/> · <strong>Lessee:</strong> <span t-field="o.lessee_id"/></p>
+                <p><strong>Period:</strong> <span t-field="o.start_date"/> to <span t-field="o.expected_return_date"/></p>
+                <table class="table table-sm"><thead><tr><th>Equipment</th><th>Serial</th><th>Release condition</th><th>Return condition</th><th class="text-end">Agreed amount</th></tr></thead>
+                    <tbody><tr t-foreach="o.line_ids" t-as="line"><td><span t-field="line.product_id"/></td><td><span t-field="line.lot_id"/></td><td><span t-field="line.release_condition"/></td><td><span t-field="line.return_condition"/></td><td class="text-end"><span t-field="line.agreed_amount"/></td></tr></tbody>
+                </table><p>This is an operational lease record and does not post to Accounting.</p></div>
+        </t></t></t>
+    </template>
+
+    <template id="report_hub_consignment">
+        <t t-call="web.html_container"><t t-foreach="docs" t-as="o"><t t-call="web.external_layout">
+            <div class="page"><h2>HUB Consignment Receipt and Discrepancy Record</h2>
+                <p><strong>Reference:</strong> <span t-field="o.name"/> · <strong>Donor/Partner:</strong> <span t-field="o.partner_id"/> · <strong>HUB:</strong> <span t-field="o.hub_id"/></p>
+                <table class="table table-sm"><thead><tr><th>Item</th><th>Batch/Serial</th><th class="text-end">Expected</th><th class="text-end">Received</th><th class="text-end">Accepted</th><th class="text-end">Rejected</th><th>Discrepancy</th></tr></thead>
+                    <tbody><tr t-foreach="o.line_ids" t-as="line"><td><span t-field="line.product_id"/></td><td><span t-field="line.batch_or_serial_number"/></td><td class="text-end"><span t-field="line.expected_quantity"/></td><td class="text-end"><span t-field="line.received_quantity"/></td><td class="text-end"><span t-field="line.accepted_quantity"/></td><td class="text-end"><span t-field="line.rejected_quantity"/></td><td><span t-field="line.discrepancy_notes"/></td></tr></tbody>
+                </table><p><strong>Inspection:</strong> <span t-field="o.inspection_status"/> · <strong>Stock receipt:</strong> <span t-field="o.picking_id"/></p></div>
+        </t></t></t>
+    </template>
+
+    <template id="report_hub_lease_return">
+        <t t-call="web.html_container"><t t-foreach="docs" t-as="o"><t t-call="web.external_layout">
+            <div class="page"><h2>Equipment Return Inspection</h2><p><strong>Lease:</strong> <span t-field="o.name"/> · <strong>Lessee:</strong> <span t-field="o.lessee_id"/> · <strong>Returned:</strong> <span t-field="o.actual_return_date"/></p>
+                <table class="table table-sm"><thead><tr><th>Equipment</th><th>Serial</th><th>Release</th><th>Return</th><th>Notes</th><th class="text-end">Damage charge</th></tr></thead>
+                    <tbody><tr t-foreach="o.line_ids" t-as="line"><td><span t-field="line.product_id"/></td><td><span t-field="line.lot_id"/></td><td><span t-field="line.release_condition"/></td><td><span t-field="line.return_condition"/></td><td><span t-field="line.return_notes"/></td><td class="text-end"><span t-field="line.damage_charge"/></td></tr></tbody>
+                </table><p><strong>Late charge:</strong> <span t-field="o.late_charge"/> · <strong>Operational balance:</strong> <span t-field="o.outstanding_amount"/></p></div>
+        </t></t></t>
+    </template>
+
+    <template id="report_hub_stock_summary">
+        <t t-call="web.html_container"><t t-set="o" t-value="docs[0]"/><t t-call="web.external_layout">
+            <div class="page"><h2>HUB Operational Stock Summary</h2>
+                <table class="table table-sm"><thead><tr><th>HUB</th><th>Storage Location</th><th>Item</th><th>Lot/Serial</th><th>Donor</th><th>Project</th><th class="text-end">Quantity</th><th class="text-end">Operational Stock Value</th></tr></thead>
+                    <tbody><tr t-foreach="docs" t-as="o"><td><span t-field="o.location_id.warehouse_id"/></td><td><span t-field="o.location_id"/></td><td><span t-field="o.product_id"/></td><td><span t-field="o.lot_id"/></td><td><span t-field="o.lot_id.lhi_donor_id"/></td><td><span t-field="o.lot_id.lhi_project_id"/></td><td class="text-end"><span t-field="o.quantity"/></td><td class="text-end"><span t-field="o.lhi_operational_stock_value"/></td></tr></tbody>
+                </table><p class="text-muted">Operational values are not accounting valuation.</p></div>
+        </t></t>
+    </template>
+
+    <template id="report_hub_expiry">
+        <t t-call="web.html_container"><t t-set="o" t-value="docs[0]"/><t t-call="web.external_layout">
+            <div class="page"><h2>HUB Pharmaceutical Expiry Report</h2>
+                <table class="table table-sm"><thead><tr><th>HUB</th><th>Item</th><th>Batch</th><th>Manufactured</th><th>Removal</th><th>Expiry</th><th>Quarantine</th></tr></thead>
+                    <tbody><tr t-foreach="docs" t-as="o"><td><span t-field="o.lhi_hub_id"/></td><td><span t-field="o.product_id"/></td><td><span t-field="o.name"/></td><td><span t-field="o.lhi_manufacturing_date"/></td><td><span t-field="o.removal_date"/></td><td><span t-field="o.expiration_date"/></td><td><span t-field="o.lhi_quarantine_status"/></td></tr></tbody>
+                </table></div>
+        </t></t>
+    </template>
+
+    <template id="report_hub_operational_revenue">
+        <t t-call="web.html_container"><t t-set="o" t-value="docs[0]"/><t t-call="web.external_layout">
+            <div class="page"><h2>Operational Revenue</h2>
+                <table class="table table-sm"><thead><tr><th>Date</th><th>HUB</th><th>Reference</th><th>Recipient</th><th>Category</th><th>Method</th><th>Officer</th><th class="text-end">Amount</th></tr></thead>
+                    <tbody><tr t-foreach="docs" t-as="o"><td><span t-field="o.transaction_date"/></td><td><span t-field="o.hub_id"/></td><td><span t-field="o.source_reference"/></td><td><span t-field="o.partner_id"/></td><td><span t-field="o.revenue_type"/></td><td><span t-field="o.payment_method_id"/></td><td><span t-field="o.officer_id"/></td><td class="text-end"><span t-field="o.amount"/></td></tr></tbody>
+                </table><p class="text-muted">This report contains operational records only. It is not an invoice, accounting ledger, or journal.</p></div>
+        </t></t>
+    </template>
+</odoo>

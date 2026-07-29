@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_lhi_hub_consignment" model="ir.sequence">
+            <field name="name">HUB Consignment</field>
+            <field name="code">lhi.hub.consignment</field>
+            <field name="prefix">HUB/CON/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_lhi_hub_stock_request" model="ir.sequence">
+            <field name="name">HUB Stock Request</field>
+            <field name="code">lhi.hub.stock.request</field>
+            <field name="prefix">HUB/REQ/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_lhi_hub_external_issue" model="ir.sequence">
+            <field name="name">HUB External Issue</field>
+            <field name="code">lhi.hub.external.issue</field>
+            <field name="prefix">HUB/ISS/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_lhi_hub_equipment_lease" model="ir.sequence">
+            <field name="name">HUB Equipment Lease</field>
+            <field name="code">lhi.hub.equipment.lease</field>
+            <field name="prefix">HUB/LEA/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_lhi_hub_lease_payment" model="ir.sequence">
+            <field name="name">HUB Lease Receipt</field>
+            <field name="code">lhi.hub.lease.payment</field>
+            <field name="prefix">HUB/RCPT/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        <record id="seq_lhi_hub_stock_adjustment" model="ir.sequence">
+            <field name="name">LHI HUB Stock Adjustment</field>
+            <field name="code">lhi.hub.stock.adjustment</field>
+            <field name="prefix">HUB/ADJ/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+    </data>
+</odoo>

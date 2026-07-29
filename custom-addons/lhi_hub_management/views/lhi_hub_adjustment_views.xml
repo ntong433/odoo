@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_hub_stock_adjustment_list" model="ir.ui.view">
+        <field name="name">lhi.hub.stock.adjustment.list</field>
+        <field name="model">lhi.hub.stock.adjustment</field>
+        <field name="arch" type="xml">
+            <list create="1" delete="0" decoration-muted="state == 'reversed'">
+                <field name="name"/>
+                <field name="adjustment_date"/>
+                <field name="hub_id"/>
+                <field name="location_id"/>
+                <field name="requested_by_id"/>
+                <field name="validated_by_id"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_hub_stock_adjustment_form" model="ir.ui.view">
+        <field name="name">lhi.hub.stock.adjustment.form</field>
+        <field name="model">lhi.hub.stock.adjustment</field>
+        <field name="arch" type="xml">
+            <form string="Controlled Stock Adjustment" delete="0">
+                <header>
+                    <button name="action_validate" type="object" string="Validate Adjustment"
+                            class="btn-primary" invisible="state != 'draft'"
+                            groups="lhi_security.group_lhi_operations_manager"/>
+                    <button name="action_reverse" type="object" string="Create Reversal"
+                            confirm="This creates an auditable reversing inventory movement. Continue?"
+                            invisible="state != 'validated' or reversal_id"
+                            groups="lhi_security.group_lhi_operations_manager"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" readonly="1"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="hub_id" readonly="state != 'draft'"/>
+                            <field name="location_id" readonly="state != 'draft'"
+                                   options="{'no_create': True}"/>
+                            <field name="adjustment_date"/>
+                        </group>
+                        <group>
+                            <field name="requested_by_id"/>
+                            <field name="validated_by_id"/>
+                            <field name="validated_at"/>
+                            <field name="reversal_of_id" invisible="not reversal_of_id"/>
+                            <field name="reversal_id" invisible="not reversal_id"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="reason" readonly="state != 'draft'"
+                               placeholder="Explain the physical count, damage, correction, or other operational cause."/>
+                    </group>
+                    <field name="line_ids" readonly="state != 'draft'">
+                        <list editable="bottom">
+                            <field name="product_id"/>
+                            <field name="uom_id" options="{'no_create': True}"/>
+                            <field name="lot_id" options="{'no_create': True}"/>
+                            <field name="adjustment_quantity"/>
+                            <field name="quantity_before" optional="show"/>
+                            <field name="quantity_after" optional="show"/>
+                            <field name="move_id" optional="show"/>
+                        </list>
+                    </field>
+                    <group invisible="state != 'validated' or reversal_id">
+                        <field name="reversal_reason"
+                               placeholder="Required before creating the reversal."/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_hub_stock_adjustment_search" model="ir.ui.view">
+        <field name="name">lhi.hub.stock.adjustment.search</field>
+        <field name="model">lhi.hub.stock.adjustment</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="hub_id"/>
+                <field name="location_id"/>
+                <field name="reason"/>
+                <filter name="draft" string="Draft" domain="[('state', '=', 'draft')]"/>
+                <filter name="validated" string="Validated" domain="[('state', '=', 'validated')]"/>
+                <group expand="0" string="Group By">
+                    <filter name="hub" string="HUB" context="{'group_by': 'hub_id'}"/>
+                    <filter name="state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="date" string="Month" context="{'group_by': 'adjustment_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_lhi_hub_stock_adjustment" model="ir.actions.act_window">
+        <field name="name">Stock Adjustments</field>
+        <field name="res_model">lhi.hub.stock.adjustment</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_lhi_hub_stock_adjustment_search"/>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create a reason-controlled stock adjustment.</p>
+            <p>Only Operations Management can validate; each line creates an auditable inventory movement.</p>
+        </field>
+    </record>
+</odoo>

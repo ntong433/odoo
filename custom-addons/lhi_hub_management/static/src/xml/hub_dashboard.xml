@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="lhi_hub_management.HubDashboard" owl="1">
+        <main class="o_lhi_hub_dashboard">
+            <header class="o_lhi_hub_dashboard_header">
+                <div>
+                    <p class="o_lhi_hub_eyebrow">LHI ERP · Operations</p>
+                    <h1>HUB Management</h1>
+                    <p>Stock, transfers, distributions, leases and operational value—limited to your authorized HUBs.</p>
+                </div>
+                <button class="btn btn-outline-primary" t-on-click="load">
+                    <i class="fa fa-refresh me-1"/> Refresh
+                </button>
+            </header>
+            <div t-if="state.loading" class="o_lhi_hub_state">
+                <i class="fa fa-circle-o-notch fa-spin fa-2x"/>
+                <span>Loading permission-aware HUB metrics…</span>
+            </div>
+            <div t-elif="state.failed" class="alert alert-warning">
+                HUB overview is unavailable. Use the operational list menus or try again.
+            </div>
+            <t t-else="">
+                <div t-if="state.warnings.length" class="alert alert-info" role="status">
+                    <strong>Some metrics are hidden by your access:</strong>
+                    <ul class="mb-0">
+                        <li t-foreach="state.warnings" t-as="warning" t-key="warning">
+                            <t t-esc="warning"/>
+                        </li>
+                    </ul>
+                </div>
+                <section class="o_lhi_hub_cards" aria-label="HUB key performance indicators">
+                    <button t-foreach="state.cards" t-as="card" t-key="card.key"
+                            class="o_lhi_hub_card"
+                            t-on-click="() => this.openRecords(card.model, card.domain)">
+                        <span><t t-esc="card.label"/></span>
+                        <strong><t t-esc="displayValue(card)"/></strong>
+                        <small>View accessible records <i class="fa fa-arrow-right"/></small>
+                    </button>
+                </section>
+                <section class="o_lhi_hub_charts">
+                    <article t-foreach="state.charts" t-as="chart" t-key="chart.key"
+                             class="o_lhi_hub_chart">
+                        <h3><t t-esc="chart.label"/></h3>
+                        <button t-foreach="chart.segments" t-as="segment"
+                                t-key="segment.label"
+                                t-on-click="() => this.openRecords(chart.model, segment.domain)">
+                            <span><t t-esc="segment.label"/></span>
+                            <strong>
+                                <t t-if="chart.monetary"><t t-esc="state.currency"/> </t>
+                                <t t-esc="Number(segment.value || 0).toLocaleString()"/>
+                            </strong>
+                        </button>
+                        <p t-if="!chart.segments.length" class="text-muted mb-0">No accessible records.</p>
+                    </article>
+                </section>
+            </t>
+        </main>
+    </t>
+</templates>

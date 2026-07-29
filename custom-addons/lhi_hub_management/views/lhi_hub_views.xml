@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_lhi_hub_dashboard" model="ir.actions.client">
+        <field name="name">HUB Overview</field>
+        <field name="tag">lhi_hub_management.hub_dashboard</field>
+    </record>
+
+    <record id="view_lhi_hub_warehouse_form" model="ir.ui.view">
+        <field name="name">stock.warehouse.form.lhi.hub</field>
+        <field name="model">stock.warehouse</field>
+        <field name="inherit_id" ref="stock.view_warehouse"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="LHI HUB" name="lhi_hub">
+                    <group>
+                        <group string="Organization">
+                            <field name="lhi_state_id"/>
+                            <field name="lhi_office_id"/>
+                            <field name="lhi_operations_manager_id"/>
+                        </group>
+                        <group string="Authorized Team">
+                            <field name="lhi_warehouse_officer_ids" widget="many2many_tags"/>
+                            <field name="lhi_operations_officer_ids" widget="many2many_tags"/>
+                            <field name="lhi_authorized_user_ids" widget="many2many_tags"/>
+                        </group>
+                    </group>
+                    <group string="Controlled Locations">
+                        <field name="lhi_default_receipt_location_id"/>
+                        <field name="lhi_default_dispatch_location_id"/>
+                        <field name="lhi_quarantine_location_id"/>
+                        <field name="lhi_damaged_location_id"/>
+                        <field name="lhi_returns_location_id"/>
+                        <field name="lhi_lease_location_id"/>
+                    </group>
+                    <button name="action_create_lhi_standard_locations"
+                            type="object" string="Create Standard HUB Locations"
+                            class="btn-primary"
+                            groups="lhi_security.group_lhi_operations_manager"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_lhi_hub_users_form" model="ir.ui.view">
+        <field name="name">res.users.form.lhi.hubs</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Authorized HUBs"
+                      groups="lhi_security.group_lhi_erp_admin,lhi_security.group_lhi_operations_manager">
+                    <field name="lhi_hub_ids" widget="many2many_tags"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_lhi_hub_warehouses" model="ir.actions.act_window">
+        <field name="name">HUBs and Locations</field>
+        <field name="res_model">stock.warehouse</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_lhi_hub_quants" model="ir.actions.act_window">
+        <field name="name">HUB Stock on Hand</field>
+        <field name="res_model">stock.quant</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('location_id.usage', '=', 'internal')]</field>
+        <field name="context">{'search_default_internal_loc': 1}</field>
+    </record>
+
+    <record id="action_lhi_hub_pickings" model="ir.actions.act_window">
+        <field name="name">HUB Stock Movements</field>
+        <field name="res_model">stock.picking</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

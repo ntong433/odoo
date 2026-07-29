@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="product_category_lhi_nfi" model="product.category">
+            <field name="name">NFI – Non-Food Items</field>
+            <field name="lhi_hub_category_code">nfi</field>
+            <field name="lhi_protected_hub_category" eval="True"/>
+        </record>
+        <record id="product_category_lhi_medical" model="product.category">
+            <field name="name">Medical Equipment</field>
+            <field name="lhi_hub_category_code">medical</field>
+            <field name="lhi_protected_hub_category" eval="True"/>
+        </record>
+        <record id="product_category_lhi_consumables" model="product.category">
+            <field name="name">Consumables</field>
+            <field name="lhi_hub_category_code">consumables</field>
+            <field name="lhi_protected_hub_category" eval="True"/>
+        </record>
+        <record id="product_category_lhi_pharmaceuticals" model="product.category">
+            <field name="name">Pharmaceuticals</field>
+            <field name="lhi_hub_category_code">pharmaceuticals</field>
+            <field name="lhi_protected_hub_category" eval="True"/>
+            <field name="removal_strategy_id" ref="product_expiry.removal_fefo"/>
+        </record>
+
+        <record id="payment_method_cash" model="lhi.hub.payment.method">
+            <field name="name">Cash</field>
+            <field name="code">cash</field>
+            <field name="sequence">10</field>
+            <field name="requires_reference" eval="False"/>
+        </record>
+        <record id="payment_method_bank" model="lhi.hub.payment.method">
+            <field name="name">Bank Transfer</field>
+            <field name="code">bank</field>
+            <field name="sequence">20</field>
+        </record>
+        <record id="payment_method_pos" model="lhi.hub.payment.method">
+            <field name="name">POS</field>
+            <field name="code">pos</field>
+            <field name="sequence">30</field>
+        </record>
+        <record id="payment_method_mobile" model="lhi.hub.payment.method">
+            <field name="name">Mobile Money</field>
+            <field name="code">mobile</field>
+            <field name="sequence">40</field>
+        </record>
+        <record id="payment_method_other" model="lhi.hub.payment.method">
+            <field name="name">Other</field>
+            <field name="code">other</field>
+            <field name="sequence">50</field>
+        </record>
+    </data>
+</odoo>

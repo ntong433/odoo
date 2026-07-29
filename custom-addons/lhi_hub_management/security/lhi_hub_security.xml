@@ -1,0 +1,479 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+        <!-- Operational roles receive stock execution rights without technical
+             Inventory administration. -->
+        <record id="lhi_security.group_lhi_warehouse_officer" model="res.groups">
+            <field name="implied_ids" eval="[
+                (4, ref('stock.group_stock_user')),
+                (4, ref('stock.group_stock_multi_locations')),
+                (4, ref('stock.group_stock_multi_warehouses')),
+                (4, ref('stock.group_production_lot'))
+            ]"/>
+        </record>
+        <record id="lhi_security.group_lhi_operations_officer" model="res.groups">
+            <field name="implied_ids" eval="[
+                (4, ref('stock.group_stock_user')),
+                (4, ref('stock.group_stock_multi_locations')),
+                (4, ref('stock.group_stock_multi_warehouses')),
+                (4, ref('stock.group_production_lot'))
+            ]"/>
+        </record>
+        <record id="lhi_security.group_lhi_erp_admin" model="res.groups">
+            <field name="implied_ids" eval="[
+                (4, ref('stock.group_stock_manager')),
+                (4, ref('stock.group_stock_multi_locations')),
+                (4, ref('stock.group_stock_multi_warehouses')),
+                (4, ref('stock.group_production_lot'))
+            ]"/>
+        </record>
+    </data>
+
+    <data noupdate="1">
+        <!-- All persistent business models are company-isolated first. -->
+        <record id="rule_lhi_hub_consignment_company" model="ir.rule">
+            <field name="name">HUB Consignment: Multi-company</field>
+            <field name="model_id" ref="model_lhi_hub_consignment"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_consignment_line_company" model="ir.rule">
+            <field name="name">HUB Consignment Line: Multi-company</field>
+            <field name="model_id" ref="model_lhi_hub_consignment_line"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_request_company" model="ir.rule">
+            <field name="name">HUB Stock Request: Multi-company</field>
+            <field name="model_id" ref="model_lhi_hub_stock_request"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_request_line_company" model="ir.rule">
+            <field name="name">HUB Stock Request Line: Multi-company</field>
+            <field name="model_id" ref="model_lhi_hub_stock_request_line"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_request_version_company" model="ir.rule">
+            <field name="name">HUB Request Version: Multi-company</field>
+            <field name="model_id" ref="model_lhi_hub_stock_request_document_version"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_request_artifact_company" model="ir.rule">
+            <field name="name">HUB Request Artifact: Multi-company</field>
+            <field name="model_id" ref="model_lhi_hub_stock_request_artifact"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_external_issue_company" model="ir.rule">
+            <field name="name">HUB External Issue: Multi-company</field>
+            <field name="model_id" ref="model_lhi_hub_external_issue"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_external_issue_line_company" model="ir.rule">
+            <field name="name">HUB External Issue Line: Multi-company</field>
+            <field name="model_id" ref="model_lhi_hub_external_issue_line"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_lease_company" model="ir.rule">
+            <field name="name">HUB Equipment Lease: Multi-company</field>
+            <field name="model_id" ref="model_lhi_hub_equipment_lease"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_lease_line_company" model="ir.rule">
+            <field name="name">HUB Equipment Lease Line: Multi-company</field>
+            <field name="model_id" ref="model_lhi_hub_equipment_lease_line"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_lease_payment_company" model="ir.rule">
+            <field name="name">HUB Lease Payment: Multi-company</field>
+            <field name="model_id" ref="model_lhi_hub_lease_payment"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_revenue_company" model="ir.rule">
+            <field name="name">HUB Operational Revenue: Multi-company</field>
+            <field name="model_id" ref="model_lhi_hub_operational_revenue"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_notification_company" model="ir.rule">
+            <field name="name">HUB Notification: Multi-company</field>
+            <field name="model_id" ref="model_lhi_hub_notification"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_payment_method_company" model="ir.rule">
+            <field name="name">HUB Payment Method: Multi-company</field>
+            <field name="model_id" ref="model_lhi_hub_payment_method"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <!-- The reusable approval engine remains broadly reusable for non-HUB
+             documents, while HUB routes are limited to creator, assigned HUB
+             staff, or users frozen into the submitted route. -->
+        <record id="rule_lhi_hub_approval_request_scope" model="ir.rule">
+            <field name="name">Approval Request: Govern HUB Route Scope</field>
+            <field name="model_id" ref="lhi_approval_matrix.model_lhi_approval_request"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_employee'))]"/>
+            <field name="domain_force">['|', ('document_type', '!=', 'hub_stock_request'), '|', '|', ('creator_id', '=', user.id), ('lhi_hub_request_id.requesting_hub_id', 'in', user.lhi_hub_ids.ids), ('line_ids.approver_ids', 'in', user.id)]</field>
+        </record>
+        <record id="rule_lhi_hub_approval_line_scope" model="ir.rule">
+            <field name="name">Approval Line: Govern HUB Route Scope</field>
+            <field name="model_id" ref="lhi_approval_matrix.model_lhi_approval_request_line"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_employee'))]"/>
+            <field name="domain_force">['|', ('request_id.document_type', '!=', 'hub_stock_request'), '|', '|', ('request_id.creator_id', '=', user.id), ('request_id.lhi_hub_request_id.requesting_hub_id', 'in', user.lhi_hub_ids.ids), ('approver_ids', 'in', user.id)]</field>
+        </record>
+        <record id="rule_lhi_hub_approval_history_scope" model="ir.rule">
+            <field name="name">Approval History: Govern HUB Route Scope</field>
+            <field name="model_id" ref="lhi_approval_matrix.model_lhi_approval_history"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_employee'))]"/>
+            <field name="domain_force">['|', ('request_line_id.request_id.document_type', '!=', 'hub_stock_request'), '|', '|', ('request_line_id.request_id.creator_id', '=', user.id), ('request_line_id.request_id.lhi_hub_request_id.requesting_hub_id', 'in', user.lhi_hub_ids.ids), ('request_line_id.approver_ids', 'in', user.id)]</field>
+        </record>
+
+        <!-- Assigned-HUB scope. Group rules are ORed, allowing the explicit
+             Director and Auditor overrides below. -->
+        <record id="rule_lhi_hub_warehouse_assigned" model="ir.rule">
+            <field name="name">HUB Warehouse: Assigned HUBs</field>
+            <field name="model_id" ref="stock.model_stock_warehouse"/>
+            <field name="groups" eval="[
+                (4, ref('lhi_security.group_lhi_hub_viewer')),
+                (4, ref('lhi_security.group_lhi_programme_user')),
+                (4, ref('lhi_security.group_lhi_programme_approver'))
+            ]"/>
+            <field name="domain_force">[('id', 'in', user.lhi_hub_ids.ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_location_assigned" model="ir.rule">
+            <field name="name">HUB Location: Assigned HUBs and Workflow Boundaries</field>
+            <field name="model_id" ref="stock.model_stock_location"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_hub_viewer'))]"/>
+            <field name="domain_force">['|', ('warehouse_id', 'in', user.lhi_hub_ids.ids), ('usage', 'in', ['supplier', 'customer', 'transit'])]</field>
+        </record>
+        <record id="rule_lhi_hub_quant_assigned" model="ir.rule">
+            <field name="name">HUB Quant: Assigned HUBs</field>
+            <field name="model_id" ref="stock.model_stock_quant"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_hub_viewer'))]"/>
+            <field name="domain_force">[('location_id.warehouse_id', 'in', user.lhi_hub_ids.ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_lot_assigned" model="ir.rule">
+            <field name="name">HUB Lots/Serials: Assigned HUBs</field>
+            <field name="model_id" ref="stock.model_stock_lot"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_hub_viewer'))]"/>
+            <field name="domain_force">[('lhi_hub_id', 'in', user.lhi_hub_ids.ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_picking_assigned" model="ir.rule">
+            <field name="name">HUB Picking: Assigned HUB Workflows</field>
+            <field name="model_id" ref="stock.model_stock_picking"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_hub_viewer'))]"/>
+            <field name="domain_force">['|','|','|','|', ('picking_type_id.warehouse_id', 'in', user.lhi_hub_ids.ids), ('lhi_hub_request_id.requesting_hub_id', 'in', user.lhi_hub_ids.ids), ('lhi_consignment_id.hub_id', 'in', user.lhi_hub_ids.ids), ('lhi_external_issue_id.hub_id', 'in', user.lhi_hub_ids.ids), ('lhi_equipment_lease_id.hub_id', 'in', user.lhi_hub_ids.ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_move_assigned" model="ir.rule">
+            <field name="name">HUB Move: Assigned HUB Workflows</field>
+            <field name="model_id" ref="stock.model_stock_move"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_hub_viewer'))]"/>
+            <field name="domain_force">['|', ('location_id.warehouse_id', 'in', user.lhi_hub_ids.ids), ('location_dest_id.warehouse_id', 'in', user.lhi_hub_ids.ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_move_line_assigned" model="ir.rule">
+            <field name="name">HUB Move Line: Assigned HUB Workflows</field>
+            <field name="model_id" ref="stock.model_stock_move_line"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_hub_viewer'))]"/>
+            <field name="domain_force">['|', ('location_id.warehouse_id', 'in', user.lhi_hub_ids.ids), ('location_dest_id.warehouse_id', 'in', user.lhi_hub_ids.ids)]</field>
+        </record>
+
+        <record id="rule_lhi_hub_consignment_assigned" model="ir.rule">
+            <field name="name">HUB Consignment: Assigned HUBs</field>
+            <field name="model_id" ref="model_lhi_hub_consignment"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_hub_viewer'))]"/>
+            <field name="domain_force">[('hub_id', 'in', user.lhi_hub_ids.ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_consignment_line_assigned" model="ir.rule">
+            <field name="name">HUB Consignment Line: Assigned HUBs</field>
+            <field name="model_id" ref="model_lhi_hub_consignment_line"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_hub_viewer'))]"/>
+            <field name="domain_force">[('consignment_id.hub_id', 'in', user.lhi_hub_ids.ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_request_assigned" model="ir.rule">
+            <field name="name">HUB Request: Requesting or Supplying HUB</field>
+            <field name="model_id" ref="model_lhi_hub_stock_request"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_hub_viewer'))]"/>
+            <field name="domain_force">['|', ('requesting_hub_id', 'in', user.lhi_hub_ids.ids), ('supplying_hub_id', 'in', user.lhi_hub_ids.ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_request_programme_owner" model="ir.rule">
+            <field name="name">HUB Request: Programme User Ownership</field>
+            <field name="model_id" ref="model_lhi_hub_stock_request"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_programme_user'))]"/>
+            <field name="domain_force">[('requested_by_id', '=', user.id), ('requesting_hub_id', 'in', user.lhi_hub_ids.ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_request_line_assigned" model="ir.rule">
+            <field name="name">HUB Request Line: Requesting or Supplying HUB</field>
+            <field name="model_id" ref="model_lhi_hub_stock_request_line"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_hub_viewer'))]"/>
+            <field name="domain_force">['|', ('request_id.requesting_hub_id', 'in', user.lhi_hub_ids.ids), ('request_id.supplying_hub_id', 'in', user.lhi_hub_ids.ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_request_line_programme_owner" model="ir.rule">
+            <field name="name">HUB Request Line: Programme User Ownership</field>
+            <field name="model_id" ref="model_lhi_hub_stock_request_line"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_programme_user'))]"/>
+            <field name="domain_force">[('request_id.requested_by_id', '=', user.id), ('request_id.requesting_hub_id', 'in', user.lhi_hub_ids.ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_request_version_assigned" model="ir.rule">
+            <field name="name">HUB Request Version: Requesting or Supplying HUB</field>
+            <field name="model_id" ref="model_lhi_hub_stock_request_document_version"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_hub_viewer'))]"/>
+            <field name="domain_force">['|', ('request_id.requesting_hub_id', 'in', user.lhi_hub_ids.ids), ('request_id.supplying_hub_id', 'in', user.lhi_hub_ids.ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_request_version_programme_owner" model="ir.rule">
+            <field name="name">HUB Request Version: Programme User Ownership</field>
+            <field name="model_id" ref="model_lhi_hub_stock_request_document_version"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_programme_user'))]"/>
+            <field name="domain_force">[('request_id.requested_by_id', '=', user.id), ('request_id.requesting_hub_id', 'in', user.lhi_hub_ids.ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_request_artifact_assigned" model="ir.rule">
+            <field name="name">HUB Request Artifact: Requesting or Supplying HUB</field>
+            <field name="model_id" ref="model_lhi_hub_stock_request_artifact"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_hub_viewer'))]"/>
+            <field name="domain_force">['|', ('request_id.requesting_hub_id', 'in', user.lhi_hub_ids.ids), ('request_id.supplying_hub_id', 'in', user.lhi_hub_ids.ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_external_issue_assigned" model="ir.rule">
+            <field name="name">HUB External Issue: Assigned HUBs</field>
+            <field name="model_id" ref="model_lhi_hub_external_issue"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_hub_viewer'))]"/>
+            <field name="domain_force">[('hub_id', 'in', user.lhi_hub_ids.ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_external_issue_line_assigned" model="ir.rule">
+            <field name="name">HUB External Issue Line: Assigned HUBs</field>
+            <field name="model_id" ref="model_lhi_hub_external_issue_line"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_hub_viewer'))]"/>
+            <field name="domain_force">[('issue_id.hub_id', 'in', user.lhi_hub_ids.ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_lease_assigned" model="ir.rule">
+            <field name="name">HUB Lease: Assigned HUBs</field>
+            <field name="model_id" ref="model_lhi_hub_equipment_lease"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_hub_viewer'))]"/>
+            <field name="domain_force">[('hub_id', 'in', user.lhi_hub_ids.ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_lease_line_assigned" model="ir.rule">
+            <field name="name">HUB Lease Line: Assigned HUBs</field>
+            <field name="model_id" ref="model_lhi_hub_equipment_lease_line"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_hub_viewer'))]"/>
+            <field name="domain_force">[('lease_id.hub_id', 'in', user.lhi_hub_ids.ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_lease_payment_assigned" model="ir.rule">
+            <field name="name">HUB Lease Payment: Assigned HUBs</field>
+            <field name="model_id" ref="model_lhi_hub_lease_payment"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_hub_viewer'))]"/>
+            <field name="domain_force">[('lease_id.hub_id', 'in', user.lhi_hub_ids.ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_revenue_assigned" model="ir.rule">
+            <field name="name">HUB Revenue: Assigned HUBs</field>
+            <field name="model_id" ref="model_lhi_hub_operational_revenue"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_hub_viewer'))]"/>
+            <field name="domain_force">[('hub_id', 'in', user.lhi_hub_ids.ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_notification_recipient" model="ir.rule">
+            <field name="name">HUB Notification: Recipient</field>
+            <field name="model_id" ref="model_lhi_hub_notification"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_employee'))]"/>
+            <field name="domain_force">[('recipient_id', '=', user.id)]</field>
+        </record>
+
+        <!-- Organizational read/management overrides. -->
+        <record id="rule_lhi_hub_request_approver" model="ir.rule">
+            <field name="name">HUB Request: Snapshotted Approver</field>
+            <field name="model_id" ref="model_lhi_hub_stock_request"/>
+            <field name="groups" eval="[
+                (4, ref('lhi_security.group_lhi_ned')),
+                (4, ref('lhi_security.group_lhi_programme_approver'))
+            ]"/>
+            <field name="domain_force">[('approval_request_id.line_ids.approver_ids', 'in', user.id)]</field>
+        </record>
+        <record id="rule_lhi_hub_request_line_approver" model="ir.rule">
+            <field name="name">HUB Request Line: Snapshotted Approver</field>
+            <field name="model_id" ref="model_lhi_hub_stock_request_line"/>
+            <field name="groups" eval="[
+                (4, ref('lhi_security.group_lhi_ned')),
+                (4, ref('lhi_security.group_lhi_programme_approver'))
+            ]"/>
+            <field name="domain_force">[('request_id.approval_request_id.line_ids.approver_ids', 'in', user.id)]</field>
+        </record>
+        <record id="rule_lhi_hub_request_version_approver" model="ir.rule">
+            <field name="name">HUB Request Version: Snapshotted Approver</field>
+            <field name="model_id" ref="model_lhi_hub_stock_request_document_version"/>
+            <field name="groups" eval="[
+                (4, ref('lhi_security.group_lhi_ned')),
+                (4, ref('lhi_security.group_lhi_programme_approver'))
+            ]"/>
+            <field name="domain_force">[('request_id.approval_request_id.line_ids.approver_ids', 'in', user.id)]</field>
+        </record>
+
+        <record id="rule_lhi_hub_warehouse_orgwide" model="ir.rule">
+            <field name="name">Director/Auditor: Company Warehouses</field>
+            <field name="model_id" ref="stock.model_stock_warehouse"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_director_operations')), (4, ref('lhi_security.group_lhi_system_auditor'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+        <record id="rule_lhi_hub_location_orgwide" model="ir.rule">
+            <field name="name">Director/Auditor: Company Stock Locations</field>
+            <field name="model_id" ref="stock.model_stock_location"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_director_operations')), (4, ref('lhi_security.group_lhi_system_auditor'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+        <record id="rule_lhi_hub_quant_orgwide" model="ir.rule">
+            <field name="name">Director/Auditor: Company Stock Quants</field>
+            <field name="model_id" ref="stock.model_stock_quant"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_director_operations')), (4, ref('lhi_security.group_lhi_system_auditor'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+        <record id="rule_lhi_hub_lot_orgwide" model="ir.rule">
+            <field name="name">Director/Auditor: Company Lots and Serials</field>
+            <field name="model_id" ref="stock.model_stock_lot"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_director_operations')), (4, ref('lhi_security.group_lhi_system_auditor'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+        <record id="rule_lhi_hub_picking_orgwide" model="ir.rule">
+            <field name="name">Director/Auditor: Company Stock Pickings</field>
+            <field name="model_id" ref="stock.model_stock_picking"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_director_operations')), (4, ref('lhi_security.group_lhi_system_auditor'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+        <record id="rule_lhi_hub_move_orgwide" model="ir.rule">
+            <field name="name">Director/Auditor: Company Stock Moves</field>
+            <field name="model_id" ref="stock.model_stock_move"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_director_operations')), (4, ref('lhi_security.group_lhi_system_auditor'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+        <record id="rule_lhi_hub_move_line_orgwide" model="ir.rule">
+            <field name="name">Director/Auditor: Company Stock Move Lines</field>
+            <field name="model_id" ref="stock.model_stock_move_line"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_director_operations')), (4, ref('lhi_security.group_lhi_system_auditor'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+
+        <record id="rule_lhi_hub_consignment_director" model="ir.rule">
+            <field name="name">Director/Auditor: All Company Consignments</field>
+            <field name="model_id" ref="model_lhi_hub_consignment"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_director_operations')), (4, ref('lhi_security.group_lhi_system_auditor'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+        <record id="rule_lhi_hub_consignment_line_director" model="ir.rule">
+            <field name="name">Director/Auditor: All Company Consignment Lines</field>
+            <field name="model_id" ref="model_lhi_hub_consignment_line"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_director_operations')), (4, ref('lhi_security.group_lhi_system_auditor'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+        <record id="rule_lhi_hub_request_director" model="ir.rule">
+            <field name="name">Director/Auditor: All Company HUB Requests</field>
+            <field name="model_id" ref="model_lhi_hub_stock_request"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_director_operations')), (4, ref('lhi_security.group_lhi_system_auditor'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+        <record id="rule_lhi_hub_request_line_director" model="ir.rule">
+            <field name="name">Director/Auditor: All Company HUB Request Lines</field>
+            <field name="model_id" ref="model_lhi_hub_stock_request_line"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_director_operations')), (4, ref('lhi_security.group_lhi_system_auditor'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+        <record id="rule_lhi_hub_request_version_director" model="ir.rule">
+            <field name="name">Director/Auditor: All Company HUB Request Versions</field>
+            <field name="model_id" ref="model_lhi_hub_stock_request_document_version"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_director_operations')), (4, ref('lhi_security.group_lhi_system_auditor'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+        <record id="rule_lhi_hub_request_artifact_director" model="ir.rule">
+            <field name="name">Director/Auditor: All Company HUB Request Artifacts</field>
+            <field name="model_id" ref="model_lhi_hub_stock_request_artifact"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_director_operations')), (4, ref('lhi_security.group_lhi_system_auditor'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+        <record id="rule_lhi_hub_external_issue_director" model="ir.rule">
+            <field name="name">Director/Auditor: All Company External Issues</field>
+            <field name="model_id" ref="model_lhi_hub_external_issue"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_director_operations')), (4, ref('lhi_security.group_lhi_system_auditor'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+        <record id="rule_lhi_hub_external_issue_line_director" model="ir.rule">
+            <field name="name">Director/Auditor: All Company External Issue Lines</field>
+            <field name="model_id" ref="model_lhi_hub_external_issue_line"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_director_operations')), (4, ref('lhi_security.group_lhi_system_auditor'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+        <record id="rule_lhi_hub_lease_director" model="ir.rule">
+            <field name="name">Director/Auditor: All Company Leases</field>
+            <field name="model_id" ref="model_lhi_hub_equipment_lease"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_director_operations')), (4, ref('lhi_security.group_lhi_system_auditor'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+        <record id="rule_lhi_hub_lease_line_director" model="ir.rule">
+            <field name="name">Director/Auditor: All Company Lease Lines</field>
+            <field name="model_id" ref="model_lhi_hub_equipment_lease_line"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_director_operations')), (4, ref('lhi_security.group_lhi_system_auditor'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+        <record id="rule_lhi_hub_lease_payment_director" model="ir.rule">
+            <field name="name">Director/Auditor: All Company Lease Payments</field>
+            <field name="model_id" ref="model_lhi_hub_lease_payment"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_director_operations')), (4, ref('lhi_security.group_lhi_system_auditor'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+        <record id="rule_lhi_hub_revenue_director" model="ir.rule">
+            <field name="name">Director/Auditor: All Company Operational Revenue</field>
+            <field name="model_id" ref="model_lhi_hub_operational_revenue"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_director_operations')), (4, ref('lhi_security.group_lhi_system_auditor'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+        <record id="rule_lhi_hub_notification_manager" model="ir.rule">
+            <field name="name">Operations Management/Auditor: Company Notifications</field>
+            <field name="model_id" ref="model_lhi_hub_notification"/>
+            <field name="groups" eval="[
+                (4, ref('lhi_security.group_lhi_operations_manager')),
+                (4, ref('lhi_security.group_lhi_director_operations')),
+                (4, ref('lhi_security.group_lhi_system_auditor'))
+            ]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+
+        <record id="rule_lhi_hub_adjustment_company" model="ir.rule">
+            <field name="name">HUB Stock Adjustment: Multi-company</field>
+            <field name="model_id" ref="model_lhi_hub_stock_adjustment"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_adjustment_line_company" model="ir.rule">
+            <field name="name">HUB Stock Adjustment Line: Multi-company</field>
+            <field name="model_id" ref="model_lhi_hub_stock_adjustment_line"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_adjustment_assigned" model="ir.rule">
+            <field name="name">HUB Stock Adjustment: Assigned HUBs</field>
+            <field name="model_id" ref="model_lhi_hub_stock_adjustment"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_hub_viewer'))]"/>
+            <field name="domain_force">[('hub_id', 'in', user.lhi_hub_ids.ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_adjustment_line_assigned" model="ir.rule">
+            <field name="name">HUB Stock Adjustment Line: Assigned HUBs</field>
+            <field name="model_id" ref="model_lhi_hub_stock_adjustment_line"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_hub_viewer'))]"/>
+            <field name="domain_force">[('adjustment_id.hub_id', 'in', user.lhi_hub_ids.ids)]</field>
+        </record>
+        <record id="rule_lhi_hub_adjustment_orgwide" model="ir.rule">
+            <field name="name">Director/Auditor: All Company Stock Adjustments</field>
+            <field name="model_id" ref="model_lhi_hub_stock_adjustment"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_director_operations')), (4, ref('lhi_security.group_lhi_system_auditor'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+        <record id="rule_lhi_hub_adjustment_line_orgwide" model="ir.rule">
+            <field name="name">Director/Auditor: All Company Stock Adjustment Lines</field>
+            <field name="model_id" ref="model_lhi_hub_stock_adjustment_line"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_director_operations')), (4, ref('lhi_security.group_lhi_system_auditor'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+    </data>
+</odoo>

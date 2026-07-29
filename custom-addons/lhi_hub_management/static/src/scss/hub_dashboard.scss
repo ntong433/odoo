@@ -1,0 +1,126 @@
+.o_lhi_hub_dashboard {
+    min-height: 100%;
+    padding: 1.5rem;
+    background:
+        radial-gradient(circle at top right, rgba(27, 111, 78, 0.13), transparent 34%),
+        var(--o-view-background-color, #f7f9f8);
+}
+
+.o_lhi_hub_dashboard_header {
+    display: flex;
+    max-width: 1500px;
+    margin: 0 auto 1.25rem;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+
+    h1 {
+        margin: 0;
+        font-weight: 760;
+    }
+
+    p:not(.o_lhi_hub_eyebrow) {
+        margin: 0.35rem 0 0;
+        color: var(--text-muted, #617169);
+    }
+}
+
+.o_lhi_hub_eyebrow {
+    margin: 0 0 0.2rem;
+    color: #1b6f4e;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.o_lhi_hub_cards,
+.o_lhi_hub_charts {
+    display: grid;
+    max-width: 1500px;
+    margin: 0 auto;
+    gap: 1rem;
+}
+
+.o_lhi_hub_cards {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.o_lhi_hub_card,
+.o_lhi_hub_chart {
+    border: 1px solid var(--border-color, #d9e3de);
+    border-radius: 0.85rem;
+    background: var(--o-view-background-color, #fff);
+    box-shadow: 0 5px 20px rgba(20, 55, 42, 0.06);
+}
+
+.o_lhi_hub_card {
+    display: flex;
+    min-height: 130px;
+    padding: 1rem;
+    color: inherit;
+    text-align: left;
+    flex-direction: column;
+
+    strong {
+        margin: 0.4rem 0;
+        color: #15533c;
+        font-size: 1.45rem;
+    }
+
+    small {
+        margin-top: auto;
+        color: #1b6f4e;
+    }
+
+    &:hover,
+    &:focus-visible {
+        border-color: #1b6f4e;
+        transform: translateY(-2px);
+    }
+}
+
+.o_lhi_hub_charts {
+    grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+    margin-top: 1rem;
+}
+
+.o_lhi_hub_chart {
+    padding: 1rem;
+
+    h3 {
+        margin: 0 0 0.75rem;
+        font-size: 1rem;
+    }
+
+    button {
+        display: flex;
+        width: 100%;
+        margin-top: 0.35rem;
+        padding: 0.55rem 0.65rem;
+        border: 0;
+        border-radius: 0.45rem;
+        background: rgba(27, 111, 78, 0.08);
+        justify-content: space-between;
+        color: inherit;
+    }
+}
+
+.o_lhi_hub_state {
+    display: flex;
+    min-height: 260px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.7rem;
+    color: var(--text-muted, #617169);
+}
+
+@media (max-width: 767.98px) {
+    .o_lhi_hub_dashboard {
+        padding: 1rem;
+    }
+    .o_lhi_hub_dashboard_header {
+        flex-direction: column;
+    }
+}

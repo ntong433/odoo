@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Keep the technical Inventory application for technical administrators;
+         operational staff use the governed HUB workspace below. -->
+    <record id="stock.menu_stock_root" model="ir.ui.menu">
+        <field name="groups_id" eval="[(6, 0, [ref('stock.group_stock_manager'), ref('lhi_security.group_lhi_erp_admin')])]"/>
+    </record>
+    <record id="fleet.menu_root" model="ir.ui.menu">
+        <field name="parent_id" ref="lhi_asset_management.menu_lhi_operations_root"/>
+        <field name="sequence">30</field>
+    </record>
+    <record id="lhi_purchase_request.menu_lhi_procurement_root" model="ir.ui.menu">
+        <field name="parent_id" ref="lhi_asset_management.menu_lhi_operations_root"/>
+        <field name="sequence">40</field>
+    </record>
+    <record id="lhi_asset_management.menu_lhi_asset" model="ir.ui.menu">
+        <field name="sequence">20</field>
+    </record>
+    <record id="action_lhi_hub_expiry_report" model="ir.actions.act_window">
+        <field name="name">Pharmaceutical Expiry</field>
+        <field name="res_model">stock.lot</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('product_id.lhi_hub_item_type', '=', 'pharmaceuticals')]</field>
+        <field name="context">{'search_default_available': 1}</field>
+    </record>
+
+    <menuitem id="menu_lhi_operations_overview" name="Operations Overview"
+              parent="lhi_asset_management.menu_lhi_operations_root"
+              action="action_lhi_hub_dashboard" sequence="1"
+              groups="lhi_security.group_lhi_hub_viewer,lhi_security.group_lhi_programme_user,lhi_security.group_lhi_programme_approver,lhi_security.group_lhi_ned,lhi_security.group_lhi_system_auditor,lhi_security.group_lhi_erp_admin"/>
+    <menuitem id="menu_lhi_hub" name="HUB"
+              parent="lhi_asset_management.menu_lhi_operations_root"
+              action="action_lhi_hub_dashboard" sequence="10"
+              groups="lhi_security.group_lhi_hub_viewer,lhi_security.group_lhi_programme_user,lhi_security.group_lhi_programme_approver,lhi_security.group_lhi_ned,lhi_security.group_lhi_system_auditor,lhi_security.group_lhi_erp_admin"/>
+    <menuitem id="menu_lhi_hub_overview" name="Overview" parent="menu_lhi_hub"
+              action="action_lhi_hub_dashboard" sequence="1"/>
+    <menuitem id="menu_lhi_hub_requests" name="HUB Stock Requests"
+              parent="lhi_asset_management.menu_lhi_operations_root"
+              action="action_lhi_hub_stock_request" sequence="11"/>
+    <menuitem id="menu_lhi_hub_consignments" name="Consignments"
+              parent="lhi_asset_management.menu_lhi_operations_root"
+              action="action_lhi_hub_consignment" sequence="14"
+              groups="lhi_security.group_lhi_hub_viewer"/>
+    <menuitem id="menu_lhi_hub_external_issues" name="External Issues and Sales"
+              parent="lhi_asset_management.menu_lhi_operations_root"
+              action="action_lhi_hub_external_issue" sequence="12"
+              groups="lhi_security.group_lhi_hub_viewer"/>
+    <menuitem id="menu_lhi_hub_leases" name="Equipment Leases"
+              parent="lhi_asset_management.menu_lhi_operations_root"
+              action="action_lhi_hub_equipment_lease" sequence="13"
+              groups="lhi_security.group_lhi_hub_viewer"/>
+    <menuitem id="menu_lhi_hub_stock" name="Stock on Hand" parent="menu_lhi_hub"
+              action="action_lhi_hub_quants" sequence="50"
+              groups="lhi_security.group_lhi_hub_viewer"/>
+    <menuitem id="menu_lhi_hub_movements" name="Stock Movements" parent="menu_lhi_hub"
+              action="action_lhi_hub_pickings" sequence="55"
+              groups="lhi_security.group_lhi_hub_viewer"/>
+    <menuitem id="menu_lhi_hub_products" name="Item Catalogue" parent="menu_lhi_hub"
+              action="action_lhi_hub_products" sequence="60"
+              groups="lhi_security.group_lhi_hub_viewer"/>
+    <menuitem id="menu_lhi_hub_lots" name="Lots, Batches and Serials" parent="menu_lhi_hub"
+              action="action_lhi_hub_lots" sequence="65"
+              groups="lhi_security.group_lhi_hub_viewer"/>
+    <menuitem id="menu_lhi_hub_adjustments" name="Stock Adjustments"
+              parent="lhi_asset_management.menu_lhi_operations_root"
+              action="action_lhi_hub_stock_adjustment" sequence="50"
+              groups="lhi_security.group_lhi_operations_manager,lhi_security.group_lhi_director_operations,lhi_security.group_lhi_system_auditor,lhi_security.group_lhi_erp_admin"/>
+    <menuitem id="menu_lhi_hub_reports" name="Reports"
+              parent="lhi_asset_management.menu_lhi_operations_root"
+              sequence="60"
+              groups="lhi_security.group_lhi_hub_viewer,lhi_security.group_lhi_system_auditor,lhi_security.group_lhi_erp_admin"/>
+    <menuitem id="menu_lhi_hub_report_stock" name="Stock by HUB"
+              parent="menu_lhi_hub_reports" action="action_lhi_hub_quants" sequence="10"/>
+    <menuitem id="menu_lhi_hub_report_movements" name="Stock Movements"
+              parent="menu_lhi_hub_reports" action="action_lhi_hub_pickings" sequence="20"/>
+    <menuitem id="menu_lhi_hub_report_expiry" name="Expiry Report"
+              parent="menu_lhi_hub_reports" action="action_lhi_hub_expiry_report" sequence="30"/>
+    <menuitem id="menu_lhi_hub_revenue" name="Operational Revenue"
+              parent="menu_lhi_hub_reports"
+              action="action_lhi_hub_operational_revenue" sequence="40"
+              groups="lhi_security.group_lhi_operations_manager,lhi_security.group_lhi_director_operations,lhi_security.group_lhi_system_auditor,lhi_security.group_lhi_erp_admin"/>
+    <menuitem id="menu_lhi_hub_configuration" name="Configuration"
+              parent="lhi_asset_management.menu_lhi_operations_root"
+              sequence="90"
+              groups="lhi_security.group_lhi_operations_manager,lhi_security.group_lhi_erp_admin"/>
+    <menuitem id="menu_lhi_hub_warehouses" name="HUBs and Locations" parent="menu_lhi_hub_configuration"
+              action="action_lhi_hub_warehouses" sequence="10"/>
+    <menuitem id="menu_lhi_hub_recipients" name="External Recipients" parent="menu_lhi_hub_configuration"
+              action="action_lhi_hub_recipients" sequence="20"/>
+    <menuitem id="menu_lhi_hub_payment_methods" name="Payment Methods" parent="menu_lhi_hub_configuration"
+              action="action_lhi_hub_payment_method" sequence="30"/>
+    <menuitem id="menu_lhi_hub_notifications" name="Notification Diagnostics" parent="menu_lhi_hub_configuration"
+              action="action_lhi_hub_notifications" sequence="40"/>
+</odoo>

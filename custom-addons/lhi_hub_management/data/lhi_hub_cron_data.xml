@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="ir_cron_lhi_hub_notification_delivery" model="ir.cron">
+            <field name="name">LHI HUB: Deliver Notification Queue</field>
+            <field name="model_id" ref="model_lhi_hub_notification"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_deliver_notifications()</field>
+            <field name="interval_number">5</field>
+            <field name="interval_type">minutes</field>
+            <field name="active" eval="True"/>
+        </record>
+        <record id="ir_cron_lhi_hub_mark_overdue_leases" model="ir.cron">
+            <field name="name">LHI HUB: Mark Overdue Equipment Leases</field>
+            <field name="model_id" ref="model_lhi_hub_equipment_lease"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_mark_overdue()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+        </record>
+        <record id="ir_cron_lhi_hub_stock_alerts" model="ir.cron">
+            <field name="name">LHI HUB: Queue Stock and Expiry Alerts</field>
+            <field name="model_id" ref="model_lhi_hub_notification"/>
+            <field name="state">code</field>
+            <field name="code">model._cron_enqueue_stock_alerts()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True"/>
+        </record>
+    </data>
+</odoo>

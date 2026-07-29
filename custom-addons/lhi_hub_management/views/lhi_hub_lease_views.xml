@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_hub_equipment_lease_list" model="ir.ui.view">
+        <field name="name">lhi.hub.equipment.lease.list</field>
+        <field name="model">lhi.hub.equipment.lease</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="state == 'overdue'">
+                <field name="name"/>
+                <field name="hub_id"/>
+                <field name="lessee_id"/>
+                <field name="start_date"/>
+                <field name="expected_return_date"/>
+                <field name="total_due"/>
+                <field name="outstanding_amount"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_lhi_hub_equipment_lease_form" model="ir.ui.view">
+        <field name="name">lhi.hub.equipment.lease.form</field>
+        <field name="model">lhi.hub.equipment.lease</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_release_equipment" type="object" string="Release Equipment" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_receive_return" type="object" string="Receive Return" class="btn-primary" invisible="state not in ['active', 'overdue']"/>
+                    <button name="action_close" type="object" string="Close Lease" class="btn-primary" invisible="state != 'returned'"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="hub_id"/>
+                            <field name="lessee_id"/>
+                            <field name="start_date"/>
+                            <field name="expected_return_date"/>
+                            <field name="actual_return_date"/>
+                            <field name="officer_id"/>
+                            <field name="charging_basis"/>
+                        </group>
+                        <group>
+                            <field name="project_id"/>
+                            <field name="programme_id"/>
+                            <field name="award_id"/>
+                            <field name="activity_id"/>
+                            <field name="currency_id"/>
+                            <field name="deposit_amount"/>
+                        </group>
+                    </group>
+                    <field name="purpose"/>
+                    <notebook>
+                        <page string="Equipment">
+                            <field name="line_ids" readonly="state in ['returned', 'closed']">
+                                <list editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="lot_id"/>
+                                    <field name="daily_rate"/>
+                                    <field name="weekly_rate"/>
+                                    <field name="monthly_rate"/>
+                                    <field name="per_usage_rate"/>
+                                    <field name="agreed_amount"/>
+                                    <field name="release_condition"/>
+                                    <field name="return_condition"/>
+                                    <field name="return_notes"/>
+                                    <field name="damage_charge"/>
+                                    <field name="returned" readonly="1"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Charges and Payments">
+                            <group>
+                                <field name="lease_amount" readonly="1"/>
+                                <field name="damage_charge" readonly="1"/>
+                                <field name="late_charge"/>
+                                <field name="waiver_indicator"
+                                       groups="lhi_security.group_lhi_operations_manager"/>
+                                <field name="waiver_reason"
+                                       groups="lhi_security.group_lhi_operations_manager"/>
+                                <field name="waived_charge" groups="lhi_security.group_lhi_operations_manager"/>
+                                <field name="charge_waiver_reason" groups="lhi_security.group_lhi_operations_manager"/>
+                                <field name="total_due" readonly="1"/>
+                                <field name="total_paid" readonly="1"/>
+                                <field name="outstanding_amount" readonly="1"/>
+                            </group>
+                            <field name="payment_ids">
+                                <list editable="bottom">
+                                    <field name="name" readonly="1"/>
+                                    <field name="payment_date"/>
+                                    <field name="amount"/>
+                                    <field name="payment_method_id"/>
+                                    <field name="payment_reference"/>
+                                    <field name="notes"/>
+                                    <field name="reversal_reason" groups="lhi_security.group_lhi_operations_manager"/>
+                                    <field name="state" widget="badge"/>
+                                    <button name="action_post" type="object" string="Post" invisible="state != 'draft'"/>
+                                    <button name="action_reverse" type="object" string="Reverse" invisible="state != 'posted'" groups="lhi_security.group_lhi_operations_manager"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Evidence and Movements">
+                            <group>
+                                <field name="release_picking_id"/>
+                                <field name="return_picking_id"/>
+                                <field name="supporting_document_ids" widget="many2many_binary"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_lhi_hub_equipment_lease" model="ir.actions.act_window">
+        <field name="name">Equipment Leases</field>
+        <field name="res_model">lhi.hub.equipment.lease</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_lhi_hub_operational_revenue" model="ir.actions.act_window">
+        <field name="name">Operational Revenue</field>
+        <field name="res_model">lhi.hub.operational.revenue</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'create': False, 'edit': False, 'delete': False}</field>
+    </record>
+</odoo>

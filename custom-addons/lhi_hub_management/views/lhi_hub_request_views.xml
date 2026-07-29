@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_hub_stock_request_list" model="ir.ui.view">
+        <field name="name">lhi.hub.stock.request.list</field>
+        <field name="model">lhi.hub.stock.request</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="state == 'integration_error'" decoration-warning="state in ['returned', 'partially_dispatched', 'partially_received']">
+                <field name="name"/>
+                <field name="requesting_hub_id"/>
+                <field name="supplying_hub_id"/>
+                <field name="request_date"/>
+                <field name="priority"/>
+                <field name="current_approval_stage"/>
+                <field name="requested_operational_value" optional="hide"/>
+                <field name="total_operational_value"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_lhi_hub_stock_request_form" model="ir.ui.view">
+        <field name="name">lhi.hub.stock.request.form</field>
+        <field name="model">lhi.hub.stock.request</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_submit" type="object" string="Submit for Quantity Review" class="btn-primary" invisible="state not in ['draft', 'returned']"/>
+                    <button name="action_review_availability" type="object" string="Refresh Availability" invisible="state != 'quantity_review'"/>
+                    <button name="action_lock_quantities_and_generate" type="object" string="Lock, Generate and Prepare Signature" class="btn-primary" invisible="state != 'quantity_review'"/>
+                    <button name="action_create_lhi_sign_draft" type="object" string="Open LHI Sign Preparation" class="btn-primary" invisible="state not in ['sign_preparation', 'integration_error']"/>
+                    <button name="action_confirm_lhi_sign_preparation" type="object" string="Confirm Signature Fields" class="btn-primary" invisible="state not in ['sign_preparation', 'integration_error']"/>
+                    <button name="action_approve_non_signature_stage" type="object" string="Approve Review Stage" class="btn-primary" invisible="state != 'signing'"/>
+                    <button name="action_approve_and_sign" type="object" string="Approve and Sign" class="btn-primary" invisible="state != 'signing'"/>
+                    <button name="action_refresh_lhi_sign_status" type="object" string="Reconcile LHI Sign" invisible="state not in ['sign_preparation', 'signing', 'integration_error']"/>
+                    <button name="action_return_for_correction" type="object" string="Return for Correction" invisible="state not in ['sign_preparation', 'signing', 'integration_error']"/>
+                    <button name="action_reject" type="object" string="Reject" invisible="state not in ['sign_preparation', 'signing']"/>
+                    <button name="action_reserve_stock" type="object" string="Reserve Stock" class="btn-primary" invisible="state != 'approved'"/>
+                    <button name="action_dispatch" type="object" string="Dispatch" class="btn-primary" invisible="state not in ['reserved', 'partially_dispatched']"/>
+                    <button name="action_receive" type="object" string="Receive at Requesting HUB" class="btn-primary" invisible="state not in ['in_transit', 'partially_dispatched', 'partially_received']"/>
+                    <button name="action_close" type="object" string="Close Request" invisible="state not in ['received', 'partially_received']"/>
+                    <button name="action_withdraw" type="object" string="Withdraw" invisible="state in ['closed', 'withdrawn', 'rejected']"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="requesting_hub_id"/>
+                            <field name="supplying_hub_id"/>
+                            <field name="request_date"/>
+                            <field name="requested_by_id"/>
+                            <field name="priority"/>
+                            <field name="emergency"/>
+                        </group>
+                        <group>
+                            <field name="project_id"/>
+                            <field name="programme_id"/>
+                            <field name="award_id"/>
+                            <field name="donor_id"/>
+                            <field name="activity_id"/>
+                            <field name="approval_matrix_id"/>
+                            <field name="requested_operational_value" readonly="1"/>
+                            <field name="total_operational_value" readonly="1"/>
+                        </group>
+                    </group>
+                    <field name="purpose" placeholder="Operational purpose and destination"/>
+                    <field name="decision_reason" placeholder="Required before Return or Reject" invisible="state not in ['sign_preparation', 'signing', 'integration_error']"/>
+                    <notebook>
+                        <page string="Requested and Approved Items">
+                            <field name="line_ids" readonly="quantities_locked">
+                                <list editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="item_description"/>
+                                    <field name="uom_id"/>
+                                    <field name="quantity_requested"/>
+                                    <field name="quantity_available" readonly="1"/>
+                                    <field name="quantity_recommended"/>
+                                    <field name="quantity_approved"/>
+                                    <field name="selected_lot_id"/>
+                                    <field name="supplying_hub_confirmed" readonly="1"/>
+                                    <field name="partial_fulfilment_reason"/>
+                                    <field name="purpose_remarks"/>
+                                    <field name="quantity_reserved" readonly="1"/>
+                                    <field name="quantity_dispatched" readonly="1"/>
+                                    <field name="quantity_to_dispatch"/>
+                                    <field name="quantity_received" readonly="1"/>
+                                    <field name="quantity_to_receive"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Approval and Signature">
+                            <group>
+                                <field name="approval_request_id"/>
+                                <field name="current_approval_stage"/>
+                                <field name="current_signature_stage"/>
+                                <field name="quantities_locked"/>
+                                <field name="quantities_locked_at"/>
+                                <field name="quantities_locked_by_id"/>
+                                <field name="document_version_number"/>
+                                <field name="provider_status"/>
+                                <field name="approval_completed_at"/>
+                                <field name="integration_error_code"/>
+                                <field name="integration_error_message"/>
+                            </group>
+                            <field name="document_version_ids" readonly="1">
+                                <list>
+                                    <field name="version"/>
+                                    <field name="changed_at"/>
+                                    <field name="changed_by_id"/>
+                                    <field name="change_reason"/>
+                                    <field name="state" widget="badge"/>
+                                    <field name="source_pdf_hash"/>
+                                    <field name="signed_pdf_hash"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Stock Movements and Evidence">
+                            <group>
+                                <field name="reservation_picking_id"/>
+                                <field name="close_unfulfilled_reason"/>
+                                <field name="supporting_document_ids" widget="many2many_binary"/>
+                            </group>
+                            <field name="picking_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="picking_type_id"/>
+                                    <field name="location_id"/>
+                                    <field name="location_dest_id"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_lhi_hub_stock_request" model="ir.actions.act_window">
+        <field name="name">Internal HUB Stock Requests</field>
+        <field name="res_model">lhi.hub.stock.request</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

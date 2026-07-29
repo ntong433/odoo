@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_hub_external_issue_list" model="ir.ui.view">
+        <field name="name">lhi.hub.external.issue.list</field>
+        <field name="model">lhi.hub.external.issue</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="state == 'reversed'">
+                <field name="name"/>
+                <field name="hub_id"/>
+                <field name="recipient_id"/>
+                <field name="issue_type"/>
+                <field name="issue_date"/>
+                <field name="total_amount"/>
+                <field name="amount_received"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_lhi_hub_external_issue_form" model="ir.ui.view">
+        <field name="name">lhi.hub.external.issue.form</field>
+        <field name="model">lhi.hub.external.issue</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_validate" type="object" string="Validate and Move Stock" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_reverse" type="object" string="Create Stock Reversal" class="btn-secondary" invisible="state != 'validated'" groups="lhi_security.group_lhi_operations_manager"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="hub_id"/>
+                            <field name="recipient_id"/>
+                            <field name="issue_type"/>
+                            <field name="issue_date"/>
+                            <field name="officer_id"/>
+                        </group>
+                        <group>
+                            <field name="project_id"/>
+                            <field name="programme_id"/>
+                            <field name="award_id"/>
+                            <field name="donor_id"/>
+                            <field name="activity_id"/>
+                            <field name="currency_id"/>
+                        </group>
+                    </group>
+                    <field name="purpose"/>
+                    <field name="distribution_event"/>
+                    <group string="Mass Distribution" invisible="not distribution_event">
+                        <field name="distribution_event_name"/>
+                        <field name="distribution_location"/>
+                        <field name="beneficiary_count"/>
+                        <field name="beneficiary_ids" widget="many2many_tags"/>
+                        <field name="beneficiary_list_document_ids"
+                               widget="many2many_binary"/>
+                    </group>
+                    <field name="line_ids" readonly="state != 'draft'">
+                        <list editable="bottom">
+                            <field name="product_id"/>
+                            <field name="item_description" readonly="1"/>
+                            <field name="category_id" readonly="1"/>
+                            <field name="uom_id"/>
+                            <field name="available_quantity" readonly="1"/>
+                            <field name="quantity"/>
+                            <field name="lot_id"/>
+                            <field name="expiry_date" readonly="1"/>
+                            <field name="unit_price"/>
+                            <field name="discount_percent"/>
+                            <field name="line_total" readonly="1"/>
+                            <field name="purpose_remarks"/>
+                        </list>
+                    </field>
+                    <group string="Operational Collection" invisible="issue_type != 'sale'">
+                        <field name="total_amount" readonly="1"/>
+                        <field name="amount_received"/>
+                        <field name="outstanding_amount" readonly="1"/>
+                        <field name="payment_method_id"/>
+                        <field name="payment_reference"/>
+                    </group>
+                    <group string="Movement and Reversal">
+                        <field name="picking_id"/>
+                        <field name="reversal_of_id"/>
+                        <field name="reversal_id"/>
+                        <field name="reversal_reason" readonly="state != 'validated'"/>
+                        <field name="supporting_document_ids" widget="many2many_binary"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    <record id="action_lhi_hub_external_issue" model="ir.actions.act_window">
+        <field name="name">External Issues and Distributions</field>
+        <field name="res_model">lhi.hub.external.issue</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

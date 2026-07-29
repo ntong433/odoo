@@ -4,6 +4,8 @@
     'version': '19.0.2.0.0',
     'category': 'Operations',
     'summary': 'Operational Asset Register, tags, imports and lifecycle history',
+    'author': 'Life Helpers Initiative',
+    'website': 'https://work.lhinigeria.org',
     'depends': [
         'mail',
         'stock',

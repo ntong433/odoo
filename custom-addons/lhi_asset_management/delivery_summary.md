@@ -87,6 +87,7 @@ New models:
 - `static/src/js/asset_dashboard.js`
 - `static/src/xml/asset_dashboard.xml`
 - `static/src/scss/asset_dashboard.scss`
+- `static/tests/asset_dashboard.test.js`
 - `report/lhi_asset_reports.xml`
 - `report/lhi_asset_report_templates.xml`
 - `migrations/19.0.2.0.0/pre-migrate.py`
@@ -155,9 +156,10 @@ Executed in the development workspace:
 
 These static checks passed. A live Odoo registry, module upgrade, database
 migration, QWeb/asset build, browser test, and transaction test were not
-executed because the host Odoo runtime lacks required Python packages and the
-Docker socket is not accessible. They remain release gates; this document does
-not claim they passed.
+executed because no PostgreSQL listener is available and the Docker socket is
+not accessible. Odoo 19 virtual-environment imports of the addon and its test
+module now pass. The database-backed checks remain release gates; this document
+does not claim they passed.
 
 Automated tests supplied cover:
 
@@ -168,8 +170,10 @@ Automated tests supplied cover:
 - approval-gated transfer completion;
 - controlled re-tagging and segregation of duties;
 - legacy tag preservation and classification;
-- immutable lifecycle history; and
-- denial for a minimal-access user.
+- immutable lifecycle history;
+- denial for a minimal-access user; and
+- dashboard result normalization, safe value formatting, and bounded
+  drill-down action construction.
 
 ## Deployment and rollback
 

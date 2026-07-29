@@ -4,6 +4,35 @@ import { Component, onWillStart, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
+export function normalizeAssetDashboardData(data) {
+    const value = data && typeof data === "object" ? data : {};
+    return {
+        cards: Array.isArray(value.cards) ? value.cards : [],
+        charts: Array.isArray(value.charts) ? value.charts : [],
+        currency: typeof value.currency === "string" ? value.currency : "",
+    };
+}
+
+export function formatAssetDashboardValue(item, currency, locale) {
+    const parsed = Number(item?.value ?? 0);
+    const value = Number.isFinite(parsed) ? parsed : 0;
+    const formatted = value.toLocaleString(locale, {
+        maximumFractionDigits: item?.monetary ? 2 : 0,
+    });
+    return item?.monetary ? `${currency} ${formatted}` : formatted;
+}
+
+export function buildAssetListAction(domain = []) {
+    return {
+        type: "ir.actions.act_window",
+        name: "Asset Register",
+        res_model: "lhi.asset",
+        views: [[false, "list"], [false, "form"]],
+        domain: Array.isArray(domain) ? domain : [],
+        target: "current",
+    };
+}
+
 export class LhiAssetDashboard extends Component {
     setup() {
         this.action = useService("action");
@@ -28,9 +57,7 @@ export class LhiAssetDashboard extends Component {
                 "get_asset_dashboard_data",
                 []
             );
-            this.state.cards = result.cards || [];
-            this.state.charts = result.charts || [];
-            this.state.currency = result.currency || "";
+            Object.assign(this.state, normalizeAssetDashboardData(result));
         } catch (error) {
             console.error("[LHI Asset Register] Dashboard load failed", error);
             this.state.error = true;
@@ -44,24 +71,11 @@ export class LhiAssetDashboard extends Component {
     }
 
     displayValue(item) {
-        const value = Number(item.value || 0);
-        if (item.monetary) {
-            return `${this.state.currency} ${value.toLocaleString(undefined, {
-                maximumFractionDigits: 2,
-            })}`;
-        }
-        return value.toLocaleString();
+        return formatAssetDashboardValue(item, this.state.currency);
     }
 
     openAssets(domain = []) {
-        return this.action.doAction({
-            type: "ir.actions.act_window",
-            name: "Asset Register",
-            res_model: "lhi.asset",
-            views: [[false, "list"], [false, "form"]],
-            domain,
-            target: "current",
-        });
+        return this.action.doAction(buildAssetListAction(domain));
     }
 }
 

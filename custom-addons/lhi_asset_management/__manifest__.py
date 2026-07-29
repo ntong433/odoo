@@ -38,6 +38,9 @@
             'lhi_asset_management/static/src/xml/asset_dashboard.xml',
             'lhi_asset_management/static/src/scss/asset_dashboard.scss',
         ],
+        'web.assets_unit_tests': [
+            'lhi_asset_management/static/tests/asset_dashboard.test.js',
+        ],
     },
     'installable': True,
     'application': True,

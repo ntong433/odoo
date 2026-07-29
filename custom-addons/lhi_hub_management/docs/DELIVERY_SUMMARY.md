@@ -58,7 +58,8 @@ schema change is introduced.
   `security/ir.model.access.csv`, all four `data/lhi_hub_*_data.xml` files,
   and `migrations/19.0.1.0.0/post-migrate.py`;
 - UI/assets: all eight workflow/configuration/menu view XML files plus
-  `views/lhi_hub_adjustment_views.xml` and the dashboard JS/XML/SCSS files;
+  `views/lhi_hub_adjustment_views.xml`, the dashboard JS/XML/SCSS files, and
+  `static/tests/hub_dashboard.test.js`;
 - reports: `report/lhi_hub_reports.xml` and
   `report/lhi_hub_report_templates.xml`;
 - tests: `tests/common.py`, `tests/test_hub_operations.py`,
@@ -114,7 +115,8 @@ movements, operational revenue, notification deduplication, pharmaceutical
 tracking, active-serial lease conflicts, immutable payments, and reversing
 revenue. They also cover forged workflow-context denial and a reason-controlled
 stock adjustment/reversal with before/after quantities and an inventory move,
-plus low-stock alert recipient queuing.
+low-stock alert recipient queuing, and frontend dashboard normalization,
+formatting, warning isolation, and drill-down validation.
 
 Not executed here:
 

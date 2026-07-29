@@ -4,6 +4,39 @@ import { Component, onWillStart, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
+export function normalizeHubDashboardData(data) {
+    const value = data && typeof data === "object" ? data : {};
+    return {
+        cards: Array.isArray(value.cards) ? value.cards : [],
+        charts: Array.isArray(value.charts) ? value.charts : [],
+        warnings: Array.isArray(value.warnings) ? value.warnings : [],
+        currency: typeof value.currency === "string" ? value.currency : "",
+    };
+}
+
+export function formatHubDashboardValue(item, currency, locale) {
+    const parsed = Number(item?.value ?? 0);
+    const value = Number.isFinite(parsed) ? parsed : 0;
+    const formatted = value.toLocaleString(locale, {
+        maximumFractionDigits: item?.monetary ? 2 : 0,
+    });
+    return item?.monetary ? `${currency} ${formatted}` : formatted;
+}
+
+export function buildHubRecordAction(model, domain = []) {
+    if (typeof model !== "string" || !model.trim()) {
+        throw new TypeError("A HUB dashboard drill-down requires a model.");
+    }
+    return {
+        type: "ir.actions.act_window",
+        name: "HUB Records",
+        res_model: model,
+        views: [[false, "list"], [false, "form"]],
+        domain: Array.isArray(domain) ? domain : [],
+        target: "current",
+    };
+}
+
 export class LhiHubDashboard extends Component {
     setup() {
         this.action = useService("action");
@@ -29,10 +62,7 @@ export class LhiHubDashboard extends Component {
                 "get_lhi_hub_dashboard_data",
                 []
             );
-            this.state.cards = data.cards || [];
-            this.state.charts = data.charts || [];
-            this.state.warnings = data.warnings || [];
-            this.state.currency = data.currency || "";
+            Object.assign(this.state, normalizeHubDashboardData(data));
         } catch (error) {
             console.error("[LHI HUB] dashboard load failed", error);
             this.state.failed = true;
@@ -46,22 +76,18 @@ export class LhiHubDashboard extends Component {
     }
 
     displayValue(item) {
-        const value = Number(item.value || 0);
-        const formatted = value.toLocaleString(undefined, {
-            maximumFractionDigits: item.monetary ? 2 : 0,
-        });
-        return item.monetary ? `${this.state.currency} ${formatted}` : formatted;
+        return formatHubDashboardValue(item, this.state.currency);
     }
 
     openRecords(model, domain = []) {
-        return this.action.doAction({
-            type: "ir.actions.act_window",
-            name: "HUB Records",
-            res_model: model,
-            views: [[false, "list"], [false, "form"]],
-            domain,
-            target: "current",
-        });
+        if (typeof model !== "string" || !model.trim()) {
+            this.notification.add(
+                "This dashboard item has no valid record action.",
+                { type: "warning" }
+            );
+            return false;
+        }
+        return this.action.doAction(buildHubRecordAction(model, domain));
     }
 }
 

@@ -44,6 +44,9 @@
             "lhi_hub_management/static/src/xml/hub_dashboard.xml",
             "lhi_hub_management/static/src/scss/hub_dashboard.scss",
         ],
+        "web.assets_unit_tests": [
+            "lhi_hub_management/static/tests/hub_dashboard.test.js",
+        ],
     },
     "installable": True,
     "application": True,

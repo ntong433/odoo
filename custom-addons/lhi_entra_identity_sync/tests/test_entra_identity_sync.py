@@ -69,13 +69,6 @@ class TestLhiEntraIdentitySync(TransactionCase):
                 "identity_source": "entra",
             }
         )
-        cls.employee = cls.env["hr.employee"].create(
-            {
-                "name": cls.user.name,
-                "user_id": cls.user.id,
-                "company_id": cls.company.id,
-            }
-        )
 
     def _remote_user(self, enabled=True):
         return {
@@ -489,14 +482,6 @@ class TestLhiEntraIdentitySync(TransactionCase):
                 "group_ids": [Command.set(self.group_project.ids)],
             }
         )
-        manager_employee = self.env["hr.employee"].create(
-            {
-                "name": manager.name,
-                "user_id": manager.id,
-                "company_id": self.company.id,
-            }
-        )
-        self.employee.parent_id = manager_employee
         matrix = self.env["lhi.approval.matrix"].create(
             {
                 "name": "Manager Approval Test",

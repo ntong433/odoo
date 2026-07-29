@@ -44,7 +44,6 @@ class LhiDashboardWidget(models.Model):
         ('approvals', 'Approvals', 'lhi_approval_matrix.menu_lhi_my_pending_approvals', ('lhi_security.group_lhi_executive_approver', 'lhi_security.group_lhi_manager'), ('APPROVALS',)),
         ('memos', 'Memos', 'lhi_memo_management.menu_lhi_memo_root', ('lhi_security.group_lhi_employee',), ()),
         ('programmes', 'Programs & Grants', 'lhi_base.menu_lhi_root', ('lhi_programme_management.group_lhi_programmes_viewer', 'lhi_security.group_lhi_project_officer', 'lhi_security.group_lhi_project_manager', 'lhi_security.group_lhi_programme_director'), ('PROJECTS', 'GRANTS', 'FUNDING', 'PIPELINE', 'PROGRAMME', 'PROGRAMMES')),
-        ('hr', 'Human Resources', 'hr.menu_hr_root', ('lhi_security.group_lhi_hr_officer',), ('HR', 'HUMAN_RESOURCES')),
         ('media', 'Media & Communications', 'lhi_media_communications.menu_lhi_media_root', ('lhi_media_communications.group_lhi_media_viewer', 'lhi_media_communications.group_lhi_media_requester', 'lhi_media_communications.group_lhi_media_officer', 'lhi_media_communications.group_lhi_media_reviewer', 'lhi_media_communications.group_lhi_media_manager'), ('MEDIA',)),
         ('reports', 'Reports', 'lhi_reporting_hub.menu_lhi_reporting_hub_root', ('lhi_security.group_lhi_manager', 'lhi_security.group_lhi_programme_director', 'lhi_security.group_lhi_finance_reviewer'), ('REPORTS', 'REPORTING', 'ANALYTICS')),
         ('settings', 'Settings', 'base.menu_administration', ('base.group_system',), ()),

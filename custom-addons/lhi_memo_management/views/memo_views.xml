@@ -90,7 +90,6 @@
                         </group>
                         <group string="Ownership and Recipients">
                             <field name="requester_id"/>
-                            <field name="requester_employee_id"/>
                             <field name="department_id" readonly="state not in ('draft', 'authoring', 'returned', 'failed')"/>
                             <field name="office_id" readonly="state not in ('draft', 'authoring', 'returned', 'failed')"/>
                             <field name="company_id" groups="base.group_multi_company"/>

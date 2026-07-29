@@ -7,7 +7,7 @@ class LhiStaffAdvance(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
     name = fields.Char(string='Advance Ref', required=True, copy=False, default='New')
-    employee_id = fields.Many2one('hr.employee', string='Staff Member', required=True)
+    user_id = fields.Many2one('res.users', string='Staff Member', default=lambda self: self.env.user, required=True)
     amount = fields.Monetary(string='Amount Requested', currency_field='currency_id', required=True)
     currency_id = fields.Many2one('res.currency', default=lambda self: self.env.company.currency_id)
     

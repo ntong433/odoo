@@ -8,7 +8,7 @@ class MediaRequest(models.Model):
 
     name = fields.Char(string='Reference', required=True, copy=False, readonly=True, default=lambda self: 'New')
     title = fields.Char(string='Title', required=True, tracking=True)
-    requesting_unit_id = fields.Many2one('hr.department', string='Requesting Unit', tracking=True)
+    requesting_unit_id = fields.Many2one('lhi.department', string='Requesting Unit', tracking=True)
     requested_by_id = fields.Many2one('res.users', string='Requested By', default=lambda self: self.env.user, tracking=True)
     
     work_context = fields.Selection(

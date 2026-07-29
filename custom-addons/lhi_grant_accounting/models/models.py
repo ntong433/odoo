@@ -11,7 +11,7 @@ class AccountAnalyticAccount(models.Model):
     lhi_output_id = fields.Char(string='Output Code')
     lhi_activity_id = fields.Char(string='Activity Code')
     lhi_funding_source_id = fields.Char(string='Funding Source')
-    lhi_department_id = fields.Many2one('hr.department', string='Department')
+    lhi_department_id = fields.Many2one('lhi.department', string='Department')
     lhi_cost_centre_id = fields.Char(string='Cost Centre')
     lhi_location_id = fields.Char(string='Location Dimension')
     

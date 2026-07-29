@@ -15,7 +15,6 @@ the authoritative authorization controls.
     "website": "https://www.lhinigeria.org",
     "license": "LGPL-3",
     "depends": [
-        "hr",
         "auth_oauth",
         "lhi_microsoft_graph_core",
         "lhi_approval_matrix",
@@ -29,7 +28,6 @@ the authoritative authorization controls.
         "views/entra_configuration_views.xml",
         "views/entra_sync_run_views.xml",
         "views/res_users_views.xml",
-        "views/hr_employee_views.xml",
         "views/res_groups_views.xml",
         "views/approval_matrix_views.xml",
         "views/lhi_entra_identity_menus.xml",

@@ -16,7 +16,6 @@ electronic-signature provider.
     "license": "LGPL-3",
     "depends": [
         "mail",
-        "hr",
         "lhi_security",
         "lhi_base",
         "lhi_purchase_request",

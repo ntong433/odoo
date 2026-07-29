@@ -111,7 +111,6 @@ class TestLhiDashboard(TransactionCase):
             ('lhi_security.group_lhi_project_officer', 'programmes'),
             ('lhi_security.group_lhi_project_manager', 'programmes'),
             ('lhi_security.group_lhi_programme_director', 'programmes'),
-            ('lhi_security.group_lhi_hr_officer', 'hr'),
             ('lhi_security.group_lhi_fleet_officer', 'fleet'),
             ('lhi_security.group_lhi_store_officer', 'inventory'),
             ('lhi_security.group_lhi_store_officer', 'assets'),

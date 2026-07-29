@@ -9,9 +9,8 @@ class TestLhiAdvanceAccounting(TransactionCase):
         cls.env['ir.config_parameter'].sudo().set_param('lhi_accounting_base.is_accounting_cutover_active', 'False')
 
     def test_advance(self):
-        emp = self.env['hr.employee'].create({'name': 'John'})
         adv = self.env['lhi.staff.advance'].create({
-            'employee_id': emp.id,
+            'user_id': self.env.user.id,
             'amount': 500
         })
         adv.action_approve()

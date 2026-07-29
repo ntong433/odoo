@@ -20,7 +20,6 @@ Deliverables:
     'license': 'LGPL-3',
     'depends': [
         'base', 
-        'hr', 
         'auth_oauth',
         'lhi_base', 
         'lhi_security'
@@ -31,7 +30,6 @@ Deliverables:
         'data/auth_oauth_data.xml',
         'data/ir_cron.xml',
         'views/res_users_views.xml',
-        'views/hr_employee_views.xml',
         'views/lhi_integration_connection_views.xml',
         'views/lhi_integration_job_views.xml',
         'views/lhi_integration_webhook_views.xml',

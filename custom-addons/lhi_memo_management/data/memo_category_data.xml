@@ -27,8 +27,8 @@
             <field name="sequence">50</field>
         </record>
         <record id="memo_category_hr" model="lhi.memo.category">
-            <field name="name">HR Memo</field>
-            <field name="code">HR</field>
+            <field name="name">Administration Memo</field>
+            <field name="code">ADMIN</field>
             <field name="sequence">60</field>
         </record>
         <record id="memo_category_field_activity" model="lhi.memo.category">

@@ -61,10 +61,5 @@ class ResUsers(models.Model):
             # Here we would use connection._execute_request(...)
             # For Sprint 6 foundation, we mock the outcome.
             _logger.info("Synchronizing Entra profile for %s (OID: %s)", user.name, user.lhi_entra_object_id)
-            
-            # Synchronize fields to hr.employee
-            if user.employee_id:
-                # E.g., user.employee_id.job_title = response.get('jobTitle')
-                pass
         
         return True

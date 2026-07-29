@@ -17,7 +17,6 @@ const APP_ICONS_BY_XMLID = Object.freeze({
     "lhi_approval_matrix.menu_lhi_approvals_root": `${ICON_ROOT}/approvals.svg`,
     "lhi_memo_management.menu_lhi_memo_root": `${ICON_ROOT}/memos.svg`,
     "lhi_base.menu_lhi_project_root": `${ICON_ROOT}/projects.svg`,
-    "hr.menu_hr_root": `${ICON_ROOT}/hr.svg`,
     "base.menu_administration": `${ICON_ROOT}/settings.svg`,
 });
 

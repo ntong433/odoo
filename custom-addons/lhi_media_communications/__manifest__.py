@@ -8,7 +8,6 @@
         'base',
         'mail',
         'project',
-        'hr',
         'lhi_base',
         'lhi_project_workplan',
     ],

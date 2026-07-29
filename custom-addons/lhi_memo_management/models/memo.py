@@ -131,7 +131,7 @@ class LhiMemo(models.Model):
         index=True,
     )
     requester_employee_id = fields.Many2one(
-        "hr.employee", compute="_compute_requester_employee", store=True, readonly=True
+        "res.users", string="Requester User Alias", compute="_compute_requester_employee", store=False, readonly=True
     )
     department_id = fields.Many2one(
         "lhi.department",
@@ -351,10 +351,10 @@ class LhiMemo(models.Model):
         "unique(name, company_id)", "The memo reference must be unique per company."
     )
 
-    @api.depends("requester_id", "requester_id.employee_id")
+    @api.depends("requester_id")
     def _compute_requester_employee(self):
         for memo in self:
-            memo.requester_employee_id = memo.requester_id.employee_id[:1]
+            memo.requester_employee_id = memo.requester_id
 
     @api.depends("project_id", "grant_id", "procurement_reference_id", "work_context")
     def _compute_related_resource(self):
@@ -763,9 +763,7 @@ class LhiMemo(models.Model):
         formatted_date = memo_date_val.strftime("%d %B %Y")
 
         from_name = self.requester_id.name or ""
-        from_title = getattr(self.requester_id, "job_title", False) or (
-            self.requester_employee_id.job_title if hasattr(self, "requester_employee_id") and self.requester_employee_id else ""
-        )
+        from_title = getattr(self.requester_id, "function", False) or getattr(self.requester_id, "title", False) or ""
         from_display = f"{from_name} ({from_title})" if from_title else from_name
 
         if self.recipient_description:

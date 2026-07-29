@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_lhi_asset_register" model="ir.actions.report">
+        <field name="name">Asset Register</field>
+        <field name="model">lhi.asset</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lhi_asset_management.report_asset_register</field>
+        <field name="report_file">lhi_asset_management.report_asset_register</field>
+        <field name="binding_model_id" ref="model_lhi_asset"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_lhi_asset_label" model="ir.actions.report">
+        <field name="name">Asset Barcode and QR Label</field>
+        <field name="model">lhi.asset</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lhi_asset_management.report_asset_label</field>
+        <field name="report_file">lhi_asset_management.report_asset_label</field>
+        <field name="binding_model_id" ref="model_lhi_asset"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+
+    <record id="action_report_lhi_asset_condition" model="ir.actions.report">
+        <field name="name">Asset Condition Report</field>
+        <field name="model">lhi.asset</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lhi_asset_management.report_asset_condition</field>
+        <field name="report_file">lhi_asset_management.report_asset_condition</field>
+        <field name="binding_model_id" ref="model_lhi_asset"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_lhi_asset_transfer" model="ir.actions.report">
+        <field name="name">Asset Handover / Transfer / Disposal</field>
+        <field name="model">lhi.asset.transfer</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">lhi_asset_management.report_asset_transfer</field>
+        <field name="report_file">lhi_asset_management.report_asset_transfer</field>
+        <field name="binding_model_id" ref="model_lhi_asset_transfer"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>

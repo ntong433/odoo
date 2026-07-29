@@ -21,7 +21,6 @@
                 <field name="workplan_activity_id" invisible="work_context != 'project_linked'"/>
                 <field name="memo_id" invisible="work_context != 'project_linked'"/>
                 <field name="project_budget_line_id" invisible="work_context != 'project_linked'"/>
-                <field name="award_id" invisible="work_context != 'project_linked'"/>
             </xpath>
         </field>
     </record>

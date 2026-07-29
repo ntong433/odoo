@@ -4,13 +4,21 @@
         <field name="name">lhi.asset.transfer.form</field>
         <field name="model">lhi.asset.transfer</field>
         <field name="arch" type="xml">
-            <form string="Asset Transfer">
+            <form string="Asset Transfer or Disposal">
                 <header>
-                    <button name="action_submit" string="Submit" type="object" class="oe_highlight" invisible="state != 'draft'"/>
-                    <button name="action_approve" string="Approve" type="object" class="oe_highlight" invisible="state != 'submitted'"/>
-                    <button name="action_complete" string="Complete Transfer" type="object" class="oe_highlight" invisible="state != 'approved'"/>
-                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('completed', 'cancel')"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,approved,completed"/>
+                    <button name="action_submit" string="Submit for Approval" type="object"
+                            class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_open_approval" string="Open Approval Route"
+                            type="object" invisible="not approval_request_id"/>
+                    <button name="action_mark_approved" string="Refresh Approval"
+                            type="object" invisible="state != 'submitted' or lhi_approval_state != 'approved'"/>
+                    <button name="action_complete" string="Complete Workflow"
+                            type="object" class="btn-success"
+                            invisible="state not in ('submitted', 'approved') or lhi_approval_state != 'approved'"/>
+                    <button name="action_cancel" string="Cancel" type="object"
+                            invisible="state in ('completed', 'cancel')"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,submitted,approved,completed"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -22,40 +30,67 @@
                             <field name="transfer_type" readonly="state != 'draft'"/>
                             <field name="company_id" groups="base.group_multi_company"/>
                         </group>
+                        <group string="Approval">
+                            <field name="approval_request_id" readonly="1"/>
+                            <field name="lhi_approval_state" readonly="1" widget="badge"/>
+                            <field name="completed_by_id" readonly="1"/>
+                            <field name="completed_at" readonly="1"/>
+                        </group>
                     </group>
                     <group>
-                        <group string="From">
-                            <field name="source_custodian_id"/>
-                            <field name="source_location_id"/>
+                        <group string="Current Assignment">
+                            <field name="source_custodian_id" readonly="1"/>
+                            <field name="source_state_id" readonly="1"/>
+                            <field name="source_office_id" readonly="1"/>
+                            <field name="source_hub_id" readonly="1"/>
+                            <field name="source_location_id" readonly="1"/>
+                            <field name="source_project_id" readonly="1"/>
+                            <field name="source_funding_source_id" readonly="1"/>
+                            <field name="source_legal_owner_id" readonly="1"/>
                         </group>
-                        <group string="To">
-                            <field name="dest_custodian_id" invisible="transfer_type not in ('handover', 'location')" required="transfer_type == 'handover'"/>
-                            <field name="dest_location_id" invisible="transfer_type not in ('location')" required="transfer_type == 'location'"/>
+                        <group string="Destination">
+                            <field name="dest_custodian_id" readonly="state != 'draft'"/>
+                            <field name="dest_state_id" readonly="state != 'draft'"/>
+                            <field name="dest_office_id" readonly="state != 'draft'"/>
+                            <field name="dest_hub_id" readonly="state != 'draft'"/>
+                            <field name="dest_location_id" readonly="state != 'draft'"/>
+                            <field name="dest_project_id" readonly="state != 'draft'"/>
+                            <field name="dest_funding_source_id" readonly="state != 'draft'"/>
+                            <field name="dest_legal_owner_id" readonly="state != 'draft'"/>
+                            <field name="destination_partner_id"
+                                   invisible="transfer_type not in ('write_off', 'donation')"
+                                   readonly="state != 'draft'"/>
+                            <field name="loss_outcome"
+                                   invisible="transfer_type != 'loss_damage'"
+                                   required="transfer_type == 'loss_damage'"
+                                   readonly="state != 'draft'"/>
                         </group>
                     </group>
-                    <group string="Justification">
-                        <field name="justification" nolabel="1" readonly="state != 'draft'"/>
+                    <group string="Required Justification">
+                        <field name="justification" readonly="state != 'draft'"/>
+                    </group>
+                    <group string="Completion Notes">
+                        <field name="unfulfilled_notes"/>
                     </group>
                 </sheet>
-                <div class="oe_chatter">
-                    <field name="message_follower_ids"/>
-                    <field name="activity_ids"/>
-                    <field name="message_ids"/>
-                </div>
+                <chatter/>
             </form>
         </field>
     </record>
 
     <record id="view_lhi_asset_transfer_tree" model="ir.ui.view">
-        <field name="name">lhi.asset.transfer.tree</field>
+        <field name="name">lhi.asset.transfer.list</field>
         <field name="model">lhi.asset.transfer</field>
         <field name="arch" type="xml">
-            <list string="Asset Transfers">
+            <list string="Asset Transfers and Disposals">
                 <field name="name"/>
                 <field name="asset_id"/>
                 <field name="transfer_type"/>
                 <field name="source_custodian_id"/>
                 <field name="dest_custodian_id"/>
+                <field name="dest_state_id"/>
+                <field name="dest_hub_id"/>
+                <field name="lhi_approval_state" widget="badge"/>
                 <field name="state" widget="badge"/>
             </list>
         </field>

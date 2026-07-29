@@ -8,7 +8,6 @@ class LhiAsset(models.Model):
         [("project_linked", "Project-linked"), ("standalone_departmental", "Standalone departmental")], 
         default="standalone_departmental", required=True, tracking=True
     )
-    award_id = fields.Many2one("lhi.award", string="Grant/Award", tracking=True)
     workplan_activity_id = fields.Many2one("lhi.workplan.activity", tracking=True)
     memo_id = fields.Many2one("lhi.activity.memo", tracking=True)
     project_budget_line_id = fields.Many2one("lhi.project.budget.line", tracking=True)

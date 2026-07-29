@@ -2,20 +2,101 @@
 <odoo>
     <data noupdate="1">
         <record id="rule_lhi_asset_company" model="ir.rule">
-            <field name="name">Asset: Multi-Company</field>
+            <field name="name">Asset: Multi-company</field>
             <field name="model_id" ref="model_lhi_asset"/>
-            <field name="domain_force">
-                ['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]
-            </field>
-            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
         </record>
+
+        <record id="rule_lhi_asset_officer_scope" model="ir.rule">
+            <field name="name">Asset Officer: Assigned Offices and Projects</field>
+            <field name="model_id" ref="model_lhi_asset"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_asset_officer'))]"/>
+            <field name="domain_force">['&amp;', '|', ('office_id', '=', False), ('office_id', 'in', user.lhi_office_ids.ids), '|', ('project_id', '=', False), ('project_id', 'in', user.lhi_project_ids.ids)] if (user.lhi_office_ids or user.lhi_project_ids) else [(1, '=', 1)]</field>
+        </record>
+
+        <record id="rule_lhi_asset_manager_all" model="ir.rule">
+            <field name="name">Asset Manager: Company Assets</field>
+            <field name="model_id" ref="model_lhi_asset"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_asset_manager'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+
+        <record id="rule_lhi_asset_auditor_all" model="ir.rule">
+            <field name="name">System Auditor: Company Assets</field>
+            <field name="model_id" ref="model_lhi_asset"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_system_auditor'))]"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+        </record>
+
+        <record id="rule_lhi_asset_history_company" model="ir.rule">
+            <field name="name">Asset History: Multi-company</field>
+            <field name="model_id" ref="model_lhi_asset_history"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+
         <record id="rule_lhi_asset_transfer_company" model="ir.rule">
-            <field name="name">Asset Transfer: Multi-Company</field>
+            <field name="name">Asset Workflow: Multi-company</field>
             <field name="model_id" ref="model_lhi_asset_transfer"/>
-            <field name="domain_force">
-                ['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]
-            </field>
-            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="rule_lhi_asset_retag_company" model="ir.rule">
+            <field name="name">Asset Re-tag: Multi-company</field>
+            <field name="model_id" ref="model_lhi_asset_retag_request"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="rule_lhi_asset_tag_rule_company" model="ir.rule">
+            <field name="name">Asset Tag Rule: Multi-company</field>
+            <field name="model_id" ref="model_lhi_asset_tag_rule"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="rule_lhi_asset_counter_company" model="ir.rule">
+            <field name="name">Asset Tag Counter: Multi-company</field>
+            <field name="model_id" ref="model_lhi_asset_tag_counter"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('rule_id.company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="rule_lhi_asset_import_batch_company" model="ir.rule">
+            <field name="name">Asset Import Batch: Multi-company</field>
+            <field name="model_id" ref="model_lhi_asset_import_batch"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="rule_lhi_asset_import_row_company" model="ir.rule">
+            <field name="name">Asset Import Row: Multi-company</field>
+            <field name="model_id" ref="model_lhi_asset_import_row"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('batch_id.company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="rule_lhi_location_company" model="ir.rule">
+            <field name="name">Physical Location: Multi-company</field>
+            <field name="model_id" ref="model_lhi_location"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="rule_lhi_asset_category_company" model="ir.rule">
+            <field name="name">Asset Category: Multi-company</field>
+            <field name="model_id" ref="model_lhi_asset_category"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="rule_lhi_asset_condition_company" model="ir.rule">
+            <field name="name">Asset Condition: Multi-company</field>
+            <field name="model_id" ref="model_lhi_asset_condition"/>
+            <field name="global" eval="True"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
         </record>
     </data>
 </odoo>

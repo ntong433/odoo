@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_asset_register">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h2>LHI ERP Asset Register</h2>
+                    <p class="text-muted">Operational asset record — not an accounting asset ledger.</p>
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Asset Tag</th>
+                                <th>Asset</th>
+                                <th>Serial Number</th>
+                                <th>Category</th>
+                                <th>Condition</th>
+                                <th>Current State / HUB</th>
+                                <th>Custodian</th>
+                                <th>Status</th>
+                                <th class="text-end">Operational Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr t-foreach="docs" t-as="o">
+                                <td><span t-field="o.asset_tag"/></td>
+                                <td><span t-field="o.name"/></td>
+                                <td><span t-field="o.serial_number"/></td>
+                                <td><span t-field="o.category_id"/></td>
+                                <td><span t-field="o.condition_id"/></td>
+                                <td>
+                                    <span t-field="o.state_id"/>
+                                    <t t-if="o.hub_id"> / <span t-field="o.hub_id"/></t>
+                                </td>
+                                <td><span t-field="o.custodian_id"/></td>
+                                <td><span t-field="o.state"/></td>
+                                <td class="text-end"><span t-field="o.asset_value"/></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_asset_label">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <div class="page text-center">
+                    <h2>LHI ERP</h2>
+                    <h3><span t-field="o.name"/></h3>
+                    <h4><span t-field="o.asset_tag"/></h4>
+                    <div t-if="o.asset_tag" class="my-3">
+                        <img t-att-src="'/report/barcode/Code128/' + o.asset_tag"
+                             style="width: 90%; height: 90px;" alt="Asset barcode"/>
+                    </div>
+                    <div t-if="o.asset_tag" class="my-3">
+                        <img t-att-src="'/report/barcode/QR/' + o.asset_tag"
+                             style="width: 180px; height: 180px;" alt="Asset QR code"/>
+                    </div>
+                    <p>
+                        <span t-field="o.category_id"/> ·
+                        <span t-field="o.registration_state_id"/>
+                    </p>
+                </div>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_asset_condition">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Asset Condition Report</h2>
+                        <table class="table table-bordered">
+                            <tr><th>Asset</th><td><span t-field="o.name"/></td></tr>
+                            <tr><th>Asset Tag</th><td><span t-field="o.asset_tag"/></td></tr>
+                            <tr><th>Serial Number</th><td><span t-field="o.serial_number"/></td></tr>
+                            <tr><th>Condition</th><td><span t-field="o.condition_id"/></td></tr>
+                            <tr><th>Status</th><td><span t-field="o.state"/></td></tr>
+                            <tr><th>Current Location</th><td><span t-field="o.location_id"/></td></tr>
+                            <tr><th>Warranty Expiry</th><td><span t-field="o.warranty_expiry"/></td></tr>
+                        </table>
+                        <h4>Condition History</h4>
+                        <table class="table table-sm">
+                            <tr t-foreach="o.history_ids.filtered(lambda h: h.event_type in ('condition', 'maintenance', 'loss_damage'))" t-as="history">
+                                <td><span t-field="history.event_date"/></td>
+                                <td><span t-field="history.description"/></td>
+                                <td><span t-field="history.user_id"/></td>
+                            </tr>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_asset_transfer">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Asset Handover / Transfer / Disposal Record</h2>
+                        <table class="table table-bordered">
+                            <tr><th>Reference</th><td><span t-field="o.name"/></td></tr>
+                            <tr><th>Workflow Type</th><td><span t-field="o.transfer_type"/></td></tr>
+                            <tr><th>Asset</th><td><span t-field="o.asset_id"/></td></tr>
+                            <tr><th>Asset Tag</th><td><span t-field="o.asset_id.asset_tag"/></td></tr>
+                            <tr><th>From Custodian</th><td><span t-field="o.source_custodian_id"/></td></tr>
+                            <tr><th>To Custodian</th><td><span t-field="o.dest_custodian_id"/></td></tr>
+                            <tr><th>From State / HUB</th><td><span t-field="o.source_state_id"/> / <span t-field="o.source_hub_id"/></td></tr>
+                            <tr><th>To State / HUB</th><td><span t-field="o.dest_state_id"/> / <span t-field="o.dest_hub_id"/></td></tr>
+                            <tr><th>Justification</th><td><span t-field="o.justification"/></td></tr>
+                            <tr><th>Approval Status</th><td><span t-field="o.lhi_approval_state"/></td></tr>
+                            <tr><th>Completed By / At</th><td><span t-field="o.completed_by_id"/> / <span t-field="o.completed_at"/></td></tr>
+                        </table>
+                        <div class="row mt-5">
+                            <div class="col-6">Released / Approved by: ____________________</div>
+                            <div class="col-6">Received by: ____________________</div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_asset_retag_list" model="ir.ui.view">
+        <field name="name">lhi.asset.retag.request.list</field>
+        <field name="model">lhi.asset.retag.request</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="asset_id"/>
+                <field name="previous_tag"/>
+                <field name="new_tag"/>
+                <field name="requested_by_id"/>
+                <field name="approved_by_id"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_asset_retag_form" model="ir.ui.view">
+        <field name="name">lhi.asset.retag.request.form</field>
+        <field name="model">lhi.asset.retag.request</field>
+        <field name="arch" type="xml">
+            <form string="Asset Re-tag Request">
+                <header>
+                    <button name="action_submit" string="Submit" type="object"
+                            class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_approve" string="Approve and Generate New Tag"
+                            type="object" class="btn-success"
+                            groups="lhi_security.group_lhi_asset_manager"
+                            invisible="state != 'submitted'"/>
+                    <button name="action_reject" string="Reject" type="object"
+                            class="btn-danger"
+                            groups="lhi_security.group_lhi_asset_manager"
+                            invisible="state != 'submitted'"/>
+                    <button name="action_cancel" string="Cancel" type="object"
+                            invisible="state not in ('draft', 'submitted')"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,submitted,approved,rejected"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group>
+                            <field name="asset_id" readonly="state != 'draft'"/>
+                            <field name="previous_tag" readonly="1"/>
+                            <field name="new_tag" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="requested_by_id" readonly="1"/>
+                            <field name="requested_at" readonly="1"/>
+                            <field name="approved_by_id" readonly="1"/>
+                            <field name="approved_at" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Required Reason">
+                        <field name="reason" readonly="state != 'draft'"/>
+                    </group>
+                    <group string="Rejection Reason"
+                           groups="lhi_security.group_lhi_asset_manager"
+                           invisible="state not in ('submitted', 'rejected')">
+                        <field name="rejection_reason" readonly="state == 'rejected'"/>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_lhi_asset_retag_request" model="ir.actions.act_window">
+        <field name="name">Asset Re-tag Requests</field>
+        <field name="res_model">lhi.asset.retag.request</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

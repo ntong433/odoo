@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="lhi_asset_management.AssetDashboard" owl="1">
+        <div class="o_lhi_asset_dashboard">
+            <header class="o_lhi_asset_dashboard_header">
+                <div>
+                    <p class="o_lhi_asset_dashboard_eyebrow">LHI ERP · Operations</p>
+                    <h1>Asset Register Overview</h1>
+                    <p>Operational custody, value, condition and location—subject to your assigned access.</p>
+                </div>
+                <button class="btn btn-outline-primary" t-on-click="load">
+                    <i class="fa fa-refresh me-1"/> Refresh
+                </button>
+            </header>
+
+            <div t-if="state.loading" class="o_lhi_asset_dashboard_state">
+                <i class="fa fa-circle-o-notch fa-spin fa-2x"/>
+                <span>Loading asset overview…</span>
+            </div>
+            <div t-elif="state.error" class="alert alert-warning m-4">
+                <h4>Overview unavailable</h4>
+                <p>This section failed safely. Use the Asset Register list or try again.</p>
+                <button class="btn btn-primary" t-on-click="() => this.openAssets([])">
+                    Open Asset Register
+                </button>
+            </div>
+            <t t-else="">
+                <section class="o_lhi_asset_cards" aria-label="Asset key performance indicators">
+                    <button t-foreach="state.cards" t-as="card" t-key="card.key"
+                            class="o_lhi_asset_card"
+                            t-on-click="() => this.openAssets(card.domain)">
+                        <span class="o_lhi_asset_card_label"><t t-esc="card.label"/></span>
+                        <strong><t t-esc="displayValue(card)"/></strong>
+                        <span class="o_lhi_asset_card_link">View records <i class="fa fa-arrow-right"/></span>
+                    </button>
+                </section>
+
+                <section class="o_lhi_asset_charts" aria-label="Asset analysis">
+                    <article t-foreach="state.charts" t-as="chart" t-key="chart.key"
+                             class="o_lhi_asset_chart">
+                        <h3><t t-esc="chart.label"/></h3>
+                        <div t-if="chart.segments.length" class="o_lhi_asset_chart_segments">
+                            <button t-foreach="chart.segments" t-as="segment"
+                                    t-key="segment.label"
+                                    t-on-click="() => this.openAssets(segment.domain)">
+                                <span><t t-esc="segment.label"/></span>
+                                <strong t-if="chart.monetary">
+                                    <t t-esc="state.currency"/> <t t-esc="Number(segment.value || 0).toLocaleString()"/>
+                                </strong>
+                                <strong t-else="">
+                                    <t t-esc="Number(segment.value || 0).toLocaleString()"/>
+                                </strong>
+                            </button>
+                        </div>
+                        <p t-else="" class="text-muted mb-0">No accessible records.</p>
+                    </article>
+                </section>
+            </t>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_lhi_asset_category_list" model="ir.ui.view">
+        <field name="name">lhi.asset.category.list</field>
+        <field name="model">lhi.asset.category</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_asset_category_form" model="ir.ui.view">
+        <field name="name">lhi.asset.category.form</field>
+        <field name="model">lhi.asset.category</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="code"/>
+                        <field name="company_id" groups="base.group_multi_company"/>
+                        <field name="active"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_asset_condition_list" model="ir.ui.view">
+        <field name="name">lhi.asset.condition.list</field>
+        <field name="model">lhi.asset.condition</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_asset_tag_rule_list" model="ir.ui.view">
+        <field name="name">lhi.asset.tag.rule.list</field>
+        <field name="model">lhi.asset.tag.rule</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="organisation_prefix"/>
+                <field name="sequence_strategy"/>
+                <field name="padding"/>
+                <field name="is_default"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_asset_tag_rule_form" model="ir.ui.view">
+        <field name="name">lhi.asset.tag.rule.form</field>
+        <field name="model">lhi.asset.tag.rule</field>
+        <field name="arch" type="xml">
+            <form string="Asset Tag Rule">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="organisation_prefix"/>
+                            <field name="lhi_owner_code"/>
+                            <field name="separator"/>
+                            <field name="padding"/>
+                        </group>
+                        <group>
+                            <field name="sequence_strategy"/>
+                            <field name="sequence"/>
+                            <field name="is_default"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="alert">
+                        Generated format:
+                        ORGANISATION / OWNER_OR_PROJECT / ORIGIN_STATE / CATEGORY / SEQUENCE.
+                        Changing a rule never changes tags already assigned to assets.
+                    </div>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_lhi_location_list" model="ir.ui.view">
+        <field name="name">lhi.location.list</field>
+        <field name="model">lhi.location</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="type"/>
+                <field name="state_id"/>
+                <field name="office_id"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_lhi_asset_category" model="ir.actions.act_window">
+        <field name="name">Asset Categories</field>
+        <field name="res_model">lhi.asset.category</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_lhi_asset_condition" model="ir.actions.act_window">
+        <field name="name">Asset Conditions</field>
+        <field name="res_model">lhi.asset.condition</field>
+        <field name="view_mode">list</field>
+    </record>
+    <record id="action_lhi_asset_tag_rule" model="ir.actions.act_window">
+        <field name="name">Asset Tag Rules</field>
+        <field name="res_model">lhi.asset.tag.rule</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <record id="action_lhi_location" model="ir.actions.act_window">
+        <field name="name">Physical Locations</field>
+        <field name="res_model">lhi.location</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

@@ -1,74 +1,261 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <record id="view_lhi_asset_search" model="ir.ui.view">
+        <field name="name">lhi.asset.search</field>
+        <field name="model">lhi.asset</field>
+        <field name="arch" type="xml">
+            <search string="Search Assets">
+                <field name="asset_tag"/>
+                <field name="name"/>
+                <field name="serial_number"/>
+                <field name="category_id"/>
+                <field name="custodian_id"/>
+                <field name="project_id"/>
+                <field name="hub_id"/>
+                <filter name="available" string="Available" domain="[('state', '=', 'available')]"/>
+                <filter name="assigned" string="Assigned" domain="[('state', '=', 'assigned')]"/>
+                <filter name="in_use" string="In Use" domain="[('state', '=', 'in_use')]"/>
+                <filter name="under_repair" string="Under Repair" domain="[('state', '=', 'under_repair')]"/>
+                <filter name="lost_stolen" string="Lost / Stolen" domain="[('state', 'in', ('lost', 'stolen'))]"/>
+                <filter name="untagged" string="Without Tags" domain="[('asset_tag', '=', False)]"/>
+                <filter name="legacy" string="Legacy Tags" domain="[('legacy_tag', '=', True)]"/>
+                <separator/>
+                <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_category" string="Category" context="{'group_by': 'category_id'}"/>
+                    <filter name="group_condition" string="Condition" context="{'group_by': 'condition_id'}"/>
+                    <filter name="group_state" string="Current State" context="{'group_by': 'state_id'}"/>
+                    <filter name="group_hub" string="Current HUB" context="{'group_by': 'hub_id'}"/>
+                    <filter name="group_project" string="Project" context="{'group_by': 'project_id'}"/>
+                    <filter name="group_programme" string="Programme" context="{'group_by': 'programme_id'}"/>
+                    <filter name="group_status" string="Status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
     <record id="view_lhi_asset_form" model="ir.ui.view">
         <field name="name">lhi.asset.form</field>
         <field name="model">lhi.asset</field>
         <field name="arch" type="xml">
             <form string="Asset">
                 <header>
-                    <button name="action_activate" string="Activate" type="object" class="oe_highlight" invisible="state != 'draft'"/>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,active,maintenance,disposed"/>
+                    <button name="action_generate_tag" string="Generate Tag" type="object"
+                            groups="lhi_security.group_lhi_asset_officer"
+                            invisible="state != 'draft' or asset_tag"/>
+                    <button name="action_confirm" string="Confirm Registration" type="object"
+                            class="oe_highlight" groups="lhi_security.group_lhi_asset_officer"
+                            invisible="state != 'draft'"/>
+                    <button name="action_assign" string="Assign" type="object"
+                            groups="lhi_security.group_lhi_asset_officer"
+                            invisible="state not in ('available', 'assigned', 'in_use')"/>
+                    <button name="action_mark_in_use" string="Mark In Use" type="object"
+                            groups="lhi_security.group_lhi_asset_officer"
+                            invisible="state not in ('available', 'assigned')"/>
+                    <button name="action_send_for_repair" string="Send for Repair" type="object"
+                            groups="lhi_security.group_lhi_asset_officer"
+                            invisible="state in ('draft', 'disposed', 'archived', 'under_repair')"/>
+                    <button name="action_return_available" string="Return Available" type="object"
+                            groups="lhi_security.group_lhi_asset_officer"
+                            invisible="state not in ('assigned', 'in_use', 'under_repair')"/>
+                    <button name="action_archive_asset" string="Archive" type="object"
+                            groups="lhi_security.group_lhi_asset_manager"
+                            invisible="state in ('draft', 'archived')"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,available,assigned,in_use,under_repair,in_transit,disposed,archived"/>
                 </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_supporting_documents" type="object"
+                                class="oe_stat_button" icon="fa-files-o">
+                            <field name="supporting_document_count" widget="statinfo"
+                                   string="SharePoint Documents"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Legacy Tag" bg_color="text-bg-warning"
+                            invisible="not legacy_tag"/>
                     <div class="oe_title">
-                        <label for="name" class="oe_edit_only"/>
-                        <h1><field name="name"/></h1>
-                        <label for="asset_tag" class="oe_edit_only"/>
-                        <h2><field name="asset_tag" readonly="1"/></h2>
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="Asset name"/></h1>
+                        <label for="asset_tag"/>
+                        <h2>
+                            <field name="asset_tag" placeholder="Generated at confirmation"
+                                   readonly="state != 'draft'"/>
+                        </h2>
                     </div>
                     <group>
-                        <group string="Basic Information">
-                            <field name="category_id"/>
+                        <group string="Identification">
+                            <field name="description"/>
                             <field name="serial_number"/>
-                            <field name="condition"/>
-                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="category_id"/>
+                            <field name="category_code" readonly="1"/>
+                            <field name="condition_id"/>
+                            <field name="tag_validation_status" readonly="1"/>
+                            <field name="legacy_tag" readonly="1"/>
                         </group>
-                        <group string="Custody &amp; Location">
+                        <group string="Custody and Location">
                             <field name="custodian_id"/>
-                            <field name="location_id"/>
+                            <field name="registration_state_id"
+                                   readonly="state != 'draft' or tag_generated_at"/>
+                            <field name="state_id" readonly="state != 'draft'"/>
+                            <field name="state_code" readonly="1"/>
+                            <field name="office_id" readonly="state != 'draft'"/>
+                            <field name="hub_id" readonly="state != 'draft'"/>
+                            <field name="location_id" readonly="state != 'draft'"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
                         </group>
                     </group>
                     <notebook>
-                        <page string="Funding &amp; Ownership">
+                        <page string="Acquisition and Ownership">
                             <group>
-                                <field name="donor_id"/>
-                                <field name="grant_id"/>
-                                <field name="project_id"/>
-                                <field name="purchase_order_id"/>
-                                <field name="acquisition_date"/>
-                                <field name="warranty_expiry"/>
+                                <group>
+                                    <field name="acquisition_date"/>
+                                    <field name="acquisition_type"/>
+                                    <field name="acquisition_source_id"/>
+                                    <field name="legal_owner_id" readonly="state != 'draft'"/>
+                                    <field name="funding_source_id" readonly="state != 'draft'"/>
+                                    <field name="donor_id"/>
+                                </group>
+                                <group>
+                                    <field name="project_id" readonly="state != 'draft'"/>
+                                    <field name="project_abbreviation"
+                                           readonly="state != 'draft' or tag_generated_at"/>
+                                    <field name="programme_id"/>
+                                    <field name="award_id"/>
+                                    <field name="grant_id"/>
+                                    <field name="purchase_order_id"/>
+                                </group>
                             </group>
                             <group string="Restrictions">
-                                <field name="ownership_restriction" nolabel="1"/>
+                                <field name="donor_restrictions"/>
+                                <field name="ownership_restriction"/>
                             </group>
                         </page>
-                        <page string="Transfer History">
-                            <field name="transfer_ids" readonly="1"/>
+                        <page string="Operational Value">
+                            <group>
+                                <group>
+                                    <field name="asset_value"/>
+                                    <field name="purchase_value"/>
+                                    <field name="declared_value"/>
+                                </group>
+                                <group>
+                                    <field name="currency_id"/>
+                                    <field name="value_source"/>
+                                    <field name="value_date"/>
+                                    <field name="operational_value_company" readonly="1"/>
+                                    <field name="company_currency_id" readonly="1"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Warranty and Notes">
+                            <group>
+                                <field name="warranty_information"/>
+                                <field name="warranty_expiry"/>
+                            </group>
+                            <field name="notes"/>
+                            <group string="Supporting Documents">
+                                <field name="supporting_document_ids"
+                                       widget="lhi_sharepoint_many2many_binary"/>
+                            </group>
+                        </page>
+                        <page string="Tag Audit">
+                            <group>
+                                <field name="tag_generated_at" readonly="1"/>
+                                <field name="tag_generated_by_id" readonly="1"/>
+                                <field name="tag_rule_id" readonly="1"/>
+                                <field name="tag_sequence_number" readonly="1"/>
+                                <field name="barcode_value" readonly="1"/>
+                                <field name="qr_code_value" readonly="1"/>
+                            </group>
+                            <field name="retag_request_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="previous_tag"/>
+                                    <field name="new_tag"/>
+                                    <field name="requested_by_id"/>
+                                    <field name="approved_by_id"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Movement Workflows">
+                            <field name="transfer_ids" readonly="1">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="transfer_type"/>
+                                    <field name="dest_custodian_id"/>
+                                    <field name="dest_state_id"/>
+                                    <field name="dest_hub_id"/>
+                                    <field name="lhi_approval_state" widget="badge"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Immutable Lifecycle History">
+                            <field name="history_ids" readonly="1">
+                                <list create="false" delete="false">
+                                    <field name="event_date"/>
+                                    <field name="event_type"/>
+                                    <field name="description"/>
+                                    <field name="old_value"/>
+                                    <field name="new_value"/>
+                                    <field name="user_id"/>
+                                </list>
+                            </field>
                         </page>
                     </notebook>
                 </sheet>
-                <div class="oe_chatter">
-                    <field name="message_follower_ids"/>
-                    <field name="activity_ids"/>
-                    <field name="message_ids"/>
-                </div>
+                <chatter/>
             </form>
         </field>
     </record>
 
     <record id="view_lhi_asset_tree" model="ir.ui.view">
-        <field name="name">lhi.asset.tree</field>
+        <field name="name">lhi.asset.list</field>
         <field name="model">lhi.asset</field>
         <field name="arch" type="xml">
-            <list string="Assets" decoration-muted="state == 'disposed'">
+            <list string="Asset Register" decoration-muted="state in ('disposed', 'archived')"
+                  decoration-danger="state in ('lost', 'stolen')">
+                <field name="asset_tag"/>
+                <field name="name"/>
+                <field name="serial_number" optional="show"/>
+                <field name="category_id"/>
+                <field name="condition_id"/>
+                <field name="custodian_id"/>
+                <field name="state_id" optional="show"/>
+                <field name="office_id" optional="hide"/>
+                <field name="hub_id" optional="show"/>
+                <field name="project_id" optional="show"/>
+                <field name="operational_value_company"
+                       sum="Total Operational Asset Value"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="company_currency_id" column_invisible="True"/>
+                <field name="state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_lhi_asset_kanban" model="ir.ui.view">
+        <field name="name">lhi.asset.kanban</field>
+        <field name="model">lhi.asset</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" sample="1">
                 <field name="asset_tag"/>
                 <field name="name"/>
                 <field name="category_id"/>
+                <field name="condition_id"/>
                 <field name="custodian_id"/>
-                <field name="location_id"/>
-                <field name="condition"/>
-                <field name="state" widget="badge"/>
-            </list>
+                <templates>
+                    <t t-name="card">
+                        <div class="fw-bold"><field name="asset_tag"/></div>
+                        <div><field name="name"/></div>
+                        <div class="text-muted"><field name="category_id"/> · <field name="condition_id"/></div>
+                        <div t-if="record.custodian_id.raw_value">
+                            <i class="fa fa-user me-1"/><field name="custodian_id"/>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
         </field>
     </record>
 </odoo>

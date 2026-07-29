@@ -1,0 +1,158 @@
+.o_lhi_asset_dashboard {
+    min-height: 100%;
+    padding: 1.5rem;
+    background:
+        radial-gradient(circle at top right, rgba(31, 122, 88, 0.11), transparent 35%),
+        var(--o-view-background-color, #f7f8f7);
+    color: var(--body-color, #24312c);
+}
+
+.o_lhi_asset_dashboard_header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+    max-width: 1440px;
+    margin: 0 auto 1.25rem;
+
+    h1 {
+        margin: 0;
+        font-weight: 750;
+    }
+
+    p:not(.o_lhi_asset_dashboard_eyebrow) {
+        margin: 0.35rem 0 0;
+        color: var(--text-muted, #607069);
+    }
+}
+
+.o_lhi_asset_dashboard_eyebrow {
+    margin: 0 0 0.25rem;
+    color: #1f7a58;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.o_lhi_asset_cards,
+.o_lhi_asset_charts {
+    display: grid;
+    max-width: 1440px;
+    margin: 0 auto;
+    gap: 1rem;
+}
+
+.o_lhi_asset_cards {
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.o_lhi_asset_card,
+.o_lhi_asset_chart {
+    border: 1px solid var(--border-color, #dce4e0);
+    border-radius: 0.85rem;
+    background: var(--o-view-background-color, #fff);
+    box-shadow: 0 6px 22px rgba(21, 57, 44, 0.06);
+}
+
+.o_lhi_asset_card {
+    display: flex;
+    min-height: 132px;
+    padding: 1rem;
+    text-align: left;
+    flex-direction: column;
+    transition: transform 120ms ease, border-color 120ms ease;
+
+    &:hover,
+    &:focus-visible {
+        border-color: #1f7a58;
+        transform: translateY(-2px);
+    }
+
+    strong {
+        margin: 0.4rem 0;
+        color: #15543d;
+        font-size: 1.45rem;
+    }
+}
+
+.o_lhi_asset_card_label {
+    color: var(--text-muted, #607069);
+    font-size: 0.82rem;
+    font-weight: 650;
+}
+
+.o_lhi_asset_card_link {
+    margin-top: auto;
+    color: #1f7a58;
+    font-size: 0.78rem;
+}
+
+.o_lhi_asset_charts {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    margin-top: 1rem;
+}
+
+.o_lhi_asset_chart {
+    padding: 1rem;
+
+    h3 {
+        margin: 0 0 0.85rem;
+        font-size: 1rem;
+        font-weight: 700;
+    }
+}
+
+.o_lhi_asset_chart_segments {
+    display: flex;
+    max-height: 280px;
+    overflow: auto;
+    flex-direction: column;
+    gap: 0.4rem;
+
+    button {
+        display: flex;
+        padding: 0.58rem 0.7rem;
+        border: 0;
+        border-radius: 0.45rem;
+        background: rgba(31, 122, 88, 0.07);
+        color: inherit;
+        justify-content: space-between;
+        text-align: left;
+
+        &:hover,
+        &:focus-visible {
+            background: rgba(31, 122, 88, 0.15);
+        }
+    }
+}
+
+.o_lhi_asset_dashboard_state {
+    display: flex;
+    min-height: 280px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.8rem;
+    color: var(--text-muted, #607069);
+}
+
+@media (max-width: 767.98px) {
+    .o_lhi_asset_dashboard {
+        padding: 1rem;
+    }
+
+    .o_lhi_asset_dashboard_header {
+        flex-direction: column;
+    }
+
+    .o_lhi_asset_cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 440px) {
+    .o_lhi_asset_cards {
+        grid-template-columns: 1fr;
+    }
+}

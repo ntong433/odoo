@@ -55,7 +55,6 @@
                             <field name="entra_scope_group_object_id" invisible="user_scope_mode != 'entra_group'"/>
                             <field name="sync_login_from_upn"/>
                             <field name="sync_organizational_scope"/>
-                            <field name="create_missing_employee"/>
                             <field name="deactivation_policy"/>
                             <field name="scheduled_sync_enabled"/>
                             <field name="active"/>

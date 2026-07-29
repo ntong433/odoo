@@ -121,7 +121,10 @@ class LhiPurchaseRequest(models.Model):
 
     def action_cancel(self):
         for req in self:
-            if req.state == 'approved':
+            if (
+                req.state == 'approved'
+                and 'lhi.procurement.commitment' in self.env
+            ):
                 # Release commitment
                 commitments = self.env['lhi.procurement.commitment'].search([('request_id', '=', req.id)])
                 commitments.action_release()

@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'LHI Budget Control',
-    'version': '19.0.1.0.1',
+    'version': '19.0.1.1.0',
     'category': 'Accounting',
-    'depends': ['account', 'lhi_base', 'lhi_accounting_base'],
+    'depends': [
+        'account',
+        'lhi_base',
+        'lhi_accounting_base',
+        'lhi_purchase_request',
+    ],
     'data': [
         'security/ir.model.access.csv',
         'views/views.xml',

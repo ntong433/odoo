@@ -466,8 +466,6 @@ class LhiEntraSyncRun(models.Model):
         add_ids, sod_blocked = self._filter_sod_conflicts(
             user, current_group_ids, add_ids, remove_ids
         )
-        employee_vals = {}
-
         manager_user = self.env["res.users"]
         if manager_object_id:
             manager_user = (
@@ -483,17 +481,15 @@ class LhiEntraSyncRun(models.Model):
                     limit=1,
                 )
             )
-            if not manager_user or not manager_user.employee_id:
+            if not manager_user:
                 self._finding(
                     category="missing_manager",
                     severity="warning",
                     user=user,
                     entra_object_id=object_id,
                     entra_upn=remote.get("userPrincipalName"),
-                    message=_("The Entra manager is not mapped to an Odoo employee."),
+                    message=_("The Entra manager is not mapped to an active Odoo user."),
                 )
-            elif employee_vals:
-                employee_vals["parent_id"] = manager_user.employee_id.id
         else:
             self._finding(
                 category="missing_manager",
@@ -585,15 +581,11 @@ class LhiEntraSyncRun(models.Model):
             user_vals["login"] = remote["userPrincipalName"].strip().casefold()
         if not account_enabled and self.configuration_id.deactivation_policy == "archive":
             user_vals["active"] = False
-            if employee_vals:
-                employee_vals["active"] = False
 
         plan = {
             "match_method": "create" if create_user else match_method,
             "create_user": create_user,
             "user_vals": user_vals,
-            "employee_id": employee.id if employee else False,
-            "employee_vals": employee_vals,
             "organizational_vals": organizational_vals,
             "group_add_ids": sorted(add_ids),
             "group_remove_ids": sorted(remove_ids),
@@ -727,7 +719,6 @@ class LhiEntraSyncRun(models.Model):
                     "create_missing_users": configuration.create_missing_users,
                     "sync_login_from_upn": configuration.sync_login_from_upn,
                     "sync_organizational_scope": configuration.sync_organizational_scope,
-                    "create_missing_employee": configuration.create_missing_employee,
                     "deactivation_policy": configuration.deactivation_policy,
                     "user_scope_mode": configuration.user_scope_mode,
                     "entra_scope_group_object_id": configuration.entra_scope_group_object_id,
@@ -932,16 +923,6 @@ class LhiEntraSyncRun(models.Model):
                 "office_ids": sorted(user.lhi_office_ids.ids),
                 "project_ids": sorted(user.lhi_project_ids.ids),
                 "group_ids": sorted(user.group_ids.ids),
-            },
-            "employee": {
-                "id": employee.id if employee else False,
-                "active": employee.active if employee else False,
-                "name": employee.name if employee else False,
-                "job_title": employee.job_title if employee else False,
-                "work_email": employee.work_email if employee else False,
-                "work_phone": employee.work_phone if employee else False,
-                "mobile_phone": employee.mobile_phone if employee else False,
-                "parent_id": employee.parent_id.id if employee else False,
             },
         }
 

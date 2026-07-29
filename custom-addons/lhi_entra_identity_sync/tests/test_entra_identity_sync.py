@@ -477,11 +477,13 @@ class TestLhiEntraIdentitySync(TransactionCase):
             {
                 "name": "Manager",
                 "login": "manager@example.org",
+                "entra_object_id": "77777777-7777-4777-8777-777777777777",
                 "company_id": self.company.id,
                 "company_ids": [Command.set(self.company.ids)],
                 "group_ids": [Command.set(self.group_project.ids)],
             }
         )
+        self.user.entra_manager_object_id = manager.entra_object_id
         matrix = self.env["lhi.approval.matrix"].create(
             {
                 "name": "Manager Approval Test",
@@ -511,5 +513,5 @@ class TestLhiEntraIdentitySync(TransactionCase):
         )
         request.with_user(self.user).action_submit()
         self.assertEqual(request.current_line_id.approver_ids, manager)
-        self.employee.parent_id = False
+        self.user.entra_manager_object_id = False
         self.assertEqual(request.current_line_id.approver_ids, manager)

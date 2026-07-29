@@ -223,6 +223,51 @@ class TestLhiApprovalMatrix(TransactionCase):
         self.assertEqual(req.state, 'returned')
         self.assertEqual(req.line_ids[0].state, 'pending')
 
+    def test_05b_only_current_approver_can_reject_or_return(self):
+        """Decision RPC methods enforce the current-stage approver boundary."""
+        req = self.env['lhi.approval.request'].create({
+            'res_model': 'lhi.project',
+            'res_id': self.project.id,
+            'document_type': 'purchase',
+            'amount': 10000.0,
+            'currency_id': self.company.currency_id.id,
+            'creator_id': self.user_creator.id,
+            'project_id': self.project.id,
+            'company_id': self.company.id,
+        })
+        req.action_submit()
+
+        with self.assertRaises(UserError):
+            req.with_user(self.user_approver).action_reject(
+                notes='Not the current-stage approver'
+            )
+        with self.assertRaises(UserError):
+            req.with_user(self.user_approver).action_return_for_correction(
+                notes='Not the current-stage approver'
+            )
+        self.assertEqual(req.state, 'under_review')
+        self.assertEqual(req.current_line_id.name, 'Technical Review')
+
+    def test_05c_decision_reasons_are_mandatory(self):
+        """Rejections and returns require an auditable reason."""
+        req = self.env['lhi.approval.request'].create({
+            'res_model': 'lhi.project',
+            'res_id': self.project.id,
+            'document_type': 'purchase',
+            'amount': 10000.0,
+            'currency_id': self.company.currency_id.id,
+            'creator_id': self.user_creator.id,
+            'project_id': self.project.id,
+            'company_id': self.company.id,
+        })
+        req.action_submit()
+
+        with self.assertRaises(ValidationError):
+            req.with_user(self.user_reviewer).action_reject(notes=' ')
+        with self.assertRaises(ValidationError):
+            req.with_user(self.user_reviewer).action_return_for_correction()
+        self.assertEqual(req.state, 'under_review')
+
     def test_06_timeout_escalation(self):
         """Verify that step timeout escalates step to the escalation user."""
         req = self.env['lhi.approval.request'].create({

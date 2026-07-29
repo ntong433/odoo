@@ -178,76 +178,58 @@ class LhiApprovalRequest(models.Model):
         )
         return True
 
-    def action_approve(self, notes=None):
+    def _lhi_assert_current_approver(self):
+        """Enforce the active-stage boundary for every approval decision."""
         self.ensure_one()
         if self.state != 'under_review' or not self.current_line_id:
             raise UserError(_("This request is not currently under review."))
 
         current_line = self.current_line_id
         user = self.env.user
-
-        # Segregation of Duties checks:
-        # 1. Prevent users from approving their own request
         if user == self.creator_id:
-            raise UserError(_("Segregation of Duties: You cannot approve your own request."))
+            raise UserError(
+                _("Segregation of Duties: You cannot decide your own request.")
+            )
 
-        # 2. Verify authorization (direct group membership or active delegation)
-        actual_approver = user
-        authorized = False
-        
-        # Check direct authorization
-        if current_line.approver_group_id in user.group_ids:
+        def is_eligible(candidate):
+            if current_line.approver_group_id not in candidate.group_ids:
+                return False
             manager_resolved = (
-                getattr(current_line.matrix_line_id, 'approver_source', 'group')
+                getattr(
+                    current_line.matrix_line_id,
+                    'approver_source',
+                    'group',
+                )
                 == 'requester_manager'
             )
-            if (
-                (manager_resolved and user in current_line.approver_ids)
-                or (
-                    not manager_resolved
-                    and (
-                        not current_line.matrix_line_id.approver_ids
-                        or user in current_line.approver_ids
-                    )
-                )
-            ):
-                authorized = True
+            if manager_resolved:
+                return candidate in current_line.approver_ids
+            configured = current_line.matrix_line_id.approver_ids
+            return not configured or candidate in current_line.approver_ids
 
-        # Check delegation if not directly authorized or if acting on behalf
-        if not authorized:
-            # Check who in the authorized list has delegated their authority to the current user
-            delegations = self.env['lhi.approval.delegation'].search([
-                ('delegatee_id', '=', user.id),
-                ('active', '=', True),
-                ('start_date', '<=', fields.Datetime.now()),
-                ('end_date', '>=', fields.Datetime.now()),
-                ('document_type', 'in', ['all', self.document_type])
-            ])
-            for delegation in delegations:
-                delegator = delegation.delegator_id
-                if current_line.approver_group_id in delegator.group_ids:
-                    manager_resolved = (
-                        getattr(current_line.matrix_line_id, 'approver_source', 'group')
-                        == 'requester_manager'
-                    )
-                    if (
-                        (manager_resolved and delegator in current_line.approver_ids)
-                        or (
-                            not manager_resolved
-                            and (
-                                not current_line.matrix_line_id.approver_ids
-                                or delegator in current_line.approver_ids
-                            )
-                        )
-                    ):
-                        authorized = True
-                        actual_approver = delegator
-                        break
+        if is_eligible(user):
+            return current_line
 
-        if not authorized:
-            raise UserError(_("You are not authorized to approve at this stage (%s).") % current_line.name)
+        delegations = self.env['lhi.approval.delegation'].search([
+            ('delegatee_id', '=', user.id),
+            ('active', '=', True),
+            ('start_date', '<=', fields.Datetime.now()),
+            ('end_date', '>=', fields.Datetime.now()),
+            ('document_type', 'in', ['all', self.document_type]),
+        ])
+        if any(is_eligible(delegation.delegator_id) for delegation in delegations):
+            return current_line
 
-        # 3. Prevent duplicate approval in same stage
+        raise UserError(
+            _("You are not authorized to decide this stage (%s).")
+            % current_line.name
+        )
+
+    def action_approve(self, notes=None):
+        current_line = self._lhi_assert_current_approver()
+        user = self.env.user
+
+        # Prevent duplicate approval in the same stage.
         if user in current_line.approved_user_ids:
             raise UserError(_("You have already approved this stage."))
 
@@ -294,19 +276,17 @@ class LhiApprovalRequest(models.Model):
             self.message_post(body=_("Stage '%s' approved by %s (Waiting for other parallel approvers).") % (current_line.name, user.name))
 
     def action_reject(self, notes=None):
-        self.ensure_one()
-        if self.state != 'under_review' or not self.current_line_id:
-            raise UserError(_("This request is not currently under review."))
-
-        current_line = self.current_line_id
+        current_line = self._lhi_assert_current_approver()
         user = self.env.user
+        if not (notes or '').strip():
+            raise ValidationError(_("A rejection reason is required."))
 
         # History log
         self.env['lhi.approval.history'].create({
             'request_line_id': current_line.id,
             'user_id': user.id,
             'action': 'reject',
-            'notes': notes or _("Rejected"),
+            'notes': notes,
         })
 
         current_line.write({'state': 'rejected'})
@@ -323,19 +303,17 @@ class LhiApprovalRequest(models.Model):
         )
 
     def action_return_for_correction(self, notes=None):
-        self.ensure_one()
-        if self.state != 'under_review' or not self.current_line_id:
-            raise UserError(_("This request is not currently under review."))
-
-        current_line = self.current_line_id
+        current_line = self._lhi_assert_current_approver()
         user = self.env.user
+        if not (notes or '').strip():
+            raise ValidationError(_("A correction reason is required."))
 
         # History log
         self.env['lhi.approval.history'].create({
             'request_line_id': current_line.id,
             'user_id': user.id,
             'action': 'return',
-            'notes': notes or _("Returned for correction"),
+            'notes': notes,
         })
 
         # Reset all steps and mark request as returned

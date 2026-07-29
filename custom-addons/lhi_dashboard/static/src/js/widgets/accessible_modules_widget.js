@@ -10,22 +10,28 @@ export class AccessibleModulesWidget extends Component {
     setup() {
         this.menuService = useService("menu");
         this.orm = useService("orm");
-        this.state = useState({ apps: [] });
+        this.state = useState({ apps: [], available: true });
         onWillStart(async () => {
-            const result = await this.orm.call(
-                "lhi.dashboard.widget",
-                "get_accessible_apps",
-                []
-            );
-            if (result && !Array.isArray(result) && result.apps) {
-                this.state.apps = result.apps;
-                if (result.warnings && result.warnings.length > 0) {
-                    for (const warning of result.warnings) {
-                        this.env.services.notification.add(warning, { type: "warning", sticky: true, title: "Configuration Warning" });
+            try {
+                const result = await this.orm.call(
+                    "lhi.dashboard.widget",
+                    "get_accessible_apps",
+                    []
+                );
+                if (result && !Array.isArray(result) && result.apps) {
+                    this.state.apps = result.apps;
+                    if (result.warnings && result.warnings.length > 0) {
+                        for (const warning of result.warnings) {
+                            this.env.services.notification.add(warning, { type: "warning", sticky: true, title: "Configuration Warning" });
+                        }
                     }
+                } else {
+                    this.state.apps = result || [];
                 }
-            } else {
-                this.state.apps = result || [];
+            } catch (error) {
+                console.error("[LHI Dashboard] My Apps is unavailable", error);
+                this.state.apps = [];
+                this.state.available = false;
             }
         });
     }

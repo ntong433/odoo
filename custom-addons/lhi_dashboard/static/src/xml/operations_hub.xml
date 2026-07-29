@@ -4,7 +4,7 @@
         <div class="lhi-operations-hub container mt-4">
             <div class="row">
                 <div class="col-12 mb-4">
-                    <h2 class="text-primary">Operations Hub</h2>
+                    <h2 class="text-primary">Operations Overview</h2>
                     <p class="text-muted">Select an operational area below to manage its processes.</p>
                 </div>
             </div>
@@ -31,7 +31,7 @@
                         <div class="card h-100 shadow-sm cursor-pointer lhi-dashboard-card" t-on-click="() => this.onModuleClick(module)">
                             <div class="card-body text-center d-flex flex-column align-items-center justify-content-center">
                                 <div class="lhi-module-icon-wrapper mb-3" style="width: 80px; height: 80px; background-color: #f8f9fa; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                    <img t-if="module.icon" t-att-src="module.icon" class="img-fluid" style="max-height: 50px;" alt="Icon"/>
+                                    <img t-if="module.icon_url" t-att-src="module.icon_url" class="img-fluid" style="max-height: 50px;" alt="Icon"/>
                                     <i t-else="" class="fa fa-cogs fa-3x text-secondary"></i>
                                 </div>
                                 <h4 class="card-title text-dark"><t t-esc="module.name"/></h4>

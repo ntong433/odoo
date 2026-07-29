@@ -111,15 +111,10 @@ class LhiEntraConfiguration(models.Model):
             "Missing or ambiguous values are blocked; master data is never auto-created."
         ),
     )
-    create_missing_employee = fields.Boolean(
-        default=False,
-        tracking=True,
-        help="Create an HR employee only for an already matched Odoo user.",
-    )
     deactivation_policy = fields.Selection(
         [
             ("block_login", "Block Entra Login and Require Review"),
-            ("archive", "Block Login and Archive User/Employee"),
+            ("archive", "Block Login and Archive User"),
         ],
         default="block_login",
         required=True,

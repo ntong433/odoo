@@ -10,3 +10,4 @@ from . import lhi_award
 from . import lhi_project
 from . import lhi_cost_center
 from . import lhi_activity
+from . import ir_ui_menu

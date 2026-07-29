@@ -1,5 +1,28 @@
 # Modification Sprint 5 delivery summary
 
+## 2026-07-29 HR-free identity correction
+
+The Asset/HUB dependency audit found residual `hr.employee` references after HR
+was removed from the manifest. The integration now stores and resolves reporting
+lines only through `res.users.entra_manager_object_id` and
+`res.users.entra_manager_user_id`. The obsolete create-employee setting and
+employee snapshot fields were removed. Existing submitted approval snapshots
+remain unchanged.
+
+Files changed by the correction:
+
+- `__manifest__.py`
+- `models/approval_matrix.py`
+- `models/entra_configuration.py`
+- `models/entra_sync_run.py`
+- `views/entra_configuration_views.xml`
+- `tests/test_entra_identity_sync.py`
+- `docs/administrator_guide.md`
+- this delivery summary
+
+No database migration was run. A legacy database column for the removed setting
+may remain harmlessly until an approved, backed-up cleanup migration is run.
+
 ## Outcome
 
 `lhi_entra_identity_sync` implements Entra identity, manager, account-state, and
@@ -34,7 +57,6 @@ New module:
 - `custom-addons/lhi_entra_identity_sync/models/entra_configuration.py`
 - `custom-addons/lhi_entra_identity_sync/models/entra_group_mapping.py`
 - `custom-addons/lhi_entra_identity_sync/models/entra_sync_run.py`
-- `custom-addons/lhi_entra_identity_sync/models/hr_employee.py`
 - `custom-addons/lhi_entra_identity_sync/models/res_groups.py`
 - `custom-addons/lhi_entra_identity_sync/models/res_users.py`
 - `custom-addons/lhi_entra_identity_sync/security/ir.model.access.csv`
@@ -45,7 +67,6 @@ New module:
 - `custom-addons/lhi_entra_identity_sync/views/entra_configuration_views.xml`
 - `custom-addons/lhi_entra_identity_sync/views/entra_group_mapping_views.xml`
 - `custom-addons/lhi_entra_identity_sync/views/entra_sync_run_views.xml`
-- `custom-addons/lhi_entra_identity_sync/views/hr_employee_views.xml`
 - `custom-addons/lhi_entra_identity_sync/views/lhi_entra_identity_menus.xml`
 - `custom-addons/lhi_entra_identity_sync/views/res_groups_views.xml`
 - `custom-addons/lhi_entra_identity_sync/views/res_users_views.xml`
@@ -56,7 +77,6 @@ Compatibility changes:
 - `docker-compose.yml`
 - `docker-compose.staging.yml`
 - `custom-addons/lhi_integration/models/res_users.py`
-- `custom-addons/lhi_integration/models/hr_employee.py`
 - `custom-addons/lhi_approval_matrix/models/lhi_approval_matrix.py`
 - `custom-addons/lhi_approval_matrix/models/lhi_approval_request.py`
 
@@ -85,12 +105,6 @@ No Odoo core file was changed.
   `entra_manager_user_id`, `entra_last_sync_at`, `entra_sync_state`,
   `identity_source`, `entra_given_name`, `entra_family_name`,
   `entra_login_blocked`, and `lhi_local_maintenance_admin`.
-
-`hr.employee`:
-
-- Related Entra identity/status fields plus synchronized `parent_id` reporting
-  line updates. Existing HR, department, office, and user relationships are
-  reused.
 
 `res.groups`:
 

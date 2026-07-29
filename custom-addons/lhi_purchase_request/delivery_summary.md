@@ -1,5 +1,18 @@
 # Sprint 15 Delivery Summary: Purchase Requests and Operational Budget Commitments
 
+## 2026-07-29 operational dependency correction
+
+`lhi.budget.line` is now owned by the operational Purchase Request module. The
+Accounting-only `lhi_budget_control` module optionally extends that model when
+the dormant Accounting capability is deliberately installed. Purchase Request,
+Procurement, Asset, HUB/Inventory, LHI Sign, and SharePoint workspace dependency
+closures therefore no longer activate `account`.
+
+The operational budget value does not create journal entries, invoices,
+payments, or accounting valuation. No database migration was executed; a
+backed-up database-copy upgrade must verify existing multi-company budget-line
+company and currency values before deployment.
+
 ## Objectives Met
 Successfully implemented the `lhi_purchase_request` and `lhi_procurement_commitment` modules to launch the first end-to-end procurement workflow, providing seamless routing, budget checking, and automated commitment generation.
 

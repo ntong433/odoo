@@ -27,17 +27,17 @@ class LhiBudget(models.Model):
         self.state = 'revised'
 
 class LhiBudgetLine(models.Model):
-    _name = 'lhi.budget.line'
-    _description = 'LHI Budget Line'
-    _inherit = ['mail.thread']
+    _inherit = 'lhi.budget.line'
 
-    budget_id = fields.Many2one('lhi.budget', string='Budget', required=True, ondelete='cascade')
-    general_account_id = fields.Many2one('account.account', string='GL Account', required=True)
+    budget_id = fields.Many2one(
+        'lhi.budget',
+        string='Accounting Budget',
+        ondelete='cascade',
+    )
+    general_account_id = fields.Many2one('account.account', string='GL Account')
     planned_amount = fields.Monetary(string='Planned Amount', currency_field='currency_id')
     commitment_amount = fields.Monetary(string='Commitments', default=0.0, currency_field='currency_id')
     actual_amount = fields.Monetary(string='Actuals', default=0.0, currency_field='currency_id')
-    currency_id = fields.Many2one('res.currency', related='budget_id.analytic_account_id.company_id.currency_id')
-    
     @api.depends('planned_amount', 'commitment_amount', 'actual_amount')
     def _compute_available(self):
         for line in self:

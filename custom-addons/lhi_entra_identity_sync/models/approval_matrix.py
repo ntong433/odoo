@@ -13,9 +13,9 @@ class LhiApprovalMatrixLine(models.Model):
         default="group",
         required=True,
         help=(
-            "Manager resolution uses the request creator's synchronized HR reporting "
-            "line when a new approval request is submitted. Existing requests retain "
-            "their snapshotted approvers."
+            "Manager resolution uses the request creator's synchronized Entra manager "
+            "user when a new approval request is submitted. Existing requests retain "
+            "their snapshotted approvers and never require an employee record."
         ),
     )
 
@@ -23,12 +23,11 @@ class LhiApprovalMatrixLine(models.Model):
         self.ensure_one()
         if self.approver_source != "requester_manager":
             return super()._lhi_resolve_approver_users(request)
-        employee = request.creator_id.sudo().employee_id
-        manager = employee.parent_id.user_id if employee and employee.parent_id else False
+        manager = request.creator_id.sudo().entra_manager_user_id
         if not manager or not manager.active:
             raise UserError(
                 _(
-                    "The request creator has no active synchronized Odoo manager. "
+                    "The request creator has no active synchronized Entra manager user. "
                     "Submit after the manager mapping is corrected."
                 )
             )

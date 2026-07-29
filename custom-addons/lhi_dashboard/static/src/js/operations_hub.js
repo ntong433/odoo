@@ -6,13 +6,13 @@ import {
     onWillStart,
 } from "@odoo/owl";
 import { registry } from "@web/core/registry";
-import { rpc } from "@web/core/network/rpc";
 import { useService } from "@web/core/utils/hooks";
 
 export class OperationsHub extends Component {
     setup() {
         this.actionService = useService("action");
         this.menuService = useService("menu");
+        this.orm = useService("orm");
 
         this.state = useState({
             modules: [],
@@ -22,14 +22,10 @@ export class OperationsHub extends Component {
 
         onWillStart(async () => {
             try {
-                const result = await rpc(
-                    "/web/dataset/call_kw/lhi.dashboard.widget/get_accessible_operations",
-                    {
-                        model: "lhi.dashboard.widget",
-                        method: "get_accessible_operations",
-                        args: [],
-                        kwargs: {},
-                    }
+                const result = await this.orm.call(
+                    "lhi.dashboard.widget",
+                    "get_accessible_operations",
+                    []
                 );
                 if (result && !Array.isArray(result) && result.modules) {
                     this.state.modules = result.modules;

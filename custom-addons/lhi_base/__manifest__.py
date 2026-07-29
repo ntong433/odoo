@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'LHI Base ERP Integration',
-    'version': '19.0.1.0.1',
+    'version': '19.0.1.1.0',
     'category': 'Operations',
     'summary': 'Core configuration and models for LHI Nigeria ERP system',
     'description': """
@@ -15,7 +15,6 @@ Defines foundational models, common partner data, and organizational structures.
     'data': [
         'security/ir.model.access.csv',
         'data/ir_sequence_data.xml',
-        'data/deactivate_hr_menus.xml',
         'views/menus.xml',
         'views/lhi_master_data_views.xml',
     ],

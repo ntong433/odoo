@@ -1,6 +1,6 @@
 {
     "name": "LHI Entra Identity Sync",
-    "version": "19.0.1.0.1",
+    "version": "19.0.1.1.0",
     "category": "Technical Settings",
     "summary": "Entra identity, manager, and existing-group synchronization",
     "description": """

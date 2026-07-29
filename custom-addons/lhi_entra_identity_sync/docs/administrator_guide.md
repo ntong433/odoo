@@ -26,8 +26,9 @@
 10. Approve that exact dry run, then enable write mode within 24 hours. Activation
     and apply fail closed if configuration, mappings, protected groups, or
     segregation-of-duties rules changed after planning.
-11. Run a controlled write synchronization in staging and verify user, employee,
-    manager, department, office, and group results.
+11. Run a controlled write synchronization in staging and verify user, manager,
+    department, office, and group results. No employee record is created or
+    required.
 12. Enable primary Entra login only after both maintenance accounts have been
     tested through `/lhi/maintenance/login`.
 13. Enable the two scheduled actions only after staging acceptance.
@@ -59,9 +60,11 @@ remain controlled by existing Odoo project assignment workflows and record rules
 
 ## Managers and approvals
 
-The synchronized manager is written to `hr.employee.parent_id`. Approval matrix
+The synchronized manager is stored as the immutable Entra manager object ID on
+`res.users` and resolved to `res.users.entra_manager_user_id`. Approval matrix
 stages may explicitly choose **Requester's Synchronized Manager** while retaining
-an existing Odoo approver group as the authorization requirement.
+an existing Odoo approver group as the authorization requirement. This path does
+not read or create `hr.employee`.
 
 Approvers are resolved and copied onto the approval request at submission.
 Subsequent manager changes do not alter submitted requests. A manager can use
@@ -73,7 +76,7 @@ All disabled Entra identities are blocked from Entra and password login.
 
 - **Block login and require review** preserves the active Odoo record for audit and
   manual review.
-- **Archive** also archives the user and linked employee.
+- **Archive** also archives the Odoo user.
 
 Protected administrators are never disabled or archived by this integration.
 

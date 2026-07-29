@@ -2,6 +2,7 @@
 import logging
 
 from odoo import api, fields, models
+from odoo.exceptions import AccessError
 
 
 _logger = logging.getLogger(__name__)
@@ -36,10 +37,9 @@ class LhiDashboardWidget(models.Model):
     _LHI_APP_DEFINITIONS = (
         ('procurement', 'Procurement', 'lhi_purchase_request.menu_lhi_procurement_root', ('lhi_security.group_lhi_procurement_officer', 'lhi_security.group_lhi_procurement_manager'), ('PROCUREMENT',)),
         ('operations', 'Operations', 'lhi_dashboard.menu_lhi_operations_hub', ('lhi_security.group_lhi_supervisor', 'lhi_security.group_lhi_manager', 'lhi_security.group_lhi_procurement_officer', 'lhi_security.group_lhi_store_officer', 'lhi_security.group_lhi_fleet_officer'), ('OPERATIONS',)),
-        ('assets', 'Assets', 'lhi_asset_management.menu_lhi_asset', ('lhi_security.group_lhi_store_officer',), ('ASSET', 'ASSETS', 'OPERATIONS')),
-        ('accounting', 'Accounting', 'account.menu_finance', ('lhi_security.group_lhi_finance_reviewer', 'lhi_accounting_base.group_lhi_accounting_sandbox'), ('ACCOUNTING', 'FINANCE')),
+        ('assets', 'Asset Register', 'lhi_asset_management.menu_lhi_asset', ('lhi_security.group_lhi_store_officer',), ('ASSET', 'ASSETS', 'OPERATIONS')),
         ('meal', 'MEAL', 'lhi_meal.menu_lhi_meal_initiative', ('lhi_security.group_lhi_meal_officer', 'lhi_meal.group_lhi_meal_sensitive'), ('MEAL',)),
-        ('inventory', 'Inventory', 'stock.menu_stock_root', ('lhi_security.group_lhi_store_officer',), ('INVENTORY', 'STORE')),
+        ('inventory', 'HUB', 'stock.menu_stock_root', ('lhi_security.group_lhi_store_officer',), ('INVENTORY', 'STORE', 'HUB')),
         ('fleet', 'Fleet', 'fleet.menu_root', ('lhi_security.group_lhi_fleet_officer',), ('FLEET', 'OPERATIONS')),
         ('approvals', 'Approvals', 'lhi_approval_matrix.menu_lhi_my_pending_approvals', ('lhi_security.group_lhi_executive_approver', 'lhi_security.group_lhi_manager'), ('APPROVALS',)),
         ('memos', 'Memos', 'lhi_memo_management.menu_lhi_memo_root', ('lhi_security.group_lhi_employee',), ()),
@@ -48,6 +48,16 @@ class LhiDashboardWidget(models.Model):
         ('reports', 'Reports', 'lhi_reporting_hub.menu_lhi_reporting_hub_root', ('lhi_security.group_lhi_manager', 'lhi_security.group_lhi_programme_director', 'lhi_security.group_lhi_finance_reviewer'), ('REPORTS', 'REPORTING', 'ANALYTICS')),
         ('settings', 'Settings', 'base.menu_administration', ('base.group_system',), ()),
     )
+
+    @api.model
+    def _lhi_user_has_any_group(self, user, group_xmlids):
+        """Resolve optional functional groups without crashing the launcher."""
+        user_groups = user.all_group_ids
+        for xmlid in group_xmlids:
+            group = self.env.ref(xmlid, raise_if_not_found=False)
+            if group and group in user_groups:
+                return True
+        return False
 
     @api.model
     def get_user_widgets(self):
@@ -107,10 +117,13 @@ class LhiDashboardWidget(models.Model):
         """
         user = self.env.user
         is_system = user.has_group('base.group_system')
-        department_codes = {
-            (code or '').strip().upper().replace(' ', '_')
-            for code in user.lhi_department_ids.mapped('code')
-        }
+        try:
+            department_codes = {
+                (code or '').strip().upper().replace(' ', '_')
+                for code in user.lhi_department_ids.mapped('code')
+            }
+        except AccessError:
+            department_codes = set()
         visible_menu_ids = self.env['ir.ui.menu']._visible_menu_ids()
         
         apps = []
@@ -126,7 +139,7 @@ class LhiDashboardWidget(models.Model):
             if not menu:
                 continue
 
-            group_match = any(user.has_group(xmlid) for xmlid in group_xmlids)
+            group_match = self._lhi_user_has_any_group(user, group_xmlids)
             department_match = bool(department_codes.intersection(department_codes_allowed))
             
             if not is_system and not (group_match or department_match):
@@ -151,18 +164,17 @@ class LhiDashboardWidget(models.Model):
         # 2. Dynamic Sidebar Role Mapping (Manager / Director specific)
         if include_mappings and 'lhi.sidebar.role.mapping' in self.env:
             # Use tight sudo() to read mapping configurations without granting users access to the config model
-            mappings = self.env['lhi.sidebar.role.mapping'].sudo().search([('active', '=', True)])
+            mappings = self.env['lhi.sidebar.role.mapping'].sudo().search([
+                ('active', '=', True),
+                '|',
+                ('company_ids', '=', False),
+                ('company_ids', 'in', user.company_ids.ids),
+            ])
             for mapping in mappings:
                 if not mapping.menu_id:
                     continue
-                
-                # Retrieve the XML ID of the mapped group securely
-                group_xml_id_dict = mapping.group_id.sudo().get_external_id()
-                group_xml_id = group_xml_id_dict.get(mapping.group_id.id)
-                if not group_xml_id:
-                    continue
 
-                if user.has_group(group_xml_id):
+                if mapping.group_id in user.all_group_ids:
                     # Ensure the menu is in the user's visible_menu_ids (current environment, NO SUDO)
                     menu = self.env['ir.ui.menu'].browse(mapping.menu_id.id)
                     if menu.id not in visible_menu_ids:
@@ -208,10 +220,16 @@ class LhiDashboardWidget(models.Model):
                 "count": 0,
             }
 
-        count = self.env[model_name].search_count([
-            ("approver_ids", "in", [self.env.user.id]),
-            ("state", "=", "pending"),
-        ])
+        try:
+            count = self.env[model_name].search_count([
+                ("approver_ids", "in", [self.env.user.id]),
+                ("state", "=", "pending"),
+            ])
+        except AccessError:
+            return {
+                "available": False,
+                "count": 0,
+            }
 
         return {
             "available": True,
@@ -262,11 +280,16 @@ class LhiDashboardWidget(models.Model):
         
         # Helper to search models safely
         def search_model(model_name, category, icon, domain=None, name_field='name', desc_field=None):
-            if model_name in self.env and self.env[model_name].check_access_rights('read', raise_exception=False):
+            try:
+                if model_name not in self.env:
+                    return
+                model = self.env[model_name]
+                if not model.check_access_rights('read', raise_exception=False):
+                    return
                 base_domain = [(name_field, 'ilike', query)]
                 if domain:
                     base_domain.extend(domain)
-                records = self.env[model_name].search(base_domain, limit=limit)
+                records = model.search(base_domain, limit=limit)
                 for rec in records:
                     desc = category
                     if desc_field:
@@ -290,12 +313,15 @@ class LhiDashboardWidget(models.Model):
                         'res_id': rec.id,
                         'category': category
                     })
+            except AccessError:
+                _logger.info(
+                    "Dashboard search source %s is unavailable to user %s.",
+                    model_name,
+                    self.env.uid,
+                )
 
         # Search Partners
         search_model('res.partner', 'Contact', 'user', [('is_company', '=', False)], desc_field='email')
-        
-        # Search Users
-        search_model('res.users', 'User', 'user-circle', desc_field='login')
         
         # Search LHI Approvals
         search_model('lhi.approval.request', 'Approval Request', 'file-text-o')
@@ -313,8 +339,8 @@ class LhiDashboardWidget(models.Model):
 
     _LHI_OPERATIONS_DEFINITIONS = (
         ('procurement', 'Procurement', 'lhi_purchase_request.menu_lhi_procurement_root', ('lhi_security.group_lhi_procurement_officer', 'lhi_security.group_lhi_procurement_manager', 'lhi_security.group_lhi_supervisor'), '/lhi_web_shell/static/src/img/module_icons/procurement.svg'),
-        ('assets', 'Assets', 'lhi_asset_management.menu_lhi_asset', ('lhi_security.group_lhi_store_officer', 'lhi_security.group_lhi_supervisor'), '/lhi_web_shell/static/src/img/module_icons/assets.svg'),
-        ('inventory', 'Inventory', 'stock.menu_stock_root', ('lhi_security.group_lhi_store_officer', 'lhi_security.group_lhi_supervisor'), '/lhi_web_shell/static/src/img/module_icons/inventory.svg'),
+        ('assets', 'Asset Register', 'lhi_asset_management.menu_lhi_asset', ('lhi_security.group_lhi_store_officer', 'lhi_security.group_lhi_supervisor'), '/lhi_web_shell/static/src/img/module_icons/assets.svg'),
+        ('inventory', 'HUB', 'stock.menu_stock_root', ('lhi_security.group_lhi_store_officer', 'lhi_security.group_lhi_supervisor'), '/lhi_web_shell/static/src/img/module_icons/inventory.svg'),
         ('fleet', 'Fleet', 'fleet.menu_root', ('lhi_security.group_lhi_fleet_officer', 'lhi_security.group_lhi_supervisor'), '/lhi_web_shell/static/src/img/module_icons/fleet.svg'),
     )
 

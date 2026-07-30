@@ -81,6 +81,12 @@
                             <field name="imported_row_count" readonly="1"/>
                             <field name="rejected_row_count" readonly="1"/>
                             <field name="duplicate_count" readonly="1"/>
+                            <field name="created_category_count" readonly="1"/>
+                            <field name="reused_category_count" readonly="1"/>
+                            <field name="created_project_count" readonly="1"/>
+                            <field name="reused_project_count" readonly="1"/>
+                            <field name="created_partner_count" readonly="1"/>
+                            <field name="reused_partner_count" readonly="1"/>
                             <field name="total_imported_value" readonly="1"/>
                             <field name="currency_id" readonly="1"/>
                             <field name="imported_by_id" readonly="1"/>

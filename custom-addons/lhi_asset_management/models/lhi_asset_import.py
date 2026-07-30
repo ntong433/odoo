@@ -3,6 +3,7 @@ import base64
 import csv
 import io
 import json
+import re
 from datetime import date, datetime
 
 from odoo import _, api, fields, models
@@ -21,7 +22,7 @@ HEADER_ALIASES = {
     "acquisition_source": {"acquisition source"},
     "project_abbreviation": {
         "project abbreviation",
-        "project abbreviation",
+        "project code",
     },
     "asset_value": {"purchase vaue", "purchase value"},
     "category": {"cat_cal", "asset category", "category", "category code"},
@@ -37,7 +38,7 @@ HEADER_ALIASES = {
         "item description",
         "asset description",
     },
-    "state": {"state", "state code"},
+    "state": {"state", "state code", "office location", "location"},
 }
 
 ACQUISITION_TYPES = {
@@ -59,6 +60,28 @@ def _json_default(value):
     if isinstance(value, (date, datetime)):
         return value.isoformat()
     return str(value)
+
+
+def _normalize_code(value):
+    return (str(value or "")).strip().upper()
+
+
+def _normalize_name(value):
+    return " ".join(str(value or "").strip().split())
+
+
+def _normalize_tag(tag):
+    if not tag:
+        return False
+    tag_str = " ".join(str(tag).strip().split())
+    return re.sub(r"\s*/\s*", "/", tag_str)
+
+
+def _canonical_partner_key(name):
+    if not name:
+        return ""
+    cleaned = re.sub(r"[^\w\s]", "", str(name)).casefold()
+    return " ".join(cleaned.split())
 
 
 class LhiAssetImportWizard(models.TransientModel):
@@ -185,6 +208,14 @@ class LhiAssetImportBatch(models.Model):
     imported_row_count = fields.Integer(readonly=True)
     rejected_row_count = fields.Integer(readonly=True)
     duplicate_count = fields.Integer(readonly=True)
+
+    created_category_count = fields.Integer(readonly=True)
+    reused_category_count = fields.Integer(readonly=True)
+    created_project_count = fields.Integer(readonly=True)
+    reused_project_count = fields.Integer(readonly=True)
+    created_partner_count = fields.Integer(readonly=True)
+    reused_partner_count = fields.Integer(readonly=True)
+
     total_imported_value = fields.Monetary(
         readonly=True, currency_field="currency_id"
     )
@@ -227,6 +258,12 @@ class LhiAssetImportBatch(models.Model):
             "imported_row_count",
             "rejected_row_count",
             "duplicate_count",
+            "created_category_count",
+            "reused_category_count",
+            "created_project_count",
+            "reused_project_count",
+            "created_partner_count",
+            "reused_partner_count",
             "total_imported_value",
             "imported_by_id",
             "imported_at",
@@ -324,7 +361,7 @@ class LhiAssetImportBatch(models.Model):
     def _prepare_row_values(self, number, values, extras, raw):
         exact_tag = values.get("asset_tag")
         if exact_tag not in (None, ""):
-            exact_tag = str(exact_tag)
+            exact_tag = str(exact_tag).strip()
         else:
             exact_tag = False
         serial = values.get("serial_number")
@@ -363,21 +400,179 @@ class LhiAssetImportBatch(models.Model):
             "state_text": str(values.get("state") or "").strip(),
         }
 
+    def _reconcile_master_data(self):
+        self.ensure_one()
+        created_cat = 0
+        reused_cat = 0
+        created_proj = 0
+        reused_proj = 0
+        created_part = 0
+        reused_part = 0
+
+        cat_cache = {}
+        proj_cache = {}
+        part_cache = {}
+
+        for row in self.line_ids:
+            # 1. Category Reconciliation
+            raw_cat = (row.category_text or "").strip()
+            if raw_cat:
+                cat_code = _normalize_code(raw_cat)
+                cat_name = _normalize_name(raw_cat)
+                if cat_code:
+                    category = cat_cache.get(cat_code)
+                    if not category:
+                        category = self.env["lhi.asset.category"].search(
+                            [("code", "=ilike", cat_code)], limit=1
+                        )
+                        if category:
+                            reused_cat += 1
+                            if cat_name and (
+                                not category.name or category.name.strip().upper() == cat_code
+                            ):
+                                category.write({"name": cat_name})
+                        else:
+                            category = self.env["lhi.asset.category"].create({
+                                "code": cat_code,
+                                "name": cat_name or cat_code,
+                                "company_id": self.company_id.id,
+                            })
+                            created_cat += 1
+                        cat_cache[cat_code] = category
+                    row.category_id = category.id
+
+            # 2. Project Code Reconciliation
+            raw_proj = (row.project_abbreviation or "").strip()
+            if raw_proj:
+                proj_code = _normalize_code(raw_proj)
+                if proj_code:
+                    project = proj_cache.get(proj_code)
+                    if not project:
+                        project = self.env["lhi.project"].search(
+                            [("code", "=ilike", proj_code)], limit=1
+                        )
+                        if project:
+                            reused_proj += 1
+                        else:
+                            project = self.env["lhi.project"].create({
+                                "code": proj_code,
+                                "name": proj_code,
+                                "company_id": self.company_id.id,
+                            })
+                            created_proj += 1
+                        proj_cache[proj_code] = project
+                    row.project_id = project.id
+
+            # 3. Vendor / Acquisition Source Reconciliation
+            raw_src = (row.acquisition_source_text or "").strip()
+            if raw_src:
+                norm_src = _normalize_name(raw_src)
+                can_key = _canonical_partner_key(raw_src)
+                if can_key:
+                    partner = part_cache.get(can_key)
+                    if not partner:
+                        partner = self.env["res.partner"].search(
+                            [("name", "=ilike", norm_src)], limit=1
+                        )
+                        if not partner:
+                            all_partners = self.env["res.partner"].search([])
+                            for p in all_partners:
+                                if _canonical_partner_key(p.name) == can_key:
+                                    partner = p
+                                    break
+                        if partner:
+                            reused_part += 1
+                        else:
+                            partner = self.env["res.partner"].create({
+                                "name": norm_src,
+                                "supplier_rank": 1,
+                            })
+                            created_part += 1
+                        part_cache[can_key] = partner
+                    row.acquisition_source_id = partner.id
+
+            # 4. Registration State Resolution
+            state = False
+            if row.state_text:
+                norm_st = _normalize_name(row.state_text)
+                state = self.env["res.country.state"].search(
+                    [
+                        "|", "|",
+                        ("lhi_asset_code", "=ilike", norm_st),
+                        ("code", "=ilike", norm_st),
+                        ("name", "=ilike", norm_st),
+                    ],
+                    limit=1,
+                )
+            if not state and row.asset_tag:
+                parsed = self.env["lhi.asset.tag.rule"].parse_tag(row.asset_tag)
+                if parsed and parsed.get("state"):
+                    st_code = parsed["state"]
+                    state = self.env["res.country.state"].search(
+                        [
+                            "|",
+                            ("lhi_asset_code", "=ilike", st_code),
+                            ("code", "=ilike", st_code),
+                        ],
+                        limit=1,
+                    )
+            state = state or self.default_state_id
+            if state:
+                row.registration_state_id = state.id
+
+        self.with_context(lhi_asset_import_system=True).write({
+            "created_category_count": created_cat,
+            "reused_category_count": reused_cat,
+            "created_project_count": created_proj,
+            "reused_project_count": reused_proj,
+            "created_partner_count": created_part,
+            "reused_partner_count": reused_part,
+        })
+
     def action_validate(self):
         for batch in self:
             if batch.state != "draft":
                 raise UserError(_("Only draft batches can be validated."))
+
+            # Reconcile Categories, Projects, Vendors, and Registration States
+            batch._reconcile_master_data()
+
+            seen_serials = {}
+            seen_tags = {}
+
             duplicates = 0
             rejected = 0
+
             for row in batch.line_ids:
-                row._validate_row()
+                row._validate_row(seen_serials=seen_serials, seen_tags=seen_tags)
                 duplicates += int(row.is_duplicate)
                 rejected += int(row.validation_state == "error")
+
             batch.with_context(lhi_asset_import_system=True).write(
                 {
                     "state": "validated",
                     "duplicate_count": duplicates,
                     "rejected_row_count": rejected,
+                }
+            )
+
+            batch.message_post(
+                body=_(
+                    "Master data reconciliation complete: "
+                    "Categories (%(cat_c)s created, %(cat_r)s reused), "
+                    "Projects (%(proj_c)s created, %(proj_r)s reused), "
+                    "Vendors (%(part_c)s created, %(part_r)s reused). "
+                    "Validation summary: %(dup)s duplicates, %(rej)s rejected rows."
+                )
+                % {
+                    "cat_c": batch.created_category_count,
+                    "cat_r": batch.reused_category_count,
+                    "proj_c": batch.created_project_count,
+                    "proj_r": batch.reused_project_count,
+                    "part_c": batch.created_partner_count,
+                    "part_r": batch.reused_partner_count,
+                    "dup": duplicates,
+                    "rej": rejected,
                 }
             )
         return True
@@ -653,20 +848,28 @@ class LhiAssetImportRow(models.Model):
             domain.append((field_name, "=ilike", value))
         return self.env[model_name].search(domain, limit=1)
 
-    def _validate_row(self):
+    def _validate_row(self, seen_serials=None, seen_tags=None):
         self.ensure_one()
         errors = []
         duplicate = False
+
+        if seen_serials is None:
+            seen_serials = {}
+        if seen_tags is None:
+            seen_tags = {}
+
         acquisition_type = ACQUISITION_TYPES.get(
             (self.acquisition_type_text or "").strip().casefold()
         )
         if self.acquisition_type_text and not acquisition_type:
             errors.append(_("Unknown acquisition type '%s'.") % self.acquisition_type_text)
+
         try:
             acquisition_date = self._parse_date(self.acquisition_date_text)
         except ValidationError as error:
             acquisition_date = False
             errors.append(str(error))
+
         try:
             asset_value = (
                 float((self.asset_value_text or "").replace(",", ""))
@@ -679,82 +882,66 @@ class LhiAssetImportRow(models.Model):
             asset_value = 0.0
             errors.append(_("Purchase Value must be a non-negative number."))
 
-        project = self._resolve_named(
-            "lhi.project", self.project_abbreviation, ("code",)
-        )
-        if self.project_abbreviation and not project:
+        if self.project_abbreviation and not self.project_id:
             errors.append(_("Unknown project abbreviation '%s'.") % self.project_abbreviation)
-        category = self._resolve_named(
-            "lhi.asset.category", self.category_text, ("code", "name")
-        )
-        if not category:
+        if not self.category_id:
             errors.append(_("Unknown or missing asset category '%s'.") % self.category_text)
         condition = self._resolve_named(
             "lhi.asset.condition", self.condition_text, ("code", "name")
         )
         if not condition:
             errors.append(_("Unknown or missing asset condition '%s'.") % self.condition_text)
-        source = self._resolve_named(
-            "res.partner", self.acquisition_source_text, ("name",)
-        )
-        if self.acquisition_source_text and not source:
+        if self.acquisition_source_text and not self.acquisition_source_id:
             errors.append(_("Unknown acquisition source '%s'.") % self.acquisition_source_text)
 
-        state = self._resolve_named(
-            "res.country.state", self.state_text, ("lhi_asset_code", "code", "name")
-        )
-        parsed = self.env["lhi.asset.tag.rule"].parse_tag(self.asset_tag)
-        if not state and parsed:
-            state = self._resolve_named(
-                "res.country.state", parsed["state"], ("lhi_asset_code", "code")
-            )
-        state = state or self.batch_id.default_state_id
-        if not state:
+        if not self.registration_state_id:
             errors.append(_("A registration state or batch default state is required."))
 
+        # Asset Tag Duplicate Check
         if self.asset_tag:
-            if self.env["lhi.asset"].search_count([("asset_tag", "=", self.asset_tag)]):
+            norm_tag = _normalize_tag(self.asset_tag)
+            if norm_tag in seen_tags:
+                first_row = seen_tags[norm_tag]
+                duplicate = True
+                errors.append(
+                    _("Asset Number is duplicated within this batch. First occurrence: row %s.") % first_row
+                )
+            else:
+                seen_tags[norm_tag] = self.row_number
+
+            if self.env["lhi.asset"].search_count([("asset_tag", "=ilike", norm_tag)]):
                 duplicate = True
                 errors.append(_("Duplicate Asset Number '%s'.") % self.asset_tag)
-            if self.search_count(
-                [
-                    ("id", "!=", self.id),
-                    ("batch_id", "=", self.batch_id.id),
-                    ("asset_tag", "=", self.asset_tag),
-                ]
-            ):
+
+        # Serial Number Duplicate Check
+        raw_serial = (self.serial_number or "").strip()
+        if raw_serial:
+            norm_serial = " ".join(raw_serial.split()).casefold()
+            if norm_serial in seen_serials:
+                first_row = seen_serials[norm_serial]
                 duplicate = True
-                errors.append(_("Asset Number is duplicated within this batch."))
-        if self.serial_number:
+                errors.append(
+                    _("Serial number is duplicated within this batch. First occurrence: row %s.") % first_row
+                )
+            else:
+                seen_serials[norm_serial] = self.row_number
+
             if self.env["lhi.asset"].search_count(
                 [
-                    ("serial_number", "=", self.serial_number),
+                    ("serial_number", "=ilike", raw_serial),
                     ("company_id", "=", self.batch_id.company_id.id),
                 ]
             ):
                 duplicate = True
-                errors.append(_("Duplicate manufacturer serial number '%s'.") % self.serial_number)
-            if self.search_count(
-                [
-                    ("id", "!=", self.id),
-                    ("batch_id", "=", self.batch_id.id),
-                    ("serial_number", "=", self.serial_number),
-                ]
-            ):
-                duplicate = True
-                errors.append(_("Serial number is duplicated within this batch."))
+                errors.append(_("Duplicate manufacturer serial number '%s'.") % raw_serial)
 
         self.write(
             {
                 "acquisition_type": acquisition_type,
                 "acquisition_date": acquisition_date,
-                "acquisition_source_id": source.id,
-                "project_id": project.id,
-                "category_id": category.id,
-                "condition_id": condition.id,
-                "registration_state_id": state.id,
+                "condition_id": condition.id if condition else False,
                 "asset_value": asset_value,
-                "validation_state": "error" if errors else "valid",
+                "validation_state": "error" if (errors or duplicate) else "valid",
                 "error_message": "\n".join(errors) if errors else False,
                 "is_duplicate": duplicate,
             }

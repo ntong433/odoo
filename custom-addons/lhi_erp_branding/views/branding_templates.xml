@@ -31,13 +31,6 @@
         </xpath>
     </template>
 
-    <!-- Login layout branding override -->
-    <template id="lhi_login_layout_branding" inherit_id="web.login_layout" name="LHI ERP Login Layout Branding" priority="20">
-        <xpath expr="//a[contains(@href, 'odoo.com')]" position="replace">
-            <span class="text-muted">Powered by <strong class="text-primary">LHI ERP</strong></span>
-        </xpath>
-    </template>
-
     <!-- Brand promotion message override -->
     <template id="lhi_brand_promotion_message" inherit_id="web.brand_promotion_message" name="LHI ERP Brand Promotion Message" priority="10">
         <xpath expr="//t[@t-set='odoo_logo']" position="replace">

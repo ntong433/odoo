@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 {
     "name": "LHI ERP Branding",
-    "version": "19.0.1.1.0",
+    "version": "19.0.1.1.1",
+    "author": "Life Helpers Initiative Nigeria",
     "category": "LHI ERP",
     "summary": "LHI ERP browser title and favicon branding",
     "depends": [

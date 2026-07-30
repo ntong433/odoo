@@ -115,6 +115,7 @@ class LhiDashboardWidget(models.Model):
         Relies purely on the current user's visible_menu_ids for native ACL checking.
         Does not read menu.action to prevent AccessError on ir.actions.act_window.
         """
+        user = self.env.user
         is_protected_admin = user._lhi_is_protected_administrator()
         is_system = user.has_group('base.group_system') or is_protected_admin
         try:

@@ -125,7 +125,10 @@ class LhiApprovalMatrixLine(models.Model):
             approver_users = approver_users.filtered(
                 lambda user: user.id in self.approver_ids.ids
             )
-        return approver_users
+        # Technical root accounts must never automatically appear as candidate approvers
+        return approver_users.filtered(
+            lambda user: not user._lhi_is_protected_administrator()
+        )
 
 
 class LhiSodRule(models.Model):

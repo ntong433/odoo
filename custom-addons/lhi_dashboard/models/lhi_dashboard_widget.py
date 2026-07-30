@@ -115,8 +115,8 @@ class LhiDashboardWidget(models.Model):
         Relies purely on the current user's visible_menu_ids for native ACL checking.
         Does not read menu.action to prevent AccessError on ir.actions.act_window.
         """
-        user = self.env.user
-        is_system = user.has_group('base.group_system')
+        is_protected_admin = user._lhi_is_protected_administrator()
+        is_system = user.has_group('base.group_system') or is_protected_admin
         try:
             department_codes = {
                 (code or '').strip().upper().replace(' ', '_')
@@ -142,7 +142,7 @@ class LhiDashboardWidget(models.Model):
             group_match = self._lhi_user_has_any_group(user, group_xmlids)
             department_match = bool(department_codes.intersection(department_codes_allowed))
             
-            if not is_system and not (group_match or department_match):
+            if not is_system and not is_protected_admin and not (group_match or department_match):
                 continue
 
             # Native ACL visibility check - Authoritative

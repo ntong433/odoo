@@ -826,3 +826,43 @@ class TestMemoManagement(TransactionCase):
             "lhi_signature_bridge.group_lhi_signature_admin",
             self.env["lhi.memo"]._fields["source_pdf_hash"].groups,
         )
+
+    def test_normal_memo_user_prepare_and_sign_security(self):
+        # 1. Verify that direct ORM read of entra_object_id by non-ERP admin raises AccessError
+        with self.assertRaises(AccessError):
+            _val = self.requester.with_user(self.requester).entra_object_id
+
+        # 2. Verify fields_get hides or protects entra_object_id from non-ERP admin
+        fields_info = self.env["res.users"].with_user(self.requester).fields_get(["entra_object_id"])
+        self.assertNotIn("entra_object_id", fields_info)
+
+        # 3. Verify normal employee can prepare memo identity checks without AccessError
+        memo = self._create_memo()
+        memo.with_user(self.requester)._ensure_requester_or_preparer()
+        identity = memo.with_user(self.requester)._recipient_identity(self.requester)
+        self.assertEqual(identity["user_id"], self.requester.id)
+        self.assertEqual(identity["entra_object_id"], "11111111-1111-4111-8111-111111111111")
+
+        # 4. Verify helper directly resolves Entra object ID for authorized caller
+        oid = self.requester.with_user(self.requester)._get_entra_object_id_for_memo_integration()
+        self.assertEqual(oid, "11111111-1111-4111-8111-111111111111")
+
+        # 5. Verify unlinked Entra user raises ValidationError
+        unlinked_user = self._new_employee(
+            "unlinked_employee",
+            "Unlinked Employee",
+            self.department,
+            False,
+        )
+        with self.assertRaises(ValidationError):
+            unlinked_user.with_user(self.requester)._get_entra_object_id_for_memo_integration()
+
+        # 6. Verify unauthorized caller is rejected by helper
+        unauthorized_user = self.env["res.users"].sudo().create({
+            "name": "External Portal User",
+            "login": "portal_external",
+            "email": "external@example.test",
+            "groups_id": [(6, 0, [self.env.ref("base.group_portal").id])],
+        })
+        with self.assertRaises(AccessError):
+            self.requester.with_user(unauthorized_user)._get_entra_object_id_for_memo_integration()

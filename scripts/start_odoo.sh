@@ -195,7 +195,7 @@ if [ -n "$bootstrap_modules" ]; then
     esac
 fi
 
-auto_upgrade_modules="${LHI_AUTO_UPGRADE_MODULES:-lhi_security,lhi_dashboard,lhi_asset_management,lhi_hub_management,lhi_accounting_base}"
+auto_upgrade_modules="${LHI_AUTO_UPGRADE_MODULES:-lhi_security,lhi_dashboard,lhi_asset_management,lhi_hub_management,lhi_memo_management,lhi_entra_identity_sync,lhi_signature_bridge,lhi_accounting_base}"
 if [ -n "$auto_upgrade_modules" ]; then
     echo "=========================================================="
     echo "Starting LHI Odoo Deployment Module Upgrade"

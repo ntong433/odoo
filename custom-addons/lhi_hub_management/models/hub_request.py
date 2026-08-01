@@ -749,7 +749,7 @@ class LhiHubStockRequest(models.Model):
                         % line.name
                     )
                 signer = line.approver_ids
-                if not signer.email or not signer.entra_object_id:
+                if not signer.email or not signer._get_entra_object_id_for_memo_integration():
                     raise ValidationError(
                         _(
                             "Signer %s requires an email address and synchronized "
@@ -884,6 +884,7 @@ class LhiHubStockRequest(models.Model):
         ).sorted("sequence")
         for index, line in enumerate(signature_lines, start=1):
             user = line.approver_ids
+            identity = user._get_entra_identity_for_memo_integration()
             commands.append(
                 (
                     0,
@@ -892,9 +893,9 @@ class LhiHubStockRequest(models.Model):
                         "sequence": index * 10,
                         "user_id": user.id,
                         "name": user.name,
-                        "email": user.email.strip().lower(),
-                        "entra_tenant_id": user.entra_tenant_id,
-                        "entra_object_id": user.entra_object_id,
+                        "email": identity["email"],
+                        "entra_tenant_id": identity["entra_tenant_id"],
+                        "entra_object_id": identity["entra_object_id"],
                         "participant_role": (
                             "final_signer"
                             if index == len(signature_lines)

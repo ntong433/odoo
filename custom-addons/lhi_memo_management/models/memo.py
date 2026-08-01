@@ -973,15 +973,7 @@ class LhiMemo(models.Model):
                     "Only the requester or an authorized preparation officer may prepare this memo."
                 )
             )
-        if (
-            not self.requester_id.entra_object_id
-            or not self.requester_id.entra_tenant_id
-        ):
-            raise UserError(
-                _(
-                    "The requester must have a synchronized immutable Microsoft Entra identity."
-                )
-            )
+        self.requester_id._get_entra_identity_for_memo_integration()
 
     @staticmethod
     def _bounded_response_content(response, maximum_bytes):
@@ -1255,24 +1247,7 @@ class LhiMemo(models.Model):
             raise UserError(
                 _("Every memo participant must be authorized for the memo company.")
             )
-        if not user.entra_object_id or not user.entra_tenant_id:
-            raise UserError(
-                _(
-                    "Every memo participant must have a synchronized immutable Microsoft Entra identity."
-                )
-            )
-        email = user.entra_upn or user.email
-        if not email:
-            raise UserError(
-                _("Every memo participant must have a synchronized UPN or email.")
-            )
-        return {
-            "user_id": user.id,
-            "name": user.name,
-            "email": email,
-            "entra_tenant_id": user.entra_tenant_id,
-            "entra_object_id": user.entra_object_id,
-        }
+        return user._get_entra_identity_for_memo_integration()
 
     def _create_signature_request(self, approval_lines, pdf_item, pdf_hash):
         self.ensure_one()

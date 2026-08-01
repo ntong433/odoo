@@ -117,6 +117,61 @@ class ResUsers(models.Model):
             "entra_login_blocked",
         ]
 
+    def _get_entra_object_id_for_memo_integration(self):
+        self.ensure_one()
+        caller = self.env.user
+        if not (
+            caller.has_group("lhi_security.group_lhi_user")
+            or caller.has_group("base.group_user")
+            or self.env.is_superuser()
+        ):
+            raise AccessError(
+                _("You are not authorized to perform identity integration actions.")
+            )
+
+        sudoed = self.sudo()
+        object_id = sudoed.entra_object_id or sudoed.lhi_entra_object_id
+        if not object_id:
+            raise ValidationError(
+                _("The selected user (%s) is not linked to Microsoft Entra ID.")
+                % self.display_name
+            )
+        return str(object_id)
+
+    def _get_entra_identity_for_memo_integration(self):
+        self.ensure_one()
+        caller = self.env.user
+        if not (
+            caller.has_group("lhi_security.group_lhi_user")
+            or caller.has_group("base.group_user")
+            or self.env.is_superuser()
+        ):
+            raise AccessError(
+                _("You are not authorized to perform identity integration actions.")
+            )
+
+        sudoed = self.sudo()
+        object_id = sudoed.entra_object_id or sudoed.lhi_entra_object_id
+        tenant_id = sudoed.entra_tenant_id
+        if not object_id or not tenant_id:
+            raise UserError(
+                _(
+                    "Every memo participant must have a synchronized immutable Microsoft Entra identity."
+                )
+            )
+        email = sudoed.entra_upn or self.email
+        if not email:
+            raise UserError(
+                _("Every memo participant must have a synchronized UPN or email.")
+            )
+        return {
+            "user_id": self.id,
+            "name": self.name,
+            "email": email,
+            "entra_tenant_id": str(tenant_id),
+            "entra_object_id": str(object_id),
+        }
+
     @api.depends("entra_manager_object_id")
     def _compute_entra_manager_user_id(self):
         object_ids = list(filter(None, self.mapped("entra_manager_object_id")))

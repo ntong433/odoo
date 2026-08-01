@@ -601,10 +601,8 @@ class LhiOpenSignRequest(models.Model):
             raise AccessError(_("You are not a participant in this signature request."))
         if recipient != self.current_recipient_id:
             raise AccessError(_("A preceding participant must act first."))
-        if (
-            not user.entra_object_id
-            or user.entra_object_id != recipient.entra_object_id
-        ):
+        user_entra_id = user._get_entra_object_id_for_memo_integration()
+        if not user_entra_id or user_entra_id != recipient.entra_object_id:
             raise AccessError(
                 _("Your immutable Microsoft Entra identity does not match.")
             )

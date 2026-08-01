@@ -21,7 +21,7 @@
                 <filter name="legacy" string="Legacy Tags" domain="[('legacy_tag', '=', True)]"/>
                 <separator/>
                 <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
-                <group expand="0" string="Group By">
+                <group string="Group By">
                     <filter name="group_category" string="Category" context="{'group_by': 'category_id'}"/>
                     <filter name="group_condition" string="Condition" context="{'group_by': 'condition_id'}"/>
                     <filter name="group_state" string="Current State" context="{'group_by': 'state_id'}"/>

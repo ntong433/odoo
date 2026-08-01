@@ -5,7 +5,7 @@
         <field name="model">lhi.approval.matrix</field>
         <field name="inherit_id" ref="lhi_approval_matrix.view_lhi_approval_matrix_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//group[@string='Organizational Constraints']" position="inside">
+            <xpath expr="//group[field[@name='department_ids']]" position="inside">
                 <field name="lhi_requesting_hub_ids" widget="many2many_tags" invisible="document_type != 'hub_stock_request'"/>
                 <field name="lhi_supplying_hub_ids" widget="many2many_tags" invisible="document_type != 'hub_stock_request'"/>
                 <field name="lhi_state_ids" widget="many2many_tags" invisible="document_type != 'hub_stock_request'"/>

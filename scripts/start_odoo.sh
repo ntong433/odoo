@@ -195,4 +195,14 @@ if [ -n "$bootstrap_modules" ]; then
     esac
 fi
 
+auto_upgrade_modules="${LHI_AUTO_UPGRADE_MODULES:-lhi_security,lhi_dashboard,lhi_asset_management,lhi_hub_management,lhi_accounting_base}"
+if [ -n "$auto_upgrade_modules" ]; then
+    echo "Running deployment schema and view upgrade for: $auto_upgrade_modules"
+    python3 "$odoo_bin" server \
+        -c "$runtime_config" \
+        -u "$auto_upgrade_modules" \
+        --stop-after-init \
+        --no-http
+fi
+
 exec python3 "$odoo_bin" server -c "$runtime_config"

@@ -47,7 +47,7 @@
                             <span><t t-esc="segment.label"/></span>
                             <strong>
                                 <t t-if="chart.monetary"><t t-esc="state.currency"/> </t>
-                                <t t-esc="Number(segment.value || 0).toLocaleString()"/>
+                                <t t-esc="displaySegmentValue(segment.value)"/>
                             </strong>
                         </button>
                         <p t-if="!chart.segments.length" class="text-muted mb-0">No accessible records.</p>

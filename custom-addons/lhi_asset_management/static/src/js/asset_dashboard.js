@@ -74,6 +74,20 @@ export class LhiAssetDashboard extends Component {
         return formatAssetDashboardValue(item, this.state.currency);
     }
 
+    displaySegmentValue(value) {
+        const number = Number(value ?? 0);
+        return Number.isFinite(number)
+            ? number.toLocaleString()
+            : "0";
+    }
+
+    displayDecimalValue(value, digits = 2) {
+        const number = Number(value ?? 0);
+        return Number.isFinite(number)
+            ? number.toFixed(digits)
+            : Number(0).toFixed(digits);
+    }
+
     openAssets(domain = []) {
         return this.action.doAction(buildAssetListAction(domain));
     }

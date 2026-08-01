@@ -1,5 +1,6 @@
 import { describe, expect, test } from "@odoo/hoot";
 import {
+    LhiHubDashboard,
     buildHubRecordAction,
     formatHubDashboardValue,
     normalizeHubDashboardData,
@@ -54,5 +55,19 @@ describe("LHI HUB dashboard helpers", () => {
         expect(() => buildHubRecordAction("", [])).toThrow(
             "A HUB dashboard drill-down requires a model."
         );
+    });
+
+    test("formats HUB segment values safely for numbers, numeric strings, null, undefined and invalid values", () => {
+        const dashboard = new LhiHubDashboard();
+        expect(dashboard.displaySegmentValue(3500)).toBe((3500).toLocaleString());
+        expect(dashboard.displaySegmentValue("7200")).toBe((7200).toLocaleString());
+        expect(dashboard.displaySegmentValue(null)).toBe("0");
+        expect(dashboard.displaySegmentValue(undefined)).toBe("0");
+        expect(dashboard.displaySegmentValue("invalid")).toBe("0");
+
+        expect(dashboard.displayDecimalValue(45.678)).toBe("45.68");
+        expect(dashboard.displayDecimalValue("100")).toBe("100.00");
+        expect(dashboard.displayDecimalValue(null)).toBe("0.00");
+        expect(dashboard.displayDecimalValue("invalid")).toBe("0.00");
     });
 });

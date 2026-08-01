@@ -41,7 +41,7 @@ export class AccessibleModulesWidget extends Component {
             try {
                 await this.menuService.selectMenu(app.menu_id);
             } catch (error) {
-                console.error("[LHI Dashboard] Unable to select app menu", error);
+                console.error(`[LHI Dashboard] Unable to open module ${app.name || app.xmlid || 'app'}`, error);
                 this.env.services.notification.add(
                     "Unable to open this module. Please refresh and try again.", 
                     { type: "warning", sticky: false }

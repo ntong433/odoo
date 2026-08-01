@@ -79,6 +79,20 @@ export class LhiHubDashboard extends Component {
         return formatHubDashboardValue(item, this.state.currency);
     }
 
+    displaySegmentValue(value) {
+        const number = Number(value ?? 0);
+        return Number.isFinite(number)
+            ? number.toLocaleString()
+            : "0";
+    }
+
+    displayDecimalValue(value, digits = 2) {
+        const number = Number(value ?? 0);
+        return Number.isFinite(number)
+            ? number.toFixed(digits)
+            : Number(0).toFixed(digits);
+    }
+
     openRecords(model, domain = []) {
         if (typeof model !== "string" || !model.trim()) {
             this.notification.add(

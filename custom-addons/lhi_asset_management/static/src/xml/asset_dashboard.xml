@@ -45,10 +45,10 @@
                                     t-on-click="() => this.openAssets(segment.domain)">
                                 <span><t t-esc="segment.label"/></span>
                                 <strong t-if="chart.monetary">
-                                    <t t-esc="state.currency"/> <t t-esc="Number(segment.value || 0).toLocaleString()"/>
+                                    <t t-esc="state.currency"/> <t t-esc="displaySegmentValue(segment.value)"/>
                                 </strong>
                                 <strong t-else="">
-                                    <t t-esc="Number(segment.value || 0).toLocaleString()"/>
+                                    <t t-esc="displaySegmentValue(segment.value)"/>
                                 </strong>
                             </button>
                         </div>

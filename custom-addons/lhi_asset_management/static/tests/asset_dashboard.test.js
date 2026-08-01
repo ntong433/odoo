@@ -1,5 +1,6 @@
 import { describe, expect, test } from "@odoo/hoot";
 import {
+    LhiAssetDashboard,
     buildAssetListAction,
     formatAssetDashboardValue,
     normalizeAssetDashboardData,
@@ -53,5 +54,19 @@ describe("LHI Asset Register dashboard helpers", () => {
             target: "current",
         });
         expect(buildAssetListAction("invalid").domain).toEqual([]);
+    });
+
+    test("formats segment values safely for numbers, numeric strings, null, undefined and invalid values", () => {
+        const dashboard = new LhiAssetDashboard();
+        expect(dashboard.displaySegmentValue(1250)).toBe((1250).toLocaleString());
+        expect(dashboard.displaySegmentValue("4500")).toBe((4500).toLocaleString());
+        expect(dashboard.displaySegmentValue(null)).toBe("0");
+        expect(dashboard.displaySegmentValue(undefined)).toBe("0");
+        expect(dashboard.displaySegmentValue("invalid")).toBe("0");
+
+        expect(dashboard.displayDecimalValue(12.3456)).toBe("12.35");
+        expect(dashboard.displayDecimalValue("99.9")).toBe("99.90");
+        expect(dashboard.displayDecimalValue(null)).toBe("0.00");
+        expect(dashboard.displayDecimalValue("invalid")).toBe("0.00");
     });
 });

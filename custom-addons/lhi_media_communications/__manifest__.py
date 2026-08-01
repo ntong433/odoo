@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 {
-    'name': 'Media & Communications',
-    'version': '19.0.2.0.0',
-    'category': 'Media & Communications',
-    'summary': 'LHI Media & Communications unit module',
+    'name': 'Media and Communications',
+    'version': '19.0.2.1.0',
+    'category': 'Media and Communications',
+    'summary': 'LHI Media and Communications unit module',
     'depends': [
         'base',
         'mail',

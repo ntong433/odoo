@@ -14,7 +14,7 @@
     </record>
 
     <record id="module_category_lhi_operations" model="ir.module.category">
-        <field name="name">LHI Operations &amp; HUB</field>
+        <field name="name">LHI Operations and HUB</field>
         <field name="description">Access levels for LHI Operations and HUB Management</field>
         <field name="parent_id" ref="module_category_lhi_erp"/>
         <field name="sequence">20</field>
@@ -28,7 +28,7 @@
     </record>
 
     <record id="module_category_lhi_programmes" model="ir.module.category">
-        <field name="name">LHI Programmes &amp; Projects</field>
+        <field name="name">LHI Programmes and Projects</field>
         <field name="description">Access levels for LHI Programmes and Projects</field>
         <field name="parent_id" ref="module_category_lhi_erp"/>
         <field name="sequence">40</field>

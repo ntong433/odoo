@@ -98,6 +98,18 @@ class TestXmlCompatibility(BaseTestCase):
                                     f"{xml_file}: invalid lhi_app_key '{key}'. Allowed: {sorted(valid_app_keys)}"
                                 )
 
+                        if tag == "record" and elem.attrib.get("model") in ("ir.module.category", "res.groups.privilege"):
+                            rec_id = elem.attrib.get("id", "unknown")
+                            model = elem.attrib.get("model")
+                            for child in elem.findall("field"):
+                                fname = child.attrib.get("name")
+                                if fname in ("name", "placeholder"):
+                                    val = (child.text or "").strip()
+                                    if any(c in val for c in ["&", "<", ">"]):
+                                        errors.append(
+                                            f"{xml_file}: record '{rec_id}' ({model}) field '{fname}' contains unsafe character: '{val}'"
+                                        )
+
                         curr_ancestors = ancestors + [elem]
                         for child in elem:
                             inspect_element(child, curr_ancestors)

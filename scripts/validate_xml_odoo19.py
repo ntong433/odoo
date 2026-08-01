@@ -97,6 +97,19 @@ def validate_xml_file(file_path):
                     f"{file_path}: invalid lhi_app_key '{app_key}'. Allowed: {sorted(VALID_LHI_APP_KEYS)}"
                 )
 
+        # Check 8: Unsafe characters in ir.module.category or res.groups.privilege display values
+        if tag == "record" and elem.attrib.get("model") in ("ir.module.category", "res.groups.privilege"):
+            record_id = elem.attrib.get("id", "unknown")
+            model = elem.attrib.get("model")
+            for field_elem in elem.findall("field"):
+                fname = field_elem.attrib.get("name")
+                if fname in ("name", "placeholder"):
+                    val = (field_elem.text or "").strip()
+                    if any(c in val for c in ["&", "<", ">"]):
+                        errors.append(
+                            f"{file_path}: record '{record_id}' ({model}) field '{fname}' contains unsafe character: '{val}'"
+                        )
+
         current_ancestors = ancestors + [elem]
         for child in elem:
             inspect_element(child, parent=elem, ancestors=current_ancestors)

@@ -189,3 +189,49 @@ class TestLhiSecurityRules(TransactionCase):
         self.assertIn(self.dept_finance.id, depts.ids, "Manager bypass should allow seeing Finance")
         self.assertIn(self.office_main.id, offices.ids, "Manager bypass should allow seeing Main Office")
         self.assertIn(self.project_a.id, projects.ids, "Manager bypass should allow seeing Project Alpha")
+
+    def test_06_category_name_xml_safety(self):
+        """Custom ir.module.category display names must not contain unsafe XML characters (&, <, >)."""
+        categories = self.env["ir.module.category"].sudo().search([])
+        custom_categories = categories.filtered(
+            lambda c: c.xml_id and (c.xml_id.startswith("lhi_") or c.xml_id.startswith("module_category_lhi_"))
+        )
+        unsafe_categories = custom_categories.filtered(
+            lambda c: any(char in (c.name or "") for char in "&<>")
+        )
+        self.assertFalse(
+            unsafe_categories,
+            f"Unsafe characters found in categories: {[c.name for c in unsafe_categories]}"
+        )
+
+    def test_07_privilege_name_xml_safety(self):
+        """Custom res.groups.privilege display names and placeholders must not contain unsafe XML characters."""
+        privileges = self.env["res.groups.privilege"].sudo().search([])
+        unsafe_privileges = privileges.filtered(
+            lambda p: any(char in (p.name or "") for char in "&<>") or any(char in (p.placeholder or "") for char in "&<>")
+        )
+        self.assertFalse(
+            unsafe_privileges,
+            f"Unsafe characters found in privileges: {[p.name for p in unsafe_privileges]}"
+        )
+
+    def test_08_admin_and_warehouse_officer_rbac_regressions(self):
+        """Verify ERP Admin access and Warehouse Officer entitlement boundaries."""
+        admin_user = self.env.ref("base.user_admin")
+        self.assertTrue(admin_user.has_lhi_app_access("operations"))
+        self.assertTrue(admin_user.has_lhi_app_access("hub"))
+        self.assertTrue(admin_user.has_lhi_app_access("programs_grants"))
+        self.assertTrue(admin_user.has_lhi_app_access("memo"))
+
+        warehouse_group = self.env.ref("lhi_security.group_lhi_warehouse_officer")
+        test_warehouse_user = self.env["res.users"].create({
+            "name": "James Bassey Test",
+            "login": "jbassey_test",
+            "email": "jbassey_test@example.com",
+            "groups_id": [(6, 0, [warehouse_group.id])],
+        })
+        self.assertTrue(test_warehouse_user.has_lhi_app_access("hub"))
+        self.assertTrue(test_warehouse_user.has_lhi_app_access("memo"))
+        self.assertFalse(test_warehouse_user.has_lhi_app_access("operations"))
+        self.assertFalse(test_warehouse_user.has_lhi_app_access("programs_grants"))
+

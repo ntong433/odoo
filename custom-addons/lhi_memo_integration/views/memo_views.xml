@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_memo_form_inherit_integration" model="ir.ui.view">
+        <field name="name">lhi.memo.form.inherit.integration</field>
+        <field name="model">lhi.memo</field>
+        <field name="inherit_id" ref="lhi_memo_management.view_memo_form"/>
+        <field name="arch" type="xml">
+            <header position="inside">
+                <button name="action_preflight_prepare_and_sign" string="Preflight Check" type="object" class="btn-secondary" invisible="state not in ('authoring', 'ready_for_preparation', 'returned', 'failed')"/>
+                <button name="action_retry_integration" string="Retry Integration" type="object" class="btn-warning" invisible="state != 'failed' or not current_operation_id"/>
+                <button name="action_reconcile_integration" string="Reconcile Integration" type="object" class="btn-danger" groups="lhi_security.group_lhi_erp_admin" invisible="not current_operation_id or not current_operation_id.requires_reconciliation"/>
+            </header>
+            <xpath expr="//sheet" position="inside">
+                <group string="Integration Diagnostics" invisible="not current_operation_id">
+                    <field name="current_operation_id" readonly="1"/>
+                    <field name="integration_correlation_ref" readonly="1"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

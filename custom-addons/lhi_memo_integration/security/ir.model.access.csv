@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lhi_memo_integration_operation_user,lhi.memo.integration.operation.user,model_lhi_memo_integration_operation,lhi_security.group_lhi_user,1,0,0,0
+access_lhi_memo_integration_operation_manager,lhi.memo.integration.operation.manager,model_lhi_memo_integration_operation,lhi_memo_management.group_lhi_memo_manager,1,1,1,1
+access_lhi_memo_integration_operation_admin,lhi.memo.integration.operation.admin,model_lhi_memo_integration_operation,lhi_security.group_lhi_erp_admin,1,1,1,1

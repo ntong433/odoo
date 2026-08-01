@@ -95,8 +95,17 @@ services:
       - LHI_ENTRA_TRUST_PROXY_HEADERS=${LHI_ENTRA_TRUST_PROXY_HEADERS:-false}
       - LHI_SHAREPOINT_SPOOL_DIR=${LHI_SHAREPOINT_SPOOL_DIR:-/var/lib/odoo/lhi-sharepoint-spool}
       - LHI_OPENSIGN_API_TOKEN=${LHI_OPENSIGN_API_TOKEN:-}
-      - LHI_OPENSIGN_WEBHOOK_SECRET=${LHI_OPENSIGN_WEBHOOK_SECRET:-}
     command: ["/opt/odoo/scripts/start_odoo.sh"]
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -fsS 'http://127.0.0.1:8069/web/health?db_server_status=1' >/dev/null || exit 1",
+        ]
+      interval: 30s
+      timeout: 10s
+      start_period: 300s
+      retries: 10
 
 volumes:
   postgres_data:

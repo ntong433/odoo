@@ -222,7 +222,7 @@ if [ -n "$auto_upgrade_modules" ]; then
         exit "$upgrade_status"
     fi
 
-    echo "Odoo deployment module upgrade completed successfully."
+    echo "Deployment schema and view upgrade completed successfully."
 fi
 
 exec python3 "$odoo_bin" server -c "$runtime_config"

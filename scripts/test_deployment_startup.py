@@ -129,7 +129,7 @@ sys.exit(0)
         assert res_success.returncode == 0, f"Success flow failed: {res_success.stderr}"
         assert "Container Hostname:" in res_success.stdout, "Missing metadata header in success flow"
         assert "UTC Timestamp:" in res_success.stdout, "Missing timestamp in success flow"
-        assert "Odoo deployment module upgrade completed successfully." in res_success.stdout, "Missing success log"
+        assert "Deployment schema and view upgrade completed successfully." in res_success.stdout, "Missing success log"
         assert "MOCK_ODOO_BIN: Web server running..." in res_success.stdout, "Web server did not start after upgrade success"
         print("PASS: Execution test - Successful upgrade continues to web server startup")
 

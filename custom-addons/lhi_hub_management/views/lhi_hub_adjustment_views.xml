@@ -87,7 +87,7 @@
                 <field name="reason"/>
                 <filter name="draft" string="Draft" domain="[('state', '=', 'draft')]"/>
                 <filter name="validated" string="Validated" domain="[('state', '=', 'validated')]"/>
-                <group string="Group By">
+                <group>
                     <filter name="hub" string="HUB" context="{'group_by': 'hub_id'}"/>
                     <filter name="state" string="Status" context="{'group_by': 'state'}"/>
                     <filter name="date" string="Month" context="{'group_by': 'adjustment_date:month'}"/>

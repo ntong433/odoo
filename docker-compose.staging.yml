@@ -98,12 +98,12 @@ services:
       test:
         [
           "CMD-SHELL",
-          "curl -fsS 'http://127.0.0.1:8069/web/health?db_server_status=1' >/dev/null",
+          "curl -fsS 'http://127.0.0.1:8069/web/health?db_server_status=1' >/dev/null || exit 1",
         ]
       interval: 30s
       timeout: 10s
-      retries: 5
-      start_period: 60s
+      start_period: 300s
+      retries: 10
 
 volumes:
   postgres_staging_data:

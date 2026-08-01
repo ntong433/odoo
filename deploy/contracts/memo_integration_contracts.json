@@ -1,0 +1,37 @@
+{
+  "orchestration_contract_version": 1,
+  "service_contracts": {
+    "approval": {
+      "version": 1,
+      "module": "lhi_approval_matrix",
+      "model": "lhi.approval.matrix",
+      "method": "_lhi_get_memo_approval_route"
+    },
+    "storage": {
+      "version": 1,
+      "module": "lhi_sharepoint_storage",
+      "model": "lhi.document.item",
+      "method": "_lhi_prepare_and_confirm_memo_document"
+    },
+    "signature": {
+      "version": 1,
+      "module": "lhi_signature_bridge",
+      "model": "lhi.opensign.request",
+      "method": "_lhi_create_memo_signature_draft"
+    },
+    "identity": {
+      "version": 1,
+      "module": "lhi_entra_identity_sync",
+      "model": "res.users",
+      "method": "_lhi_get_memo_identity_contract"
+    }
+  },
+  "required_modules": [
+    "lhi_memo_management",
+    "lhi_approval_matrix",
+    "lhi_sharepoint_storage",
+    "lhi_signature_bridge",
+    "lhi_entra_identity_sync",
+    "lhi_memo_integration"
+  ]
+}

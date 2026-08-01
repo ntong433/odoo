@@ -197,12 +197,32 @@ fi
 
 auto_upgrade_modules="${LHI_AUTO_UPGRADE_MODULES:-lhi_security,lhi_dashboard,lhi_asset_management,lhi_hub_management,lhi_accounting_base}"
 if [ -n "$auto_upgrade_modules" ]; then
-    echo "Running deployment schema and view upgrade for: $auto_upgrade_modules"
+    echo "=========================================================="
+    echo "Starting LHI Odoo Deployment Module Upgrade"
+    echo "Container Hostname: $(hostname)"
+    echo "UTC Timestamp: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+    echo "Module List: $auto_upgrade_modules"
+    echo "=========================================================="
+
+    set +e
     python3 "$odoo_bin" server \
         -c "$runtime_config" \
         -u "$auto_upgrade_modules" \
         --stop-after-init \
-        --no-http
+        --no-http \
+        --logfile=/dev/stdout \
+        --log-level="${ODOO_LOG_LEVEL:-info}"
+    upgrade_status=$?
+    set -e
+
+    if [ "$upgrade_status" -ne 0 ]; then
+        echo "Odoo deployment startup failed: module upgrade returned exit code $upgrade_status for modules: $auto_upgrade_modules" >&2
+        echo "Waiting ${LHI_UPGRADE_FAILURE_DELAY_SECONDS:-10} seconds to ensure logs are captured..." >&2
+        sleep "${LHI_UPGRADE_FAILURE_DELAY_SECONDS:-10}"
+        exit "$upgrade_status"
+    fi
+
+    echo "Odoo deployment module upgrade completed successfully."
 fi
 
 exec python3 "$odoo_bin" server -c "$runtime_config"

@@ -14,12 +14,15 @@ class LhiApprovalMatrix(models.Model):
     active = fields.Boolean(string='Active', default=True, tracking=True)
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
 
+    MEMO_APPROVAL_CONTRACT_VERSION = 1
+
     # Criteria
     document_type = fields.Selection([
         ('purchase', 'Purchase Request'),
         ('payment', 'Payment Voucher'),
         ('travel', 'Travel Request'),
         ('leave', 'Leave Request'),
+        ('memo', 'Internal Memo'),
     ], string='Document Type', required=True, tracking=True)
 
     min_amount = fields.Float(string='Minimum Amount', default=0.0, tracking=True)
@@ -92,6 +95,48 @@ class LhiApprovalMatrix(models.Model):
             matched_matrices.sort(key=lambda m: m.sequence)
             return matched_matrices[0]
         return self.env['lhi.approval.matrix']
+
+    @api.model
+    def _lhi_get_memo_approval_route(
+        self, memo, amount=0.0, currency=None, department=None, office=None, award=None, project=None
+    ):
+        """Service contract v1 method for resolving Memo approval route."""
+        matrix = memo.memo_category_id.approval_matrix_id if hasattr(memo, "memo_category_id") else False
+        if not matrix:
+            matrix = self.find_matching_matrix(
+                document_type="memo",
+                amount=amount,
+                currency_id=currency.id if currency else None,
+                department_id=department.id if department else None,
+                office_id=office.id if office else None,
+                award_id=award.id if award else None,
+                project_id=project.id if project else None,
+                company_id=memo.company_id.id if memo else self.env.company.id,
+            )
+        if not matrix or not matrix.active:
+            return {
+                "contract_version": self.MEMO_APPROVAL_CONTRACT_VERSION,
+                "matrix_id": False,
+                "matrix_name": False,
+                "stages": [],
+            }
+        stages = []
+        for line in matrix.line_ids.sorted("sequence"):
+            approvers = line._lhi_resolve_approver_users(memo) if hasattr(line, "_lhi_resolve_approver_users") else line.approver_ids
+            stages.append({
+                "line_id": line.id,
+                "sequence": line.sequence,
+                "name": line.name,
+                "approval_type": line.approval_type,
+                "approver_group_id": line.approver_group_id.id,
+                "approver_user_ids": approvers.ids,
+            })
+        return {
+            "contract_version": self.MEMO_APPROVAL_CONTRACT_VERSION,
+            "matrix_id": matrix.id,
+            "matrix_name": matrix.name,
+            "stages": stages,
+        }
 
 
 class LhiApprovalMatrixLine(models.Model):

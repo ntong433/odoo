@@ -34,6 +34,8 @@ class LhiDocumentItem(models.Model):
     _order = "create_date desc, id desc"
     _rec_name = "name"
 
+    MEMO_STORAGE_CONTRACT_VERSION = 1
+
     uuid = fields.Char(
         required=True, default=lambda self: str(uuid.uuid4()), copy=False, index=True
     )
@@ -969,4 +971,63 @@ class LhiDocumentItem(models.Model):
             try:
                 os.unlink(entry.path)
             except OSError:
-                _logger.exception("Could not remove orphan SharePoint spool file")
+                pass
+
+    @api.model
+    def _lhi_prepare_and_confirm_memo_document(self, memo, docx_item, storage_policy):
+        """Service contract v1 method for memo document conversion and SharePoint storage."""
+        item = docx_item
+        if not item or item.storage_state != "available":
+            raise UserError(_("The Word document is not confirmed in SharePoint."))
+        connection = item.graph_connection_id
+        resource = f"/drives/{quote(item.sharepoint_drive_id)}/items/{quote(item.sharepoint_item_id)}"
+        metadata = connection.graph_request(
+            "GET",
+            resource,
+            auth_context="application",
+            params={
+                "$select": "id,name,size,eTag,cTag,webUrl,lastModifiedDateTime,lastModifiedBy,parentReference,file"
+            },
+        )
+        if metadata.get("id") != item.sharepoint_item_id:
+            raise UserError(_("SharePoint returned a different Word DriveItem."))
+        if not storage_policy:
+            raise UserError(_("No SharePoint storage policy is configured for memos."))
+        maximum_bytes = storage_policy.maximum_size_mb * 1024 * 1024
+
+        docx_response = connection.lhi_binary_request(
+            "GET", f"{resource}/content", auth_context="application", expected_statuses={200}, stream=True
+        )
+        docx_content = memo._bounded_response_content(docx_response, maximum_bytes) if hasattr(memo, "_bounded_response_content") else docx_response.content
+        if not docx_content:
+            raise UserError(_("SharePoint returned an empty Word document."))
+
+        pdf_response = connection.lhi_binary_request(
+            "GET", f"{resource}/content?format=pdf", auth_context="application", expected_statuses={200}, stream=True
+        )
+        pdf_content = memo._bounded_response_content(pdf_response, maximum_bytes) if hasattr(memo, "_bounded_response_content") else pdf_response.content
+        if not pdf_content.startswith(b"%PDF"):
+            raise UserError(_("Microsoft 365 did not return a valid PDF conversion."))
+
+        pdf_hash = hashlib.sha256(pdf_content).hexdigest()
+        pdf_item = self.create_from_bytes(
+            name=f"{memo._safe_filename(memo.name) if hasattr(memo, '_safe_filename') else memo.name}-Submitted.pdf",
+            content=pdf_content,
+            mime_type="application/pdf",
+            linked_model=memo._name,
+            linked_record_id=memo.id,
+            linked_field="source_pdf_item_id",
+            requested_by=memo.requester_id,
+            synchronous=True,
+        )
+        if pdf_item.storage_state != "available":
+            raise UserError(_("SharePoint did not confirm the submitted memo PDF."))
+
+        version = metadata.get("cTag") or metadata.get("eTag")
+        return {
+            "contract_version": self.MEMO_STORAGE_CONTRACT_VERSION,
+            "document_item_id": pdf_item.id,
+            "storage_state": pdf_item.storage_state,
+            "content_hash": pdf_hash,
+            "version": version or "",
+        }

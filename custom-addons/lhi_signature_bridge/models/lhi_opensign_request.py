@@ -17,6 +17,8 @@ class LhiOpenSignRequest(models.Model):
     _inherit = ["mail.thread", "mail.activity.mixin"]
     _order = "create_date desc, id desc"
 
+    MEMO_SIGNATURE_CONTRACT_VERSION = 1
+
     name = fields.Char(
         string="Request Reference", required=True, copy=False, default="New", index=True
     )
@@ -973,4 +975,19 @@ class LhiOpenSignRequest(models.Model):
             limit=min(max(int(batch_size), 1), 500),
         )
         requests_to_reconcile.action_reconcile()
+
+    @api.model
+    def _lhi_create_memo_signature_draft(self, signature_request, redirect_url):
+        """Service contract v1 method for creating provider draft and validating preparation URL."""
+        req = signature_request.sudo()
+        req.action_create_provider_draft(redirect_url=redirect_url)
+        if not req.provider_request_id or not req.provider_preparation_url:
+            raise UserError(_("LHI Sign did not return a valid provider draft or preparation URL."))
+        return {
+            "contract_version": self.MEMO_SIGNATURE_CONTRACT_VERSION,
+            "signature_request_id": req.id,
+            "provider_request_id": req.provider_request_id,
+            "preparation_url": req.provider_preparation_url,
+            "outcome": "confirmed",
+        }
         return True

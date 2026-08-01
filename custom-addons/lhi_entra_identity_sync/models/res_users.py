@@ -172,6 +172,15 @@ class ResUsers(models.Model):
             "entra_object_id": str(object_id),
         }
 
+    MEMO_IDENTITY_CONTRACT_VERSION = 1
+
+    def _lhi_get_memo_identity_contract(self):
+        """Service contract v1 method for resolving user Entra identity details for Memo integration."""
+        self.ensure_one()
+        identity = self._get_entra_identity_for_memo_integration()
+        identity["contract_version"] = self.MEMO_IDENTITY_CONTRACT_VERSION
+        return identity
+
     @api.depends("entra_manager_object_id")
     def _compute_entra_manager_user_id(self):
         object_ids = list(filter(None, self.mapped("entra_manager_object_id")))

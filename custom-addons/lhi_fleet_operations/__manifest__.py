@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'LHI Fleet Operations',
-    'version': '19.0.1.0.0',
+    'version': '19.0.2.0.0',
     'category': 'Operations',
     'summary': 'Fleet tracking, trip requests, and maintenance with donor/project metadata',
-    'depends': ['fleet', 'lhi_base', 'lhi_project_workplan', 'lhi_approval_matrix'],
+    'depends': ['fleet', 'lhi_base', 'lhi_security', 'lhi_project_workplan', 'lhi_approval_matrix'],
     'data': [
         'security/ir.model.access.csv',
         'security/lhi_fleet_security.xml',

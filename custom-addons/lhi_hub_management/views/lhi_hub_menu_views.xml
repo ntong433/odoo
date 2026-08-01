@@ -3,17 +3,19 @@
     <!-- Keep the technical Inventory application for technical administrators;
          operational staff use the governed HUB workspace below. -->
     <record id="stock.menu_stock_root" model="ir.ui.menu">
-        <field name="groups_id" eval="[(6, 0, [ref('stock.group_stock_manager'), ref('lhi_security.group_lhi_erp_admin')])]"/>
+        <field name="group_ids" eval="[(6, 0, [ref('lhi_security.group_lhi_inventory_viewer')])]"/>
+        <field name="lhi_app_key">inventory</field>
     </record>
     <record id="fleet.menu_root" model="ir.ui.menu">
-        <field name="parent_id" ref="lhi_asset_management.menu_lhi_operations_root"/>
+        <field name="parent_id" eval="False"/>
         <field name="sequence">30</field>
     </record>
     <record id="lhi_purchase_request.menu_lhi_procurement_root" model="ir.ui.menu">
-        <field name="parent_id" ref="lhi_asset_management.menu_lhi_operations_root"/>
+        <field name="parent_id" eval="False"/>
         <field name="sequence">40</field>
     </record>
     <record id="lhi_asset_management.menu_lhi_asset" model="ir.ui.menu">
+        <field name="parent_id" eval="False"/>
         <field name="sequence">20</field>
     </record>
     <record id="action_lhi_hub_expiry_report" model="ir.actions.act_window">
@@ -27,26 +29,36 @@
     <menuitem id="menu_lhi_operations_overview" name="Operations Overview"
               parent="lhi_asset_management.menu_lhi_operations_root"
               action="action_lhi_hub_dashboard" sequence="1"
-              groups="lhi_security.group_lhi_hub_viewer,lhi_security.group_lhi_programme_user,lhi_security.group_lhi_programme_approver,lhi_security.group_lhi_ned,lhi_security.group_lhi_system_auditor,lhi_security.group_lhi_erp_admin"/>
+              groups="lhi_security.group_lhi_operations_viewer"/>
+    <record id="menu_lhi_operations_overview" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+        <field name="lhi_app_key">operations</field>
+    </record>
     <menuitem id="menu_lhi_hub" name="HUB"
-              parent="lhi_asset_management.menu_lhi_operations_root"
               action="action_lhi_hub_dashboard" sequence="10"
-              groups="lhi_security.group_lhi_hub_viewer,lhi_security.group_lhi_programme_user,lhi_security.group_lhi_programme_approver,lhi_security.group_lhi_ned,lhi_security.group_lhi_system_auditor,lhi_security.group_lhi_erp_admin"/>
+              groups="lhi_security.group_lhi_hub_viewer"
+              web_icon="lhi_web_shell,static/src/img/module_icons/inventory.svg"/>
+    <record id="menu_lhi_hub" model="ir.ui.menu">
+        <field name="parent_id" eval="False"/>
+        <field name="lhi_app_key">hub</field>
+    </record>
     <menuitem id="menu_lhi_hub_overview" name="Overview" parent="menu_lhi_hub"
-              action="action_lhi_hub_dashboard" sequence="1"/>
+              action="action_lhi_hub_dashboard" sequence="1"
+              groups="lhi_security.group_lhi_hub_viewer"/>
     <menuitem id="menu_lhi_hub_requests" name="HUB Stock Requests"
-              parent="lhi_asset_management.menu_lhi_operations_root"
-              action="action_lhi_hub_stock_request" sequence="11"/>
+              parent="menu_lhi_hub"
+              action="action_lhi_hub_stock_request" sequence="11"
+              groups="lhi_security.group_lhi_hub_viewer"/>
     <menuitem id="menu_lhi_hub_consignments" name="Consignments"
-              parent="lhi_asset_management.menu_lhi_operations_root"
+              parent="menu_lhi_hub"
               action="action_lhi_hub_consignment" sequence="14"
               groups="lhi_security.group_lhi_hub_viewer"/>
     <menuitem id="menu_lhi_hub_external_issues" name="External Issues and Sales"
-              parent="lhi_asset_management.menu_lhi_operations_root"
+              parent="menu_lhi_hub"
               action="action_lhi_hub_external_issue" sequence="12"
               groups="lhi_security.group_lhi_hub_viewer"/>
     <menuitem id="menu_lhi_hub_leases" name="Equipment Leases"
-              parent="lhi_asset_management.menu_lhi_operations_root"
+              parent="menu_lhi_hub"
               action="action_lhi_hub_equipment_lease" sequence="13"
               groups="lhi_security.group_lhi_hub_viewer"/>
     <menuitem id="menu_lhi_hub_stock" name="Stock on Hand" parent="menu_lhi_hub"
@@ -62,33 +74,40 @@
               action="action_lhi_hub_lots" sequence="65"
               groups="lhi_security.group_lhi_hub_viewer"/>
     <menuitem id="menu_lhi_hub_adjustments" name="Stock Adjustments"
-              parent="lhi_asset_management.menu_lhi_operations_root"
+              parent="menu_lhi_hub"
               action="action_lhi_hub_stock_adjustment" sequence="50"
-              groups="lhi_security.group_lhi_operations_manager,lhi_security.group_lhi_director_operations,lhi_security.group_lhi_system_auditor,lhi_security.group_lhi_erp_admin"/>
+              groups="lhi_security.group_lhi_hub_manager"/>
     <menuitem id="menu_lhi_hub_reports" name="Reports"
-              parent="lhi_asset_management.menu_lhi_operations_root"
+              parent="menu_lhi_hub"
               sequence="60"
-              groups="lhi_security.group_lhi_hub_viewer,lhi_security.group_lhi_system_auditor,lhi_security.group_lhi_erp_admin"/>
+              groups="lhi_security.group_lhi_hub_viewer"/>
     <menuitem id="menu_lhi_hub_report_stock" name="Stock by HUB"
-              parent="menu_lhi_hub_reports" action="action_lhi_hub_quants" sequence="10"/>
+              parent="menu_lhi_hub_reports" action="action_lhi_hub_quants" sequence="10"
+              groups="lhi_security.group_lhi_hub_viewer"/>
     <menuitem id="menu_lhi_hub_report_movements" name="Stock Movements"
-              parent="menu_lhi_hub_reports" action="action_lhi_hub_pickings" sequence="20"/>
+              parent="menu_lhi_hub_reports" action="action_lhi_hub_pickings" sequence="20"
+              groups="lhi_security.group_lhi_hub_viewer"/>
     <menuitem id="menu_lhi_hub_report_expiry" name="Expiry Report"
-              parent="menu_lhi_hub_reports" action="action_lhi_hub_expiry_report" sequence="30"/>
+              parent="menu_lhi_hub_reports" action="action_lhi_hub_expiry_report" sequence="30"
+              groups="lhi_security.group_lhi_hub_viewer"/>
     <menuitem id="menu_lhi_hub_revenue" name="Operational Revenue"
               parent="menu_lhi_hub_reports"
               action="action_lhi_hub_operational_revenue" sequence="40"
-              groups="lhi_security.group_lhi_operations_manager,lhi_security.group_lhi_director_operations,lhi_security.group_lhi_system_auditor,lhi_security.group_lhi_erp_admin"/>
+              groups="lhi_security.group_lhi_hub_manager"/>
     <menuitem id="menu_lhi_hub_configuration" name="Configuration"
-              parent="lhi_asset_management.menu_lhi_operations_root"
+              parent="menu_lhi_hub"
               sequence="90"
-              groups="lhi_security.group_lhi_operations_manager,lhi_security.group_lhi_erp_admin"/>
+              groups="lhi_security.group_lhi_hub_manager"/>
     <menuitem id="menu_lhi_hub_warehouses" name="HUBs and Locations" parent="menu_lhi_hub_configuration"
-              action="action_lhi_hub_warehouses" sequence="10"/>
+              action="action_lhi_hub_warehouses" sequence="10" groups="lhi_security.group_lhi_hub_manager"/>
     <menuitem id="menu_lhi_hub_recipients" name="External Recipients" parent="menu_lhi_hub_configuration"
-              action="action_lhi_hub_recipients" sequence="20"/>
+              action="action_lhi_hub_recipients" sequence="20" groups="lhi_security.group_lhi_hub_manager"/>
     <menuitem id="menu_lhi_hub_payment_methods" name="Payment Methods" parent="menu_lhi_hub_configuration"
-              action="action_lhi_hub_payment_method" sequence="30"/>
+              action="action_lhi_hub_payment_method" sequence="30" groups="lhi_security.group_lhi_hub_manager"/>
     <menuitem id="menu_lhi_hub_notifications" name="Notification Diagnostics" parent="menu_lhi_hub_configuration"
-              action="action_lhi_hub_notifications" sequence="40"/>
+              action="action_lhi_hub_notifications" sequence="40" groups="lhi_security.group_lhi_hub_manager"/>
+
+    <record id="action_lhi_hub_expiry_report" model="ir.actions.act_window">
+        <field name="lhi_app_key">hub</field>
+    </record>
 </odoo>

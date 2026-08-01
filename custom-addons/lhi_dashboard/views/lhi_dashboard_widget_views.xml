@@ -18,13 +18,16 @@
                         <group>
                             <field name="col_span"/>
                             <field name="active"/>
+                            <field name="app_key"/>
+                            <field name="is_public_internal"/>
                         </group>
                     </group>
                     <notebook>
                         <page string="Access Rights">
                             <field name="group_ids" widget="many2many_tags"/>
                             <p class="text-muted">
-                                If no groups are selected, this widget is visible to all users.
+                                Empty access configuration is fail-closed. Select an application,
+                                explicit internal visibility, or one or more groups.
                             </p>
                         </page>
                     </notebook>
@@ -42,6 +45,8 @@
                 <field name="name"/>
                 <field name="registry_key"/>
                 <field name="col_span"/>
+                <field name="app_key" optional="show"/>
+                <field name="is_public_internal" optional="show"/>
                 <field name="group_ids" widget="many2many_tags"/>
                 <field name="active" widget="boolean_toggle"/>
             </list>

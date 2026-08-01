@@ -1,3 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_lhi_reporting_job_user,lhi.reporting.job.user,model_lhi_reporting_job,base.group_system,1,1,1,1
-access_lhi_data_quality_check_user,lhi.data.quality.check.user,model_lhi_data_quality_check,base.group_system,1,1,1,1
+access_lhi_reporting_job_user,lhi.reporting.job.viewer,model_lhi_reporting_job,lhi_security.group_lhi_reports_viewer,1,0,0,0
+access_lhi_reporting_job_officer,lhi.reporting.job.officer,model_lhi_reporting_job,lhi_security.group_lhi_reports_officer,1,1,1,0
+access_lhi_reporting_job_manager,lhi.reporting.job.manager,model_lhi_reporting_job,lhi_security.group_lhi_reports_manager,1,1,1,1
+access_lhi_data_quality_check_user,lhi.data.quality.check.viewer,model_lhi_data_quality_check,lhi_security.group_lhi_reports_viewer,1,0,0,0
+access_lhi_data_quality_check_officer,lhi.data.quality.check.officer,model_lhi_data_quality_check,lhi_security.group_lhi_reports_officer,1,1,1,0
+access_lhi_data_quality_check_manager,lhi.data.quality.check.manager,model_lhi_data_quality_check,lhi_security.group_lhi_reports_manager,1,1,1,1

@@ -13,6 +13,8 @@ class TestLhiSecurityRules(TransactionCase):
         cls.group_employee = cls.env.ref('lhi_security.group_lhi_employee')
         cls.group_manager = cls.env.ref('lhi_security.group_lhi_manager')
         cls.group_erp_admin = cls.env.ref('lhi_security.group_lhi_erp_admin')
+        cls.group_programme_viewer = cls.env.ref('lhi_security.group_lhi_programme_viewer')
+        cls.group_project_manager = cls.env.ref('lhi_security.group_lhi_project_manager')
 
         # Setup standard company
         cls.company = cls.env.company
@@ -75,14 +77,14 @@ class TestLhiSecurityRules(TransactionCase):
             'name': 'LHI Test Employee',
             'login': 'lhi_employee',
             'email': 'emp@lhinigeria.org',
-            'group_ids': [(6, 0, [cls.group_employee.id])],
+            'group_ids': [(6, 0, [cls.group_employee.id, cls.group_programme_viewer.id])],
         })
 
         cls.user_manager = cls.env['res.users'].create({
             'name': 'LHI Test Manager',
             'login': 'lhi_manager',
             'email': 'mgr@lhinigeria.org',
-            'group_ids': [(6, 0, [cls.group_employee.id, cls.group_manager.id])],
+            'group_ids': [(6, 0, [cls.group_employee.id, cls.group_manager.id, cls.group_project_manager.id])],
         })
 
     def test_00_erp_administrator_inherits_manager_and_employee(self):

@@ -213,6 +213,9 @@
     </record>
 
     <menuitem id="menu_lhi_opensign" name="Signature Administration" sequence="95" groups="lhi_signature_bridge.group_lhi_signature_admin" web_icon="lhi_web_shell,static/src/img/module_icons/signatures.svg"/>
+    <record id="menu_lhi_opensign" model="ir.ui.menu">
+        <field name="lhi_app_key">signatures</field>
+    </record>
     <menuitem id="menu_lhi_opensign_requests" name="Signature Requests" parent="menu_lhi_opensign" action="action_lhi_opensign_request" sequence="10" groups="lhi_signature_bridge.group_lhi_signature_admin"/>
     <menuitem id="menu_lhi_opensign_failed_requests" name="Failed Requests" parent="menu_lhi_opensign" action="action_lhi_opensign_failed_request" sequence="20" groups="lhi_signature_bridge.group_lhi_signature_admin"/>
     <menuitem id="menu_lhi_opensign_webhooks" name="Webhook Events" parent="menu_lhi_opensign" action="action_lhi_opensign_webhook_event" sequence="30" groups="lhi_signature_bridge.group_lhi_signature_admin"/>

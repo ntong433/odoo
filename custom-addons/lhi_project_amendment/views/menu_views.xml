@@ -7,5 +7,5 @@
         <field name="search_view_id" ref="view_lhi_project_amendment_search"/>
     </record>
 
-    <menuitem id="menu_lhi_project_amendment" name="Amendments" parent="lhi_base.menu_lhi_project_root" action="action_lhi_project_amendment" sequence="40"/>
+    <menuitem id="menu_lhi_project_amendment" name="Amendments" parent="lhi_base.menu_lhi_project_root" action="action_lhi_project_amendment" sequence="40" groups="lhi_security.group_lhi_programme_viewer"/>
 </odoo>

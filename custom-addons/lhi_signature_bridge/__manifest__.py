@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "LHI Signature Bridge",
-    "version": "19.0.1.0.1",
+    "version": "19.0.2.0.0",
     "category": "Integration",
     "summary": "OpenSign Bridge for Signature and Document Locking",
     "author": "Life Helpers Initiative",

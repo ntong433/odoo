@@ -3,6 +3,7 @@
     <record id="action_lhi_hub_dashboard" model="ir.actions.client">
         <field name="name">HUB Overview</field>
         <field name="tag">lhi_hub_management.hub_dashboard</field>
+        <field name="lhi_app_key">hub</field>
     </record>
 
     <record id="view_lhi_hub_warehouse_form" model="ir.ui.view">
@@ -35,7 +36,7 @@
                     <button name="action_create_lhi_standard_locations"
                             type="object" string="Create Standard HUB Locations"
                             class="btn-primary"
-                            groups="lhi_security.group_lhi_operations_manager"/>
+                            groups="lhi_security.group_lhi_hub_manager"/>
                 </page>
             </xpath>
         </field>
@@ -48,7 +49,7 @@
         <field name="arch" type="xml">
             <xpath expr="//notebook" position="inside">
                 <page string="Authorized HUBs"
-                      groups="lhi_security.group_lhi_erp_admin,lhi_security.group_lhi_operations_manager">
+                      groups="lhi_security.group_lhi_erp_admin,lhi_security.group_lhi_hub_manager">
                     <field name="lhi_hub_ids" widget="many2many_tags"/>
                 </page>
             </xpath>

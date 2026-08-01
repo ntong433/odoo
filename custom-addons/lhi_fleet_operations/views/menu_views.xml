@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <record id="fleet.menu_root" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('lhi_security.group_lhi_fleet_viewer')])]"/>
+        <field name="lhi_app_key">fleet</field>
+    </record>
+    <record id="fleet.fleet_vehicles" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('lhi_security.group_lhi_fleet_viewer')])]"/>
+    </record>
     <record id="action_lhi_fleet_trip" model="ir.actions.act_window">
         <field name="name">Trip Requests</field>
         <field name="res_model">lhi.fleet.trip</field>
@@ -13,6 +20,6 @@
     </record>
 
     <!-- Odoo 19 standard Fleet application submenu. -->
-    <menuitem id="menu_lhi_fleet_trip" name="Trip Requests" parent="fleet.fleet_vehicles" action="action_lhi_fleet_trip" sequence="10"/>
-    <menuitem id="menu_lhi_fleet_incident" name="Incidents" parent="fleet.fleet_vehicles" action="action_lhi_fleet_incident" sequence="15"/>
+    <menuitem id="menu_lhi_fleet_trip" name="Trip Requests" parent="fleet.fleet_vehicles" action="action_lhi_fleet_trip" sequence="10" groups="lhi_security.group_lhi_fleet_viewer"/>
+    <menuitem id="menu_lhi_fleet_incident" name="Incidents" parent="fleet.fleet_vehicles" action="action_lhi_fleet_incident" sequence="15" groups="lhi_security.group_lhi_fleet_viewer"/>
 </odoo>

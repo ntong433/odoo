@@ -7,7 +7,7 @@
             <field name="domain_force">
                 ['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]
             </field>
-            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_procurement_viewer'))]"/>
         </record>
         <record id="rule_lhi_budget_line_company" model="ir.rule">
             <field name="name">Operational Budget Line: Multi-Company</field>
@@ -15,7 +15,7 @@
             <field name="domain_force">
                 [('company_id', 'in', company_ids)]
             </field>
-            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_procurement_viewer'))]"/>
         </record>
     </data>
 </odoo>

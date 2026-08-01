@@ -656,6 +656,7 @@ class LhiAsset(models.Model):
     @api.model
     def get_asset_dashboard_data(self):
         """Return record-rule-aware metrics; intentionally never uses sudo()."""
+        self.env.user.check_lhi_app_access("assets")
         self.check_access("read")
         count = self.search_count
         total_value = self.read_group(

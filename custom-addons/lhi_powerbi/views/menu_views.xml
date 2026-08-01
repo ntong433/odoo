@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <menuitem id="menu_lhi_powerbi_root" name="LHI Analytics" sequence="55" web_icon="lhi_web_shell,static/src/img/module_icons/analytics.svg"/>
+    <menuitem id="menu_lhi_powerbi_root" name="LHI Analytics" sequence="55" web_icon="lhi_web_shell,static/src/img/module_icons/analytics.svg" groups="lhi_security.group_lhi_powerbi_viewer"/>
+    <record id="menu_lhi_powerbi_root" model="ir.ui.menu">
+        <field name="lhi_app_key">power_bi</field>
+    </record>
 
     <record id="action_lhi_powerbi_report" model="ir.actions.act_window">
         <field name="name">Power BI Reports</field>
@@ -8,5 +11,5 @@
         <field name="view_mode">list,form</field>
     </record>
     
-    <menuitem id="menu_lhi_powerbi_registry" name="Report Registry" parent="menu_lhi_powerbi_root" action="action_lhi_powerbi_report" sequence="10"/>
+    <menuitem id="menu_lhi_powerbi_registry" name="Report Registry" parent="menu_lhi_powerbi_root" action="action_lhi_powerbi_report" sequence="10" groups="lhi_security.group_lhi_powerbi_viewer"/>
 </odoo>

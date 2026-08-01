@@ -1,3 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_lhi_reporting_calendar_user,lhi.reporting.calendar.user,model_lhi_reporting_calendar,base.group_user,1,1,1,0
-access_lhi_reporting_calendar_admin,lhi.reporting.calendar.admin,model_lhi_reporting_calendar,base.group_erp_manager,1,1,1,1
+access_lhi_reporting_calendar_user,lhi.reporting.calendar.viewer,model_lhi_reporting_calendar,lhi_security.group_lhi_programme_viewer,1,0,0,0
+access_lhi_reporting_calendar_officer,lhi.reporting.calendar.officer,model_lhi_reporting_calendar,lhi_security.group_lhi_project_officer,1,1,1,0
+access_lhi_reporting_calendar_admin,lhi.reporting.calendar.manager,model_lhi_reporting_calendar,lhi_security.group_lhi_project_manager,1,1,1,1

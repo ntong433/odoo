@@ -34,9 +34,143 @@
         <field name="sequence">40</field>
     </record>
 
+    <record id="module_category_lhi_hub" model="ir.module.category">
+        <field name="name">LHI HUB Management</field>
+        <field name="description">Access levels for governed HUB operations</field>
+        <field name="parent_id" ref="module_category_lhi_erp"/>
+        <field name="sequence">21</field>
+    </record>
+
+    <record id="module_category_lhi_inventory" model="ir.module.category">
+        <field name="name">LHI Inventory</field>
+        <field name="description">Access levels for inventory functions</field>
+        <field name="parent_id" ref="module_category_lhi_erp"/>
+        <field name="sequence">22</field>
+    </record>
+
+    <record id="module_category_lhi_fleet" model="ir.module.category">
+        <field name="name">LHI Fleet</field>
+        <field name="description">Access levels for fleet functions</field>
+        <field name="parent_id" ref="module_category_lhi_erp"/>
+        <field name="sequence">23</field>
+    </record>
+
+    <record id="module_category_lhi_approvals" model="ir.module.category">
+        <field name="name">LHI Approvals</field>
+        <field name="description">Access levels for the Approvals application</field>
+        <field name="parent_id" ref="module_category_lhi_erp"/>
+        <field name="sequence">50</field>
+    </record>
+
+    <record id="module_category_lhi_reporting" model="ir.module.category">
+        <field name="name">LHI Reporting and Analytics</field>
+        <field name="description">Access levels for reporting and analytics applications</field>
+        <field name="parent_id" ref="module_category_lhi_erp"/>
+        <field name="sequence">60</field>
+    </record>
+
+    <record id="module_category_lhi_meal" model="ir.module.category">
+        <field name="name">LHI MEAL</field>
+        <field name="description">Access levels for MEAL and results data</field>
+        <field name="parent_id" ref="module_category_lhi_erp"/>
+        <field name="sequence">70</field>
+    </record>
+
+    <record id="module_category_lhi_hr" model="ir.module.category">
+        <field name="name">LHI HR and Leave</field>
+        <field name="description">Access levels for HR and Leave functions</field>
+        <field name="parent_id" ref="module_category_lhi_erp"/>
+        <field name="sequence">80</field>
+    </record>
+
     <record id="res_groups_privilege_lhi_erp" model="res.groups.privilege">
         <field name="name">LHI ERP Access</field>
         <field name="category_id" ref="module_category_lhi_erp"/>
+        <field name="placeholder">No Access</field>
+    </record>
+
+    <record id="res_groups_privilege_lhi_operations" model="res.groups.privilege">
+        <field name="name">Operations</field>
+        <field name="category_id" ref="module_category_lhi_operations"/>
+        <field name="placeholder">No Access</field>
+        <field name="sequence">10</field>
+    </record>
+
+    <record id="res_groups_privilege_lhi_hub" model="res.groups.privilege">
+        <field name="name">HUB</field>
+        <field name="category_id" ref="module_category_lhi_hub"/>
+        <field name="placeholder">No Access</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <record id="res_groups_privilege_lhi_assets" model="res.groups.privilege">
+        <field name="name">Asset Register</field>
+        <field name="category_id" ref="module_category_lhi_assets"/>
+        <field name="placeholder">No Access</field>
+        <field name="sequence">30</field>
+    </record>
+
+    <record id="res_groups_privilege_lhi_procurement" model="res.groups.privilege">
+        <field name="name">Procurement</field>
+        <field name="category_id" ref="module_category_lhi_procurement"/>
+        <field name="placeholder">No Access</field>
+        <field name="sequence">40</field>
+    </record>
+
+    <record id="res_groups_privilege_lhi_inventory" model="res.groups.privilege">
+        <field name="name">Inventory</field>
+        <field name="category_id" ref="module_category_lhi_inventory"/>
+        <field name="placeholder">No Access</field>
+        <field name="sequence">50</field>
+    </record>
+
+    <record id="res_groups_privilege_lhi_fleet" model="res.groups.privilege">
+        <field name="name">Fleet</field>
+        <field name="category_id" ref="module_category_lhi_fleet"/>
+        <field name="placeholder">No Access</field>
+        <field name="sequence">60</field>
+    </record>
+
+    <record id="res_groups_privilege_lhi_programmes" model="res.groups.privilege">
+        <field name="name">Programs and Grants</field>
+        <field name="category_id" ref="module_category_lhi_programmes"/>
+        <field name="placeholder">No Access</field>
+        <field name="sequence">70</field>
+    </record>
+
+    <record id="res_groups_privilege_lhi_approvals" model="res.groups.privilege">
+        <field name="name">Approvals</field>
+        <field name="category_id" ref="module_category_lhi_approvals"/>
+        <field name="placeholder">No Access</field>
+        <field name="sequence">80</field>
+    </record>
+
+    <record id="res_groups_privilege_lhi_reports" model="res.groups.privilege">
+        <field name="name">Reports</field>
+        <field name="category_id" ref="module_category_lhi_reporting"/>
+        <field name="placeholder">No Access</field>
+        <field name="sequence">90</field>
+    </record>
+
+    <record id="res_groups_privilege_lhi_powerbi" model="res.groups.privilege">
+        <field name="name">Power BI</field>
+        <field name="category_id" ref="module_category_lhi_reporting"/>
+        <field name="placeholder">No Access</field>
+        <field name="sequence">100</field>
+    </record>
+
+    <record id="res_groups_privilege_lhi_meal" model="res.groups.privilege">
+        <field name="name">MEAL</field>
+        <field name="category_id" ref="module_category_lhi_meal"/>
+        <field name="placeholder">No Access</field>
+        <field name="sequence">110</field>
+    </record>
+
+    <record id="res_groups_privilege_lhi_hr" model="res.groups.privilege">
+        <field name="name">HR and Leave</field>
+        <field name="category_id" ref="module_category_lhi_hr"/>
+        <field name="placeholder">No Access</field>
+        <field name="sequence">120</field>
     </record>
 
     <!-- Base User and Manager Groups (Keep xml_ids for backward compatibility with tests) -->
@@ -52,7 +186,9 @@
         <field name="category_id" ref="module_category_lhi_erp"/>
         <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
         <field name="implied_ids" eval="[(4, ref('group_lhi_user'))]"/>
-        <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        <!-- Protected administrators receive Manager through ERP Administrator;
+             avoid two direct selections in the same native privilege. -->
+        <field name="user_ids" eval="[(3, ref('base.user_root')), (3, ref('base.user_admin'))]"/>
     </record>
 
     <!-- Specific LHI Roles -->
@@ -70,100 +206,223 @@
         <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
     </record>
 
+    <record id="group_lhi_programme_viewer" model="res.groups">
+        <field name="name">Programs and Grants Viewer</field>
+        <field name="category_id" ref="module_category_lhi_programmes"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_programmes"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+        <field name="comment">Read-only access to Programs and Grants.</field>
+    </record>
+
     <record id="group_lhi_project_officer" model="res.groups">
         <field name="name">LHI Project Officer</field>
         <field name="category_id" ref="module_category_lhi_programmes"/>
-        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
-        <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_programmes"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_programme_viewer'))]"/>
     </record>
 
     <record id="group_lhi_project_manager" model="res.groups">
         <field name="name">LHI Project Manager</field>
         <field name="category_id" ref="module_category_lhi_programmes"/>
-        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_programmes"/>
         <field name="implied_ids" eval="[(4, ref('group_lhi_project_officer'))]"/>
     </record>
 
     <record id="group_lhi_programme_director" model="res.groups">
         <field name="name">LHI Programme Director</field>
         <field name="category_id" ref="module_category_lhi_programmes"/>
-        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_programmes"/>
         <field name="implied_ids" eval="[(4, ref('group_lhi_project_manager'))]"/>
+    </record>
+
+    <record id="group_lhi_meal_viewer" model="res.groups">
+        <field name="name">MEAL Viewer</field>
+        <field name="category_id" ref="module_category_lhi_meal"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_meal"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+        <field name="comment">Read-only access to MEAL records.</field>
     </record>
 
     <record id="group_lhi_meal_officer" model="res.groups">
         <field name="name">LHI MEAL Officer</field>
-        <field name="category_id" ref="module_category_lhi_erp"/>
-        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="category_id" ref="module_category_lhi_meal"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_meal"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_meal_viewer'))]"/>
+    </record>
+
+    <record id="group_lhi_meal_manager" model="res.groups">
+        <field name="name">MEAL Manager</field>
+        <field name="category_id" ref="module_category_lhi_meal"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_meal"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_meal_officer'))]"/>
+    </record>
+
+    <record id="group_lhi_procurement_viewer" model="res.groups">
+        <field name="name">Procurement Viewer</field>
+        <field name="category_id" ref="module_category_lhi_procurement"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_procurement"/>
         <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+        <field name="comment">Read-only access to Procurement.</field>
     </record>
 
     <record id="group_lhi_procurement_officer" model="res.groups">
         <field name="name">LHI Procurement Officer</field>
         <field name="category_id" ref="module_category_lhi_procurement"/>
-        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
-        <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_procurement"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_procurement_viewer'))]"/>
     </record>
 
     <record id="group_lhi_procurement_manager" model="res.groups">
         <field name="name">LHI Procurement Manager</field>
         <field name="category_id" ref="module_category_lhi_procurement"/>
-        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_procurement"/>
         <field name="implied_ids" eval="[(4, ref('group_lhi_procurement_officer'))]"/>
+    </record>
+
+    <record id="group_lhi_inventory_viewer" model="res.groups">
+        <field name="name">Inventory Viewer</field>
+        <field name="category_id" ref="module_category_lhi_inventory"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_inventory"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+        <field name="comment">Read-only access to Inventory.</field>
     </record>
 
     <record id="group_lhi_store_officer" model="res.groups">
         <field name="name">LHI Store Officer</field>
-        <field name="category_id" ref="module_category_lhi_operations"/>
-        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="category_id" ref="module_category_lhi_inventory"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_inventory"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_inventory_viewer'))]"/>
+    </record>
+
+    <record id="group_lhi_inventory_manager" model="res.groups">
+        <field name="name">Inventory Manager</field>
+        <field name="category_id" ref="module_category_lhi_inventory"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_inventory"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_store_officer'))]"/>
+    </record>
+
+    <record id="group_lhi_fleet_viewer" model="res.groups">
+        <field name="name">Fleet Viewer</field>
+        <field name="category_id" ref="module_category_lhi_fleet"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_fleet"/>
         <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+        <field name="comment">Read-only access to Fleet.</field>
     </record>
 
     <record id="group_lhi_fleet_officer" model="res.groups">
         <field name="name">LHI Fleet Officer</field>
-        <field name="category_id" ref="module_category_lhi_operations"/>
-        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="category_id" ref="module_category_lhi_fleet"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_fleet"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_fleet_viewer'))]"/>
+    </record>
+
+    <record id="group_lhi_fleet_manager" model="res.groups">
+        <field name="name">Fleet Manager</field>
+        <field name="category_id" ref="module_category_lhi_fleet"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_fleet"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_fleet_officer'))]"/>
+    </record>
+
+    <record id="group_lhi_reports_viewer" model="res.groups">
+        <field name="name">Reports Viewer</field>
+        <field name="category_id" ref="module_category_lhi_reporting"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_reports"/>
         <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+        <field name="comment">Read-only access to reporting applications.</field>
+    </record>
+
+    <record id="group_lhi_reports_officer" model="res.groups">
+        <field name="name">Reports Officer</field>
+        <field name="category_id" ref="module_category_lhi_reporting"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_reports"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_reports_viewer'))]"/>
+    </record>
+
+    <record id="group_lhi_reports_manager" model="res.groups">
+        <field name="name">Reports Manager</field>
+        <field name="category_id" ref="module_category_lhi_reporting"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_reports"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_reports_officer'))]"/>
+    </record>
+
+    <record id="group_lhi_powerbi_viewer" model="res.groups">
+        <field name="name">Power BI Viewer</field>
+        <field name="category_id" ref="module_category_lhi_reporting"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_powerbi"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+        <field name="comment">Read-only access to the approved Power BI registry.</field>
+    </record>
+
+    <record id="group_lhi_powerbi_officer" model="res.groups">
+        <field name="name">Power BI Officer</field>
+        <field name="category_id" ref="module_category_lhi_reporting"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_powerbi"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_powerbi_viewer'))]"/>
+    </record>
+
+    <record id="group_lhi_powerbi_manager" model="res.groups">
+        <field name="name">Power BI Manager</field>
+        <field name="category_id" ref="module_category_lhi_reporting"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_powerbi"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_powerbi_officer'))]"/>
     </record>
 
     <record id="group_lhi_finance_reviewer" model="res.groups">
         <field name="name">LHI Finance Reviewer</field>
         <field name="category_id" ref="module_category_lhi_erp"/>
         <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_employee')), (4, ref('group_lhi_reports_viewer'))]"/>
+    </record>
+
+    <record id="group_lhi_hr_viewer" model="res.groups">
+        <field name="name">HR and Leave Viewer</field>
+        <field name="category_id" ref="module_category_lhi_hr"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_hr"/>
         <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+        <field name="comment">Read-only access to HR and Leave bridge data.</field>
     </record>
 
     <record id="group_lhi_hr_officer" model="res.groups">
         <field name="name">LHI HR Officer</field>
-        <field name="category_id" ref="module_category_lhi_erp"/>
-        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
-        <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+        <field name="category_id" ref="module_category_lhi_hr"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_hr"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_hr_viewer'))]"/>
+    </record>
+
+    <record id="group_lhi_hr_manager" model="res.groups">
+        <field name="name">HR and Leave Manager</field>
+        <field name="category_id" ref="module_category_lhi_hr"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_hr"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_hr_officer'))]"/>
     </record>
 
     <record id="group_lhi_internal_auditor" model="res.groups">
         <field name="name">LHI Internal Auditor</field>
         <field name="category_id" ref="module_category_lhi_erp"/>
         <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_employee')), (4, ref('group_lhi_reports_viewer'))]"/>
+    </record>
+
+    <record id="group_lhi_approvals_viewer" model="res.groups">
+        <field name="name">Approvals Viewer</field>
+        <field name="category_id" ref="module_category_lhi_approvals"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_approvals"/>
         <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+        <field name="comment">Read-only access to the Approvals application.</field>
     </record>
 
     <record id="group_lhi_executive_approver" model="res.groups">
         <field name="name">LHI Executive Approver</field>
-        <field name="category_id" ref="module_category_lhi_erp"/>
-        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
-        <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+        <field name="category_id" ref="module_category_lhi_approvals"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_approvals"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_approvals_viewer'))]"/>
     </record>
 
-    <record id="group_lhi_erp_admin" model="res.groups">
-        <field name="name">LHI ERP Administrator</field>
-        <field name="category_id" ref="module_category_lhi_erp"/>
-        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
-        <field name="implied_ids"
-               eval="[(4, ref('group_lhi_manager')),
-                      (4, ref('group_lhi_employee'))]"/>
-        <field name="user_ids"
-               eval="[(4, ref('base.user_root')),
-                      (4, ref('base.user_admin'))]"/>
+    <record id="group_lhi_approvals_manager" model="res.groups">
+        <field name="name">Approvals Manager</field>
+        <field name="category_id" ref="module_category_lhi_approvals"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_approvals"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_executive_approver'))]"/>
     </record>
 
     <record id="group_lhi_integration_service" model="res.groups">
@@ -176,40 +435,54 @@
     <!-- Operational roles. -->
     <record id="group_lhi_hub_viewer" model="res.groups">
         <field name="name">HUB Viewer</field>
-        <field name="category_id" ref="module_category_lhi_operations"/>
-        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="category_id" ref="module_category_lhi_hub"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_hub"/>
         <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+        <field name="comment">Read-only access to assigned HUB records.</field>
     </record>
 
     <record id="group_lhi_warehouse_officer" model="res.groups">
         <field name="name">Warehouse Officer</field>
-        <field name="category_id" ref="module_category_lhi_operations"/>
-        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="category_id" ref="module_category_lhi_hub"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_hub"/>
         <field name="implied_ids"
                eval="[(4, ref('group_lhi_hub_viewer')),
                       (4, ref('group_lhi_store_officer'))]"/>
     </record>
 
+    <record id="group_lhi_hub_manager" model="res.groups">
+        <field name="name">HUB Manager</field>
+        <field name="category_id" ref="module_category_lhi_hub"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_hub"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_warehouse_officer'))]"/>
+    </record>
+
+    <record id="group_lhi_operations_viewer" model="res.groups">
+        <field name="name">Operations Viewer</field>
+        <field name="category_id" ref="module_category_lhi_operations"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_operations"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+        <field name="comment">Read-only access to the Operations overview.</field>
+    </record>
+
     <record id="group_lhi_operations_officer" model="res.groups">
         <field name="name">Operations Officer</field>
         <field name="category_id" ref="module_category_lhi_operations"/>
-        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
-        <field name="implied_ids" eval="[(4, ref('group_lhi_hub_viewer'))]"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_operations"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_operations_viewer'))]"/>
     </record>
 
     <record id="group_lhi_operations_manager" model="res.groups">
         <field name="name">Operations Manager</field>
         <field name="category_id" ref="module_category_lhi_operations"/>
-        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
-        <field name="implied_ids"
-               eval="[(4, ref('group_lhi_warehouse_officer')),
-                      (4, ref('group_lhi_operations_officer'))]"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_operations"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_operations_officer'))]"/>
     </record>
 
     <record id="group_lhi_director_operations" model="res.groups">
         <field name="name">Director of Operations</field>
         <field name="category_id" ref="module_category_lhi_operations"/>
-        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_operations"/>
         <field name="implied_ids" eval="[(4, ref('group_lhi_operations_manager'))]"/>
     </record>
 
@@ -220,31 +493,39 @@
         <field name="implied_ids" eval="[(4, ref('group_lhi_executive_approver'))]"/>
     </record>
 
+    <record id="group_lhi_asset_viewer" model="res.groups">
+        <field name="name">Asset Viewer</field>
+        <field name="category_id" ref="module_category_lhi_assets"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_assets"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+        <field name="comment">Read-only access to the Asset Register.</field>
+    </record>
+
     <record id="group_lhi_asset_officer" model="res.groups">
         <field name="name">Asset Officer</field>
         <field name="category_id" ref="module_category_lhi_assets"/>
-        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
-        <field name="implied_ids" eval="[(4, ref('group_lhi_employee'))]"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_assets"/>
+        <field name="implied_ids" eval="[(4, ref('group_lhi_asset_viewer'))]"/>
     </record>
 
     <record id="group_lhi_asset_manager" model="res.groups">
         <field name="name">Asset Manager</field>
         <field name="category_id" ref="module_category_lhi_assets"/>
-        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_assets"/>
         <field name="implied_ids" eval="[(4, ref('group_lhi_asset_officer'))]"/>
     </record>
 
     <record id="group_lhi_programme_user" model="res.groups">
         <field name="name">Programme User</field>
         <field name="category_id" ref="module_category_lhi_programmes"/>
-        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_programmes"/>
         <field name="implied_ids" eval="[(4, ref('group_lhi_project_officer'))]"/>
     </record>
 
     <record id="group_lhi_programme_approver" model="res.groups">
         <field name="name">Programme Approver</field>
         <field name="category_id" ref="module_category_lhi_programmes"/>
-        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_programmes"/>
         <field name="implied_ids" eval="[(4, ref('group_lhi_project_manager'))]"/>
     </record>
 
@@ -253,5 +534,31 @@
         <field name="category_id" ref="module_category_lhi_erp"/>
         <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
         <field name="implied_ids" eval="[(4, ref('group_lhi_internal_auditor'))]"/>
+    </record>
+
+    <record id="group_lhi_erp_admin" model="res.groups">
+        <field name="name">LHI ERP Administrator</field>
+        <field name="category_id" ref="module_category_lhi_erp"/>
+        <field name="privilege_id" ref="res_groups_privilege_lhi_erp"/>
+        <field name="implied_ids" eval="[
+            (4, ref('group_lhi_manager')),
+            (4, ref('group_lhi_employee')),
+            (4, ref('group_lhi_operations_manager')),
+            (4, ref('group_lhi_hub_manager')),
+            (4, ref('group_lhi_asset_manager')),
+            (4, ref('group_lhi_procurement_manager')),
+            (4, ref('group_lhi_inventory_manager')),
+            (4, ref('group_lhi_fleet_manager')),
+            (4, ref('group_lhi_project_manager')),
+            (4, ref('group_lhi_approvals_manager')),
+            (4, ref('group_lhi_reports_manager')),
+            (4, ref('group_lhi_powerbi_manager')),
+            (4, ref('group_lhi_meal_manager')),
+            (4, ref('group_lhi_hr_manager'))
+        ]"/>
+        <field name="user_ids" eval="[
+            (4, ref('base.user_root')),
+            (4, ref('base.user_admin'))
+        ]"/>
     </record>
 </odoo>

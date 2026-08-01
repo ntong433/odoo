@@ -15,6 +15,6 @@
     </record>
 
     <!-- Assumes menu_lhi_meal_root exists from lhi_results_framework -->
-    <menuitem id="menu_lhi_meal_data" name="Data Collection" parent="lhi_results_framework.menu_lhi_meal_root" action="action_lhi_meal_data" sequence="30"/>
-    <menuitem id="menu_lhi_meal_evidence" name="Evidence Library" parent="lhi_results_framework.menu_lhi_meal_root" action="action_lhi_meal_evidence" sequence="40"/>
+    <menuitem id="menu_lhi_meal_data" name="Data Collection" parent="lhi_results_framework.menu_lhi_meal_root" action="action_lhi_meal_data" sequence="30" groups="lhi_security.group_lhi_meal_viewer"/>
+    <menuitem id="menu_lhi_meal_evidence" name="Evidence Library" parent="lhi_results_framework.menu_lhi_meal_root" action="action_lhi_meal_evidence" sequence="40" groups="lhi_security.group_lhi_meal_viewer"/>
 </odoo>

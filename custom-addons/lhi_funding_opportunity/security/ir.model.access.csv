@@ -1,5 +1,6 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_lhi_funding_stage_user,lhi.funding.stage.user,model_lhi_funding_stage,base.group_user,1,0,0,0
-access_lhi_funding_stage_admin,lhi.funding.stage.admin,model_lhi_funding_stage,base.group_erp_manager,1,1,1,1
-access_lhi_funding_opportunity_user,lhi.funding.opportunity.user,model_lhi_funding_opportunity,base.group_user,1,1,1,0
-access_lhi_funding_opportunity_admin,lhi.funding.opportunity.admin,model_lhi_funding_opportunity,base.group_erp_manager,1,1,1,1
+access_lhi_funding_stage_user,lhi.funding.stage.viewer,model_lhi_funding_stage,lhi_security.group_lhi_programme_viewer,1,0,0,0
+access_lhi_funding_stage_admin,lhi.funding.stage.admin,model_lhi_funding_stage,lhi_security.group_lhi_project_manager,1,1,1,1
+access_lhi_funding_opportunity_viewer,lhi.funding.opportunity.viewer,model_lhi_funding_opportunity,lhi_security.group_lhi_programme_viewer,1,0,0,0
+access_lhi_funding_opportunity_user,lhi.funding.opportunity.user,model_lhi_funding_opportunity,lhi_security.group_lhi_project_officer,1,1,1,0
+access_lhi_funding_opportunity_admin,lhi.funding.opportunity.admin,model_lhi_funding_opportunity,lhi_security.group_lhi_project_manager,1,1,1,1

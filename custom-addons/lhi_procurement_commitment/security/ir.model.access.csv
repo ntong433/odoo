@@ -1,3 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_lhi_procurement_commitment_user,lhi.procurement.commitment.user,model_lhi_procurement_commitment,base.group_user,1,1,1,0
-access_lhi_procurement_commitment_admin,lhi.procurement.commitment.admin,model_lhi_procurement_commitment,base.group_erp_manager,1,1,1,1
+access_lhi_procurement_commitment_viewer,lhi.procurement.commitment.viewer,model_lhi_procurement_commitment,lhi_security.group_lhi_procurement_viewer,1,0,0,0
+access_lhi_procurement_commitment_user,lhi.procurement.commitment.user,model_lhi_procurement_commitment,lhi_security.group_lhi_procurement_officer,1,1,1,0
+access_lhi_procurement_commitment_admin,lhi.procurement.commitment.manager,model_lhi_procurement_commitment,lhi_security.group_lhi_procurement_manager,1,1,1,1

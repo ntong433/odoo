@@ -32,7 +32,9 @@ class LhiUnifiedInbox(models.Model):
     
     def action_approve_local(self):
         # Implementation for Odoo native approvals from inbox
+        self.env.user.check_lhi_app_access("approvals")
         pass
         
     def action_reject_local(self):
+        self.env.user.check_lhi_app_access("approvals")
         pass

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'LHI Procurement',
-    'version': '19.0.1.0.0',
+    'version': '19.0.2.0.0',
     'category': 'Procurement',
     'summary': 'RFQs, Tenders, Bid Analysis, and Recommendations',
-    'depends': ['lhi_purchase_request', 'lhi_vendor_management', 'mail'],
+    'depends': ['lhi_purchase_request', 'lhi_vendor_management', 'lhi_security', 'mail'],
     'data': [
         'security/ir.model.access.csv',
         'security/lhi_procurement_security.xml',

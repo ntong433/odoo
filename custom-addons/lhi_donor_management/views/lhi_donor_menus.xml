@@ -5,5 +5,9 @@
               name="Donors"
               parent="contacts.menu_contacts"
               action="lhi_base.action_lhi_donor"
-              sequence="50"/>
+              sequence="50"
+              groups="lhi_security.group_lhi_programme_viewer"/>
+    <record id="menu_lhi_donor_management" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
 </odoo>

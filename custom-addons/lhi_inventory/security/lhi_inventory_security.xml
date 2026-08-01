@@ -1,5 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <data noupdate="0">
+        <record id="lhi_security.group_lhi_store_officer" model="res.groups">
+            <field name="implied_ids" eval="[
+                (4, ref('stock.group_stock_user')),
+                (4, ref('stock.group_stock_multi_locations')),
+                (4, ref('stock.group_stock_multi_warehouses')),
+                (4, ref('stock.group_production_lot'))
+            ]"/>
+        </record>
+        <record id="lhi_security.group_lhi_inventory_manager" model="res.groups">
+            <field name="implied_ids" eval="[(4, ref('stock.group_stock_manager'))]"/>
+        </record>
+        <record id="stock.menu_stock_root" model="ir.ui.menu">
+            <field name="group_ids" eval="[(6, 0, [ref('lhi_security.group_lhi_inventory_viewer')])]"/>
+            <field name="lhi_app_key">inventory</field>
+        </record>
+        <!-- Replace Odoo's generic Internal User stock reads with the positive
+             Inventory entitlement. Stock User remains the operational grant. -->
+        <record id="stock.access_stock_warehouse_user" model="ir.model.access">
+            <field name="group_id" ref="lhi_security.group_lhi_inventory_viewer"/>
+        </record>
+        <record id="stock.access_stock_location_all_user" model="ir.model.access">
+            <field name="group_id" ref="lhi_security.group_lhi_inventory_viewer"/>
+        </record>
+        <record id="stock.access_stock_picking_type_all" model="ir.model.access">
+            <field name="group_id" ref="lhi_security.group_lhi_inventory_viewer"/>
+        </record>
+        <record id="stock.access_stock_quant_all" model="ir.model.access">
+            <field name="group_id" ref="lhi_security.group_lhi_inventory_viewer"/>
+        </record>
+        <record id="stock.access_stock_move_line_all" model="ir.model.access">
+            <field name="group_id" ref="lhi_security.group_lhi_inventory_viewer"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+    </data>
     <data noupdate="1">
         <!-- Any specific multi-company overrides if needed, native stock handles most -->
     </data>

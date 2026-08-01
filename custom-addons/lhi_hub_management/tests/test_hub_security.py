@@ -95,7 +95,7 @@ class TestHubSecurity(HubCommon):
                     "name": "Snapshot",
                     "sequence": 10,
                     "approver_group_id": self.env.ref(
-                        "lhi_security.group_lhi_operations_manager"
+                        "lhi_security.group_lhi_hub_manager"
                     ).id,
                     "approver_ids": [Command.set(self.manager.ids)],
                     "approval_type": "any",

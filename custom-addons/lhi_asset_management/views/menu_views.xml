@@ -2,10 +2,14 @@
 <odoo>
     <menuitem id="menu_lhi_operations_root" name="Operations" sequence="60"
               web_icon="lhi_web_shell,static/src/img/module_icons/operations.svg"/>
+    <record id="menu_lhi_operations_root" model="ir.ui.menu">
+        <field name="active" eval="False"/>
+    </record>
 
     <record id="action_lhi_asset_dashboard" model="ir.actions.client">
         <field name="name">Asset Register Overview</field>
         <field name="tag">lhi_asset_management.asset_dashboard</field>
+        <field name="lhi_app_key">assets</field>
     </record>
 
     <record id="action_lhi_asset" model="ir.actions.act_window">
@@ -22,36 +26,45 @@
     </record>
 
     <menuitem id="menu_lhi_asset" name="Asset Register"
-              parent="menu_lhi_operations_root" action="action_lhi_asset_dashboard"
+              action="action_lhi_asset_dashboard"
               sequence="60"
-              groups="lhi_security.group_lhi_asset_officer,lhi_security.group_lhi_system_auditor"/>
+              groups="lhi_security.group_lhi_asset_viewer"
+              web_icon="lhi_web_shell,static/src/img/module_icons/assets.svg"/>
+    <record id="menu_lhi_asset" model="ir.ui.menu">
+        <field name="lhi_app_key">assets</field>
+    </record>
     <menuitem id="menu_lhi_asset_overview" name="Overview"
-              parent="menu_lhi_asset" action="action_lhi_asset_dashboard" sequence="1"/>
+              parent="menu_lhi_asset" action="action_lhi_asset_dashboard" sequence="1"
+              groups="lhi_security.group_lhi_asset_viewer"/>
     <menuitem id="menu_lhi_asset_register" name="All Assets"
-              parent="menu_lhi_asset" action="action_lhi_asset" sequence="10"/>
+              parent="menu_lhi_asset" action="action_lhi_asset" sequence="10"
+              groups="lhi_security.group_lhi_asset_viewer"/>
     <menuitem id="menu_lhi_asset_transfer" name="Transfers and Disposals"
-              parent="menu_lhi_asset" action="action_lhi_asset_transfer" sequence="20"/>
+              parent="menu_lhi_asset" action="action_lhi_asset_transfer" sequence="20"
+              groups="lhi_security.group_lhi_asset_viewer"/>
     <menuitem id="menu_lhi_asset_retag" name="Re-tag Requests"
-              parent="menu_lhi_asset" action="action_lhi_asset_retag_request" sequence="30"/>
+              parent="menu_lhi_asset" action="action_lhi_asset_retag_request" sequence="30"
+              groups="lhi_security.group_lhi_asset_viewer"/>
     <menuitem id="menu_lhi_asset_import" name="Import Legacy Register"
               parent="menu_lhi_asset" action="action_lhi_asset_import_wizard" sequence="40"
               groups="lhi_security.group_lhi_asset_officer"/>
     <menuitem id="menu_lhi_asset_import_batches" name="Import Batches"
-              parent="menu_lhi_asset" action="action_lhi_asset_import_batch" sequence="50"/>
+              parent="menu_lhi_asset" action="action_lhi_asset_import_batch" sequence="50"
+              groups="lhi_security.group_lhi_asset_officer"/>
 
     <menuitem id="menu_lhi_asset_configuration" name="Configuration"
               parent="menu_lhi_asset" sequence="90"
               groups="lhi_security.group_lhi_asset_manager"/>
     <menuitem id="menu_lhi_asset_categories" name="Asset Categories"
               parent="menu_lhi_asset_configuration" action="action_lhi_asset_category"
-              sequence="10"/>
+              sequence="10" groups="lhi_security.group_lhi_asset_manager"/>
     <menuitem id="menu_lhi_asset_conditions" name="Asset Conditions"
               parent="menu_lhi_asset_configuration" action="action_lhi_asset_condition"
-              sequence="20"/>
+              sequence="20" groups="lhi_security.group_lhi_asset_manager"/>
     <menuitem id="menu_lhi_asset_tag_rules" name="Asset Tag Rules"
               parent="menu_lhi_asset_configuration" action="action_lhi_asset_tag_rule"
-              sequence="30"/>
+              sequence="30" groups="lhi_security.group_lhi_asset_manager"/>
     <menuitem id="menu_lhi_asset_locations" name="Physical Locations"
               parent="menu_lhi_asset_configuration" action="action_lhi_location"
-              sequence="40"/>
+              sequence="40" groups="lhi_security.group_lhi_asset_manager"/>
 </odoo>

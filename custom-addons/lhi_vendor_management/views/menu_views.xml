@@ -6,5 +6,5 @@
         <field name="view_mode">list,form</field>
     </record>
 
-    <menuitem id="menu_lhi_vendor_management" name="Vendors" parent="lhi_purchase_request.menu_lhi_procurement_root" action="action_lhi_vendor" sequence="40"/>
+    <menuitem id="menu_lhi_vendor_management" name="Vendors" parent="lhi_purchase_request.menu_lhi_procurement_root" action="action_lhi_vendor" sequence="40" groups="lhi_security.group_lhi_procurement_viewer"/>
 </odoo>

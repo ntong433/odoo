@@ -3,12 +3,17 @@
     <record id="action_lhi_operations_hub" model="ir.actions.client">
         <field name="name">Operations Overview</field>
         <field name="tag">lhi_dashboard.operations_hub</field>
+        <field name="lhi_app_key">operations</field>
     </record>
 
     <!-- Hidden menu targeted by the dashboard Operations card -->
     <menuitem id="menu_lhi_operations_hub" 
               name="Operations Overview"
               action="action_lhi_operations_hub"
-              groups="base.group_user"
+              groups="lhi_security.group_lhi_operations_viewer"
               sequence="100"/>
+
+    <record id="menu_lhi_operations_hub" model="ir.ui.menu">
+        <field name="lhi_app_key">operations</field>
+    </record>
 </odoo>

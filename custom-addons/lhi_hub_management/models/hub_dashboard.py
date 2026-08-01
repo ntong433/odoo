@@ -14,6 +14,7 @@ class StockWarehouse(models.Model):
     @api.model
     def get_lhi_hub_dashboard_data(self):
         """Return only data visible under the caller's ACLs and record rules."""
+        self.env.user.check_lhi_app_access("hub")
         self.check_access("read")
         cards = []
         charts = []

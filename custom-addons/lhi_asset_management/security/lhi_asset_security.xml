@@ -11,7 +11,7 @@
         <record id="rule_lhi_asset_officer_scope" model="ir.rule">
             <field name="name">Asset Officer: Assigned Offices and Projects</field>
             <field name="model_id" ref="model_lhi_asset"/>
-            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_asset_officer'))]"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_asset_viewer'))]"/>
             <field name="domain_force">['&amp;', '|', ('office_id', '=', False), ('office_id', 'in', user.lhi_office_ids.ids), '|', ('project_id', '=', False), ('project_id', 'in', user.lhi_project_ids.ids)] if (user.lhi_office_ids or user.lhi_project_ids) else [(1, '=', 1)]</field>
         </record>
 

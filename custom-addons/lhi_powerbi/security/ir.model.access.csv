@@ -1,3 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_lhi_powerbi_report_user,lhi.powerbi.report.user,model_lhi_powerbi_report,base.group_user,1,0,0,0
-access_lhi_powerbi_report_admin,lhi.powerbi.report.admin,model_lhi_powerbi_report,base.group_system,1,1,1,1
+access_lhi_powerbi_report_user,lhi.powerbi.report.viewer,model_lhi_powerbi_report,lhi_security.group_lhi_powerbi_viewer,1,0,0,0
+access_lhi_powerbi_report_officer,lhi.powerbi.report.officer,model_lhi_powerbi_report,lhi_security.group_lhi_powerbi_officer,1,1,1,0
+access_lhi_powerbi_report_admin,lhi.powerbi.report.manager,model_lhi_powerbi_report,lhi_security.group_lhi_powerbi_manager,1,1,1,1

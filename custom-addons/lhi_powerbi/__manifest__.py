@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'LHI Power BI Embedded',
-    'version': '19.0.1.0.1',
+    'version': '19.0.2.0.0',
     'category': 'Reporting',
     'summary': 'Registry and Owl viewer for embedded Power BI reports with RLS mapping',
-    'depends': ['base', 'lhi_base', 'mail', 'lhi_web_shell'],
+    'depends': ['base', 'lhi_base', 'lhi_security', 'mail', 'lhi_web_shell'],
     'data': [
         'security/ir.model.access.csv',
         'views/powerbi_report_views.xml',

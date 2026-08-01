@@ -1,3 +1,4 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_lhi_project_amendment_user,lhi.project.amendment.user,model_lhi_project_amendment,base.group_user,1,1,1,0
-access_lhi_project_amendment_admin,lhi.project.amendment.admin,model_lhi_project_amendment,base.group_erp_manager,1,1,1,1
+access_lhi_project_amendment_user,lhi.project.amendment.viewer,model_lhi_project_amendment,lhi_security.group_lhi_programme_viewer,1,0,0,0
+access_lhi_project_amendment_officer,lhi.project.amendment.officer,model_lhi_project_amendment,lhi_security.group_lhi_project_officer,1,1,1,0
+access_lhi_project_amendment_admin,lhi.project.amendment.manager,model_lhi_project_amendment,lhi_security.group_lhi_project_manager,1,1,1,1

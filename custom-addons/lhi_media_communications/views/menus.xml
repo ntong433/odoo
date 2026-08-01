@@ -1,22 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Root Menu: Removed explicit groups to allow native model-level fallback, giving Admin visibility -->
     <menuitem id="menu_lhi_media_root" 
               name="Media &amp; Communications" 
               web_icon="lhi_media_communications,static/description/icon.png"
+              groups="lhi_media_communications.group_lhi_media_viewer"
               sequence="55"/>
+    <record id="menu_lhi_media_root" model="ir.ui.menu">
+        <field name="lhi_app_key">media</field>
+    </record>
 
     <!-- Sub Menus -->
     <menuitem id="menu_lhi_media_dashboard" 
               name="Media Dashboard" 
               parent="menu_lhi_media_root" 
               action="action_lhi_media_request"
+              groups="lhi_media_communications.group_lhi_media_viewer"
               sequence="10"/>
 
     <menuitem id="menu_lhi_media_request" 
               name="Media Requests" 
               parent="menu_lhi_media_root" 
               action="action_lhi_media_request" 
+              groups="lhi_media_communications.group_lhi_media_viewer"
               sequence="20"/>
 
     <!-- The user wanted specific Initiatives, Success Stories, etc. 
@@ -27,59 +32,69 @@
               name="Initiatives" 
               parent="menu_lhi_media_root" 
               action="action_lhi_media_activity" 
+              groups="lhi_media_communications.group_lhi_media_viewer"
               sequence="30"/>
 
     <menuitem id="menu_lhi_media_success_story" 
               name="Success Stories" 
               parent="menu_lhi_media_root" 
               action="action_lhi_media_success_story" 
+              groups="lhi_media_communications.group_lhi_media_viewer"
               sequence="40"/>
 
     <menuitem id="menu_lhi_media_photos_videos" 
               name="Photos and Videos" 
               parent="menu_lhi_media_root" 
               action="action_lhi_media_asset"
+              groups="lhi_media_communications.group_lhi_media_viewer"
               sequence="50"/>
 
     <menuitem id="menu_lhi_media_consent_records" 
               name="Consent Records" 
               parent="menu_lhi_media_root" 
               action="action_lhi_media_consent_records"
+              groups="lhi_media_communications.group_lhi_media_viewer"
               sequence="60"/>
 
     <menuitem id="menu_lhi_media_donor_visibility" 
               name="Donor Visibility" 
               parent="menu_lhi_media_root" 
               action="action_lhi_media_donor_visibility"
+              groups="lhi_media_communications.group_lhi_media_viewer"
               sequence="70"/>
 
     <menuitem id="menu_lhi_media_radio_tv" 
               name="Radio and TV Engagements" 
               parent="menu_lhi_media_root" 
               action="action_lhi_media_radio_tv"
+              groups="lhi_media_communications.group_lhi_media_viewer"
               sequence="80"/>
 
     <menuitem id="menu_lhi_media_outreach_events" 
               name="Outreach and Events" 
               parent="menu_lhi_media_root" 
               action="action_lhi_media_outreach_events"
+              groups="lhi_media_communications.group_lhi_media_viewer"
               sequence="90"/>
 
     <menuitem id="menu_lhi_media_calendar" 
               name="Communications Calendar" 
               parent="menu_lhi_media_root" 
               action="action_lhi_media_activity"
+              groups="lhi_media_communications.group_lhi_media_viewer"
               sequence="100"/>
 
     <menuitem id="menu_lhi_media_library" 
               name="Media Asset Library" 
               parent="menu_lhi_media_root" 
               action="action_lhi_media_asset" 
+              groups="lhi_media_communications.group_lhi_media_viewer"
               sequence="110"/>
 
     <menuitem id="menu_lhi_media_reports" 
               name="Reports" 
               parent="menu_lhi_media_root" 
+              groups="lhi_media_communications.group_lhi_media_viewer"
               sequence="120"/>
 
     <menuitem id="menu_lhi_media_configuration" 

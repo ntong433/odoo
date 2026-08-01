@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'LHI Procurement Commitment',
-    'version': '19.0.1.0.0',
+    'version': '19.0.2.0.0',
     'category': 'Procurement',
     'summary': 'Operational Budget Commitments for Purchase Requests',
-    'depends': ['lhi_purchase_request', 'mail'],
+    'depends': ['lhi_purchase_request', 'lhi_security', 'mail'],
     'data': [
         'security/ir.model.access.csv',
         'security/lhi_procurement_commitment_security.xml',

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'LHI Approval Matrix',
-    'version': '19.0.1.1.0',
+    'version': '19.0.2.0.0',
     'category': 'Operations',
     'summary': 'Multi-step approval matrix engine for LHI business workflows',
     'description': """

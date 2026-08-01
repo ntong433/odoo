@@ -1,12 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="lhi_base.menu_lhi_root" model="ir.ui.menu"><field name="name">Programmatic Operations</field><field name="action" ref="lhi_base.action_lhi_project"/></record>
-    <record id="lhi_base.menu_lhi_project_root" model="ir.ui.menu"><field name="name">Projects</field></record>
-    <menuitem id="menu_lhi_programmes_opportunities" name="Funding Opportunities" parent="lhi_base.menu_lhi_root" action="lhi_funding_opportunity.action_lhi_funding_opportunity" sequence="20"/>
-    <menuitem id="menu_lhi_programmes_awards" name="Grant Awards" parent="lhi_base.menu_lhi_root" action="lhi_base.action_lhi_award" sequence="30"/>
-    <menuitem id="menu_lhi_programmes_workplans" name="Workplans" parent="lhi_base.menu_lhi_root" action="lhi_project_workplan.action_lhi_workplan" sequence="40"/>
-    <menuitem id="menu_lhi_programmes_budgets" name="Project Budgets" parent="lhi_base.menu_lhi_root" action="action_lhi_project_budget" sequence="50"/>
-    <menuitem id="menu_lhi_programmes_memos" name="Activity Memos" parent="lhi_base.menu_lhi_root" action="action_lhi_activity_memo" sequence="60"/>
-    <menuitem id="menu_lhi_programmes_requests" name="Execution Requests" parent="lhi_base.menu_lhi_root" action="action_lhi_execution_request" sequence="70"/>
-    <menuitem id="menu_lhi_programmes_retirements" name="Retirements" parent="lhi_base.menu_lhi_root" action="action_lhi_payment_retirement" sequence="80"/>
+    <record id="lhi_base.menu_lhi_root" model="ir.ui.menu">
+        <field name="name">Programs and Grants</field>
+        <field name="action" ref="lhi_base.action_lhi_project"/>
+        <field name="group_ids" eval="[(6, 0, [ref('lhi_security.group_lhi_programme_viewer')])]"/>
+        <field name="lhi_app_key">programs_grants</field>
+    </record>
+    <record id="lhi_base.menu_lhi_project_root" model="ir.ui.menu">
+        <field name="name">Projects</field>
+        <field name="group_ids" eval="[(6, 0, [ref('lhi_security.group_lhi_programme_viewer')])]"/>
+        <field name="lhi_app_key">programs_grants</field>
+    </record>
+    <menuitem id="menu_lhi_programmes_opportunities" name="Funding Opportunities" parent="lhi_base.menu_lhi_root" action="lhi_funding_opportunity.action_lhi_funding_opportunity" sequence="20" groups="lhi_security.group_lhi_programme_viewer"/>
+    <record id="menu_lhi_programmes_opportunities" model="ir.ui.menu"><field name="active" eval="False"/></record>
+    <menuitem id="menu_lhi_programmes_awards" name="Grant Awards" parent="lhi_base.menu_lhi_root" action="lhi_base.action_lhi_award" sequence="30" groups="lhi_security.group_lhi_programme_viewer"/>
+    <menuitem id="menu_lhi_programmes_workplans" name="Workplans" parent="lhi_base.menu_lhi_root" action="lhi_project_workplan.action_lhi_workplan" sequence="40" groups="lhi_security.group_lhi_programme_viewer"/>
+    <menuitem id="menu_lhi_programmes_budgets" name="Project Budgets" parent="lhi_base.menu_lhi_root" action="action_lhi_project_budget" sequence="50" groups="lhi_security.group_lhi_programme_viewer"/>
+    <menuitem id="menu_lhi_programmes_memos" name="Activity Memos" parent="lhi_base.menu_lhi_root" action="action_lhi_activity_memo" sequence="60" groups="lhi_security.group_lhi_programme_viewer"/>
+    <menuitem id="menu_lhi_programmes_requests" name="Execution Requests" parent="lhi_base.menu_lhi_root" action="action_lhi_execution_request" sequence="70" groups="lhi_security.group_lhi_programme_viewer"/>
+    <menuitem id="menu_lhi_programmes_retirements" name="Retirements" parent="lhi_base.menu_lhi_root" action="action_lhi_payment_retirement" sequence="80" groups="lhi_security.group_lhi_programme_viewer"/>
 </odoo>

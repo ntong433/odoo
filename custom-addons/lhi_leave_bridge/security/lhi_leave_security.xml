@@ -7,7 +7,7 @@
             <field name="domain_force">
                 [('approver_id', '=', user.id)]
             </field>
-            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+            <field name="groups" eval="[(4, ref('lhi_security.group_lhi_approvals_viewer'))]"/>
         </record>
     </data>
 </odoo>

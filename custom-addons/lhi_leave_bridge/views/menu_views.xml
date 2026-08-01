@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <menuitem id="menu_lhi_unified_inbox_root" name="Unified Inbox" sequence="1" web_icon="lhi_web_shell,static/src/img/module_icons/inbox.svg"/>
+    <menuitem id="menu_lhi_unified_inbox_root" name="Unified Inbox" sequence="1" web_icon="lhi_web_shell,static/src/img/module_icons/inbox.svg" groups="lhi_security.group_lhi_approvals_viewer"/>
+    <record id="menu_lhi_unified_inbox_root" model="ir.ui.menu">
+        <field name="lhi_app_key">approvals</field>
+    </record>
 
     <record id="action_lhi_unified_inbox" model="ir.actions.act_window">
         <field name="name">My Approvals</field>
@@ -21,9 +24,12 @@
         <field name="view_mode">list</field>
     </record>
 
-    <menuitem id="menu_lhi_unified_inbox" name="My Approvals" parent="menu_lhi_unified_inbox_root" action="action_lhi_unified_inbox" sequence="10"/>
+    <menuitem id="menu_lhi_unified_inbox" name="My Approvals" parent="menu_lhi_unified_inbox_root" action="action_lhi_unified_inbox" sequence="10" groups="lhi_security.group_lhi_approvals_viewer"/>
     
-    <menuitem id="menu_lhi_leave_root" name="Leave Management" sequence="2" web_icon="lhi_web_shell,static/src/img/module_icons/leave.svg"/>
-    <menuitem id="menu_lhi_leave_balances" name="Balances" parent="menu_lhi_leave_root" action="action_lhi_leave_cache" sequence="10"/>
-    <menuitem id="menu_lhi_leave_staff" name="Staff On Leave" parent="menu_lhi_leave_root" action="action_lhi_leave_request_cache" sequence="20"/>
+    <menuitem id="menu_lhi_leave_root" name="Leave Management" sequence="2" web_icon="lhi_web_shell,static/src/img/module_icons/leave.svg" groups="lhi_security.group_lhi_hr_viewer"/>
+    <record id="menu_lhi_leave_root" model="ir.ui.menu">
+        <field name="lhi_app_key">hr_leave</field>
+    </record>
+    <menuitem id="menu_lhi_leave_balances" name="Balances" parent="menu_lhi_leave_root" action="action_lhi_leave_cache" sequence="10" groups="lhi_security.group_lhi_hr_viewer"/>
+    <menuitem id="menu_lhi_leave_staff" name="Staff On Leave" parent="menu_lhi_leave_root" action="action_lhi_leave_request_cache" sequence="20" groups="lhi_security.group_lhi_hr_viewer"/>
 </odoo>

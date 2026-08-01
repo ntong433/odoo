@@ -293,10 +293,14 @@
     </record>
 
     <!-- Menus -->
-    <menuitem id="menu_lhi_approvals_root" name="Approvals" parent="lhi_base.menu_lhi_root" action="action_lhi_approval_request" sequence="20"/>
-    <menuitem id="menu_lhi_my_pending_approvals" name="My Pending Approvals" parent="menu_lhi_approvals_root" action="action_lhi_my_pending_approvals" sequence="5"/>
-    <menuitem id="menu_lhi_approval_request" name="Active Requests" parent="menu_lhi_approvals_root" action="action_lhi_approval_request" sequence="10"/>
-    <menuitem id="menu_lhi_approval_matrix" name="Matrix Configurations" parent="menu_lhi_approvals_root" action="action_lhi_approval_matrix" sequence="20"/>
-    <menuitem id="menu_lhi_approval_delegation" name="Approval Delegations" parent="menu_lhi_approvals_root" action="action_lhi_approval_delegation" sequence="30"/>
-    <menuitem id="menu_lhi_sod_rule" name="SoD Conflicts Rules" parent="menu_lhi_approvals_root" action="action_lhi_sod_rule" sequence="40"/>
+    <menuitem id="menu_lhi_approvals_root" name="Approvals" action="action_lhi_approval_request" sequence="20" groups="lhi_security.group_lhi_approvals_viewer" web_icon="lhi_web_shell,static/src/img/module_icons/approvals.svg"/>
+    <record id="menu_lhi_approvals_root" model="ir.ui.menu">
+        <field name="parent_id" eval="False"/>
+        <field name="lhi_app_key">approvals</field>
+    </record>
+    <menuitem id="menu_lhi_my_pending_approvals" name="My Pending Approvals" parent="menu_lhi_approvals_root" action="action_lhi_my_pending_approvals" sequence="5" groups="lhi_security.group_lhi_approvals_viewer"/>
+    <menuitem id="menu_lhi_approval_request" name="Active Requests" parent="menu_lhi_approvals_root" action="action_lhi_approval_request" sequence="10" groups="lhi_security.group_lhi_approvals_viewer"/>
+    <menuitem id="menu_lhi_approval_matrix" name="Matrix Configurations" parent="menu_lhi_approvals_root" action="action_lhi_approval_matrix" sequence="20" groups="lhi_security.group_lhi_approvals_manager"/>
+    <menuitem id="menu_lhi_approval_delegation" name="Approval Delegations" parent="menu_lhi_approvals_root" action="action_lhi_approval_delegation" sequence="30" groups="lhi_security.group_lhi_executive_approver"/>
+    <menuitem id="menu_lhi_sod_rule" name="SoD Conflicts Rules" parent="menu_lhi_approvals_root" action="action_lhi_sod_rule" sequence="40" groups="lhi_security.group_lhi_approvals_manager"/>
 </odoo>

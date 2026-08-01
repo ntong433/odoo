@@ -1,1 +1,9 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_stock_warehouse_lhi_inventory_viewer,stock.warehouse.lhi.inventory.viewer,stock.model_stock_warehouse,lhi_security.group_lhi_inventory_viewer,1,0,0,0
+access_stock_location_lhi_inventory_viewer,stock.location.lhi.inventory.viewer,stock.model_stock_location,lhi_security.group_lhi_inventory_viewer,1,0,0,0
+access_stock_picking_lhi_inventory_viewer,stock.picking.lhi.inventory.viewer,stock.model_stock_picking,lhi_security.group_lhi_inventory_viewer,1,0,0,0
+access_stock_picking_type_lhi_inventory_viewer,stock.picking.type.lhi.inventory.viewer,stock.model_stock_picking_type,lhi_security.group_lhi_inventory_viewer,1,0,0,0
+access_stock_move_lhi_inventory_viewer,stock.move.lhi.inventory.viewer,stock.model_stock_move,lhi_security.group_lhi_inventory_viewer,1,0,0,0
+access_stock_move_line_lhi_inventory_viewer,stock.move.line.lhi.inventory.viewer,stock.model_stock_move_line,lhi_security.group_lhi_inventory_viewer,1,0,0,0
+access_stock_quant_lhi_inventory_viewer,stock.quant.lhi.inventory.viewer,stock.model_stock_quant,lhi_security.group_lhi_inventory_viewer,1,0,0,0
+access_stock_lot_lhi_inventory_viewer,stock.lot.lhi.inventory.viewer,stock.model_stock_lot,lhi_security.group_lhi_inventory_viewer,1,0,0,0

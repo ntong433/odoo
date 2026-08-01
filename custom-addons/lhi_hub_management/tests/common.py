@@ -49,7 +49,7 @@ class HubCommon(TransactionCase):
                             [
                                 cls.env.ref("base.group_user").id,
                                 cls.env.ref(
-                                    "lhi_security.group_lhi_operations_officer"
+                                    "lhi_security.group_lhi_warehouse_officer"
                                 ).id,
                             ]
                         )
@@ -73,7 +73,7 @@ class HubCommon(TransactionCase):
                             [
                                 cls.env.ref("base.group_user").id,
                                 cls.env.ref(
-                                    "lhi_security.group_lhi_operations_manager"
+                                    "lhi_security.group_lhi_hub_manager"
                                 ).id,
                             ]
                         )

@@ -1,35 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <record id="lhi_base.menu_lhi_root" model="ir.ui.menu">
+        <field name="group_ids" eval="[(6, 0, [ref('lhi_security.group_lhi_programme_viewer')])]"/>
+        <field name="lhi_app_key">programs_grants</field>
+    </record>
     <!-- Main Menu -->
     <menuitem id="menu_lhi_funding_root" 
               name="Pipeline" 
               action="action_lhi_funding_opportunity"
-              web_icon="lhi_web_shell,static/src/img/module_icons/pipeline.svg"
+              parent="lhi_base.menu_lhi_root"
               sequence="20" 
-              groups="base.group_user"/>
+              groups="lhi_security.group_lhi_programme_viewer"/>
+    <record id="menu_lhi_funding_root" model="ir.ui.menu">
+        <field name="lhi_app_key">programs_grants</field>
+    </record>
               
     <menuitem id="menu_lhi_funding_opportunities" 
               name="Opportunities" 
               parent="menu_lhi_funding_root" 
               action="action_lhi_funding_opportunity" 
-              sequence="10"/>
+              sequence="10"
+              groups="lhi_security.group_lhi_programme_viewer"/>
 
     <menuitem id="menu_lhi_funding_donors" 
               name="Donors" 
               parent="menu_lhi_funding_root" 
               action="lhi_base.action_lhi_donor" 
-              sequence="20"/>
+              sequence="20"
+              groups="lhi_security.group_lhi_programme_viewer"/>
 
     <!-- Configuration Menu -->
     <menuitem id="menu_lhi_funding_config" 
               name="Configuration" 
               parent="menu_lhi_funding_root" 
               sequence="100"
-              groups="base.group_erp_manager"/>
+              groups="lhi_security.group_lhi_project_manager"/>
 
     <menuitem id="menu_lhi_funding_stages" 
               name="Pipeline Stages" 
               parent="menu_lhi_funding_config" 
               action="action_lhi_funding_stage" 
-              sequence="10"/>
+              sequence="10"
+              groups="lhi_security.group_lhi_project_manager"/>
 </odoo>

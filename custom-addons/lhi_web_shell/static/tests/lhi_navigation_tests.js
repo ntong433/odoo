@@ -57,12 +57,12 @@ QUnit.module("LHI Web Shell Navigation", () => {
         const sidebar = Object.create(LhiSidebar.prototype);
         sidebar.state = {
             apps: [
-                { id: 10, key: "memos", name: "Memos" },
+                { id: 10, key: "memo", name: "Memos" },
                 { id: 20, key: "procurement", name: "Procurement" },
             ],
         };
 
-        assert.deepEqual(sidebar.generalApps.map((app) => app.key), ["memos"]);
+        assert.deepEqual(sidebar.generalApps.map((app) => app.key), ["memo"]);
         assert.deepEqual(sidebar.businessApps.map((app) => app.key), ["procurement"]);
     });
 
@@ -196,15 +196,15 @@ QUnit.module("LHI Web Shell Navigation", () => {
     QUnit.test("_normalizeAccessibleApps generates stable keys and deduplicates apps", (assert) => {
         const sidebar = Object.create(LhiSidebar.prototype);
         const rawApps = [
-            { key: "memos", name: "Memos", menu_id: 10 },
-            { key: "memos", name: "Memos Duplicate", menu_id: 10 },
+            { key: "memo", name: "Memos", menu_id: 10 },
+            { key: "memo", name: "Memos Duplicate", menu_id: 10 },
             { key: "procurement", name: "Procurement", xmlid: "lhi_procurement.menu_root" },
             { name: "No Key App" },
             null,
         ];
         const normalized = sidebar._normalizeAccessibleApps(rawApps);
         assert.strictEqual(normalized.length, 2, "Filters invalid and duplicate applications");
-        assert.strictEqual(normalized[0]._lhiSidebarKey, "lhi_app_memos");
+        assert.strictEqual(normalized[0]._lhiSidebarKey, "lhi_app_memo");
         assert.strictEqual(normalized[1]._lhiSidebarKey, "lhi_app_lhi_procurement.menu_root");
     });
 });

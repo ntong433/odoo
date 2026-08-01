@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <menuitem id="menu_lhi_memo_root" name="Memos" action="action_lhi_memo" sequence="35" groups="lhi_security.group_lhi_employee" web_icon="lhi_memo_management,static/description/icon.svg"/>
+    <record id="menu_lhi_memo_root" model="ir.ui.menu">
+        <field name="lhi_app_key">memo</field>
+    </record>
     <menuitem id="menu_lhi_memo_raise" name="Raise Memo" parent="menu_lhi_memo_root" action="action_lhi_memo_raise" sequence="10" groups="lhi_security.group_lhi_employee"/>
     <menuitem id="menu_lhi_memo_my_drafts" name="My Drafts" parent="menu_lhi_memo_root" action="action_lhi_memo_my_drafts" sequence="20" groups="lhi_security.group_lhi_employee"/>
     <menuitem id="menu_lhi_memo_my_submitted" name="My Submitted Memos" parent="menu_lhi_memo_root" action="action_lhi_memo_my_submitted" sequence="30" groups="lhi_security.group_lhi_employee"/>

@@ -1,16 +1,52 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
-from odoo import models, api
+from odoo import fields, models, api
+
+from .res_users import LHI_APP_SELECTION
 
 
 class IrUiMenu(models.Model):
     _inherit = 'ir.ui.menu'
 
+    lhi_app_key = fields.Selection(
+        selection=LHI_APP_SELECTION,
+        string="LHI Application",
+        index=True,
+        help="Application entitlement required for this menu and its descendants.",
+    )
+
+    @api.model
+    def _lhi_filter_app_menu_ids(self, visible_menu_ids):
+        """Apply central application entitlements to native visible menus."""
+        if not visible_menu_ids:
+            return visible_menu_ids
+
+        menus = self.sudo().browse(visible_menu_ids).exists()
+        allowed_keys = set(self.env["res.users"].get_lhi_allowed_apps())
+        blocked_ids = {
+            menu.id
+            for menu in menus
+            if menu.lhi_app_key and menu.lhi_app_key not in allowed_keys
+        }
+
+        # Fail closed for untagged descendants of a denied tagged root.  This
+        # also protects an older database while all menu records are upgraded.
+        changed = True
+        while changed:
+            changed = False
+            for menu in menus:
+                if menu.id not in blocked_ids and menu.parent_id.id in blocked_ids:
+                    blocked_ids.add(menu.id)
+                    changed = True
+
+        return frozenset(set(visible_menu_ids) - blocked_ids)
+
     @api.model
     def _visible_menu_ids(self, debug=False):
         """Return menu IDs visible to current user. For protected root, bypass group_ids restrictions."""
         if not self.env.user._lhi_is_protected_administrator():
-            return super()._visible_menu_ids(debug=debug)
+            visible_menu_ids = super()._visible_menu_ids(debug=debug)
+            return self._lhi_filter_app_menu_ids(visible_menu_ids)
 
         # For protected administrator: search ALL active menus, bypassing group_ids restriction
         menus = self.with_context({}).search_fetch(
@@ -61,4 +97,4 @@ class IrUiMenu(models.Model):
                 menu = menu.parent_id
                 menu_id = menu.id
 
-        return frozenset(visible_ids)
+        return self._lhi_filter_app_menu_ids(frozenset(visible_ids))

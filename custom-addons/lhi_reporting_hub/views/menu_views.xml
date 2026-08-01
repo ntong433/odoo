@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <menuitem id="menu_lhi_reporting_hub_root" name="Reporting Hub" sequence="50" web_icon="lhi_web_shell,static/src/img/module_icons/reporting.svg" action="action_lhi_reporting_job"/>
+    <menuitem id="menu_lhi_reporting_hub_root" name="Reporting Hub" sequence="50" web_icon="lhi_web_shell,static/src/img/module_icons/reporting.svg" action="action_lhi_reporting_job" groups="lhi_security.group_lhi_reports_viewer"/>
+    <record id="menu_lhi_reporting_hub_root" model="ir.ui.menu">
+        <field name="lhi_app_key">reports</field>
+    </record>
 
     <record id="action_lhi_reporting_job" model="ir.actions.act_window">
         <field name="name">Data Sync Jobs</field>
@@ -14,6 +17,6 @@
         <field name="view_mode">list,form</field>
     </record>
 
-    <menuitem id="menu_lhi_reporting_hub_jobs" name="Sync Jobs" parent="menu_lhi_reporting_hub_root" action="action_lhi_reporting_job" sequence="10"/>
-    <menuitem id="menu_lhi_reporting_hub_checks" name="Quality Checks" parent="menu_lhi_reporting_hub_root" action="action_lhi_data_quality_check" sequence="20"/>
+    <menuitem id="menu_lhi_reporting_hub_jobs" name="Sync Jobs" parent="menu_lhi_reporting_hub_root" action="action_lhi_reporting_job" sequence="10" groups="lhi_security.group_lhi_reports_viewer"/>
+    <menuitem id="menu_lhi_reporting_hub_checks" name="Quality Checks" parent="menu_lhi_reporting_hub_root" action="action_lhi_data_quality_check" sequence="20" groups="lhi_security.group_lhi_reports_viewer"/>
 </odoo>

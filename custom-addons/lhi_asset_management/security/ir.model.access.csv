@@ -1,4 +1,15 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lhi_asset_viewer,lhi.asset.viewer,model_lhi_asset,lhi_security.group_lhi_asset_viewer,1,0,0,0
+access_lhi_asset_category_viewer,lhi.asset.category.viewer,model_lhi_asset_category,lhi_security.group_lhi_asset_viewer,1,0,0,0
+access_lhi_asset_condition_viewer,lhi.asset.condition.viewer,model_lhi_asset_condition,lhi_security.group_lhi_asset_viewer,1,0,0,0
+access_lhi_asset_history_viewer,lhi.asset.history.viewer,model_lhi_asset_history,lhi_security.group_lhi_asset_viewer,1,0,0,0
+access_lhi_location_viewer,lhi.location.viewer,model_lhi_location,lhi_security.group_lhi_asset_viewer,1,0,0,0
+access_lhi_asset_transfer_viewer,lhi.asset.transfer.viewer,model_lhi_asset_transfer,lhi_security.group_lhi_asset_viewer,1,0,0,0
+access_lhi_asset_retag_viewer,lhi.asset.retag.viewer,model_lhi_asset_retag_request,lhi_security.group_lhi_asset_viewer,1,0,0,0
+access_lhi_asset_tag_rule_viewer,lhi.asset.tag.rule.viewer,model_lhi_asset_tag_rule,lhi_security.group_lhi_asset_viewer,1,0,0,0
+access_lhi_asset_tag_counter_viewer,lhi.asset.tag.counter.viewer,model_lhi_asset_tag_counter,lhi_security.group_lhi_asset_viewer,1,0,0,0
+access_lhi_asset_import_batch_viewer,lhi.asset.import.batch.viewer,model_lhi_asset_import_batch,lhi_security.group_lhi_asset_viewer,1,0,0,0
+access_lhi_asset_import_row_viewer,lhi.asset.import.row.viewer,model_lhi_asset_import_row,lhi_security.group_lhi_asset_viewer,1,0,0,0
 access_lhi_asset_officer,lhi.asset.officer,model_lhi_asset,lhi_security.group_lhi_asset_officer,1,1,1,0
 access_lhi_asset_manager,lhi.asset.manager,model_lhi_asset,lhi_security.group_lhi_asset_manager,1,1,1,0
 access_lhi_asset_auditor,lhi.asset.auditor,model_lhi_asset,lhi_security.group_lhi_system_auditor,1,0,0,0

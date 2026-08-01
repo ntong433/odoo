@@ -11,6 +11,7 @@
     <menuitem id="menu_lhi_dashboard_root"
               name="Dashboard"
               action="action_lhi_dashboard"
+              groups="base.group_user"
               sequence="1"
               web_icon="lhi_dashboard,static/description/icon.png"/>
 
@@ -18,17 +19,20 @@
     <menuitem id="menu_lhi_dashboard_config"
               name="Dashboard Settings"
               parent="base.menu_custom"
-              sequence="50"/>
+              sequence="50"
+              groups="base.group_system"/>
 
     <menuitem id="menu_lhi_dashboard_widgets"
               name="Dashboard Widgets"
               parent="menu_lhi_dashboard_config"
               action="action_lhi_dashboard_widget"
-              sequence="10"/>
+              sequence="10"
+              groups="base.group_system"/>
               
     <menuitem id="menu_lhi_dashboard_announcements"
               name="Announcements"
               parent="menu_lhi_dashboard_config"
               action="action_lhi_announcement"
-              sequence="20"/>
+              sequence="20"
+              groups="base.group_system"/>
 </odoo>

@@ -1,5 +1,13 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_lhi_fleet_trip_user,lhi.fleet.trip.user,model_lhi_fleet_trip,base.group_user,1,1,1,0
-access_lhi_fleet_incident_user,lhi.fleet.incident.user,model_lhi_fleet_incident,base.group_user,1,1,1,0
-access_lhi_fleet_trip_admin,lhi.fleet.trip.admin,model_lhi_fleet_trip,fleet.fleet_group_manager,1,1,1,1
-access_lhi_fleet_incident_admin,lhi.fleet.incident.admin,model_lhi_fleet_incident,fleet.fleet_group_manager,1,1,1,1
+access_lhi_fleet_trip_viewer,lhi.fleet.trip.viewer,model_lhi_fleet_trip,lhi_security.group_lhi_fleet_viewer,1,0,0,0
+access_lhi_fleet_incident_viewer,lhi.fleet.incident.viewer,model_lhi_fleet_incident,lhi_security.group_lhi_fleet_viewer,1,0,0,0
+access_lhi_fleet_vehicle_viewer,fleet.vehicle.lhi.viewer,fleet.model_fleet_vehicle,lhi_security.group_lhi_fleet_viewer,1,0,0,0
+access_lhi_fleet_vehicle_model_viewer,fleet.vehicle.model.lhi.viewer,fleet.model_fleet_vehicle_model,lhi_security.group_lhi_fleet_viewer,1,0,0,0
+access_lhi_fleet_vehicle_brand_viewer,fleet.vehicle.brand.lhi.viewer,fleet.model_fleet_vehicle_model_brand,lhi_security.group_lhi_fleet_viewer,1,0,0,0
+access_lhi_fleet_vehicle_category_viewer,fleet.vehicle.category.lhi.viewer,fleet.model_fleet_vehicle_model_category,lhi_security.group_lhi_fleet_viewer,1,0,0,0
+access_lhi_fleet_vehicle_state_viewer,fleet.vehicle.state.lhi.viewer,fleet.model_fleet_vehicle_state,lhi_security.group_lhi_fleet_viewer,1,0,0,0
+access_lhi_fleet_vehicle_tag_viewer,fleet.vehicle.tag.lhi.viewer,fleet.model_fleet_vehicle_tag,lhi_security.group_lhi_fleet_viewer,1,0,0,0
+access_lhi_fleet_trip_user,lhi.fleet.trip.user,model_lhi_fleet_trip,lhi_security.group_lhi_fleet_officer,1,1,1,0
+access_lhi_fleet_incident_user,lhi.fleet.incident.user,model_lhi_fleet_incident,lhi_security.group_lhi_fleet_officer,1,1,1,0
+access_lhi_fleet_trip_admin,lhi.fleet.trip.admin,model_lhi_fleet_trip,lhi_security.group_lhi_fleet_manager,1,1,1,1
+access_lhi_fleet_incident_admin,lhi.fleet.incident.admin,model_lhi_fleet_incident,lhi_security.group_lhi_fleet_manager,1,1,1,1

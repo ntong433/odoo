@@ -1,6 +1,6 @@
 {
     "name": "LHI HUB Management",
-    "version": "19.0.1.0.0",
+    "version": "19.0.2.0.0",
     "category": "Operations",
     "summary": "HUB stock, requests, consignments, issues, leases and operational revenue",
     "author": "Life Helpers Initiative",
@@ -11,6 +11,7 @@
         "stock",
         "product_expiry",
         "lhi_fleet_operations",
+        "lhi_security",
         "lhi_inventory",
         "lhi_asset_management",
         "lhi_approval_matrix",

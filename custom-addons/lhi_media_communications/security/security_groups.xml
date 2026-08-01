@@ -9,6 +9,7 @@
     <record id="res_groups_privilege_lhi_media" model="res.groups.privilege">
         <field name="name">Media and Communications</field>
         <field name="category_id" ref="module_category_lhi_media"/>
+        <field name="placeholder">No Access</field>
     </record>
 
     <record id="group_lhi_media_viewer" model="res.groups">
@@ -44,5 +45,9 @@
         <field name="privilege_id" ref="res_groups_privilege_lhi_media"/>
         <field name="implied_ids" eval="[(4, ref('group_lhi_media_reviewer'))]"/>
         <field name="comment">Manage the unit, configuration and all records.</field>
+    </record>
+
+    <record id="lhi_security.group_lhi_erp_admin" model="res.groups">
+        <field name="implied_ids" eval="[(4, ref('group_lhi_media_manager'))]"/>
     </record>
 </odoo>

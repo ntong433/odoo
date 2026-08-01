@@ -8,5 +8,5 @@
     </record>
 
     <!-- Menu assuming menu_lhi_risk_issue_root exists from lhi_project_risk -->
-    <menuitem id="menu_lhi_project_issue" name="Issue Register" parent="lhi_project_risk.menu_lhi_risk_issue_root" action="action_lhi_project_issue" sequence="20"/>
+    <menuitem id="menu_lhi_project_issue" name="Issue Register" parent="lhi_project_risk.menu_lhi_risk_issue_root" action="action_lhi_project_issue" sequence="20" groups="lhi_security.group_lhi_programme_viewer"/>
 </odoo>

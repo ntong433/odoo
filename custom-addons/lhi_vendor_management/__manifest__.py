@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'LHI Vendor Management',
-    'version': '19.0.1.0.0',
+    'version': '19.0.2.0.0',
     'category': 'Procurement',
     'summary': 'Vendor Onboarding, Due Diligence, and Expiry Alerts',
-    'depends': ['lhi_base', 'mail', 'lhi_purchase_request', 'lhi_sharepoint_storage'],
+    'depends': ['lhi_base', 'lhi_security', 'mail', 'lhi_purchase_request', 'lhi_sharepoint_storage'],
     'data': [
         'security/ir.model.access.csv',
         'security/lhi_vendor_security.xml',

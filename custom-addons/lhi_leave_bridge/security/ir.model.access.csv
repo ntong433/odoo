@@ -1,4 +1,10 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_lhi_unified_inbox_user,lhi.unified.inbox.user,model_lhi_unified_inbox,base.group_user,1,1,1,0
-access_lhi_leave_cache_user,lhi.leave.cache.user,model_lhi_leave_cache,base.group_user,1,0,0,0
-access_lhi_leave_request_cache_user,lhi.leave.request.cache.user,model_lhi_leave_request_cache,base.group_user,1,0,0,0
+access_lhi_unified_inbox_user,lhi.unified.inbox.viewer,model_lhi_unified_inbox,lhi_security.group_lhi_approvals_viewer,1,0,0,0
+access_lhi_unified_inbox_approver,lhi.unified.inbox.approver,model_lhi_unified_inbox,lhi_security.group_lhi_executive_approver,1,1,1,0
+access_lhi_unified_inbox_manager,lhi.unified.inbox.manager,model_lhi_unified_inbox,lhi_security.group_lhi_approvals_manager,1,1,1,1
+access_lhi_leave_cache_user,lhi.leave.cache.viewer,model_lhi_leave_cache,lhi_security.group_lhi_hr_viewer,1,0,0,0
+access_lhi_leave_cache_officer,lhi.leave.cache.officer,model_lhi_leave_cache,lhi_security.group_lhi_hr_officer,1,1,1,0
+access_lhi_leave_cache_manager,lhi.leave.cache.manager,model_lhi_leave_cache,lhi_security.group_lhi_hr_manager,1,1,1,1
+access_lhi_leave_request_cache_user,lhi.leave.request.cache.viewer,model_lhi_leave_request_cache,lhi_security.group_lhi_hr_viewer,1,0,0,0
+access_lhi_leave_request_cache_officer,lhi.leave.request.cache.officer,model_lhi_leave_request_cache,lhi_security.group_lhi_hr_officer,1,1,1,0
+access_lhi_leave_request_cache_manager,lhi.leave.request.cache.manager,model_lhi_leave_request_cache,lhi_security.group_lhi_hr_manager,1,1,1,1

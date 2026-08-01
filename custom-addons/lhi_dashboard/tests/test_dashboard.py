@@ -1,3 +1,4 @@
+from odoo.exceptions import AccessError, ValidationError
 from odoo.tests.common import TransactionCase, new_test_user
 
 
@@ -43,22 +44,19 @@ class TestLhiDashboard(TransactionCase):
 
     def test_app_definitions_use_xmlids_and_local_icons(self):
         menu_xmlids = []
-        for key, _label, menu_xmlid, _groups, _departments in self.Widget._LHI_APP_DEFINITIONS:
+        for key, _label, menu_xmlid, icon_path in self.Widget._LHI_APP_DEFINITIONS:
             self.assertIn('.', menu_xmlid)
             self.assertNotEqual(key, menu_xmlid)
             self.assertFalse(menu_xmlid.isdigit())
+            self.assertTrue(icon_path.startswith('/lhi_web_shell/'))
             menu_xmlids.append(menu_xmlid)
         self.assertEqual(len(menu_xmlids), len(set(menu_xmlids)))
         definitions = {item[0]: item for item in self.Widget._LHI_APP_DEFINITIONS}
-        self.assertIn('memos', definitions)
-        self.assertNotIn('signatures', definitions)
+        self.assertIn('memo', definitions)
+        self.assertIn('signatures', definitions)
         self.assertEqual(
-            definitions['memos'][2],
+            definitions['memo'][2],
             'lhi_memo_management.menu_lhi_memo_root',
-        )
-        self.assertIn(
-            'lhi_security.group_lhi_employee',
-            definitions['memos'][3],
         )
 
     def test_accessible_apps_are_deduplicated_by_menu_xmlid(self):
@@ -75,8 +73,8 @@ class TestLhiDashboard(TransactionCase):
     def test_affected_dashboard_actions_resolve(self):
         expected = {
             'meal': ('lhi_results_framework.menu_lhi_meal_root', 'lhi_results_framework.action_lhi_results_framework'),
-            'programmes': ('lhi_base.menu_lhi_root', 'lhi_base.action_lhi_project'),
-            'approvals': ('lhi_approval_matrix.menu_lhi_my_pending_approvals', 'lhi_approval_matrix.action_lhi_my_pending_approvals'),
+            'programs_grants': ('lhi_base.menu_lhi_root', 'lhi_base.action_lhi_project'),
+            'approvals': ('lhi_approval_matrix.menu_lhi_approvals_root', 'lhi_approval_matrix.action_lhi_my_pending_approvals'),
             'media': ('lhi_media_communications.menu_lhi_media_root', 'lhi_media_communications.action_lhi_media_request'),
         }
         definitions = {item[0]: item for item in self.Widget._LHI_APP_DEFINITIONS}
@@ -92,7 +90,7 @@ class TestLhiDashboard(TransactionCase):
             'inventory',
             'fleet',
             'approvals',
-            'programmes',
+            'programs_grants',
             'media',
             'reports',
         }
@@ -108,13 +106,12 @@ class TestLhiDashboard(TransactionCase):
             ('lhi_media_communications.group_lhi_media_officer', 'media'),
             ('lhi_security.group_lhi_procurement_officer', 'procurement'),
             ('lhi_security.group_lhi_procurement_manager', 'procurement'),
-            ('lhi_security.group_lhi_project_officer', 'programmes'),
-            ('lhi_security.group_lhi_project_manager', 'programmes'),
-            ('lhi_security.group_lhi_programme_director', 'programmes'),
+            ('lhi_security.group_lhi_project_officer', 'programs_grants'),
+            ('lhi_security.group_lhi_project_manager', 'programs_grants'),
+            ('lhi_security.group_lhi_programme_director', 'programs_grants'),
             ('lhi_security.group_lhi_fleet_officer', 'fleet'),
             ('lhi_security.group_lhi_store_officer', 'inventory'),
-            ('lhi_security.group_lhi_store_officer', 'assets'),
-            ('lhi_security.group_lhi_manager', 'reports'),
+            ('lhi_security.group_lhi_reports_manager', 'reports'),
             ('lhi_security.group_lhi_executive_approver', 'approvals'),
         )
         for index, (group_xmlid, expected_key) in enumerate(cases):
@@ -152,7 +149,7 @@ class TestLhiDashboard(TransactionCase):
 
     def test_single_canonical_dashboard_client_action(self):
         actions = self.env["ir.actions.client"].search(
-            [("tag", "ilike", "lhi_dashboard")]
+            [("tag", "=", "lhi_dashboard.dashboard_action")]
         )
         self.assertEqual(len(actions), 1)
         self.assertEqual(actions.tag, "lhi_dashboard.dashboard_action")
@@ -176,48 +173,48 @@ class TestLhiDashboard(TransactionCase):
         self.assertIn('apps', result)
 
     def test_operations_hub_access(self):
-        # 1. System Administrator sees all four operational areas
-        sys_admin = new_test_user(self.env, login='sys_admin', groups='base.group_system')
+        # 1. ERP Administrator sees all installed operational areas.
+        sys_admin = self.env.ref('base.user_admin')
         ops_sys_admin = self.Widget.with_user(sys_admin).get_accessible_operations().get('modules', [])
         keys_sys_admin = {op['key'] for op in ops_sys_admin}
-        self.assertEqual(keys_sys_admin, {'procurement', 'assets', 'inventory', 'fleet'})
+        self.assertTrue({'procurement', 'assets', 'inventory', 'fleet'} <= keys_sys_admin)
 
-        # 2. Procurement user sees Procurement only
-        proc_user = new_test_user(self.env, login='proc_user', groups='base.group_user,lhi_security.group_lhi_procurement_officer')
+        # 2. Operations and Procurement are independently positive grants.
+        proc_user = new_test_user(self.env, login='proc_user', groups='base.group_user,lhi_security.group_lhi_operations_viewer,lhi_security.group_lhi_procurement_officer')
         ops_proc = self.Widget.with_user(proc_user).get_accessible_operations().get('modules', [])
         keys_proc = {op['key'] for op in ops_proc}
         self.assertEqual(keys_proc, {'procurement'})
 
-        # 3. Store user sees Assets and Inventory
-        store_user = new_test_user(self.env, login='store_user', groups='base.group_user,lhi_security.group_lhi_store_officer')
+        # 3. Store Officer grants Inventory, not Asset Register.
+        store_user = new_test_user(self.env, login='store_user', groups='base.group_user,lhi_security.group_lhi_operations_viewer,lhi_security.group_lhi_store_officer')
         ops_store = self.Widget.with_user(store_user).get_accessible_operations().get('modules', [])
         keys_store = {op['key'] for op in ops_store}
-        self.assertEqual(keys_store, {'assets', 'inventory'})
+        self.assertEqual(keys_store, {'inventory'})
 
         # 4. Fleet user sees Fleet
-        fleet_user = new_test_user(self.env, login='fleet_user', groups='base.group_user,lhi_security.group_lhi_fleet_officer')
+        fleet_user = new_test_user(self.env, login='fleet_user', groups='base.group_user,lhi_security.group_lhi_operations_viewer,lhi_security.group_lhi_fleet_officer')
         ops_fleet = self.Widget.with_user(fleet_user).get_accessible_operations().get('modules', [])
         keys_fleet = {op['key'] for op in ops_fleet}
         self.assertEqual(keys_fleet, {'fleet'})
 
-        # 5. Unassigned internal user sees none
-        ops_unassigned = self.Widget.with_user(self.user).get_accessible_operations().get('modules', [])
-        self.assertEqual(len(ops_unassigned), 0)
+        # 5. An internal user cannot call the Operations RPC at all.
+        with self.assertRaises(AccessError):
+            self.Widget.with_user(self.user).get_accessible_operations()
 
         # 6. Check that every returned menu XML ID resolves and icon URL exists
         definitions = self.Widget._LHI_OPERATIONS_DEFINITIONS
-        for key, label, menu_xmlid, group_xmlids, icon_path in definitions:
+        for key, label, menu_xmlid, icon_path in definitions:
             menu = self.env.ref(menu_xmlid)
             self.assertEqual(menu._name, 'ir.ui.menu')
     def test_role_mapping_resolution(self):
         # Create a mapping for a specific manager group
         manager_group = self.env.ref('lhi_security.group_lhi_manager')
-        sys_admin_group = self.env.ref('base.group_system')
         
         procurement_menu = self.env.ref('lhi_purchase_request.menu_lhi_procurement_root')
         
         mapping = self.env['lhi.sidebar.role.mapping'].create({
             'name': 'Test Manager -> Procurement',
+            'app_key': 'procurement',
             'group_id': manager_group.id,
             'menu_id': procurement_menu.id,
             'active': True,
@@ -229,11 +226,12 @@ class TestLhiDashboard(TransactionCase):
             groups='base.group_user,lhi_security.group_lhi_manager'
         )
         
-        # Test: Manager user gets access via mapping but should be blocked if no underlying ACL
-        # (Assuming group_lhi_manager doesn't natively have access to Procurement menu by default,
-        # but let's just check the method return)
+        # A legacy role mapping is not an entitlement grant. The central
+        # procurement app role and native menu visibility remain mandatory.
         result = self.Widget.with_user(manager_user).get_accessible_apps()
-        apps = result.get('apps', [])
+        self.assertFalse(
+            any(a['menu_id'] == procurement_menu.id for a in result.get('apps', []))
+        )
         
         # Unassigned internal user should not see it
         unassigned_user = new_test_user(
@@ -244,13 +242,35 @@ class TestLhiDashboard(TransactionCase):
         unassigned_result = self.Widget.with_user(unassigned_user).get_accessible_apps()
         self.assertFalse(any(a['menu_id'] == procurement_menu.id for a in unassigned_result.get('apps', [])))
         
-        # Test: Admin sees a warning if native ACL blocks it (simulate by accessing as admin)
+        # Odoo Settings access alone is not the LHI ERP Administrator role.
         sys_admin_user = new_test_user(self.env, login='test_sys_admin_mapping', groups='base.group_system')
         admin_result = self.Widget.with_user(sys_admin_user).get_accessible_apps()
-        
-        # Admin gets everything, but if a mapping tries to grant access to a user but the admin 
-        # is checking, wait, the admin check inside get_accessible_apps checks the *current user*.
-        # For the admin, all menus are visible, so no warnings are generated for themselves.
+        self.assertFalse(
+            any(
+                a['menu_id'] == procurement_menu.id
+                for a in admin_result.get('apps', [])
+            )
+        )
         
         # Clean up
         mapping.unlink()
+
+    def test_empty_group_widget_fails_closed(self):
+        hidden = self.env.ref('lhi_dashboard.widget_notifications')
+        hidden.write({
+            'app_key': False,
+            'is_public_internal': False,
+            'group_ids': [(5, 0, 0)],
+        })
+        widgets = self.Widget.with_user(self.user).get_user_widgets()
+        self.assertNotIn(hidden.id, {widget['id'] for widget in widgets})
+        hidden.write({'is_public_internal': True})
+        widgets = self.Widget.with_user(self.user).get_user_widgets()
+        self.assertIn(hidden.id, {widget['id'] for widget in widgets})
+
+    def test_application_widget_requires_app_key(self):
+        with self.assertRaises(ValidationError):
+            self.Widget.create({
+                'name': 'Restricted App Card',
+                'registry_key': 'lhi_app.restricted',
+            })

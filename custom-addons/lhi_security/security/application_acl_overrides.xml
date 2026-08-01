@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        lhi_base owns these foundational models and therefore cannot depend on
+        lhi_security without a dependency cycle.  Override its legacy generic
+        Internal User ACLs after the central positive roles exist.  Keeping the
+        original XML IDs makes upgrades idempotent and avoids leaving stale,
+        additive ACL records behind.
+    -->
+    <record id="lhi_base.access_lhi_programme_user" model="ir.model.access">
+        <field name="group_id" ref="group_lhi_programme_viewer"/>
+    </record>
+    <record id="lhi_base.access_lhi_donor_user" model="ir.model.access">
+        <field name="group_id" ref="group_lhi_programme_viewer"/>
+    </record>
+    <record id="lhi_base.access_lhi_funding_source_user" model="ir.model.access">
+        <field name="group_id" ref="group_lhi_programme_viewer"/>
+    </record>
+    <record id="lhi_base.access_lhi_award_user" model="ir.model.access">
+        <field name="group_id" ref="group_lhi_programme_viewer"/>
+    </record>
+    <record id="lhi_base.access_lhi_project_user" model="ir.model.access">
+        <field name="group_id" ref="group_lhi_programme_viewer"/>
+    </record>
+    <record id="lhi_base.access_lhi_activity_user" model="ir.model.access">
+        <field name="group_id" ref="group_lhi_programme_viewer"/>
+    </record>
+</odoo>

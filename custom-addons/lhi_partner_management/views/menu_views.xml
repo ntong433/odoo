@@ -12,7 +12,7 @@
         <field name="view_mode">list,form</field>
     </record>
 
-    <menuitem id="menu_lhi_partner_management_root" name="Partners" parent="lhi_base.menu_lhi_project_root" sequence="50"/>
-    <menuitem id="menu_lhi_partner_profile" name="Profiles &amp; Risk" parent="menu_lhi_partner_management_root" action="action_lhi_partner_profile" sequence="10"/>
-    <menuitem id="menu_lhi_subaward" name="Sub-Awards" parent="menu_lhi_partner_management_root" action="action_lhi_subaward" sequence="20"/>
+    <menuitem id="menu_lhi_partner_management_root" name="Partners" parent="lhi_base.menu_lhi_project_root" sequence="50" groups="lhi_security.group_lhi_programme_viewer"/>
+    <menuitem id="menu_lhi_partner_profile" name="Profiles &amp; Risk" parent="menu_lhi_partner_management_root" action="action_lhi_partner_profile" sequence="10" groups="lhi_security.group_lhi_programme_viewer"/>
+    <menuitem id="menu_lhi_subaward" name="Sub-Awards" parent="menu_lhi_partner_management_root" action="action_lhi_subaward" sequence="20" groups="lhi_security.group_lhi_programme_viewer"/>
 </odoo>

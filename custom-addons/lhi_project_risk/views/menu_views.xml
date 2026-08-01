@@ -8,6 +8,6 @@
     </record>
 
     <!-- Base project menu might not be defined locally if we use lhi_base menu -->
-    <menuitem id="menu_lhi_risk_issue_root" name="Risks &amp; Issues" parent="lhi_base.menu_lhi_project_root" sequence="30"/>
-    <menuitem id="menu_lhi_project_risk" name="Risk Register" parent="menu_lhi_risk_issue_root" action="action_lhi_project_risk" sequence="10"/>
+    <menuitem id="menu_lhi_risk_issue_root" name="Risks &amp; Issues" parent="lhi_base.menu_lhi_project_root" sequence="30" groups="lhi_security.group_lhi_programme_viewer"/>
+    <menuitem id="menu_lhi_project_risk" name="Risk Register" parent="menu_lhi_risk_issue_root" action="action_lhi_project_risk" sequence="10" groups="lhi_security.group_lhi_programme_viewer"/>
 </odoo>

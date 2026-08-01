@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'LHI Security and Access Controls',
-    'version': '19.0.1.1.0',
+    'version': '19.0.2.0.0',
     'category': 'Security',
     'summary': 'Dedicated security groups and authorization rules for LHI ERP',
     'description': """
@@ -15,6 +15,7 @@ and least-privilege model access lists.
     'depends': ['lhi_base'],
     'data': [
         'security/security_groups.xml',
+        'security/application_acl_overrides.xml',
         'security/ir.model.access.csv',
         'security/security_rules.xml',
         'views/res_users_views.xml',

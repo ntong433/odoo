@@ -11,13 +11,8 @@
                 (4, ref('stock.group_production_lot'))
             ]"/>
         </record>
-        <record id="lhi_security.group_lhi_operations_officer" model="res.groups">
-            <field name="implied_ids" eval="[
-                (4, ref('stock.group_stock_user')),
-                (4, ref('stock.group_stock_multi_locations')),
-                (4, ref('stock.group_stock_multi_warehouses')),
-                (4, ref('stock.group_production_lot'))
-            ]"/>
+        <record id="lhi_security.group_lhi_hub_manager" model="res.groups">
+            <field name="implied_ids" eval="[(4, ref('stock.group_stock_manager'))]"/>
         </record>
         <record id="lhi_security.group_lhi_erp_admin" model="res.groups">
             <field name="implied_ids" eval="[

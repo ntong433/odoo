@@ -179,11 +179,11 @@ export class LhiSidebar extends Component {
     }
 
     get generalApps() {
-        return this.state.apps.filter((app) => app.key === "memos");
+        return this.state.apps.filter((app) => app.key === "memo");
     }
 
     get businessApps() {
-        return this.state.apps.filter((app) => app.key !== "memos");
+        return this.state.apps.filter((app) => app.key !== "memo");
     }
 
     getIconProps(app) {

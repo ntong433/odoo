@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'LHI Project Compliance',
-    'version': '19.0.1.0.0',
+    'version': '19.0.2.0.0',
     'category': 'Project Management',
     'summary': 'Project activation checklists and reporting calendar',
-    'depends': ['lhi_base', 'mail', 'lhi_grant_award', 'lhi_sharepoint_storage'],
+    'depends': ['lhi_base', 'lhi_security', 'mail', 'lhi_grant_award', 'lhi_sharepoint_storage'],
     'data': [
         'security/ir.model.access.csv',
         'security/lhi_project_compliance_security.xml',

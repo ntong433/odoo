@@ -1,17 +1,26 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'LHI Integrated UAT & Readiness',
-    'version': '19.0.1.0.0',
+    'version': '19.0.2.0.0',
     'category': 'Quality Assurance',
     'summary': 'End-to-End Tests, RBAC Validations, and Go-Live Readiness Docs',
     'depends': [
         'lhi_base', 
+        'lhi_security',
+        'lhi_dashboard',
+        'lhi_hub_management',
+        'lhi_asset_management',
+        'lhi_programme_management',
+        'lhi_memo_management',
         'lhi_proposal_management', 
         'lhi_project_workplan',
         'lhi_purchase_request', 
         'lhi_leave_bridge',
         'lhi_fleet_operations',
         'lhi_reporting_hub',
+        'lhi_powerbi',
+        'lhi_media_communications',
+        'lhi_meal',
         'lhi_accounting_base'
     ],
     'data': [],

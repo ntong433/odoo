@@ -106,13 +106,21 @@ services:
         [
           "CMD-SHELL",
           "curl -fsS 'http://127.0.0.1:8069/web/health' >/dev/null || exit 1",
-
         ]
       interval: 30s
       timeout: 10s
       start_period: 300s
       retries: 10
+    networks:
+      - default
+      - coolify
 
 volumes:
   postgres_data:
   odoo_data:
+
+networks:
+  default:
+  coolify:
+    external: true
+

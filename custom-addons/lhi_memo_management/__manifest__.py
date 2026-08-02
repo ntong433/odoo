@@ -10,6 +10,12 @@ Creates and governs internal memos while Microsoft Word for the web remains the
 authoring surface, SharePoint Online remains the document system of record, Odoo
 remains the workflow and authorization system, and LHI Sign/OpenSign remains the
 electronic-signature provider.
+
+v19.0.2.0.0 — Document Gateway
+-------------------------------
+All lhi.document.item access from Memo business logic is now mediated through
+MemoDocumentGateway, enforcing six-step authorization before any sudo elevation.
+Normal employees (lhi_employee) retain zero direct access to lhi.document.item.
 """,
     "author": "Life Helpers Initiative",
     "website": "https://www.lhinigeria.org",

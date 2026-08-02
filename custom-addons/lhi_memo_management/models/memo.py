@@ -5,13 +5,14 @@ import logging
 import re
 import uuid
 import zipfile
-from datetime import timedelta
+from datetime import datetime, timezone
 from urllib.parse import quote
 from xml.sax.saxutils import escape
 
 from odoo import api, fields, models, _
 from odoo.exceptions import AccessError, UserError, ValidationError
 
+from ..services.memo_document_gateway import MemoDocumentGateway
 
 _logger = logging.getLogger(__name__)
 DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -370,28 +371,32 @@ class LhiMemo(models.Model):
             memo.related_record_id = record.id if record else 0
 
     @api.depends(
-        "source_docx_item_id.storage_state",
-        "source_pdf_item_id.storage_state",
-        "signed_pdf_item_id.storage_state",
-        "certificate_item_id.storage_state",
+        "source_docx_item_id",
+        "source_pdf_item_id",
+        "signed_pdf_item_id",
+        "certificate_item_id",
     )
     def _compute_document_flags(self):
+        # Use sudo for all document-item field access to avoid AccessError
+        # for normal employees who have no ACL on lhi.document.item.
+        # The depends triggers on the Many2one ID change only (safe).
         for memo in self:
+            sudo_memo = memo.sudo()
             memo.has_word_document = bool(
-                memo.source_docx_item_id
-                and memo.source_docx_item_id.storage_state == "available"
+                sudo_memo.source_docx_item_id
+                and sudo_memo.source_docx_item_id.storage_state == "available"
             )
             memo.has_submitted_pdf = bool(
-                memo.source_pdf_item_id
-                and memo.source_pdf_item_id.storage_state == "available"
+                sudo_memo.source_pdf_item_id
+                and sudo_memo.source_pdf_item_id.storage_state == "available"
             )
             memo.has_signed_pdf = bool(
-                memo.signed_pdf_item_id
-                and memo.signed_pdf_item_id.storage_state == "available"
+                sudo_memo.signed_pdf_item_id
+                and sudo_memo.signed_pdf_item_id.storage_state == "available"
             )
             memo.has_certificate = bool(
-                memo.certificate_item_id
-                and memo.certificate_item_id.storage_state == "available"
+                sudo_memo.certificate_item_id
+                and sudo_memo.certificate_item_id.storage_state == "available"
             )
 
     @api.constrains(
@@ -797,8 +802,10 @@ class LhiMemo(models.Model):
         # Acquire row lock
         self.env.cr.execute("SELECT id FROM lhi_memo WHERE id = %s FOR UPDATE NOWAIT", [self.id])
 
-        if self.source_docx_item_id and self.source_docx_item_id.storage_state == "available":
-            return self.source_docx_item_id
+        # Guard: use sudo to read storage_state without requiring employee ACL
+        sudo_self = self.sudo()
+        if sudo_self.source_docx_item_id and sudo_self.source_docx_item_id.storage_state == "available":
+            return sudo_self.source_docx_item_id
 
         self.sudo().write({"document_state": "creating"})
 
@@ -813,7 +820,9 @@ class LhiMemo(models.Model):
             rendered_bytes = WordTemplateService.render_template(template_bytes, context)
 
             filename = self._safe_memo_filename()
-            item = self.env["lhi.document.item"].create_from_bytes(
+            # create_from_bytes must run under service elevation — normal employees
+            # have no ACL on lhi.document.item.
+            item = self.env["lhi.document.item"].sudo().create_from_bytes(
                 name=filename,
                 content=rendered_bytes,
                 mime_type=DOCX_MIME,
@@ -847,7 +856,11 @@ class LhiMemo(models.Model):
             return item
         except Exception as error:
             self.sudo().write({"document_state": "failed"})
-            _logger.error("Failed to create Word document from template for memo %s: %s", self.name, error)
+            _logger.error(
+                "Failed to create Word document from template for memo %s: %s",
+                self.name,
+                error,
+            )
             raise
 
     def _create_word_document(self, *, retry_failed=False):
@@ -885,12 +898,35 @@ class LhiMemo(models.Model):
         )
         return True
 
-    def _record_integration_failure(self, code, error):
+    def _generate_correlation_id(self):
+        """Generate a safe, opaque correlation reference for end users."""
         self.ensure_one()
-        safe_message = str(error)[:2000]
+        date_part = datetime.now(timezone.utc).strftime("%Y%m%d")
+        suffix = str(uuid.uuid4()).replace("-", "")[:8].upper()
+        return f"MEMO-INT-{date_part}-{suffix}"
+
+    def _record_integration_failure(self, code, error, correlation_id=None):
+        self.ensure_one()
+        if not correlation_id:
+            correlation_id = self._generate_correlation_id()
+
+        # Log with full traceback — never log tokens, secrets, or upload URLs
+        _logger.exception(
+            "Memo integration failure memo=%s code=%s correlation_id=%s",
+            self.name,
+            code,
+            correlation_id,
+        )
+
+        # Safe message for storage: strip tokens and raw URLs
+        import re
+        safe_raw = str(error)[:2000]
+        safe_message = re.sub(r"Bearer [A-Za-z0-9._\-+/=]{20,}", "[REDACTED]", safe_raw)
+        safe_message = re.sub(r"https?://[^\s'\"]{40,}", "[URL]", safe_message)
+
         vals = {
             "integration_error_code": code,
-            "integration_error_message": safe_message,
+            "integration_error_message": f"[{correlation_id}] {safe_message[:1900]}",
         }
         if self.state not in TERMINAL_STATES:
             vals["state"] = "failed"
@@ -904,18 +940,19 @@ class LhiMemo(models.Model):
         self._notify_users(
             self.requester_id,
             _("Memo integration needs attention"),
-            _("A memo operation failed safely. Retry it or contact support."),
+            _("A memo operation failed safely. Retry it or contact support. Reference: %s")
+            % correlation_id,
             schedule_activity=True,
         )
-        _logger.warning("Memo %s integration failure %s", self.name, code)
         return {
             "type": "ir.actions.client",
             "tag": "display_notification",
             "params": {
                 "title": _("Memo integration needs attention"),
                 "message": _(
-                    "The operation failed safely. Please retry or contact support."
-                ),
+                    "The operation failed safely. Reference: %(ref)s. "
+                    "Please retry or contact support."
+                ) % {"ref": correlation_id},
                 "type": "warning",
                 "sticky": True,
             },
@@ -1008,13 +1045,36 @@ class LhiMemo(models.Model):
             chunks.append(chunk)
         return b"".join(chunks)
 
-    def _capture_current_pdf(self, *, retry_failed=False):
+    def _capture_current_pdf(self, *, retry_failed=False, operation=None):
+        """
+        Capture the current DOCX as a PDF via the MemoDocumentGateway.
+
+        All ``lhi.document.item`` field access is mediated through the gateway.
+        Normal Memo requesters have no ACL on the model directly.
+        """
         self.ensure_one()
-        item = self.source_docx_item_id
-        if not item or item.storage_state != "available":
+
+        gateway = MemoDocumentGateway(self.env, self, self.env.user)
+
+        # Step: reading_source_document
+        if operation:
+            operation._advance_step("reading_source_document")
+
+        docx_meta = gateway.read_document_metadata("source_docx_item_id")
+
+        if docx_meta["storage_state"] != "available":
             raise UserError(_("The Word document is not confirmed in SharePoint."))
-        connection = item.graph_connection_id
-        resource = f"/drives/{quote(item.sharepoint_drive_id)}/items/{quote(item.sharepoint_item_id)}"
+
+        # Fetch connection under service elevation (connection record is internal)
+        connection = (
+            self.env["lhi.graph.connection"]
+            .sudo()
+            .browse(docx_meta["connection_id"])
+        )
+        drive_id = docx_meta["drive_id"]
+        item_id_sp = docx_meta["item_id"]
+        resource = f"/drives/{quote(drive_id)}/items/{quote(item_id_sp)}"
+
         metadata = connection.graph_request(
             "GET",
             resource,
@@ -1023,14 +1083,22 @@ class LhiMemo(models.Model):
                 "$select": "id,name,size,eTag,cTag,webUrl,lastModifiedDateTime,lastModifiedBy,parentReference,file"
             },
         )
-        if metadata.get("id") != item.sharepoint_item_id:
+        if metadata.get("id") != item_id_sp:
             raise UserError(_("SharePoint returned a different Word DriveItem."))
-        policy = self.env["lhi.document.storage.policy"].resolve_policy(
-            self._name, "source_docx_item_id", self.company_id
+
+        policy = (
+            self.env["lhi.document.storage.policy"]
+            .sudo()
+            .resolve_policy(self._name, "source_docx_item_id", self.company_id)
         )
         if not policy:
             raise UserError(_("No SharePoint storage policy is configured for memos."))
         maximum_bytes = policy.maximum_size_mb * 1024 * 1024
+
+        # Step: capturing_pdf
+        if operation:
+            operation._advance_step("capturing_pdf")
+
         docx_response = connection.lhi_binary_request(
             "GET",
             f"{resource}/content",
@@ -1041,6 +1109,7 @@ class LhiMemo(models.Model):
         docx_content = self._bounded_response_content(docx_response, maximum_bytes)
         if not docx_content:
             raise UserError(_("SharePoint returned an empty Word document."))
+
         pdf_response = connection.lhi_binary_request(
             "GET",
             f"{resource}/content?format=pdf",
@@ -1049,6 +1118,7 @@ class LhiMemo(models.Model):
             stream=True,
         )
         pdf_content = self._bounded_response_content(pdf_response, maximum_bytes)
+
         metadata_after = connection.graph_request(
             "GET",
             resource,
@@ -1059,25 +1129,23 @@ class LhiMemo(models.Model):
         )
         version = metadata.get("cTag") or metadata.get("eTag")
         version_after = metadata_after.get("cTag") or metadata_after.get("eTag")
-        if version != version_after or metadata.get("eTag") != metadata_after.get(
-            "eTag"
-        ):
+        if version != version_after or metadata.get("eTag") != metadata_after.get("eTag"):
             raise UserError(
                 _("The Word document changed during PDF capture. Save it and retry.")
             )
         if not pdf_content.startswith(b"%PDF"):
             raise UserError(_("Microsoft 365 did not return a valid PDF conversion."))
-        item.sudo().write(
-            {
-                "file_size": len(docx_content),
-                "checksum": hashlib.sha256(docx_content).hexdigest(),
-                "sha1_checksum": hashlib.sha1(docx_content).hexdigest(),
-            }
+
+        # Update DOCX checksums through the gateway (authorized)
+        gateway.update_docx_checksums(
+            "source_docx_item_id",
+            len(docx_content),
+            hashlib.sha256(docx_content).hexdigest(),
+            hashlib.sha1(docx_content).hexdigest(),
         )
-        # The caller has already passed memo record rules. Updating only the
-        # integration-owned DriveItem metadata is a deliberately narrow service
-        # elevation; it does not bypass access to the linked memo.
-        item.sudo()._apply_drive_item(metadata_after)
+        # Apply updated DriveItem metadata through the gateway
+        gateway.apply_drive_item_metadata("source_docx_item_id", metadata_after)
+
         pdf_hash = hashlib.sha256(pdf_content).hexdigest()
         if self.state == "returned" and self.signature_request_ids.filtered(
             lambda request: request.source_pdf_hash == pdf_hash
@@ -1087,42 +1155,28 @@ class LhiMemo(models.Model):
                     "The returned memo has not changed. Save a corrected Word version first."
                 )
             )
-        pdf_item = self.env["lhi.document.item"].create_from_bytes(
-            name=f"{self._safe_filename(self.name)}-Submitted.pdf",
-            content=pdf_content,
-            mime_type="application/pdf",
-            linked_model=self._name,
-            linked_record_id=self.id,
-            linked_field="source_pdf_item_id",
-            requested_by=self.requester_id,
-            synchronous=True,
-        )
-        if retry_failed and pdf_item.storage_state != "available":
-            try:
-                pdf_item.sudo().write(
-                    {
-                        "storage_state": "pending",
-                        "upload_state": "pending",
-                        "last_error": False,
-                    }
-                )
-                pdf_item.sudo().action_upload()
-            except Exception as error:
-                pdf_item.sudo()._mark_failed(error, enqueue=True)
-                raise
-        if pdf_item.storage_state != "available":
-            raise UserError(_("SharePoint did not confirm the submitted memo PDF."))
+
+        # Step: confirming_pdf
+        if operation:
+            operation._advance_step("confirming_pdf")
+
+        # Create PDF through the gateway — enforces authorization + idempotency
+        filename = f"{self._safe_filename(self.name)}-Submitted.pdf"
+        pdf_contract = gateway.create_pdf_document(pdf_content, filename, pdf_hash)
+
+        pdf_item_id = pdf_contract["document_item_id"]
+
         self.sudo().write(
             {
                 "source_docx_version_id": version,
                 "source_docx_etag": metadata.get("eTag"),
-                "source_docx_web_url": metadata_after.get("webUrl")
-                or item.sharepoint_web_url,
-                "source_pdf_item_id": pdf_item.id,
+                "source_docx_web_url": metadata_after.get("webUrl") or self.source_docx_web_url,
+                "source_pdf_item_id": pdf_item_id,
                 "source_pdf_hash": pdf_hash,
             }
         )
-        return pdf_item, pdf_hash
+        # Return pdf_item_id (integer) and pdf_hash for downstream use
+        return pdf_item_id, pdf_hash
 
     def _lhi_approval_matrix_for_request(self, approval_request):
         self.ensure_one()
@@ -1406,21 +1460,52 @@ class LhiMemo(models.Model):
             "failed",
         ):
             raise UserError(_("This memo is not ready for signature preparation."))
-        try:
-            pdf_item, pdf_hash = self._capture_current_pdf(
-                retry_failed=self.state == "failed"
+
+        correlation_id = self._generate_correlation_id()
+        operation = (
+            self.env["lhi.memo.integration.operation"]
+            .sudo()
+            .create(
+                {
+                    "memo_id": self.id,
+                    "correlation_id": correlation_id,
+                    "operation_type": "prepare_and_sign",
+                    "state": "validating",
+                    "current_step": "validating",
+                    "requested_by_id": self.env.user.id,
+                    "started_at": fields.Datetime.now(),
+                }
             )
+        )
+        try:
+            # _capture_current_pdf uses MemoDocumentGateway internally
+            pdf_item_id, pdf_hash = self._capture_current_pdf(
+                retry_failed=self.state == "failed",
+                operation=operation,
+            )
+
+            # Fetch pdf_item record under service elevation for downstream use
+            pdf_item = self.env["lhi.document.item"].sudo().browse(pdf_item_id)
+
+            operation._advance_step("preparing_approval_route")
             _approval_request, approval_lines = self._prepare_approval_route()
+
+            operation._advance_step("creating_signature_request")
             signature_request = self._create_signature_request(
                 approval_lines, pdf_item, pdf_hash
             )
+
             if self.state != "preparing":
                 self._transition("preparing")
+
+            operation._advance_step("creating_provider_draft")
             base_url = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
             redirect_url = f"{base_url}/web#id={self.id}&model=lhi.memo&view_type=form"
             signature_request.sudo().action_create_provider_draft(
                 redirect_url=redirect_url
             )
+
+            operation._complete()
             self._notify_users(
                 self.requester_id,
                 _("Requester signature required"),
@@ -1434,7 +1519,10 @@ class LhiMemo(models.Model):
                 "target": "new",
             }
         except Exception as error:
-            return self._record_integration_failure("memo_preparation", error)
+            operation._fail(error)
+            return self._record_integration_failure(
+                "memo_preparation", error, correlation_id=correlation_id
+            )
 
     def action_continue_preparation(self):
         self.ensure_one()
@@ -1593,13 +1681,16 @@ class LhiMemo(models.Model):
 
     def action_refresh_document_status(self):
         self.ensure_one()
-        if not self.source_docx_item_id:
+        if not self.sudo().source_docx_item_id:
             raise UserError(_("No SharePoint Word document exists yet."))
-        self.source_docx_item_id.sudo().action_reconcile()
-        if self.source_docx_item_id.storage_state == "available":
+        gateway = MemoDocumentGateway(self.env, self, self.env.user)
+        gateway.reconcile_document("source_docx_item_id")
+        docx_meta = gateway.read_document_metadata("source_docx_item_id")
+        if docx_meta["storage_state"] == "available":
+            web_url = gateway.get_sharepoint_web_url("source_docx_item_id")
             self.sudo().write(
                 {
-                    "source_docx_web_url": self.source_docx_item_id.sharepoint_web_url,
+                    "source_docx_web_url": web_url,
                     "integration_error_code": False,
                     "integration_error_message": False,
                 }
@@ -1617,11 +1708,21 @@ class LhiMemo(models.Model):
         self.ensure_one()
         self._validate_before_opening_word()
 
-        item = self.sudo().source_docx_item_id
-        if not item or item.storage_state != "available":
-            item = self._create_word_document_from_template().sudo()
+        # Use sudo to check availability without requiring employee ACL
+        sudo_self = self.sudo()
+        has_available_docx = (
+            sudo_self.source_docx_item_id
+            and sudo_self.source_docx_item_id.storage_state == "available"
+        )
+        if not has_available_docx:
+            self._create_word_document_from_template()
 
-        web_url = self.source_docx_web_url or item.sharepoint_web_url
+        # source_docx_web_url is a plain Char on lhi.memo — safe for employees
+        web_url = self.source_docx_web_url
+        if not web_url:
+            # Fallback: read via gateway (authorized)
+            gateway = MemoDocumentGateway(self.env, self, self.env.user)
+            web_url = gateway.get_sharepoint_web_url("source_docx_item_id")
         if not web_url:
             raise UserError(_("The SharePoint Word document URL is not available."))
 
@@ -1631,31 +1732,35 @@ class LhiMemo(models.Model):
             "target": "new",
         }
 
-    def _document_action(self, item):
+    def _document_action(self, field_name):
+        """Return a download URL for the document linked to field_name.
+
+        Uses MemoDocumentGateway to authorize access before returning the URL.
+        Never exposes the lhi.document.item record to the caller.
+        """
         self.ensure_one()
-        item = (item or self.env["lhi.document.item"]).sudo()
-        if not item or item.storage_state != "available":
-            raise UserError(_("The requested SharePoint document is not available."))
+        gateway = MemoDocumentGateway(self.env, self, self.env.user)
+        download_url = gateway.get_document_download_url(field_name)
         return {
             "type": "ir.actions.act_url",
-            "url": f"/lhi/sharepoint/document/{item.uuid}/download",
+            "url": download_url,
             "target": "new",
         }
 
     def action_view_submitted_pdf(self):
-        return self._document_action(self.source_pdf_item_id)
+        return self._document_action("source_pdf_item_id")
 
     def action_preview_document(self):
         self.ensure_one()
         if self.has_submitted_pdf:
-            return self._document_action(self.source_pdf_item_id)
+            return self._document_action("source_pdf_item_id")
         return self.action_open_word()
 
     def action_view_signed_memo(self):
-        return self._document_action(self.signed_pdf_item_id)
+        return self._document_action("signed_pdf_item_id")
 
     def action_view_audit_certificate(self):
-        return self._document_action(self.certificate_item_id)
+        return self._document_action("certificate_item_id")
 
     def action_track_approval(self):
         self.ensure_one()

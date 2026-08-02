@@ -10,4 +10,5 @@ access_lhi_memo_matrix_line_admin,lhi.approval.matrix.line.memo.admin,lhi_approv
 access_lhi_document_item_memo_admin,lhi.document.item.memo.starter.admin,lhi_sharepoint_storage.model_lhi_document_item,lhi_memo_management.group_lhi_memo_admin,1,0,0,0
 access_lhi_memo_document_template_employee,lhi.memo.document.template.employee,model_lhi_memo_document_template,lhi_security.group_lhi_employee,1,0,0,0
 access_lhi_memo_document_template_admin,lhi.memo.document.template.admin,model_lhi_memo_document_template,lhi_memo_management.group_lhi_memo_admin,1,1,1,1
-
+access_lhi_memo_integration_operation_admin,lhi.memo.integration.operation.admin,model_lhi_memo_integration_operation,lhi_memo_management.group_lhi_memo_admin,1,1,1,1
+access_lhi_memo_integration_operation_erp_admin,lhi.memo.integration.operation.erp.admin,model_lhi_memo_integration_operation,lhi_security.group_lhi_erp_admin,1,1,0,0

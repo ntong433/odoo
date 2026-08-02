@@ -1470,27 +1470,31 @@ class LhiMemo(models.Model):
                     "memo_id": self.id,
                     "correlation_id": correlation_id,
                     "operation_type": "prepare_and_sign",
-                    "state": "validating",
-                    "current_step": "validating",
-                    "requested_by_id": self.env.user.id,
+                    "state": "draft",
+                    "current_step": "draft",
+                    "requested_by": self.env.user.id,
                     "started_at": fields.Datetime.now(),
                 }
             )
         )
+        self.sudo().write({"current_operation_id": operation.id})
+
         try:
-            # _capture_current_pdf uses MemoDocumentGateway internally
+            operation._transition_step("validating", "validating")
+            self.action_preflight_prepare_and_sign()
+
+            operation._transition_step("generating_pdf", "generating_pdf")
             pdf_item_id, pdf_hash = self._capture_current_pdf(
                 retry_failed=self.state == "failed",
                 operation=operation,
             )
 
-            # Fetch pdf_item record under service elevation for downstream use
             pdf_item = self.env["lhi.document.item"].sudo().browse(pdf_item_id)
 
-            operation._advance_step("preparing_approval_route")
+            operation._transition_step("preparing_route", "preparing_route")
             _approval_request, approval_lines = self._prepare_approval_route()
 
-            operation._advance_step("creating_signature_request")
+            operation._transition_step("creating_signature_request", "creating_signature_request")
             signature_request = self._create_signature_request(
                 approval_lines, pdf_item, pdf_hash
             )
@@ -1498,18 +1502,20 @@ class LhiMemo(models.Model):
             if self.state != "preparing":
                 self._transition("preparing")
 
-            operation._advance_step("creating_provider_draft")
+            operation._transition_step("creating_provider_draft", "creating_provider_draft")
             base_url = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
             redirect_url = f"{base_url}/web#id={self.id}&model=lhi.memo&view_type=form"
             signature_request.sudo().action_create_provider_draft(
                 redirect_url=redirect_url
             )
 
-            operation._complete()
+            operation._transition_step("awaiting_requester_signature", "completed")
             self._notify_users(
                 self.requester_id,
                 _("Requester signature required"),
-                _("Prepare the fields for memo %s, then sign and submit it.")
+                _(
+                    "Prepare the fields for memo %s, then sign and submit it."
+                )
                 % self.name,
                 schedule_activity=True,
             )
@@ -1519,7 +1525,7 @@ class LhiMemo(models.Model):
                 "target": "new",
             }
         except Exception as error:
-            operation._fail(error)
+            operation._mark_failed("memo_preparation", error, failure_type="retryable")
             return self._record_integration_failure(
                 "memo_preparation", error, correlation_id=correlation_id
             )

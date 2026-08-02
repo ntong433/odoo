@@ -1,10 +1,8 @@
 """
-Migration 19.0.2.0.0 — Create lhi_memo_integration_operation table
-and convert any existing Memo integration-failure records into
-historical operation rows.
+Migration 19.0.2.1.0 — Create/verify lhi_memo_integration_operation table
+and convert historical Memo integration failures into operation rows.
 
-This migration is fully idempotent: running it twice produces the
-same result as running it once.
+Idempotent: safe to run multiple times.
 """
 import logging
 
@@ -13,22 +11,20 @@ _logger = logging.getLogger(__name__)
 
 def migrate(cr, version):
     """
-    Post-migration steps for lhi_memo_management 19.0.2.0.0.
+    Post-migration steps for lhi_memo_integration 19.0.2.1.0.
 
-    1. Ensure the lhi_memo_integration_operation table exists
-       (the ORM will have created it before this runs, but the guard
-       is here for safety in case of partial failures).
-    2. Convert existing Memo records with integration_error_code into
-       historical operation rows so the audit trail is preserved.
-    3. Document item 78 (source_docx_item_id for Memo 14) is
-       intentionally untouched.
+    1. Verify lhi_memo_integration_operation table structure, columns, and indexes.
+    2. Convert historical Memo records with integration_error_code into
+       historical operation rows.
+    3. Document item 78 (source_docx_item_id for Memo 14) is preserved.
     """
+    _logger.info("Starting lhi_memo_integration post-migration 19.0.2.1.0")
     _ensure_operation_table(cr)
     _migrate_historical_failures(cr)
 
 
 def _ensure_operation_table(cr):
-    """Ensure the integration operation table has the expected columns."""
+    """Ensure columns and indexes exist on lhi_memo_integration_operation."""
     cr.execute(
         """
         SELECT EXISTS (
@@ -37,16 +33,14 @@ def _ensure_operation_table(cr):
         )
         """
     )
-    table_exists = cr.fetchone()[0]
-    if not table_exists:
+    if not cr.fetchone()[0]:
         _logger.warning(
-            "lhi_memo_integration_operation table does not yet exist; "
-            "the ORM migration may not have run. This is expected only in "
-            "non-standard upgrade sequences."
+            "lhi_memo_integration_operation table does not yet exist. "
+            "It will be created by ORM model loading."
         )
         return
 
-    # Ensure idempotency_key column exists (added in this version)
+    # Ensure idempotency_key column
     cr.execute(
         """
         SELECT EXISTS (
@@ -63,7 +57,41 @@ def _ensure_operation_table(cr):
         )
         _logger.info("Added idempotency_key column to lhi_memo_integration_operation.")
 
-    # Ensure index on idempotency_key
+    # Ensure requested_by_id column
+    cr.execute(
+        """
+        SELECT EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_name = 'lhi_memo_integration_operation'
+              AND column_name = 'requested_by_id'
+        )
+        """
+    )
+    if not cr.fetchone()[0]:
+        cr.execute(
+            "ALTER TABLE lhi_memo_integration_operation "
+            "ADD COLUMN IF NOT EXISTS requested_by_id INTEGER"
+        )
+        _logger.info("Added requested_by_id column to lhi_memo_integration_operation.")
+
+    # Ensure company_id column
+    cr.execute(
+        """
+        SELECT EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_name = 'lhi_memo_integration_operation'
+              AND column_name = 'company_id'
+        )
+        """
+    )
+    if not cr.fetchone()[0]:
+        cr.execute(
+            "ALTER TABLE lhi_memo_integration_operation "
+            "ADD COLUMN IF NOT EXISTS company_id INTEGER"
+        )
+        _logger.info("Added company_id column to lhi_memo_integration_operation.")
+
+    # Index on idempotency_key
     cr.execute(
         """
         SELECT EXISTS (
@@ -80,19 +108,30 @@ def _ensure_operation_table(cr):
             "ON lhi_memo_integration_operation (idempotency_key)"
         )
 
-    _logger.info("lhi_memo_integration_operation table verified.")
+    # Index on correlation_id
+    cr.execute(
+        """
+        SELECT EXISTS (
+            SELECT 1 FROM pg_indexes
+            WHERE tablename = 'lhi_memo_integration_operation'
+              AND indexname = 'lhi_memo_integration_operation_correlation_id_index'
+        )
+        """
+    )
+    if not cr.fetchone()[0]:
+        cr.execute(
+            "CREATE INDEX IF NOT EXISTS "
+            "lhi_memo_integration_operation_correlation_id_index "
+            "ON lhi_memo_integration_operation (correlation_id)"
+        )
+
+    _logger.info("Verified lhi_memo_integration_operation table structure and indexes.")
 
 
 def _migrate_historical_failures(cr):
     """
-    Insert historical operation records for existing Memo failures.
-
-    Condition: lhi_memo.integration_error_code IS NOT NULL and no
-    historical operation record already exists for that memo.
-
-    The correlation_id format for historical records is
-    'HISTORICAL-{memo_id}' to avoid collisions with live records
-    (which use 'MEMO-INT-YYYYMMDD-XXXXXXXX').
+    Idempotently migrate historical failure records from lhi_memo into
+    lhi_memo_integration_operation rows.
     """
     cr.execute(
         """
@@ -109,6 +148,7 @@ def _migrate_historical_failures(cr):
         """
         INSERT INTO lhi_memo_integration_operation (
             memo_id,
+            company_id,
             correlation_id,
             operation_type,
             state,
@@ -129,10 +169,11 @@ def _migrate_historical_failures(cr):
         )
         SELECT
             m.id                                          AS memo_id,
+            m.company_id                                  AS company_id,
             'HISTORICAL-' || m.id::text                  AS correlation_id,
             'prepare_and_sign'                            AS operation_type,
             'permanent_failure'                           AS state,
-            m.integration_error_code                      AS current_step,
+            COALESCE(m.integration_error_code, 'failed')  AS current_step,
             COALESCE(m.write_date, m.create_date, now()) AS started_at,
             COALESCE(m.write_date, now())                 AS completed_at,
             COALESCE(m.requester_id, 1)                   AS requested_by_id,

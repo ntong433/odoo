@@ -1,6 +1,6 @@
 {
     "name": "LHI Memo Integration",
-    "version": "19.0.1.0.0",
+    "version": "19.0.2.1.0",
     "category": "Productivity",
     "summary": "Dedicated orchestration, saga operation tracking, preflight validation, and versioned contracts for Memo workflows",
     "description": """

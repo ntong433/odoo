@@ -15,10 +15,34 @@ if [ ! -x "$PYTHON" ]; then
     PYTHON="python3"
 fi
 
-"$PYTHON" "$SCRIPT_DIR/validate_memo_contracts.py"
-"$PYTHON" "$SCRIPT_DIR/check_memo_dependency_changes.py"
-"$PYTHON" "$SCRIPT_DIR/validate_odoo19_search_views.py"
-"$PYTHON" "$SCRIPT_DIR/validate_owl_xml_templates.py"
+if [ -f "$SCRIPT_DIR/validate_memo_module_boundaries.py" ]; then
+    "$PYTHON" "$SCRIPT_DIR/validate_memo_module_boundaries.py"
+fi
+
+if [ -f "$SCRIPT_DIR/validate_memo_registry_contract.py" ]; then
+    "$PYTHON" "$SCRIPT_DIR/validate_memo_registry_contract.py"
+fi
+
+if [ -f "$SCRIPT_DIR/validate_memo_document_contract.py" ]; then
+    "$PYTHON" "$SCRIPT_DIR/validate_memo_document_contract.py"
+fi
+
+if [ -f "$SCRIPT_DIR/validate_memo_contracts.py" ]; then
+    "$PYTHON" "$SCRIPT_DIR/validate_memo_contracts.py"
+fi
+
+if [ -f "$SCRIPT_DIR/check_memo_dependency_changes.py" ]; then
+    "$PYTHON" "$SCRIPT_DIR/check_memo_dependency_changes.py"
+fi
+
+if [ -f "$SCRIPT_DIR/validate_odoo19_search_views.py" ]; then
+    "$PYTHON" "$SCRIPT_DIR/validate_odoo19_search_views.py"
+fi
+
+if [ -f "$SCRIPT_DIR/validate_owl_xml_templates.py" ]; then
+    "$PYTHON" "$SCRIPT_DIR/validate_owl_xml_templates.py"
+fi
+
 sh -n "$SCRIPT_DIR/start_odoo.sh"
 
 echo "=========================================================="

@@ -1045,138 +1045,7 @@ class LhiMemo(models.Model):
             chunks.append(chunk)
         return b"".join(chunks)
 
-    def _capture_current_pdf(self, *, retry_failed=False, operation=None):
-        """
-        Capture the current DOCX as a PDF via the MemoDocumentGateway.
 
-        All ``lhi.document.item`` field access is mediated through the gateway.
-        Normal Memo requesters have no ACL on the model directly.
-        """
-        self.ensure_one()
-
-        gateway = MemoDocumentGateway(self.env, self, self.env.user)
-
-        # Step: reading_source_document
-        if operation:
-            operation._advance_step("reading_source_document")
-
-        docx_meta = gateway.read_document_metadata("source_docx_item_id")
-
-        if docx_meta["storage_state"] != "available":
-            raise UserError(_("The Word document is not confirmed in SharePoint."))
-
-        # Fetch connection under service elevation (connection record is internal)
-        connection = (
-            self.env["lhi.graph.connection"]
-            .sudo()
-            .browse(docx_meta["connection_id"])
-        )
-        drive_id = docx_meta["drive_id"]
-        item_id_sp = docx_meta["item_id"]
-        resource = f"/drives/{quote(drive_id)}/items/{quote(item_id_sp)}"
-
-        metadata = connection.graph_request(
-            "GET",
-            resource,
-            auth_context="application",
-            params={
-                "$select": "id,name,size,eTag,cTag,webUrl,lastModifiedDateTime,lastModifiedBy,parentReference,file"
-            },
-        )
-        if metadata.get("id") != item_id_sp:
-            raise UserError(_("SharePoint returned a different Word DriveItem."))
-
-        policy = (
-            self.env["lhi.document.storage.policy"]
-            .sudo()
-            .resolve_policy(self._name, "source_docx_item_id", self.company_id)
-        )
-        if not policy:
-            raise UserError(_("No SharePoint storage policy is configured for memos."))
-        maximum_bytes = policy.maximum_size_mb * 1024 * 1024
-
-        # Step: capturing_pdf
-        if operation:
-            operation._advance_step("capturing_pdf")
-
-        docx_response = connection.lhi_binary_request(
-            "GET",
-            f"{resource}/content",
-            auth_context="application",
-            expected_statuses={200},
-            stream=True,
-        )
-        docx_content = self._bounded_response_content(docx_response, maximum_bytes)
-        if not docx_content:
-            raise UserError(_("SharePoint returned an empty Word document."))
-
-        pdf_response = connection.lhi_binary_request(
-            "GET",
-            f"{resource}/content?format=pdf",
-            auth_context="application",
-            expected_statuses={200},
-            stream=True,
-        )
-        pdf_content = self._bounded_response_content(pdf_response, maximum_bytes)
-
-        metadata_after = connection.graph_request(
-            "GET",
-            resource,
-            auth_context="application",
-            params={
-                "$select": "id,size,eTag,cTag,webUrl,lastModifiedDateTime,lastModifiedBy,parentReference,file"
-            },
-        )
-        version = metadata.get("cTag") or metadata.get("eTag")
-        version_after = metadata_after.get("cTag") or metadata_after.get("eTag")
-        if version != version_after or metadata.get("eTag") != metadata_after.get("eTag"):
-            raise UserError(
-                _("The Word document changed during PDF capture. Save it and retry.")
-            )
-        if not pdf_content.startswith(b"%PDF"):
-            raise UserError(_("Microsoft 365 did not return a valid PDF conversion."))
-
-        # Update DOCX checksums through the gateway (authorized)
-        gateway.update_docx_checksums(
-            "source_docx_item_id",
-            len(docx_content),
-            hashlib.sha256(docx_content).hexdigest(),
-            hashlib.sha1(docx_content).hexdigest(),
-        )
-        # Apply updated DriveItem metadata through the gateway
-        gateway.apply_drive_item_metadata("source_docx_item_id", metadata_after)
-
-        pdf_hash = hashlib.sha256(pdf_content).hexdigest()
-        if self.state == "returned" and self.signature_request_ids.filtered(
-            lambda request: request.source_pdf_hash == pdf_hash
-        ):
-            raise UserError(
-                _(
-                    "The returned memo has not changed. Save a corrected Word version first."
-                )
-            )
-
-        # Step: confirming_pdf
-        if operation:
-            operation._advance_step("confirming_pdf")
-
-        # Create PDF through the gateway — enforces authorization + idempotency
-        filename = f"{self._safe_filename(self.name)}-Submitted.pdf"
-        pdf_contract = gateway.create_pdf_document(pdf_content, filename, pdf_hash)
-
-        pdf_item_id = pdf_contract["document_item_id"]
-
-        self.sudo().write(
-            {
-                "source_docx_version_id": version,
-                "source_docx_etag": metadata.get("eTag"),
-                "source_docx_web_url": metadata_after.get("webUrl") or self.source_docx_web_url,
-                "source_pdf_item_id": pdf_item_id,
-                "source_pdf_hash": pdf_hash,
-            }
-        )
-        # Return pdf_item_id (integer) and pdf_hash for downstream use
-        return pdf_item_id, pdf_hash
 
     def _lhi_approval_matrix_for_request(self, approval_request):
         self.ensure_one()
@@ -1450,9 +1319,9 @@ class LhiMemo(models.Model):
         )
         return True
 
-    def action_prepare_and_sign(self):
+    def _memo_business_validation(self):
+        """Validate core business rules for a memo before preparation."""
         self.ensure_one()
-        self._ensure_requester_or_preparer()
         if self.state not in (
             "authoring",
             "ready_for_preparation",
@@ -1461,85 +1330,43 @@ class LhiMemo(models.Model):
         ):
             raise UserError(_("This memo is not ready for signature preparation."))
 
-        correlation_id = self._generate_correlation_id()
-        operation = (
-            self.env["lhi.memo.integration.operation"]
-            .sudo()
-            .create(
-                {
-                    "memo_id": self.id,
-                    "correlation_id": correlation_id,
-                    "operation_type": "prepare_and_sign",
-                    "state": "draft",
-                    "current_step": "draft",
-                    "requested_by": self.env.user.id,
-                    "started_at": fields.Datetime.now(),
-                }
-            )
-        )
-        self.sudo().write({"current_operation_id": operation.id})
-
-        try:
-            operation._transition_step("validating", "validating")
-            self.action_preflight_prepare_and_sign()
-
-            operation._transition_step("generating_pdf", "generating_pdf")
-            pdf_item_id, pdf_hash = self._capture_current_pdf(
-                retry_failed=self.state == "failed",
-                operation=operation,
-            )
-
-            pdf_item = self.env["lhi.document.item"].sudo().browse(pdf_item_id)
-
-            operation._transition_step("preparing_route", "preparing_route")
-            _approval_request, approval_lines = self._prepare_approval_route()
-
-            operation._transition_step("creating_signature_request", "creating_signature_request")
-            signature_request = self._create_signature_request(
-                approval_lines, pdf_item, pdf_hash
-            )
-
-            if self.state != "preparing":
-                self._transition("preparing")
-
-            operation._transition_step("creating_provider_draft", "creating_provider_draft")
-            base_url = self.env["ir.config_parameter"].sudo().get_param("web.base.url")
-            redirect_url = f"{base_url}/web#id={self.id}&model=lhi.memo&view_type=form"
-            signature_request.sudo().action_create_provider_draft(
-                redirect_url=redirect_url
-            )
-
-            operation._transition_step("awaiting_requester_signature", "completed")
-            self._notify_users(
-                self.requester_id,
-                _("Requester signature required"),
-                _(
-                    "Prepare the fields for memo %s, then sign and submit it."
-                )
-                % self.name,
-                schedule_activity=True,
-            )
-            return {
-                "type": "ir.actions.act_url",
-                "url": f"/lhi/memo/{self.uuid}/prepare",
-                "target": "new",
-            }
-        except Exception as error:
-            operation._mark_failed("memo_preparation", error, failure_type="retryable")
-            return self._record_integration_failure(
-                "memo_preparation", error, correlation_id=correlation_id
-            )
-
-    def action_continue_preparation(self):
+    def _prepare_and_sign_precheck(self):
+        """Precheck authorization and validation before signature preparation."""
         self.ensure_one()
         self._ensure_requester_or_preparer()
-        if not self.signature_request_id.provider_preparation_url:
-            raise UserError(_("No secure preparation URL is available."))
-        return {
-            "type": "ir.actions.act_url",
-            "url": f"/lhi/memo/{self.uuid}/prepare",
-            "target": "new",
-        }
+        self._memo_business_validation()
+
+    def action_prepare_and_sign(self):
+        """Domain action hook. Re-implemented by integration extension."""
+        self.ensure_one()
+        self._prepare_and_sign_precheck()
+        raise UserError(
+            _("Integration orchestration is required for signature preparation.")
+        )
+
+    def action_continue_preparation(self):
+        """Domain action hook. Re-implemented by integration extension."""
+        self.ensure_one()
+        self._ensure_requester_or_preparer()
+        raise UserError(
+            _("Integration orchestration is required to continue memo preparation.")
+        )
+
+    def action_retry_integration(self):
+        """Domain action hook. Re-implemented by integration extension."""
+        self.ensure_one()
+        raise UserError(
+            _("Integration orchestration is required to retry integration.")
+        )
+
+    def action_reconcile_integration(self):
+        """Domain action hook. Re-implemented by integration extension."""
+        self.ensure_one()
+        raise UserError(
+            _("Integration orchestration is required to reconcile integration.")
+        )
+
+
 
     def action_sign_and_submit(self):
         self.ensure_one()

@@ -195,7 +195,67 @@ if [ -n "$bootstrap_modules" ]; then
     esac
 fi
 
+required_modules="${LHI_REQUIRED_MODULES:-lhi_memo_integration}"
+if [ -n "$required_modules" ]; then
+    case "$required_modules" in
+        *[!A-Za-z0-9_,]*|,*|*,|*,,*)
+            echo "Odoo startup failed: LHI_REQUIRED_MODULES must be a comma-separated list of module technical names." >&2
+            exit 1
+            ;;
+    esac
+
+    uninstalled_required="$(
+        PGPASSWORD="$POSTGRES_PASSWORD" \
+            psql \
+            --host="${POSTGRES_HOST:-db}" \
+            --port="${POSTGRES_PORT:-5432}" \
+            --username="$POSTGRES_USER" \
+            --dbname="$POSTGRES_DB" \
+            --no-password \
+            --tuples-only \
+            --no-align \
+            --command="
+                SELECT COALESCE(string_agg(requested.name, ','), '')
+                FROM unnest(string_to_array('$required_modules', ',')) AS requested(name)
+                LEFT JOIN ir_module_module AS module
+                    ON module.name = requested.name
+                WHERE module.state IS NULL OR module.state IS DISTINCT FROM 'installed';
+            "
+    )"
+
+    if [ -n "$uninstalled_required" ]; then
+        echo "=========================================================="
+        echo "Installing Uninstalled Mandatory LHI Addons: $uninstalled_required"
+        echo "Container Hostname: $(hostname)"
+        echo "UTC Timestamp: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+        echo "=========================================================="
+
+        set +e
+        python3 "$odoo_bin" server \
+            -c "$runtime_config" \
+            -i "$uninstalled_required" \
+            --without-demo=all \
+            --stop-after-init \
+            --no-http \
+            --logfile=/dev/stdout \
+            --log-level="${ODOO_LOG_LEVEL:-info}"
+        install_status=$?
+        set -e
+
+        if [ "$install_status" -ne 0 ]; then
+            echo "Odoo deployment startup failed: installation of required modules returned exit code $install_status for modules: $uninstalled_required" >&2
+            echo "Waiting ${LHI_UPGRADE_FAILURE_DELAY_SECONDS:-10} seconds to ensure logs are captured..." >&2
+            sleep "${LHI_UPGRADE_FAILURE_DELAY_SECONDS:-10}"
+            exit "$install_status"
+        fi
+        echo "Mandatory module installation completed successfully."
+    else
+        echo "All mandatory LHI addons are already installed."
+    fi
+fi
+
 auto_upgrade_modules="${LHI_AUTO_UPGRADE_MODULES:-lhi_security,lhi_dashboard,lhi_asset_management,lhi_hub_management,lhi_memo_management,lhi_entra_identity_sync,lhi_signature_bridge,lhi_memo_integration,lhi_accounting_base}"
+
 if [ -n "$auto_upgrade_modules" ]; then
     echo "=========================================================="
     echo "Starting LHI Odoo Deployment Module Upgrade"

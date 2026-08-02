@@ -1,20 +1,18 @@
 import logging
 import uuid
-from datetime import datetime, timezone
 
 from odoo import api, fields, models, _
-from odoo.exceptions import AccessError, UserError, ValidationError
+from odoo.exceptions import AccessError, UserError
 
 _logger = logging.getLogger(__name__)
 
 OPERATION_STATES = [
     ("draft", "Draft"),
     ("validating", "Validating Preflight"),
-    ("preparing_route", "Preparing Approval Route"),
-    ("generating_docx", "Generating Word Document"),
-    ("confirming_docx", "Confirming Word Document in SharePoint"),
-    ("generating_pdf", "Generating PDF Conversion"),
+    ("reading_source_document", "Reading Source Document"),
+    ("capturing_pdf", "Capturing PDF Conversion"),
     ("confirming_pdf", "Confirming PDF Document in SharePoint"),
+    ("preparing_approval_route", "Preparing Approval Route"),
     ("creating_signature_request", "Creating Signature Request"),
     ("creating_provider_draft", "Creating Provider Draft"),
     ("awaiting_requester_signature", "Awaiting Requester Signature"),
@@ -35,9 +33,17 @@ OPERATION_TYPES = [
 
 
 class LhiMemoIntegrationOperation(models.Model):
+    """
+    Durable saga record for a single Memo integration operation.
+
+    Owned exclusively by ``lhi_memo_integration``. Tracks correlation ID,
+    step progression, failure classification, idempotency keys, and
+    reconciliation state.
+    """
+
     _name = "lhi.memo.integration.operation"
     _description = "LHI Memo Integration Saga Operation"
-    _order = "create_date desc, id desc"
+    _order = "started_at desc, id desc"
     _rec_name = "name"
 
     name = fields.Char(
@@ -54,11 +60,12 @@ class LhiMemoIntegrationOperation(models.Model):
         ondelete="cascade",
         index=True,
     )
-    operation_type = fields.Selection(
-        OPERATION_TYPES,
-        string="Operation Type",
-        required=True,
-        default="prepare_and_sign",
+    company_id = fields.Many2one(
+        "res.company",
+        string="Company",
+        related="memo_id.company_id",
+        store=True,
+        index=True,
     )
     correlation_id = fields.Char(
         string="Correlation ID",
@@ -72,6 +79,12 @@ class LhiMemoIntegrationOperation(models.Model):
         copy=False,
         index=True,
     )
+    operation_type = fields.Selection(
+        OPERATION_TYPES,
+        string="Operation Type",
+        required=True,
+        default="prepare_and_sign",
+    )
     state = fields.Selection(
         OPERATION_STATES,
         string="Operation State",
@@ -84,23 +97,29 @@ class LhiMemoIntegrationOperation(models.Model):
         string="Current Step",
         default="draft",
     )
-    retry_count = fields.Integer(
-        string="Retry Count",
-        default=0,
+    requested_by_id = fields.Many2one(
+        "res.users",
+        string="Requested By",
+        required=True,
+        default=lambda self: self.env.user,
+    )
+    requested_by = fields.Many2one(
+        "res.users",
+        related="requested_by_id",
+        string="Requested By (Alias)",
     )
     started_at = fields.Datetime(
         string="Started At",
         default=fields.Datetime.now,
+        required=True,
     )
     completed_at = fields.Datetime(
         string="Completed At",
         copy=False,
     )
-    requested_by = fields.Many2one(
-        "res.users",
-        string="Requested By",
-        required=True,
-        default=lambda self: self.env.user,
+    retry_count = fields.Integer(
+        string="Retry Count",
+        default=0,
     )
     failure_code = fields.Char(
         string="Failure Code",
@@ -142,7 +161,12 @@ class LhiMemoIntegrationOperation(models.Model):
         for vals in vals_list:
             if not vals.get("name") or vals["name"] == "New":
                 date_str = fields.Date.context_today(self).strftime("%Y%m%d")
-                seq = self.env["ir.sequence"].next_by_code("lhi.memo.integration.operation") or str(uuid.uuid4())[:8].upper()
+                seq = (
+                    self.env["ir.sequence"].next_by_code(
+                        "lhi.memo.integration.operation"
+                    )
+                    or str(uuid.uuid4())[:8].upper()
+                )
                 vals["name"] = f"MEMO-INT-{date_str}-{seq}"
         return super().create(vals_list)
 
@@ -164,11 +188,16 @@ class LhiMemoIntegrationOperation(models.Model):
             new_state or self.state,
         )
 
+    def _advance_step(self, step_name):
+        self._transition_step(step_name, step_name)
+
+    def _complete(self):
+        self._transition_step("completed", "completed")
+
     def _mark_failed(self, code, error, failure_type="retryable"):
         self.ensure_one()
-        safe_msg = str(error)[:2000]
-        tech_ref = getattr(error, "__traceback__", None)
-        tech_str = str(error)
+        safe_msg = self._safe_error_text(str(error))
+        tech_ref = self.correlation_id
 
         if failure_type == "reconciliation":
             state = "reconciliation_required"
@@ -183,14 +212,17 @@ class LhiMemoIntegrationOperation(models.Model):
             outcome_uncertain = False
             requires_reconciliation = False
 
-        self.sudo().write({
-            "state": state,
-            "failure_code": code,
-            "safe_failure_message": safe_msg,
-            "technical_failure_reference": tech_str,
-            "outcome_uncertain": outcome_uncertain,
-            "requires_reconciliation": requires_reconciliation,
-        })
+        self.sudo().write(
+            {
+                "state": state,
+                "failure_code": code,
+                "safe_failure_message": safe_msg[:500],
+                "technical_failure_reference": tech_ref,
+                "outcome_uncertain": outcome_uncertain,
+                "requires_reconciliation": requires_reconciliation,
+                "completed_at": fields.Datetime.now(),
+            }
+        )
         _logger.warning(
             "Memo Operation %s [%s] failed at step %s with code %s: %s",
             self.name,
@@ -200,50 +232,76 @@ class LhiMemoIntegrationOperation(models.Model):
             safe_msg,
         )
 
+    def _fail(self, error):
+        self._mark_failed("integration_error", error, failure_type="retryable")
+
+    @staticmethod
+    def _safe_error_text(error_text):
+        import re
+
+        cleaned = re.sub(
+            r"Bearer [A-Za-z0-9._\-+/=]{20,}", "[REDACTED_TOKEN]", error_text
+        )
+        cleaned = re.sub(r"https?://[^\s'\"]{40,}", "[REDACTED_URL]", cleaned)
+        return cleaned[:500]
+
     def action_retry(self):
         self.ensure_one()
         if self.state not in ("retryable_failure", "permanent_failure"):
             raise UserError(_("Only failed operations can be retried."))
         if self.requires_reconciliation:
-            raise UserError(_("This operation requires administrator reconciliation before retry."))
-        self.sudo().write({
-            "retry_count": self.retry_count + 1,
-            "state": "draft",
-            "failure_code": False,
-            "safe_failure_message": False,
-            "technical_failure_reference": False,
-        })
+            raise UserError(
+                _(
+                    "This operation requires administrator reconciliation before retry."
+                )
+            )
+        self.sudo().write(
+            {
+                "retry_count": self.retry_count + 1,
+                "state": "draft",
+                "failure_code": False,
+                "safe_failure_message": False,
+                "technical_failure_reference": False,
+            }
+        )
         return self.memo_id.action_prepare_and_sign()
 
     def action_reconcile(self):
         self.ensure_one()
         if not self.env.user.has_group("lhi_security.group_lhi_erp_admin"):
-            raise AccessError(_("Only ERP Administrators may reconcile integration operations."))
-        # Verify provider status
+            raise AccessError(
+                _("Only ERP Administrators may reconcile integration operations.")
+            )
         memo = self.memo_id
         if memo.signature_request_id and memo.signature_request_id.provider_request_id:
             memo.signature_request_id.action_reconcile()
             if memo.signature_request_id.provider_preparation_url:
-                self.sudo().write({
-                    "state": "awaiting_requester_signature",
-                    "outcome_uncertain": False,
-                    "requires_reconciliation": False,
-                })
+                self.sudo().write(
+                    {
+                        "state": "awaiting_requester_signature",
+                        "outcome_uncertain": False,
+                        "requires_reconciliation": False,
+                    }
+                )
                 memo.sudo().write({"state": "preparing"})
                 return {
                     "type": "ir.actions.client",
                     "tag": "display_notification",
                     "params": {
                         "title": _("Reconciliation Successful"),
-                        "message": _("Provider signature request was reconciled and confirmed."),
+                        "message": _(
+                            "Provider signature request was reconciled and confirmed."
+                        ),
                         "type": "success",
                     },
                 }
-        self.sudo().write({
-            "state": "retryable_failure",
-            "outcome_uncertain": False,
-            "requires_reconciliation": False,
-        })
+        self.sudo().write(
+            {
+                "state": "retryable_failure",
+                "outcome_uncertain": False,
+                "requires_reconciliation": False,
+            }
+        )
         return {
             "type": "ir.actions.client",
             "tag": "display_notification",

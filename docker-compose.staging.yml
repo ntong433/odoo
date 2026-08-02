@@ -100,7 +100,7 @@ services:
     command: ["/opt/odoo/scripts/start_odoo.sh"]
     labels:
       - "caddy_0=https://work.lhinigeria.org"
-      - "caddy_0.reverse_proxy=http://lhi_odoo_app:8069"
+      - "caddy_0.reverse_proxy={{upstreams 8069}}"
       - "caddy_0.encode=gzip"
 
 

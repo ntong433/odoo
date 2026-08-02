@@ -71,7 +71,8 @@ HEALTHCHECK \
   --timeout=10s \
   --start-period=300s \
   --retries=10 \
-  CMD curl -fsS 'http://127.0.0.1:8069/web/health?db_server_status=1' >/dev/null || exit 1
+  CMD curl -fsS 'http://127.0.0.1:8069/web/health' >/dev/null || exit 1
+
 
 USER odoo
 

@@ -83,11 +83,12 @@ config["options"] = {
     "log_handler": ":INFO,odoo.addons.lhi_audit:DEBUG",
     "workers": str(workers),
     "max_cron_threads": str(max_cron_threads),
-    "limit_memory_soft": "1610612736",
-    "limit_memory_hard": "2147483648",
-    "limit_time_cpu": "600",
-    "limit_time_real": "1200",
+    "limit_memory_soft": "1610612736" if workers > 0 else "0",
+    "limit_memory_hard": "2147483648" if workers > 0 else "0",
+    "limit_time_cpu": os.environ.get("ODOO_LIMIT_TIME_CPU", "600"),
+    "limit_time_real": os.environ.get("ODOO_LIMIT_TIME_REAL", "1200"),
 }
+
 
 old_umask = os.umask(0o077)
 try:

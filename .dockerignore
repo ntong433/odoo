@@ -1,15 +1,7 @@
-# Exclude large git objects, virtual environments, generated graphs, and build artifacts
-.git
-.git/**
-odoo/.git
-odoo/.git/**
-.venv
-.venv/**
-custom-addons/graphify-out
-custom-addons/graphify-out/**
-
-# Include only necessary files
+# First, exclude everything by default
 **
+
+# Next, explicitly include only what we need
 !Dockerfile.dev
 !Dockerfile.staging
 !.dockerignore
@@ -21,13 +13,15 @@ custom-addons/graphify-out/**
 !scripts/
 !scripts/**
 
-# Exclude sensitive/generated files inside included trees
+# FINALLY, exclude sensitive/generated/huge directories that might have been re-included above
 .git
 .git/**
 odoo/.git
 odoo/.git/**
 **/.git
 **/.git/**
+.venv
+.venv/**
 **/.env
 **/.env.*
 **/lhi-sharepoint-identifiers.env

@@ -30,9 +30,13 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    ports:
+      - "8069:8069"
+      - "8072:8072"
     expose:
       - "8069"
       - "8072"
+
     volumes:
       - odoo_staging_data:/var/lib/odoo
     environment:

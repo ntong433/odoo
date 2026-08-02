@@ -102,6 +102,7 @@ services:
       - "caddy_0=https://work.lhinigeria.org"
       - "caddy_0.reverse_proxy={{upstreams 8069}}"
       - "caddy_0.encode=gzip"
+      - "caddy_ingress_network=coolify"
 
 
 
@@ -127,4 +128,3 @@ networks:
   default:
   coolify:
     external: true
-

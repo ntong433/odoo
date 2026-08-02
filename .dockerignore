@@ -1,6 +1,14 @@
-# Send only files used by Dockerfile.dev and Dockerfile.staging. This prevents
-# local virtual environments, nested Git history, filestore data, attachments,
-# and unrelated workspace artifacts from being uploaded to the Coolify builder.
+# Exclude large git objects, virtual environments, generated graphs, and build artifacts
+.git
+.git/**
+odoo/.git
+odoo/.git/**
+.venv
+.venv/**
+custom-addons/graphify-out
+custom-addons/graphify-out/**
+
+# Include only necessary files
 **
 !Dockerfile.dev
 !Dockerfile.staging
@@ -13,7 +21,11 @@
 !scripts/
 !scripts/**
 
-# Exclude generated and sensitive files even below included directories.
+# Exclude sensitive/generated files inside included trees
+.git
+.git/**
+odoo/.git
+odoo/.git/**
 **/.git
 **/.git/**
 **/.env
@@ -25,3 +37,12 @@
 **/__pycache__
 **/__pycache__/**
 **/*.py[co]
+**/.pytest_cache
+**/.pytest_cache/**
+custom-addons/graphify-out
+custom-addons/graphify-out/**
+*.pdf
+har_rpc.txt
+har_urls.txt
+keys.json
+microsoft_login_completion_report.md

@@ -143,6 +143,15 @@ class TestMemoIntegrationOrchestration(TransactionCase):
         res = self.env["lhi.memo.integration.contracts"].validate_all_contracts()
         self.assertTrue(res)
 
+    def test_integration_operations_menu_is_under_memo_configuration(self):
+        integration_menu = self.env.ref(
+            "lhi_memo_integration.menu_memo_integration_operations"
+        )
+        configuration_menu = self.env.ref(
+            "lhi_memo_management.menu_lhi_memo_configuration"
+        )
+        self.assertEqual(integration_menu.parent_id, configuration_menu)
+
     def test_preflight_success(self):
         memo = self._create_memo()
         preflight_res = memo.action_preflight_prepare_and_sign()

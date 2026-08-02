@@ -83,7 +83,7 @@
 
     <menuitem id="menu_memo_integration_operations"
               name="Integration Operations"
-              parent="lhi_memo_management.menu_memo_configuration"
+              parent="lhi_memo_management.menu_lhi_memo_configuration"
               action="action_lhi_memo_integration_operation"
               groups="lhi_security.group_lhi_erp_admin"
               sequence="90"/>

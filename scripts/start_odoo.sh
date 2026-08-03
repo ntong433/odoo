@@ -78,7 +78,6 @@ config["options"] = {
     "proxy_mode": "True",
     "addons_path": "/opt/odoo/odoo/addons,/opt/odoo/custom-addons",
     "data_dir": "/var/lib/odoo",
-    "logfile": "/var/log/odoo/odoo.log",
     "log_level": os.environ.get("ODOO_LOG_LEVEL", "info"),
     "log_handler": ":INFO,odoo.addons.lhi_audit:DEBUG",
     "workers": str(workers),
@@ -88,6 +87,8 @@ config["options"] = {
     "limit_time_cpu": os.environ.get("ODOO_LIMIT_TIME_CPU", "600"),
     "limit_time_real": os.environ.get("ODOO_LIMIT_TIME_REAL", "1200"),
 }
+if os.environ.get("ODOO_LOGFILE"):
+    config["options"]["logfile"] = os.environ["ODOO_LOGFILE"]
 
 
 old_umask = os.umask(0o077)
@@ -121,11 +122,23 @@ case "$database_initialized" in
         case "${ODOO_INITIALIZE_DATABASE_IF_EMPTY:-true}" in
             true|TRUE|1|yes|YES)
                 echo "Odoo database schema is absent; initializing the base module."
+                set +e
                 python3 "$odoo_bin" server \
                     -c "$runtime_config" \
                     --init=base \
                     --without-demo=all \
-                    --stop-after-init
+                    --stop-after-init \
+                    --no-http \
+                    --logfile=/dev/stdout \
+                    --log-level="${ODOO_LOG_LEVEL:-info}"
+                base_init_status=$?
+                set -e
+                if [ "$base_init_status" -ne 0 ]; then
+                    echo "Odoo startup failed: base database initialization returned exit code $base_init_status" >&2
+                    echo "Waiting ${LHI_UPGRADE_FAILURE_DELAY_SECONDS:-10} seconds to ensure logs are captured..." >&2
+                    sleep "${LHI_UPGRADE_FAILURE_DELAY_SECONDS:-10}"
+                    exit "$base_init_status"
+                fi
                 ;;
             *)
                 echo \
@@ -178,11 +191,23 @@ if [ -n "$bootstrap_modules" ]; then
     case "$bootstrap_required" in
         t)
             echo "Installing the approved LHI foundation module set."
+            set +e
             python3 "$odoo_bin" server \
                 -c "$runtime_config" \
                 --init="$bootstrap_modules" \
                 --without-demo=all \
-                --stop-after-init
+                --stop-after-init \
+                --no-http \
+                --logfile=/dev/stdout \
+                --log-level="${ODOO_LOG_LEVEL:-info}"
+            bootstrap_status=$?
+            set -e
+            if [ "$bootstrap_status" -ne 0 ]; then
+                echo "Odoo startup failed: LHI foundation module initialization returned exit code $bootstrap_status for modules: $bootstrap_modules" >&2
+                echo "Waiting ${LHI_UPGRADE_FAILURE_DELAY_SECONDS:-10} seconds to ensure logs are captured..." >&2
+                sleep "${LHI_UPGRADE_FAILURE_DELAY_SECONDS:-10}"
+                exit "$bootstrap_status"
+            fi
             ;;
         f)
             echo "Approved LHI foundation modules are already installed."

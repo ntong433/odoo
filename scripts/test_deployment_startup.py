@@ -1,18 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Deployment Startup & Log Redirection Test Harness.
-
-Validates:
-1. POSIX shell syntax validity (`sh -n scripts/start_odoo.sh`).
-2. Single upgrade command invocation in `start_odoo.sh`.
-3. `--logfile=/dev/stdout` and `--log-level` flag presence on upgrade invocation.
-4. Preserved runtime config usage on server startup (`exec python3 "$odoo_bin" server -c "$runtime_config"`).
-5. Execution under mock odoo-bin (success flow & failure flow).
-6. Exit status preservation and failure delay.
-7. Web server is never started after upgrade failure.
-8. Docker/Coolify health check inspection.
-"""
+"""Regression harness for deterministic Odoo deployment startup."""
 
 import os
 import shutil
@@ -21,147 +8,206 @@ import sys
 import tempfile
 from pathlib import Path
 
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 START_SCRIPT = REPO_ROOT / "scripts" / "start_odoo.sh"
 
 
 def test_shell_syntax():
-    """Verify POSIX shell syntax."""
-    res = subprocess.run(["sh", "-n", str(START_SCRIPT)], capture_output=True, text=True)
-    assert res.returncode == 0, f"Shell syntax error in start_odoo.sh: {res.stderr}"
-    print("PASS: POSIX shell syntax validation (sh -n)")
+    result = subprocess.run(
+        ["sh", "-n", str(START_SCRIPT)], capture_output=True, text=True
+    )
+    assert result.returncode == 0, result.stderr
+    print("PASS: POSIX shell syntax validation")
 
 
 def test_script_structure():
-    """Verify structural constraints on start_odoo.sh."""
     content = START_SCRIPT.read_text(encoding="utf-8")
 
-    # Single upgrade invocation check
-    upgrade_occurrences = content.count("-u \"$auto_upgrade_modules\"")
-    assert upgrade_occurrences == 1, f"Expected 1 upgrade invocation, found {upgrade_occurrences}"
+    assert content.count('-u "$installed_upgrade_modules"') == 1
+    ordered_markers = (
+        "Startup phase: Odoo module-list refresh",
+        '"approved foundation-module installation"',
+        '"required-module installation"',
+        '"approved installed-module upgrade"',
+        "Startup phase: registry and required-field validation",
+        "Startup phase: normal Odoo server",
+    )
+    positions = [content.index(marker) for marker in ordered_markers]
+    assert positions == sorted(positions), "Startup phases are not ordered"
 
-    # Logfile stdout check on upgrade command
-    assert "--logfile=/dev/stdout" in content, "Missing --logfile=/dev/stdout on upgrade command"
-    assert "--log-level=" in content, "Missing --log-level= parameter on upgrade command"
+    assert "phase_status=$?" in content
+    assert 'exit "$phase_status"' in content
+    assert "LHI_UPGRADE_FAILURE_DELAY_SECONDS" not in content
+    assert "Waiting " not in content
+    assert "|| true" not in content
+    assert 'touch "$server_start_marker"' in content
+    assert 'exec python3 "$odoo_bin" server -c "$runtime_config"' in content
+    print("PASS: Deterministic phase ordering and failure semantics")
 
-    # Temporary set +e check
-    assert "set +e" in content, "Missing set +e around upgrade command"
-    assert "upgrade_status=$?" in content, "Missing upgrade_status=$? capture"
-    assert "set -e" in content, "Missing set -e after upgrade status capture"
 
-    # Failure delay check
-    assert "LHI_UPGRADE_FAILURE_DELAY_SECONDS" in content, "Missing LHI_UPGRADE_FAILURE_DELAY_SECONDS variable"
-    assert "sleep" in content, "Missing sleep call on failure"
+def _write_mock_environment(temp_dir):
+    bin_dir = temp_dir / "bin"
+    bin_dir.mkdir()
 
-    # Server startup check
-    assert "exec python3 \"$odoo_bin\" server -c \"$runtime_config\"" in content, "Missing server startup line"
-    print("PASS: Script structure & flag checks")
+    mock_psql = bin_dir / "psql"
+    mock_psql.write_text(
+        """#!/bin/sh
+case "$*" in
+    *"string_agg(requested.name"*) echo 'lhi_test_upgrade' ;;
+    *) echo 't' ;;
+esac
+""",
+        encoding="utf-8",
+    )
+    mock_psql.chmod(0o755)
+
+    mock_pg_isready = bin_dir / "pg_isready"
+    mock_pg_isready.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    mock_pg_isready.chmod(0o755)
+
+    mock_validate = temp_dir / "validate_microsoft_env.sh"
+    mock_validate.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    mock_validate.chmod(0o755)
+
+    mock_odoo_bin = bin_dir / "odoo-bin"
+    mock_odoo_bin.write_text(
+        """#!/usr/bin/env python3
+import os
+import sys
+
+args_str = " ".join(sys.argv)
+with open(os.environ["TEST_INVOCATION_LOG"], "a", encoding="utf-8") as stream:
+    stream.write(args_str + "\\n")
+
+if " shell " in f" {args_str} ":
+    print("MOCK_ODOO_BIN: Registry shell phase complete.")
+    raise SystemExit(0)
+
+if "-u" in args_str:
+    if os.environ.get("TEST_FAIL_MODE") == "upgrade":
+        print(
+            "CRITICAL_ERROR: Failed to load view lhi_asset_management.lhi_asset_view",
+            file=sys.stderr,
+        )
+        raise SystemExit(42)
+    print("MOCK_ODOO_BIN: Upgrading modules successfully...")
+    raise SystemExit(0)
+
+if "--stop-after-init" in args_str:
+    print("MOCK_ODOO_BIN: Module installation phase complete.")
+    raise SystemExit(0)
+
+print("MOCK_ODOO_BIN: Web server running...")
+""",
+        encoding="utf-8",
+    )
+    mock_odoo_bin.chmod(0o755)
+
+    run_script = temp_dir / "start_odoo.sh"
+    run_script.write_text(
+        START_SCRIPT.read_text(encoding="utf-8").replace(
+            "/opt/odoo/scripts/validate_microsoft_env.sh", str(mock_validate)
+        ),
+        encoding="utf-8",
+    )
+    run_script.chmod(0o755)
+
+    environment = os.environ.copy()
+    environment.update(
+        {
+            "PATH": f"{bin_dir}:{environment.get('PATH', '')}",
+            "ODOO_MASTER_PASSWORD": "test_master_pwd",
+            "POSTGRES_DB": "lhi_test_db",
+            "POSTGRES_USER": "odoo",
+            "POSTGRES_PASSWORD": "test_database_password",
+            "ODOO_BIN_PATH": str(mock_odoo_bin),
+            "ODOO_RUNTIME_CONFIG": str(temp_dir / "lhi-odoo.conf"),
+            "LHI_BOOTSTRAP_MODULES": "",
+            "LHI_REQUIRED_MODULES": "",
+            "LHI_AUTO_UPGRADE_MODULES": "lhi_test_upgrade",
+            "LHI_SERVER_START_MARKER": str(temp_dir / "normal-server-started"),
+            "TEST_INVOCATION_LOG": str(temp_dir / "odoo-invocations.log"),
+        }
+    )
+    return run_script, environment
 
 
 def test_execution_flows():
-    """Test start_odoo.sh execution using mock environments."""
     temp_dir = Path(tempfile.mkdtemp(prefix="lhi_start_test_"))
     try:
-        # Create mock binaries and scripts
-        bin_dir = temp_dir / "bin"
-        bin_dir.mkdir()
+        run_script, environment = _write_mock_environment(temp_dir)
 
-        mock_odoo_bin = bin_dir / "odoo-bin"
-        mock_psql = bin_dir / "psql"
-        mock_validate = temp_dir / "validate_microsoft_env.sh"
-
-        # Mock psql: return 't' for database initialized, 'f' for bootstrap required
-        mock_psql.write_text("""#!/bin/sh
-case "$*" in
-    *"module.state IS DISTINCT FROM"*)
-        echo 'f'
-        ;;
-    *)
-        echo 't'
-        ;;
-esac
-""", encoding="utf-8")
-        mock_psql.chmod(0o755)
-
-        # Mock validate_microsoft_env.sh
-        mock_validate.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
-        mock_validate.chmod(0o755)
-
-        # Environment setup for mock run
-        base_env = os.environ.copy()
-        base_env["PATH"] = f"{bin_dir}:{base_env.get('PATH', '')}"
-        base_env["ODOO_MASTER_PASSWORD"] = "test_master_pwd"
-        base_env["POSTGRES_DB"] = "lhi_test_db"
-        base_env["POSTGRES_USER"] = "odoo"
-        base_env["POSTGRES_PASSWORD"] = "odoo_pwd"
-        base_env["ODOO_BIN_PATH"] = str(mock_odoo_bin)
-        base_env["ODOO_RUNTIME_CONFIG"] = str(temp_dir / "lhi-odoo.conf")
-        base_env["LHI_BOOTSTRAP_MODULES"] = ""
-        base_env["LHI_UPGRADE_FAILURE_DELAY_SECONDS"] = "1"
-
-        # --- Test 1: Successful Upgrade Flow ---
-        mock_odoo_bin.write_text("""#!/usr/bin/env python3
-import sys, os
-
-args_str = " ".join(sys.argv)
-if "-u" in args_str or "--stop-after-init" in args_str:
-    if os.environ.get("TEST_FAIL_MODE") == "1":
-        sys.stderr.write("CRITICAL_ERROR: Failed to load view lhi_asset_management.lhi_asset_view\\n")
-        sys.exit(42)
-    else:
-        sys.stdout.write("MOCK_ODOO_BIN: Upgrading modules successfully...\\n")
-        sys.exit(0)
-
-sys.stdout.write("MOCK_ODOO_BIN: Web server running...\\n")
-sys.exit(0)
-""", encoding="utf-8")
-        mock_odoo_bin.chmod(0o755)
-
-        # Replace script path references dynamically for mock test run
-        run_script = temp_dir / "start_odoo.sh"
-        script_text = START_SCRIPT.read_text(encoding="utf-8").replace(
-            "/opt/odoo/scripts/validate_microsoft_env.sh", str(mock_validate)
+        success = subprocess.run(
+            [str(run_script)], env=environment, capture_output=True, text=True
         )
-        run_script.write_text(script_text, encoding="utf-8")
-        run_script.chmod(0o755)
+        assert success.returncode == 0, success.stderr
+        assert "Startup phase: Odoo module-list refresh" in success.stdout
+        assert "Startup phase: approved installed-module upgrade" in success.stdout
+        assert "MOCK_ODOO_BIN: Web server running..." in success.stdout
+        assert Path(environment["LHI_SERVER_START_MARKER"]).exists()
+        print("PASS: Successful startup reaches the normal server exactly once")
 
-        res_success = subprocess.run([str(run_script)], env=base_env, capture_output=True, text=True)
-        assert res_success.returncode == 0, f"Success flow failed: {res_success.stderr}"
-        assert "Container Hostname:" in res_success.stdout, "Missing metadata header in success flow"
-        assert "UTC Timestamp:" in res_success.stdout, "Missing timestamp in success flow"
-        assert "Deployment schema and view upgrade completed successfully." in res_success.stdout, "Missing success log"
-        assert "MOCK_ODOO_BIN: Web server running..." in res_success.stdout, "Web server did not start after upgrade success"
-        print("PASS: Execution test - Successful upgrade continues to web server startup")
-
-        # --- Test 2: Failed Upgrade Flow ---
-        fail_env = base_env.copy()
-        fail_env["TEST_FAIL_MODE"] = "1"
-
-        res_fail = subprocess.run([str(run_script)], env=fail_env, capture_output=True, text=True)
-        assert res_fail.returncode == 42, f"Expected returncode 42, got {res_fail.returncode}"
-        assert "CRITICAL_ERROR: Failed to load view" in res_fail.stderr, f"Odoo error traceback missing from stderr: {res_fail.stderr}"
-        assert "exit code 42" in res_fail.stderr or "exit code 42" in res_fail.stdout, f"Missing exit code in failure message. stderr: '{res_fail.stderr}', stdout: '{res_fail.stdout}'"
-        assert "Waiting 1 seconds to ensure logs are captured..." in res_fail.stderr or "Waiting 1 seconds to ensure logs are captured..." in res_fail.stdout, "Missing delay log"
-        assert "MOCK_ODOO_BIN: Web server running..." not in res_fail.stdout, "Web server MUST NOT start after upgrade failure"
-        print("PASS: Execution test - Failed upgrade preserves exit code 42, logs error, delays, and stops web server start")
-
+        Path(environment["TEST_INVOCATION_LOG"]).write_text("", encoding="utf-8")
+        failed_environment = environment.copy()
+        failed_environment["TEST_FAIL_MODE"] = "upgrade"
+        failure = subprocess.run(
+            [str(run_script)],
+            env=failed_environment,
+            capture_output=True,
+            text=True,
+        )
+        assert failure.returncode == 42
+        assert "CRITICAL_ERROR: Failed to load view" in failure.stderr
+        assert "exit code 42" in failure.stderr + failure.stdout
+        assert "Waiting " not in failure.stderr + failure.stdout
+        assert "MOCK_ODOO_BIN: Web server running..." not in failure.stdout
+        assert not Path(environment["LHI_SERVER_START_MARKER"]).exists()
+        invocations = Path(environment["TEST_INVOCATION_LOG"]).read_text(
+            encoding="utf-8"
+        ).splitlines()
+        assert sum(" -u " in f" {line} " for line in invocations) == 1
+        print("PASS: Failed upgrade exits once with its exact status and no server start")
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
 
 
 def test_healthcheck_configuration():
-    """Verify Docker Compose / Dockerfile health checks do not execute module upgrades."""
-    compose_staging = REPO_ROOT / "docker-compose.staging.yml"
-    if compose_staging.exists():
-        text = compose_staging.read_text(encoding="utf-8")
-        assert "healthcheck:" in text, "Missing healthcheck in docker-compose.staging.yml"
-        # Extract healthcheck block under odoo service
-        odoo_section = text.split("odoo:")[1] if "odoo:" in text else text
-        healthcheck_block = odoo_section.split("healthcheck:")[1].split("volumes:")[0]
-        assert "/web/health" in healthcheck_block, "Healthcheck should query /web/health readiness endpoint"
-        assert "start_odoo.sh" not in healthcheck_block, "Healthcheck MUST NOT execute start_odoo.sh"
-        assert "-u" not in healthcheck_block, "Healthcheck MUST NOT execute module upgrade (-u)"
-    print("PASS: Healthcheck configuration audit")
+    for compose_name in ("docker-compose.yml", "docker-compose.staging.yml"):
+        text = (REPO_ROOT / compose_name).read_text(encoding="utf-8")
+        db_section = text.split("\n  db:", 1)[1].split("\n  odoo:", 1)[0]
+        odoo_section = text.split("\n  odoo:", 1)[1]
+        healthcheck = odoo_section.split("healthcheck:", 1)[1].split(
+            "\nvolumes:", 1
+        )[0]
+        assert "restart: always" in db_section
+        assert 'restart: "no"' in odoo_section.split("healthcheck:", 1)[0]
+        assert "/web/health" in healthcheck
+        assert "lhi-odoo-normal-server-started" in healthcheck
+        assert "start_odoo.sh" not in healthcheck
+        assert "-u" not in healthcheck
+    dockerfile = (REPO_ROOT / "Dockerfile.staging").read_text(encoding="utf-8")
+    assert "lhi-odoo-normal-server-started" in dockerfile
+    print("PASS: Restart and healthcheck configuration")
+
+
+def test_lhi_base_clean_install_xml_order():
+    menus = (
+        REPO_ROOT / "custom-addons" / "lhi_base" / "views" / "menus.xml"
+    ).read_text(encoding="utf-8")
+    master_views = (
+        REPO_ROOT
+        / "custom-addons"
+        / "lhi_base"
+        / "views"
+        / "lhi_master_data_views.xml"
+    ).read_text(encoding="utf-8")
+    declaration = '<record id="action_lhi_project" model="ir.actions.act_window">'
+    first_reference = 'action="action_lhi_project"'
+    assert declaration in menus
+    assert menus.index(declaration) < menus.index(first_reference)
+    assert '<field name="search_view_id" ref="view_lhi_project_search"/>' in master_views
+    print("PASS: lhi_base action resolves before clean-install menu references")
 
 
 def main():
@@ -169,7 +215,8 @@ def main():
     test_script_structure()
     test_execution_flows()
     test_healthcheck_configuration()
-    print("\nALL DEPLOYMENT STARTUP TESTS PASSED SUCCESSFULLY.")
+    test_lhi_base_clean_install_xml_order()
+    print("\nALL DEPLOYMENT STARTUP TESTS PASSED.")
     return 0
 
 

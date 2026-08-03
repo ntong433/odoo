@@ -3,6 +3,12 @@ set -eu
 
 runtime_config="${ODOO_RUNTIME_CONFIG:-/tmp/lhi-odoo.conf}"
 odoo_bin="${ODOO_BIN_PATH:-/opt/odoo/odoo-bin}"
+server_start_marker="${LHI_SERVER_START_MARKER:-/tmp/lhi-odoo-normal-server-started}"
+
+# A container restart reuses its writable layer.  Remove a stale marker before
+# any configuration, migration, or registry work so the health check cannot
+# probe a server that has not reached the final exec in this invocation.
+rm -f "$server_start_marker"
 
 # The immutable staging image copies the repository's `odoo/` contents to
 # /opt/odoo, while the development Compose file bind-mounts them one directory
@@ -87,10 +93,6 @@ config["options"] = {
     "limit_time_cpu": os.environ.get("ODOO_LIMIT_TIME_CPU", "600"),
     "limit_time_real": os.environ.get("ODOO_LIMIT_TIME_REAL", "1200"),
 }
-if os.environ.get("ODOO_LOGFILE"):
-    config["options"]["logfile"] = os.environ["ODOO_LOGFILE"]
-
-
 old_umask = os.umask(0o077)
 try:
     with open(runtime_config, "w", encoding="utf-8") as stream:
@@ -100,7 +102,25 @@ finally:
 os.chmod(runtime_config, 0o600)
 PY
 
+echo "Startup phase: protected environment validation"
 /opt/odoo/scripts/validate_microsoft_env.sh --configuration-only
+
+echo "Startup phase: PostgreSQL readiness"
+readiness_attempt=0
+until PGPASSWORD="$POSTGRES_PASSWORD" pg_isready \
+    --host="${POSTGRES_HOST:-db}" \
+    --port="${POSTGRES_PORT:-5432}" \
+    --username="$POSTGRES_USER" \
+    --dbname="$POSTGRES_DB" >/dev/null 2>&1
+do
+    readiness_attempt=$((readiness_attempt + 1))
+    if [ "$readiness_attempt" -ge "${LHI_POSTGRES_READY_ATTEMPTS:-30}" ]; then
+        echo "Odoo startup failed: PostgreSQL did not become ready within the bounded startup window." >&2
+        exit 1
+    fi
+    sleep "${LHI_POSTGRES_READY_INTERVAL_SECONDS:-2}"
+done
+echo "PostgreSQL readiness: success"
 
 database_initialized="$(
     PGPASSWORD="$POSTGRES_PASSWORD" \
@@ -126,17 +146,14 @@ case "$database_initialized" in
                 python3 "$odoo_bin" server \
                     -c "$runtime_config" \
                     --init=base \
-                    --without-demo=all \
+                    --without-demo \
                     --stop-after-init \
                     --no-http \
-                    --logfile=/dev/stdout \
                     --log-level="${ODOO_LOG_LEVEL:-info}"
                 base_init_status=$?
                 set -e
                 if [ "$base_init_status" -ne 0 ]; then
                     echo "Odoo startup failed: base database initialization returned exit code $base_init_status" >&2
-                    echo "Waiting ${LHI_UPGRADE_FAILURE_DELAY_SECONDS:-10} seconds to ensure logs are captured..." >&2
-                    sleep "${LHI_UPGRADE_FAILURE_DELAY_SECONDS:-10}"
                     exit "$base_init_status"
                 fi
                 ;;
@@ -156,16 +173,58 @@ case "$database_initialized" in
         ;;
 esac
 
-bootstrap_modules="${LHI_BOOTSTRAP_MODULES:-lhi_base,lhi_security,lhi_audit,lhi_approval_matrix,lhi_feature_control,lhi_web_shell,lhi_dashboard}"
-if [ -n "$bootstrap_modules" ]; then
-    case "$bootstrap_modules" in
+validate_module_list() {
+    module_variable="$1"
+    module_list="$2"
+    case "$module_list" in
         *[!A-Za-z0-9_,]*|,*|*,|*,,*)
-            echo \
-                "Odoo startup failed: LHI_BOOTSTRAP_MODULES must be a comma-separated list of module technical names." \
-                >&2
+            echo "Odoo startup failed: $module_variable must be a comma-separated list of module technical names." >&2
             exit 1
             ;;
     esac
+}
+
+run_odoo_module_phase() {
+    phase_name="$1"
+    phase_modules="$2"
+    shift 2
+
+    echo "=========================================================="
+    echo "Startup phase: $phase_name"
+    echo "Module list: $phase_modules"
+    echo "UTC timestamp: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+    echo "Logs: stdout/stderr"
+    echo "=========================================================="
+
+    set +e
+    "$@"
+    phase_status=$?
+    set -e
+    if [ "$phase_status" -ne 0 ]; then
+        echo "Odoo startup failed during $phase_name; exit code $phase_status; modules: $phase_modules" >&2
+        exit "$phase_status"
+    fi
+}
+
+echo "Startup phase: Odoo module-list refresh"
+set +e
+python3 "$odoo_bin" shell \
+    -c "$runtime_config" \
+    --log-level="${ODOO_LOG_LEVEL:-info}" <<'PY'
+updated, added = env["ir.module.module"].update_list()
+env.cr.commit()
+print(f"Odoo module-list refresh complete: updated={updated}, added={added}")
+PY
+module_refresh_status=$?
+set -e
+if [ "$module_refresh_status" -ne 0 ]; then
+    echo "Odoo startup failed during module-list refresh; exit code $module_refresh_status" >&2
+    exit "$module_refresh_status"
+fi
+
+bootstrap_modules="${LHI_BOOTSTRAP_MODULES:-lhi_base,lhi_security,lhi_audit,lhi_approval_matrix,lhi_feature_control,lhi_web_shell,lhi_dashboard}"
+if [ -n "$bootstrap_modules" ]; then
+    validate_module_list "LHI_BOOTSTRAP_MODULES" "$bootstrap_modules"
 
     bootstrap_required="$(
         PGPASSWORD="$POSTGRES_PASSWORD" \
@@ -190,24 +249,16 @@ if [ -n "$bootstrap_modules" ]; then
 
     case "$bootstrap_required" in
         t)
-            echo "Installing the approved LHI foundation module set."
-            set +e
-            python3 "$odoo_bin" server \
+            run_odoo_module_phase \
+                "approved foundation-module installation" \
+                "$bootstrap_modules" \
+                python3 "$odoo_bin" server \
                 -c "$runtime_config" \
                 --init="$bootstrap_modules" \
-                --without-demo=all \
+                --without-demo \
                 --stop-after-init \
                 --no-http \
-                --logfile=/dev/stdout \
                 --log-level="${ODOO_LOG_LEVEL:-info}"
-            bootstrap_status=$?
-            set -e
-            if [ "$bootstrap_status" -ne 0 ]; then
-                echo "Odoo startup failed: LHI foundation module initialization returned exit code $bootstrap_status for modules: $bootstrap_modules" >&2
-                echo "Waiting ${LHI_UPGRADE_FAILURE_DELAY_SECONDS:-10} seconds to ensure logs are captured..." >&2
-                sleep "${LHI_UPGRADE_FAILURE_DELAY_SECONDS:-10}"
-                exit "$bootstrap_status"
-            fi
             ;;
         f)
             echo "Approved LHI foundation modules are already installed."
@@ -223,12 +274,7 @@ fi
 
 required_modules="${LHI_REQUIRED_MODULES:-lhi_memo_integration}"
 if [ -n "$required_modules" ]; then
-    case "$required_modules" in
-        *[!A-Za-z0-9_,]*|,*|*,|*,,*)
-            echo "Odoo startup failed: LHI_REQUIRED_MODULES must be a comma-separated list of module technical names." >&2
-            exit 1
-            ;;
-    esac
+    validate_module_list "LHI_REQUIRED_MODULES" "$required_modules"
 
     uninstalled_required="$(
         PGPASSWORD="$POSTGRES_PASSWORD" \
@@ -250,65 +296,132 @@ if [ -n "$required_modules" ]; then
     )"
 
     if [ -n "$uninstalled_required" ]; then
-        echo "=========================================================="
-        echo "Installing Uninstalled Mandatory LHI Addons: $uninstalled_required"
-        echo "Container Hostname: $(hostname)"
-        echo "UTC Timestamp: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-        echo "=========================================================="
-
-        set +e
-        python3 "$odoo_bin" server \
+        run_odoo_module_phase \
+            "required-module installation" \
+            "$uninstalled_required" \
+            python3 "$odoo_bin" server \
             -c "$runtime_config" \
             -i "$uninstalled_required" \
-            --without-demo=all \
+            --without-demo \
             --stop-after-init \
             --no-http \
-            --logfile=/dev/stdout \
             --log-level="${ODOO_LOG_LEVEL:-info}"
-        install_status=$?
-        set -e
-
-        if [ "$install_status" -ne 0 ]; then
-            echo "Odoo deployment startup failed: installation of required modules returned exit code $install_status for modules: $uninstalled_required" >&2
-            echo "Waiting ${LHI_UPGRADE_FAILURE_DELAY_SECONDS:-10} seconds to ensure logs are captured..." >&2
-            sleep "${LHI_UPGRADE_FAILURE_DELAY_SECONDS:-10}"
-            exit "$install_status"
-        fi
         echo "Mandatory module installation completed successfully."
     else
         echo "All mandatory LHI addons are already installed."
     fi
 fi
 
-auto_upgrade_modules="${LHI_AUTO_UPGRADE_MODULES:-lhi_security,lhi_dashboard,lhi_asset_management,lhi_hub_management,lhi_memo_management,lhi_entra_identity_sync,lhi_signature_bridge,lhi_memo_integration,lhi_accounting_base}"
+auto_upgrade_modules="${LHI_AUTO_UPGRADE_MODULES:-lhi_base,lhi_security,lhi_approval_matrix,lhi_dashboard,lhi_asset_management,lhi_hub_management,lhi_purchase_request,lhi_memo_management,lhi_entra_identity_sync,lhi_signature_bridge,lhi_memo_integration,lhi_accounting_base}"
 
 if [ -n "$auto_upgrade_modules" ]; then
-    echo "=========================================================="
-    echo "Starting LHI Odoo Deployment Module Upgrade"
-    echo "Container Hostname: $(hostname)"
-    echo "UTC Timestamp: $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
-    echo "Module List: $auto_upgrade_modules"
-    echo "=========================================================="
+    validate_module_list "LHI_AUTO_UPGRADE_MODULES" "$auto_upgrade_modules"
+    installed_upgrade_modules="$(
+        PGPASSWORD="$POSTGRES_PASSWORD" \
+            psql \
+            --host="${POSTGRES_HOST:-db}" \
+            --port="${POSTGRES_PORT:-5432}" \
+            --username="$POSTGRES_USER" \
+            --dbname="$POSTGRES_DB" \
+            --no-password \
+            --tuples-only \
+            --no-align \
+            --command="
+                SELECT COALESCE(string_agg(requested.name, ',' ORDER BY requested.ordinality), '')
+                FROM unnest(string_to_array('$auto_upgrade_modules', ',')) WITH ORDINALITY AS requested(name, ordinality)
+                JOIN ir_module_module AS module
+                    ON module.name = requested.name
+                   AND module.state = 'installed';
+            "
+    )"
 
-    set +e
-    python3 "$odoo_bin" server \
-        -c "$runtime_config" \
-        -u "$auto_upgrade_modules" \
-        --stop-after-init \
-        --no-http \
-        --logfile=/dev/stdout \
-        --log-level="${ODOO_LOG_LEVEL:-info}"
-    upgrade_status=$?
-    set -e
-
-    if [ "$upgrade_status" -ne 0 ]; then
-        echo "Odoo deployment startup failed: module upgrade returned exit code $upgrade_status for modules: $auto_upgrade_modules" >&2
-        echo "Waiting ${LHI_UPGRADE_FAILURE_DELAY_SECONDS:-10} seconds to ensure logs are captured..." >&2
-        sleep "${LHI_UPGRADE_FAILURE_DELAY_SECONDS:-10}"
-        exit "$upgrade_status"
+    if [ -n "$installed_upgrade_modules" ]; then
+        echo "Approved upgrade request: $auto_upgrade_modules"
+        run_odoo_module_phase \
+            "approved installed-module upgrade" \
+            "$installed_upgrade_modules" \
+            python3 "$odoo_bin" server \
+            -c "$runtime_config" \
+            -u "$installed_upgrade_modules" \
+            --stop-after-init \
+            --no-http \
+            --log-level="${ODOO_LOG_LEVEL:-info}"
+        echo "Deployment schema and view upgrade completed successfully."
+    else
+        echo "No approved upgrade modules are currently installed; upgrade phase skipped."
     fi
-
-    echo "Deployment schema and view upgrade completed successfully."
 fi
 
+echo "Startup phase: registry and required-field validation"
+registry_required_modules="$bootstrap_modules"
+if [ -n "$required_modules" ]; then
+    if [ -n "$registry_required_modules" ]; then
+        registry_required_modules="$registry_required_modules,$required_modules"
+    else
+        registry_required_modules="$required_modules"
+    fi
+fi
+
+set +e
+LHI_REGISTRY_REQUIRED_MODULES="$registry_required_modules" \
+python3 "$odoo_bin" shell \
+    -c "$runtime_config" \
+    --log-level="${ODOO_LOG_LEVEL:-info}" <<'PY'
+import os
+
+required_modules = {
+    name
+    for name in os.environ.get("LHI_REGISTRY_REQUIRED_MODULES", "").split(",")
+    if name
+}
+module_records = env["ir.module.module"].search([("name", "in", sorted(required_modules))])
+states = {module.name: module.state for module in module_records}
+missing_modules = sorted(
+    module for module in required_modules if states.get(module) != "installed"
+)
+if missing_modules:
+    raise RuntimeError(
+        "Required modules are not installed: " + ", ".join(missing_modules)
+    )
+
+if "lhi_memo_integration" in required_modules:
+    model_name = "lhi.memo.integration.operation"
+    if model_name not in env:
+        raise RuntimeError(f"Required registry model is missing: {model_name}")
+    required_fields = {
+        "memo_id",
+        "company_id",
+        "correlation_id",
+        "operation_type",
+        "idempotency_key",
+        "state",
+        "current_step",
+        "requested_by_id",
+        "started_at",
+        "completed_at",
+        "retry_count",
+        "failure_code",
+        "safe_failure_message",
+        "technical_failure_reference",
+        "outcome_uncertain",
+        "requires_reconciliation",
+    }
+    missing_fields = sorted(required_fields - set(env[model_name]._fields))
+    if missing_fields:
+        raise RuntimeError(
+            f"Required fields are missing from {model_name}: "
+            + ", ".join(missing_fields)
+        )
+
+print("Registry validation complete: required modules, model, and fields are present")
+PY
+registry_validation_status=$?
+set -e
+if [ "$registry_validation_status" -ne 0 ]; then
+    echo "Odoo startup failed during registry validation; exit code $registry_validation_status" >&2
+    exit "$registry_validation_status"
+fi
+
+echo "Startup phase: normal Odoo server"
+touch "$server_start_marker"
 exec python3 "$odoo_bin" server -c "$runtime_config"

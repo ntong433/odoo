@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!--
+        Menus are loaded before the full master-data views.  Declare the
+        project action shell here so every menu action reference resolves on a
+        clean install.  lhi_master_data_views.xml enriches this same action
+        with its search view after that view has been created.
+    -->
+    <record id="action_lhi_project" model="ir.actions.act_window">
+        <field name="name">Project Codes</field>
+        <field name="res_model">lhi.project</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
     <!-- Root Menu for LHI ERP -->
     <menuitem id="menu_lhi_root" name="Programmatic Operations" sequence="10" action="action_lhi_project"/>
 

@@ -3,7 +3,7 @@
     <record id="view_memo_form_inherit_integration" model="ir.ui.view">
         <field name="name">lhi.memo.form.inherit.integration</field>
         <field name="model">lhi.memo</field>
-        <field name="inherit_id" ref="lhi_memo_management.view_memo_form"/>
+        <field name="inherit_id" ref="lhi_memo_management.view_lhi_memo_form"/>
         <field name="arch" type="xml">
             <header position="inside">
                 <button name="action_preflight_prepare_and_sign" string="Preflight Check" type="object" class="btn-secondary" invisible="state not in ('authoring', 'ready_for_preparation', 'returned', 'failed')"/>

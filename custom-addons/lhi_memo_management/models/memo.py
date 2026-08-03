@@ -1050,23 +1050,40 @@ class LhiMemo(models.Model):
     def _lhi_approval_matrix_for_request(self, approval_request):
         self.ensure_one()
         matrix = self.memo_category_id.approval_matrix_id
-        if matrix and (
-            matrix.document_type != "memo"
-            or matrix.company_id != self.company_id
-            or not matrix.active
+        # Approval matrices are administrator-owned configuration.  Memo users
+        # must not need read access to restricted Award or Project records just
+        # to evaluate the configured scope, so elevate only this configuration
+        # read after the category has selected the matrix.
+        scoped_matrix = matrix.sudo()
+        if scoped_matrix and (
+            scoped_matrix.document_type != "memo"
+            or scoped_matrix.company_id != self.company_id
+            or not scoped_matrix.active
         ):
             raise UserError(_("The memo category approval route is not valid."))
-        if matrix and (
-            matrix.currency_id != approval_request.currency_id
-            or approval_request.amount < matrix.min_amount
-            or (matrix.max_amount > 0 and approval_request.amount > matrix.max_amount)
+        if scoped_matrix and (
+            scoped_matrix.currency_id != approval_request.currency_id
+            or approval_request.amount < scoped_matrix.min_amount
             or (
-                matrix.department_ids
-                and self.department_id not in matrix.department_ids
+                scoped_matrix.max_amount > 0
+                and approval_request.amount > scoped_matrix.max_amount
             )
-            or (matrix.office_ids and self.office_id not in matrix.office_ids)
-            or (matrix.award_ids and self.grant_id not in matrix.award_ids)
-            or (matrix.project_ids and self.project_id not in matrix.project_ids)
+            or (
+                scoped_matrix.department_ids
+                and self.department_id not in scoped_matrix.department_ids
+            )
+            or (
+                scoped_matrix.office_ids
+                and self.office_id not in scoped_matrix.office_ids
+            )
+            or (
+                scoped_matrix.award_ids
+                and self.grant_id not in scoped_matrix.award_ids
+            )
+            or (
+                scoped_matrix.project_ids
+                and self.project_id not in scoped_matrix.project_ids
+            )
         ):
             raise UserError(
                 _(
@@ -1074,7 +1091,7 @@ class LhiMemo(models.Model):
                     "or organizational context."
                 )
             )
-        return matrix
+        return scoped_matrix
 
     def _prepare_approval_route(self):
         self.ensure_one()

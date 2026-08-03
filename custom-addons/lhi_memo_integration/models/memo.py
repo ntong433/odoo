@@ -177,8 +177,12 @@ class LhiMemoIntegration(models.Model):
             raise UserError(_("No active SharePoint storage policy exists for memos."))
 
         # 8. LHI Sign configuration check
-        sign_config = self.env["lhi.opensign.configuration"]._get_for_company(
-            company=self.company_id, required=False
+        sign_config = self.env["lhi.opensign.configuration"].sudo().search(
+            [
+                ("company_id", "=", self.company_id.id),
+                ("active", "=", True),
+            ],
+            limit=1,
         )
         if not sign_config or not sign_config.active:
             raise UserError(
@@ -190,8 +194,10 @@ class LhiMemoIntegration(models.Model):
 
     def _compute_idempotency_key(self, operation_type="prepare_and_sign"):
         self.ensure_one()
+        technical_memo = self.sudo()
         raw = (
-            f"memo|{self.id}|{self.source_docx_version_id or self.write_date}"
+            f"memo|{self.id}|"
+            f"{technical_memo.source_docx_version_id or technical_memo.write_date}"
             f"|{self.amount}|{self.currency_id.id}|{operation_type}"
         )
         return hashlib.sha256(raw.encode()).hexdigest()
@@ -320,7 +326,10 @@ class LhiMemoIntegration(models.Model):
         Orchestrates Prepare and Sign as an idempotent saga operation.
         """
         self.ensure_one()
-        self._prepare_and_sign_precheck()
+        # Authorization always precedes the idempotency lookup.  Mutable-state
+        # validation follows the completed-operation fast path so an authorized
+        # retry can safely return the original result after the memo advances.
+        self._ensure_requester_or_preparer()
 
         correlation_id = self._generate_correlation_id()
         idempotency_key = self._compute_idempotency_key("prepare_and_sign")
@@ -332,7 +341,11 @@ class LhiMemoIntegration(models.Model):
         )
 
         if existing_op:
-            if existing_op.state == "completed" and self.signature_request_id.provider_preparation_url:
+            signature_request = self.sudo().signature_request_id
+            if (
+                existing_op.state == "completed"
+                and signature_request.provider_preparation_url
+            ):
                 return {
                     "type": "ir.actions.act_url",
                     "url": f"/lhi/memo/{self.uuid}/prepare",
@@ -343,6 +356,9 @@ class LhiMemoIntegration(models.Model):
                     _("Memo operation %s requires administrator reconciliation before retrying.")
                     % existing_op.name
                 )
+        self._memo_business_validation()
+
+        if existing_op:
             operation = existing_op
         else:
             operation = (

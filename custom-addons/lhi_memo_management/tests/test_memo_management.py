@@ -1,4 +1,5 @@
 import hashlib
+import io
 import json
 import os
 import tempfile
@@ -141,6 +142,10 @@ class TestMemoManagement(TransactionCase):
         }
         if cls.configuration:
             cls.configuration.write(config_values)
+        else:
+            cls.configuration = cls.env["lhi.opensign.configuration"].create(
+                {**config_values, "company_id": cls.company.id}
+            )
         cls.doc_template = cls.env["lhi.memo.document.template"].create({
             "name": "Default Test Memo Template",
             "code": "MEMO-TEST-TPL",
@@ -209,8 +214,9 @@ class TestMemoManagement(TransactionCase):
         return True
 
     def _create_test_template_bytes(self):
-        from docxtpl import DocxTemplate
-        doc = DocxTemplate(io.BytesIO())
+        from docx import Document
+
+        doc = Document()
         doc.add_paragraph("REF: {{ memo_reference }}")
         doc.add_paragraph("FROM: {{ from_display }}")
         doc.add_paragraph("TO: {{ to_display }}")
@@ -230,6 +236,9 @@ class TestMemoManagement(TransactionCase):
             "subject": "Routine office requirement",
             "purpose": "Request approval for a standalone departmental need.",
             "department_id": department.id,
+            "recipient_user_ids": [
+                (6, 0, [self.approver.id, self.final_authority.id])
+            ],
             **extra,
         }
         with (
@@ -295,7 +304,8 @@ class TestMemoManagement(TransactionCase):
                 self._confirm_upload,
             ),
         ):
-            return memo._capture_current_pdf()
+            pdf_item_id, pdf_hash = memo._capture_current_pdf()
+            return self.env["lhi.document.item"].sudo().browse(pdf_item_id), pdf_hash
 
     def _signature_request(self, memo):
         pdf_item, pdf_hash = self._capture_pdf(memo)
@@ -311,7 +321,11 @@ class TestMemoManagement(TransactionCase):
             self.env.registry["lhi.opensign.configuration"],
             "api_request",
             return_value=response,
-        ) as api_request:
+        ) as api_request, patch.object(
+            self.env.registry["lhi.opensign.request"],
+            "_lhi_source_pdf_bytes",
+            return_value=b"%PDF-1.7\nMemo test\n%%EOF",
+        ):
             signature_request.action_create_provider_draft()
             signature_request.action_create_provider_draft()
         self.assertEqual(api_request.call_count, 1)
@@ -358,7 +372,7 @@ class TestMemoManagement(TransactionCase):
             .get_accessible_apps()["apps"]
         )
         self.assertEqual(
-            len([app for app in apps if app["key"] == "memos"]),
+            len([app for app in apps if app["key"] == "memo"]),
             1,
         )
         self.assertFalse(any(app["key"] == "signatures" for app in apps))
@@ -411,8 +425,8 @@ class TestMemoManagement(TransactionCase):
         memo = self._create_memo()
         pdf = b"%PDF-1.7\nTwo-page representative payload\n%%EOF"
         pdf_item, pdf_hash = self._capture_pdf(memo, pdf=pdf)
-        self.assertEqual(memo.source_docx_version_id, '"memo-version-1"')
-        self.assertEqual(memo.source_docx_etag, '"memo-etag-1"')
+        self.assertEqual(memo.sudo().source_docx_version_id, '"memo-version-1"')
+        self.assertEqual(memo.sudo().source_docx_etag, '"memo-etag-1"')
         self.assertEqual(pdf_hash, hashlib.sha256(pdf).hexdigest())
         self.assertEqual(pdf_item.storage_state, "available")
         self.assertEqual(memo.action_preview_document()["target"], "new")
@@ -427,7 +441,7 @@ class TestMemoManagement(TransactionCase):
             )
             pdf_item, _pdf_hash = self._capture_pdf(memo, pdf=pdf)
             signature_request = memo._create_signature_request(
-                memo._prepare_approval_route()[1], pdf_item, memo.source_pdf_hash
+                memo._prepare_approval_route()[1], pdf_item, memo.sudo().source_pdf_hash
             )
             self.assertEqual(signature_request.sequence_type, "sequential")
             self.assertTrue(
@@ -447,9 +461,9 @@ class TestMemoManagement(TransactionCase):
         self.assertEqual(recipients[-1].participant_role, "final_signer")
         self.assertEqual(recipients[1].provider_role, "approver")
         same_request = memo._create_signature_request(
-            memo.approver_line_ids,
-            memo.source_pdf_item_id,
-            memo.source_pdf_hash,
+            memo.sudo().approver_line_ids,
+            memo.sudo().source_pdf_item_id,
+            memo.sudo().source_pdf_hash,
         )
         self.assertEqual(same_request, signature_request)
         self._prepare_provider(signature_request)
@@ -459,6 +473,7 @@ class TestMemoManagement(TransactionCase):
     def test_failed_provider_creation_never_marks_request_sent(self):
         memo = self._create_memo()
         signature_request = self._signature_request(memo)
+        caught_error = False
         with (
             patch.object(
                 self.env.registry["lhi.opensign.configuration"],
@@ -467,9 +482,17 @@ class TestMemoManagement(TransactionCase):
                     "LHI Sign did not confirm the request; its outcome is unknown."
                 ),
             ),
-            self.assertRaises(UserError),
+            patch.object(
+                self.env.registry["lhi.opensign.request"],
+                "_lhi_source_pdf_bytes",
+                return_value=b"%PDF-1.7\nMemo test\n%%EOF",
+            ),
         ):
-            signature_request.action_create_provider_draft()
+            try:
+                signature_request.action_create_provider_draft()
+            except UserError:
+                caught_error = True
+        self.assertTrue(caught_error)
         self.assertFalse(signature_request.provider_request_id)
         self.assertEqual(signature_request.status, "failed")
         self.assertTrue(signature_request.provider_creation_uncertain)
@@ -568,6 +591,7 @@ class TestMemoManagement(TransactionCase):
                 "current_recipient_id": recipients[0].id,
             }
         )
+        memo.sudo().write({"state": "requester_signature_pending"})
         with self.assertRaises(UserError):
             signature_request.process_provider_event(
                 self._event(signature_request, "signed", "early-final"),
@@ -605,10 +629,11 @@ class TestMemoManagement(TransactionCase):
             )
         self.assertEqual(memo.state, "completed")
         self.assertEqual(
-            memo.signed_pdf_hash, hashlib.sha256(b"%PDF-signed-memo").hexdigest()
+            memo.sudo().signed_pdf_hash,
+            hashlib.sha256(b"%PDF-signed-memo").hexdigest(),
         )
-        self.assertEqual(memo.signed_pdf_item_id.storage_state, "available")
-        self.assertEqual(memo.certificate_item_id.storage_state, "available")
+        self.assertEqual(memo.sudo().signed_pdf_item_id.storage_state, "available")
+        self.assertEqual(memo.sudo().certificate_item_id.storage_state, "available")
         self.assertFalse(signature_request.signed_pdf)
         self.assertFalse(signature_request.audit_certificate)
 
@@ -671,11 +696,12 @@ class TestMemoManagement(TransactionCase):
                 "current_recipient_id": recipients[0].id,
             }
         )
+        memo.sudo().write({"state": "requester_signature_pending"})
         signature_request.process_provider_event(
             self._event(signature_request, "signed", "requester-signed"),
             {"event": "signed", "signer": {"email": recipients[0].email}},
         )
-        old_pdf = memo.source_pdf_item_id
+        old_pdf = memo.sudo().source_pdf_item_id
         memo.with_user(self.approver).write({"return_reason": "Correct the amount."})
         with patch.object(
             self.env.registry["lhi.opensign.configuration"],
@@ -684,10 +710,10 @@ class TestMemoManagement(TransactionCase):
         ):
             memo.with_user(self.approver).action_return_for_correction()
         self.assertEqual(memo.state, "returned")
-        self.assertFalse(memo.signature_request_id)
-        self.assertIn(signature_request, memo.signature_request_ids)
+        self.assertFalse(memo.sudo().signature_request_id)
+        self.assertIn(signature_request, memo.sudo().signature_request_ids)
         self.assertEqual(signature_request.status, "superseded")
-        self.assertEqual(memo.source_pdf_item_id, old_pdf)
+        self.assertEqual(memo.sudo().source_pdf_item_id, old_pdf)
         self.assertFalse(memo.requester_signature_completed)
 
         new_pdf, new_hash = self._capture_pdf(
@@ -704,7 +730,7 @@ class TestMemoManagement(TransactionCase):
         )
         self.assertEqual(replacement.supersedes_request_id, signature_request)
         self.assertEqual(signature_request.superseded_by_request_id, replacement)
-        self.assertEqual(memo.source_docx_version_id, '"memo-version-2"')
+        self.assertEqual(memo.sudo().source_docx_version_id, '"memo-version-2"')
         self.assertFalse(memo.requester_signature_completed)
         self.assertEqual(
             replacement.recipient_ids.sorted("sequence")[:1].participant_role,
@@ -862,7 +888,7 @@ class TestMemoManagement(TransactionCase):
             "name": "External Portal User",
             "login": "portal_external",
             "email": "external@example.test",
-            "groups_id": [(6, 0, [self.env.ref("base.group_portal").id])],
+            "group_ids": [(6, 0, [self.env.ref("base.group_portal").id])],
         })
         with self.assertRaises(AccessError):
             self.requester.with_user(unauthorized_user)._get_entra_object_id_for_memo_integration()

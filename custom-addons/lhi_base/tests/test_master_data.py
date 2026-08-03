@@ -20,6 +20,19 @@ class TestLhiMasterData(TransactionCase):
         self.cc_model = self.env['lhi.cost.center']
         self.activity_model = self.env['lhi.activity']
 
+    def test_00_project_action_is_available_to_early_menus(self):
+        """The project action must resolve when menus load on a clean install."""
+        action = self.env.ref('lhi_base.action_lhi_project')
+        root_menu = self.env.ref('lhi_base.menu_lhi_root')
+        project_menu = self.env.ref('lhi_base.menu_lhi_project_root')
+
+        self.assertEqual(root_menu.action, action)
+        self.assertEqual(project_menu.action, action)
+        self.assertEqual(
+            action.search_view_id,
+            self.env.ref('lhi_base.view_lhi_project_search'),
+        )
+
     def test_01_office_creation_and_constraints(self):
         """Test Office creation, uniqueness of code, and date validations."""
         office = self.office_model.create({

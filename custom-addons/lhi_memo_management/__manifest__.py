@@ -1,6 +1,6 @@
 {
     "name": "LHI Memo Management",
-    "version": "19.0.2.0.0",
+    "version": "19.0.2.0.1",
     "category": "Productivity",
     "summary": "Word, SharePoint, approval, and LHI Sign memo lifecycle",
     "description": """

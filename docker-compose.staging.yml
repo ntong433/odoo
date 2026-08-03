@@ -26,7 +26,8 @@ services:
       dockerfile: Dockerfile.staging
       network: host
 
-    restart: always
+    # Do not replay a failed install or upgrade in an uncontrolled crash loop.
+    restart: "no"
     depends_on:
       db:
         condition: service_healthy
@@ -110,7 +111,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "curl -fsS 'http://127.0.0.1:8069/web/health' >/dev/null || exit 1",
+          "test -f /tmp/lhi-odoo-normal-server-started && curl -fsS 'http://127.0.0.1:8069/web/health' >/dev/null || exit 1",
         ]
       interval: 30s
       timeout: 10s

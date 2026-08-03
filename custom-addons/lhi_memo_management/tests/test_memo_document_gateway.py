@@ -133,8 +133,7 @@ class TestMemoDocumentGateway(TransactionCase):
                     "field_name": "source_docx_item_id",
                     "company_id": self.company.id,
                     "storage_backend": "sharepoint",
-                    "graph_connection_id": self.connection.id,
-                    "sharepoint_library": "MemoDocuments",
+                    "library_code": "operations",
                     "folder_strategy": "library_root",
                     "maximum_size_mb": 10,
                     "confidentiality": "internal",
@@ -299,7 +298,7 @@ class TestMemoDocumentGateway(TransactionCase):
         memo_b.sudo().write({"source_docx_item_id": item_for_a.id})
         gateway = MemoDocumentGateway(self.env, memo_b, self.requester)
         # The item's linked_record_id doesn't match memo_b.id → AccessError
-        with self.assertRaises((AccessError, UserError)):
+        with self.assertRaises(AccessError):
             gateway.read_document_metadata("source_docx_item_id")
 
     # ================================================================== #
@@ -472,9 +471,7 @@ class TestMemoDocumentGateway(TransactionCase):
             "lastModifiedBy": {"user": {"displayName": "Test"}},
             "size": 10000,
         }
-        fake_policy = MagicMock()
-        fake_policy.maximum_size_mb = 10
-        fake_policy.storage_backend = "sharepoint"
+        fake_policy = self._get_or_create_storage_policy()
         fake_pdf = b"%PDF-1.4 integration-test-pdf-bytes"
         fake_docx = b"PK\x03\x04fake-docx-bytes"
 
@@ -501,7 +498,7 @@ class TestMemoDocumentGateway(TransactionCase):
 
         def mock_binary_request(*args, **kwargs):
             response = MagicMock()
-            url = args[1] if len(args) > 1 else ""
+            url = args[2] if len(args) > 2 else ""
             if "format=pdf" in str(kwargs.get("params", "")) or "?format=pdf" in url:
                 response.content = fake_pdf
             else:
@@ -518,18 +515,19 @@ class TestMemoDocumentGateway(TransactionCase):
                 self.env.registry["lhi.document.item"], "action_upload", mock_upload
             ),
             patch.object(
-                self.connection, "graph_request", mock_graph_request
+                self.env.registry["lhi.graph.connection"],
+                "graph_request",
+                mock_graph_request,
             ),
             patch.object(
-                self.connection, "lhi_binary_request", mock_binary_request
+                self.env.registry["lhi.graph.connection"],
+                "lhi_binary_request",
+                mock_binary_request,
             ),
             patch.object(
                 self.env.registry["lhi.document.storage.policy"],
                 "resolve_policy",
                 mock_resolve_policy,
-            ),
-            patch.object(
-                self.connection.__class__, "graph_request", mock_graph_request
             ),
         ):
             memo_as_requester = self.env["lhi.memo"].with_user(self.requester).browse(

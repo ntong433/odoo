@@ -4,7 +4,7 @@ from unittest.mock import patch, MagicMock
 from odoo.tests.common import TransactionCase
 from odoo.exceptions import UserError, ValidationError
 from ..services.word_template_service import WordTemplateService, REQUIRED_PLACEHOLDERS
-from docxtpl import DocxTemplate
+from docx import Document
 
 
 class TestMemoWordTemplate(TransactionCase):
@@ -14,6 +14,11 @@ class TestMemoWordTemplate(TransactionCase):
         super().setUpClass()
         cls.company = cls.env.company
         cls.user = cls.env.user
+        cls.department = cls.env["lhi.department"].create({
+            "name": "Memo Template Test Department",
+            "code": "MEMO-TEMPLATE-TEST",
+            "company_id": cls.company.id,
+        })
 
         cls.template = cls.env["lhi.memo.document.template"].create({
             "name": "LHI Internal Memo Template",
@@ -34,9 +39,15 @@ class TestMemoWordTemplate(TransactionCase):
             "code": "TEST_CAT",
             "company_id": cls.company.id,
         })
+        cls.connection = cls.env["lhi.graph.connection"].create({
+            "name": "Memo Template Test Graph",
+            "company_id": cls.company.id,
+            "tenant_id": "11111111-1111-4111-8111-111111111111",
+            "client_id": "22222222-2222-4222-8222-222222222222",
+        })
 
     def _create_valid_template_bytes(self):
-        doc = DocxTemplate(io.BytesIO())
+        doc = Document()
         doc.add_paragraph("REF: {{ memo_reference }}")
         doc.add_paragraph("FROM: {{ from_display }}")
         doc.add_paragraph("TO: {{ to_display }}")
@@ -65,9 +76,12 @@ class TestMemoWordTemplate(TransactionCase):
     def test_02_template_snapshot_on_memo_creation(self):
         """Creating a memo assigns default template and snapshots metadata without auto-creating docx."""
         memo = self.env["lhi.memo"].create({
+            "title": "Equipment Procurement Request",
             "subject": "Equipment Procurement Request",
+            "purpose": "Request approval to procure equipment.",
             "memo_category_id": self.category.id,
             "requester_id": self.user.id,
+            "department_id": self.department.id,
             "company_id": self.company.id,
         })
 
@@ -80,7 +94,7 @@ class TestMemoWordTemplate(TransactionCase):
 
     def test_03_placeholder_validation_missing_placeholders(self):
         """WordTemplateService.validate_template raises UserError listing missing required placeholders."""
-        doc = DocxTemplate(io.BytesIO())
+        doc = Document()
         output = io.BytesIO()
         doc.save(output)
         empty_bytes = output.getvalue()
@@ -102,9 +116,12 @@ class TestMemoWordTemplate(TransactionCase):
         """_safe_memo_filename converts slashes and sanitizes invalid SharePoint characters."""
         memo = self.env["lhi.memo"].create({
             "name": "LHI/MEMO/2026/00008",
+            "title": "Network Equipment Request",
             "subject": 'Request for "Network" & : <Equipment>? / \\ |',
+            "purpose": "Request approval for network equipment.",
             "memo_category_id": self.category.id,
             "requester_id": self.user.id,
+            "department_id": self.department.id,
         })
 
         safe_name = memo._safe_memo_filename()
@@ -117,9 +134,12 @@ class TestMemoWordTemplate(TransactionCase):
         """_validate_before_opening_word raises UserError listing missing required fields."""
         memo = self.env["lhi.memo"].create({
             "name": "New",
-            "subject": False,
+            "title": "Incomplete Memo",
+            "subject": "Incomplete Memo",
+            "purpose": "Exercise document preflight validation.",
             "memo_category_id": self.category.id,
             "requester_id": self.user.id,
+            "department_id": self.department.id,
         })
 
         with self.assertRaises(UserError) as cm:
@@ -131,11 +151,13 @@ class TestMemoWordTemplate(TransactionCase):
         """_build_template_rendering_context formats dates, requester, recipients, and reference cleanly."""
         memo = self.env["lhi.memo"].create({
             "name": "LHI/MEMO/2026/00099",
+            "title": "Test Context Memo",
             "subject": "Test Context Subject",
             "purpose": "<p>Test <b>body</b> content</p>",
             "memo_category_id": self.category.id,
             "requester_id": self.user.id,
-            "recipient_user_ids": [(6, 0, [self.user.id])],
+            "department_id": self.department.id,
+            "recipient_description": self.user.name,
         })
 
         context = memo._build_template_rendering_context()
@@ -147,18 +169,23 @@ class TestMemoWordTemplate(TransactionCase):
     def test_08_download_master_template_bytes_uses_binary_request_and_content_endpoint(self):
         """_download_master_template_bytes calls /content endpoint via lhi_binary_request with correct parameters."""
         memo = self.env["lhi.memo"].create({
+            "title": "Download Test Memo",
             "subject": "Download Test Memo",
+            "purpose": "Test the bounded template download path.",
             "memo_category_id": self.category.id,
             "requester_id": self.user.id,
+            "department_id": self.department.id,
         })
 
         valid_docx = self._create_valid_template_bytes()
         mock_response = MagicMock()
         mock_response.content = valid_docx
 
-        connection = self.env["lhi.graph.connection"]._get_active_connection(self.company)
-
-        with patch.object(connection, "lhi_binary_request", return_value=mock_response) as mock_binary:
+        with patch.object(
+            self.env.registry["lhi.graph.connection"],
+            "lhi_binary_request",
+            return_value=mock_response,
+        ) as mock_binary:
             content = memo._download_master_template_bytes()
             self.assertTrue(content.startswith(b"PK"))
             mock_binary.assert_called_once()
@@ -173,17 +200,22 @@ class TestMemoWordTemplate(TransactionCase):
     def test_09_download_master_template_bytes_empty_content_raises_user_error(self):
         """Empty response content from SharePoint raises UserError."""
         memo = self.env["lhi.memo"].create({
+            "title": "Empty Download Test Memo",
             "subject": "Empty Download Test Memo",
+            "purpose": "Test rejection of an empty template download.",
             "memo_category_id": self.category.id,
             "requester_id": self.user.id,
+            "department_id": self.department.id,
         })
 
         mock_response = MagicMock()
         mock_response.content = b""
 
-        connection = self.env["lhi.graph.connection"]._get_active_connection(self.company)
-
-        with patch.object(connection, "lhi_binary_request", return_value=mock_response):
+        with patch.object(
+            self.env.registry["lhi.graph.connection"],
+            "lhi_binary_request",
+            return_value=mock_response,
+        ):
             with self.assertRaises(UserError) as cm:
                 memo._download_master_template_bytes()
             self.assertIn("downloaded from SharePoint is empty", str(cm.exception))
@@ -195,27 +227,52 @@ class TestMemoWordTemplate(TransactionCase):
             "name": "Ordinary Memo User",
             "login": "ordinary_memo_user",
             "email": "ordinary_memo_user@example.test",
-            "groups_id": [(6, 0, [self.env.ref("base.group_user").id, employee_group.id])],
+            "group_ids": [(6, 0, [self.env.ref("base.group_user").id, employee_group.id])],
+            "lhi_department_ids": [(6, 0, [self.department.id])],
         })
 
         memo = self.env["lhi.memo"].with_user(ordinary_user).create({
+            "title": "Ordinary User Operations Request",
             "subject": "Ordinary User Operations Request",
+            "purpose": "Test least-privilege Word document creation.",
             "memo_category_id": self.category.id,
             "requester_id": ordinary_user.id,
+            "department_id": self.department.id,
+            "recipient_user_ids": [(6, 0, [ordinary_user.id])],
+            "recipient_description": ordinary_user.name,
         })
 
         valid_docx = self._create_valid_template_bytes()
         mock_response = MagicMock()
         mock_response.content = valid_docx
 
-        connection = self.env["lhi.graph.connection"]._get_active_connection(self.company)
+        def confirm_upload(documents):
+            for document in documents:
+                document.sudo().write({
+                    "sharepoint_site_id": "template-test-site",
+                    "sharepoint_drive_id": "template-test-drive",
+                    "sharepoint_item_id": f"template-test-item-{document.id}",
+                    "sharepoint_web_url": (
+                        f"https://tenant.sharepoint.com/template-test-item-{document.id}"
+                    ),
+                    "storage_state": "available",
+                    "upload_state": "completed",
+                })
+            return True
 
         with (
-            patch.object(connection, "lhi_binary_request", return_value=mock_response),
-            patch.object(self.env.registry["lhi.document.item"], "action_upload", lambda *args, **kwargs: True),
+            patch.object(
+                self.env.registry["lhi.graph.connection"],
+                "lhi_binary_request",
+                return_value=mock_response,
+            ),
+            patch.object(
+                self.env.registry["lhi.document.item"],
+                "action_upload",
+                confirm_upload,
+            ),
         ):
             action = memo.with_user(ordinary_user).action_open_word()
             self.assertEqual(action.get("type"), "ir.actions.act_url")
             self.assertTrue(memo.has_word_document)
             self.assertEqual(memo.document_state, "created")
-

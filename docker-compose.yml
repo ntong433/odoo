@@ -26,7 +26,8 @@ services:
       context: .
       dockerfile: Dockerfile.dev
       network: host
-    restart: always
+    # A failed schema/module phase must stop once with its diagnostic logs.
+    restart: "no"
     depends_on:
       db:
         condition: service_healthy
@@ -108,7 +109,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "curl -fsS 'http://127.0.0.1:8069/web/health' >/dev/null || exit 1",
+          "test -f /tmp/lhi-odoo-normal-server-started && curl -fsS 'http://127.0.0.1:8069/web/health' >/dev/null || exit 1",
         ]
       interval: 30s
       timeout: 10s
@@ -126,4 +127,3 @@ networks:
   default:
   coolify:
     external: true
-

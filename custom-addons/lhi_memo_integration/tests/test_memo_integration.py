@@ -36,7 +36,7 @@ class TestMemoIntegrationOrchestration(TransactionCase):
                 "entra_tenant_id": "tenant-id-aaaa",
                 "entra_upn": "orch_req@example.test",
                 "lhi_department_ids": [(6, 0, [cls.department.id])],
-                "groups_id": [(6, 0, [cls.env.ref("lhi_security.group_lhi_employee").id, cls.env.ref("lhi_security.group_lhi_user").id])],
+                "group_ids": [(6, 0, [cls.env.ref("lhi_security.group_lhi_employee").id, cls.env.ref("lhi_security.group_lhi_user").id])],
             }
         )
         cls.approver = cls.env["res.users"].create(
@@ -50,7 +50,7 @@ class TestMemoIntegrationOrchestration(TransactionCase):
                 "entra_tenant_id": "tenant-id-aaaa",
                 "entra_upn": "orch_app@example.test",
                 "lhi_department_ids": [(6, 0, [cls.department.id])],
-                "groups_id": [(6, 0, [cls.env.ref("lhi_security.group_lhi_employee").id, cls.env.ref("lhi_security.group_lhi_user").id, cls.approver_group.id])],
+                "group_ids": [(6, 0, [cls.env.ref("lhi_security.group_lhi_employee").id, cls.env.ref("lhi_security.group_lhi_user").id, cls.approver_group.id])],
             }
         )
         cls.matrix = cls.env["lhi.approval.matrix"].create(
@@ -83,35 +83,25 @@ class TestMemoIntegrationOrchestration(TransactionCase):
                 "requester_signature_required": True,
             }
         )
-        cls.connection = cls.env["lhi.graph.connection"].create(
-            {
-                "name": "Orchestration Graph Connection",
-                "company_id": cls.company.id,
-                "tenant_id": "tenant-id-aaaa",
-                "client_id": "client-id-bbbb",
-                "client_secret": "secret",
-                "auth_state": "authenticated",
-            }
+        cls.connection = cls.env["lhi.graph.connection"].search(
+            [("company_id", "=", cls.company.id)], limit=1
         )
-        cls.docx_item = cls.env["lhi.document.item"].create(
-            {
-                "name": "Template.docx",
-                "mime_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                "file_size": 1024,
-                "storage_state": "available",
-                "upload_state": "completed",
-                "company_id": cls.company.id,
-                "graph_connection_id": cls.connection.id,
-                "sharepoint_drive_id": "drive-123",
-                "sharepoint_item_id": "item-123",
-            }
-        )
+        if not cls.connection:
+            cls.connection = cls.env["lhi.graph.connection"].create(
+                {
+                    "name": "Orchestration Graph Connection",
+                    "company_id": cls.company.id,
+                    "tenant_id": "11111111-1111-4111-8111-111111111111",
+                    "client_id": "22222222-2222-4222-8222-222222222222",
+                }
+            )
         cls.policy = cls.env["lhi.document.storage.policy"].create(
             {
                 "name": "Memo Policy",
                 "model_name": "lhi.memo",
                 "field_name": "source_docx_item_id",
                 "company_id": cls.company.id,
+                "library_code": "operations",
                 "maximum_size_mb": 25,
             }
         )
@@ -119,25 +109,57 @@ class TestMemoIntegrationOrchestration(TransactionCase):
             {
                 "name": "OpenSign Config",
                 "company_id": cls.company.id,
-                "base_url": "https://sign.example.test",
-                "api_token": "token-xyz",
+                "api_base_url": "https://sign.example.test/api/v1.2/",
                 "active": True,
             }
         )
 
     def _create_memo(self):
-        return self.env["lhi.memo"].with_user(self.requester).create(
+        memo = self.env["lhi.memo"].with_user(self.requester).create(
             {
                 "title": "Test Integration Memo",
+                "subject": "Test Integration Memo",
+                "purpose": "Exercise the Prepare and Sign orchestration contract.",
                 "memo_category_id": self.category.id,
                 "requester_id": self.requester.id,
                 "department_id": self.department.id,
-                "source_docx_item_id": self.docx_item.id,
+                "recipient_user_ids": [(6, 0, [self.approver.id])],
                 "amount": 100.0,
                 "currency_id": self.company.currency_id.id,
                 "company_id": self.company.id,
             }
         )
+        self.docx_item = self.env["lhi.document.item"].create(
+            {
+                "name": "Template.docx",
+                "mime_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "file_size": 1024,
+                "storage_state": "available",
+                "upload_state": "completed",
+                "company_id": self.company.id,
+                "requested_by_id": self.requester.id,
+                "graph_connection_id": self.connection.id,
+                "storage_policy_id": self.policy.id,
+                "linked_model": "lhi.memo",
+                "linked_record_id": memo.id,
+                "linked_field": "source_docx_item_id",
+                "linked_record_uuid": memo.uuid,
+                "checksum": hashlib.sha256(b"PK\x03\x04template").hexdigest(),
+                "sha1_checksum": hashlib.sha1(b"PK\x03\x04template").hexdigest(),
+                "idempotency_key": self.env["lhi.document.item"]._make_idempotency_key(
+                    "lhi.memo",
+                    memo.id,
+                    "source_docx_item_id",
+                    "Template.docx",
+                    hashlib.sha256(b"PK\x03\x04template").hexdigest(),
+                ),
+                "sharepoint_drive_id": "drive-123",
+                "sharepoint_site_id": "site-123",
+                "sharepoint_item_id": f"item-{memo.id}",
+            }
+        )
+        memo.sudo().write({"source_docx_item_id": self.docx_item.id})
+        return memo
 
     def test_contract_validation(self):
         res = self.env["lhi.memo.integration.contracts"].validate_all_contracts()
@@ -152,6 +174,13 @@ class TestMemoIntegrationOrchestration(TransactionCase):
         )
         self.assertEqual(integration_menu.parent_id, configuration_menu)
 
+    def test_integration_view_inherits_the_core_memo_form(self):
+        integration_view = self.env.ref(
+            "lhi_memo_integration.view_memo_form_inherit_integration"
+        )
+        core_view = self.env.ref("lhi_memo_management.view_lhi_memo_form")
+        self.assertEqual(integration_view.inherit_id, core_view)
+
     def test_preflight_success(self):
         memo = self._create_memo()
         preflight_res = memo.action_preflight_prepare_and_sign()
@@ -159,8 +188,12 @@ class TestMemoIntegrationOrchestration(TransactionCase):
 
     def test_preflight_missing_approval_matrix(self):
         memo = self._create_memo()
-        memo.memo_category_id.write({"approval_matrix_id": False})
-        with patch.object(self.env["lhi.approval.matrix"], "find_matching_matrix", return_value=self.env["lhi.approval.matrix"]):
+        memo.memo_category_id.sudo().write({"approval_matrix_id": False})
+        with patch.object(
+            self.env.registry["lhi.approval.matrix"],
+            "find_matching_matrix",
+            return_value=self.env["lhi.approval.matrix"],
+        ):
             with self.assertRaises(UserError):
                 memo.action_preflight_prepare_and_sign()
 
@@ -176,11 +209,12 @@ class TestMemoIntegrationOrchestration(TransactionCase):
             }
         )
         self.matrix.line_ids[0].write({"approver_ids": [(6, 0, [unlinked_user.id])]})
-        with self.assertRaises((UserError, ValidationError)):
+        with self.assertRaises(UserError):
             memo.action_preflight_prepare_and_sign()
 
     def test_prepare_and_sign_idempotency(self):
         memo = self._create_memo()
+        memo.sudo().write({"state": "ready_for_preparation"})
         mock_pdf_item = self.docx_item
         mock_pdf_hash = "abc123hash"
         mock_storage_res = {
@@ -207,10 +241,21 @@ class TestMemoIntegrationOrchestration(TransactionCase):
             "preparation_url": "https://sign.example.test/prep/999",
             "outcome": "confirmed",
         }
+        memo.sudo().write({"signature_request_id": mock_sig_req.id})
 
-        with patch.object(self.env["lhi.document.item"], "_lhi_prepare_and_confirm_memo_document", return_value=mock_storage_res), \
-             patch.object(self.env["lhi.opensign.request"], "_lhi_create_memo_signature_draft", return_value=mock_sig_res), \
-             patch.object(memo, "_create_signature_request", return_value=mock_sig_req):
+        with patch.object(
+            self.env.registry["lhi.memo"],
+            "_capture_current_pdf",
+            return_value=(mock_pdf_item.id, mock_pdf_hash),
+        ), patch.object(
+            self.env.registry["lhi.opensign.request"],
+            "_lhi_create_memo_signature_draft",
+            return_value=mock_sig_res,
+        ), patch.object(
+            self.env.registry["lhi.memo"],
+            "_create_signature_request",
+            return_value=mock_sig_req,
+        ):
             res1 = memo.action_prepare_and_sign()
             self.assertEqual(res1.get("type"), "ir.actions.act_url")
             op = memo.current_operation_id
@@ -236,7 +281,9 @@ class TestMemoIntegrationOrchestration(TransactionCase):
             }
         )
         memo.sudo().write({"current_operation_id": op.id})
-        with patch.object(memo, "action_prepare_and_sign") as mock_prep:
+        with patch.object(
+            self.env.registry["lhi.memo"], "action_prepare_and_sign"
+        ) as mock_prep:
             memo.action_retry_integration()
             self.assertEqual(op.state, "draft")
             self.assertEqual(op.retry_count, 1)

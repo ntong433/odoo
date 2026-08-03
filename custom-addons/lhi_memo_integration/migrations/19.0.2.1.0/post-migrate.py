@@ -147,9 +147,11 @@ def _migrate_historical_failures(cr):
     cr.execute(
         """
         INSERT INTO lhi_memo_integration_operation (
+            name,
             memo_id,
             company_id,
             correlation_id,
+            idempotency_key,
             operation_type,
             state,
             current_step,
@@ -168,9 +170,11 @@ def _migrate_historical_failures(cr):
             write_date
         )
         SELECT
+            'MEMO-INT-HISTORICAL-' || m.id::text          AS name,
             m.id                                          AS memo_id,
             m.company_id                                  AS company_id,
             'HISTORICAL-' || m.id::text                  AS correlation_id,
+            'historical-memo-failure-' || m.id::text     AS idempotency_key,
             'prepare_and_sign'                            AS operation_type,
             'permanent_failure'                           AS state,
             COALESCE(m.integration_error_code, 'failed')  AS current_step,

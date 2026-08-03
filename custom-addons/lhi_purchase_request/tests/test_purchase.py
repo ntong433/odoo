@@ -33,6 +33,12 @@ class TestPurchaseRequest(TransactionCase):
         # Note: In a real test we'd need to mock find_matching_matrix to return this matrix 
         # or ensure criteria match. The matrix created has no constraints so it should match.
 
+    def test_procurement_root_menu_action_resolves(self):
+        self.assertEqual(
+            self.env.ref('lhi_purchase_request.menu_lhi_procurement_root').action,
+            self.env.ref('lhi_purchase_request.action_lhi_purchase_request'),
+        )
+
     def test_pr_workflow(self):
         pr = self.env['lhi.purchase.request'].create({
             'justification': 'Need supplies',

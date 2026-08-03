@@ -278,7 +278,10 @@ class LhiApprovalRequest(models.Model):
             raise UserError(_("You have already approved this stage."))
 
         # Record approval
-        current_line.write({"approved_user_ids": [(4, user.id)]})
+        # Authorization is established above against the current immutable
+        # step.  Mutate the server-owned route snapshot under narrow elevation;
+        # approvers intentionally cannot browse or edit hidden future steps.
+        current_line.sudo().write({"approved_user_ids": [(4, user.id)]})
 
         # History log
         self.env["lhi.approval.history"].create(
@@ -296,22 +299,24 @@ class LhiApprovalRequest(models.Model):
             stage_complete = True
         elif current_line.approval_type == "all":
             # All eligible approvers must have approved
-            if len(current_line.approved_user_ids) >= len(current_line.approver_ids):
+            if len(current_line.sudo().approved_user_ids) >= len(
+                current_line.sudo().approver_ids
+            ):
                 stage_complete = True
 
         if stage_complete:
-            current_line.write({"state": "approved"})
+            current_line.sudo().write({"state": "approved"})
             # Notify chatter
             self.message_post(
                 body=_("Stage '%s' approved by %s.") % (current_line.name, user.name)
             )
 
             # Find next stage
-            next_line = self.line_ids.filtered(
+            next_line = self.sudo().line_ids.filtered(
                 lambda request_line: request_line.state == "pending"
             )
             if not next_line:
-                self.write({"state": "approved"})
+                self.sudo().write({"state": "approved"})
                 self._update_source_document("approved")
                 # Log audit event
                 self.env["lhi.audit.log"].create_event(
@@ -344,8 +349,8 @@ class LhiApprovalRequest(models.Model):
             }
         )
 
-        current_line.write({"state": "rejected"})
-        self.write({"state": "rejected"})
+        current_line.sudo().write({"state": "rejected"})
+        self.sudo().write({"state": "rejected"})
         self._update_source_document("rejected")
         self.message_post(
             body=_("Request rejected at stage '%s' by %s. Notes: %s")
@@ -377,8 +382,10 @@ class LhiApprovalRequest(models.Model):
         )
 
         # Reset all steps and mark request as returned
-        self.line_ids.write({"state": "pending", "approved_user_ids": [(6, 0, [])]})
-        self.write({"state": "returned"})
+        self.sudo().line_ids.write(
+            {"state": "pending", "approved_user_ids": [(6, 0, [])]}
+        )
+        self.sudo().write({"state": "returned"})
         self._update_source_document("returned")
         self.message_post(
             body=_("Request returned for correction by %s. Notes: %s")

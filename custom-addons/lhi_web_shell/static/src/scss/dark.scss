@@ -23,12 +23,29 @@
         border-color: var(--lhi-card-border);
     }
 
-    .o_list_view {
+    .modal-content {
+        background-color: var(--lhi-surface, #172033) !important;
+        border-color: var(--lhi-border, #334155) !important;
+        color: var(--lhi-text, #f8fafc) !important;
+    }
+
+    .modal-header {
+        border-bottom-color: var(--lhi-border, #334155) !important;
+    }
+
+    .modal-footer {
+        border-top-color: var(--lhi-border, #334155) !important;
+        background-color: var(--lhi-surface-muted, #1e293b) !important;
+    }
+
+    .o_list_view,
+    .o_list_renderer {
         background: var(--lhi-card-bg);
         border-color: var(--lhi-card-border);
 
         thead th {
-            background: #161b28;
+            background: #161b28 !important;
+            color: var(--lhi-text-secondary);
         }
 
         tbody tr:hover {

@@ -109,9 +109,11 @@
 .o_form_view {
     background: var(--lhi-canvas-bg);
     font-family: $lhi-font-family-sans;
+    width: 100%;
 
     .o_form_sheet_bg {
         background: var(--lhi-canvas-bg);
+        width: 100%;
     }
 
     .o_form_sheet {
@@ -119,17 +121,55 @@
         border: 1px solid var(--lhi-card-border);
         border-radius: $lhi-radius-xl;
         box-shadow: var(--lhi-shadow);
-        margin: $lhi-space-4;
+        margin: $lhi-space-4 auto;
         padding: $lhi-space-6;
+        width: 100%;
+        max-width: 1200px;
     }
 
-    // Field labels
-    .o_field_widget .o_form_label,
-    .o_field_label {
-        font-size: $lhi-font-size-sm;
-        font-weight: $lhi-font-weight-medium;
-        color: var(--lhi-text-secondary);
-        font-family: $lhi-font-family-sans;
+    // Preserve Odoo native form table/grid layout
+    .o_group {
+        width: 100%;
+
+        .o_td_label {
+            width: 0%; // Standard Odoo table label cell width behavior
+            min-width: 130px;
+            white-space: nowrap !important;
+            vertical-align: top;
+            padding-right: $lhi-space-3;
+        }
+
+        .o_form_label,
+        .o_field_label {
+            font-size: $lhi-font-size-sm;
+            font-weight: $lhi-font-weight-medium;
+            color: var(--lhi-text-secondary);
+            font-family: $lhi-font-family-sans;
+            white-space: nowrap !important;
+            word-break: normal !important;
+            overflow-wrap: normal !important;
+            display: inline-block;
+            margin-bottom: 0;
+        }
+
+        .o_cell {
+            vertical-align: top;
+        }
+    }
+
+    // Modal form view sheet adjustment
+    &.modal-body,
+    .modal & {
+        padding: 0;
+
+        .o_form_sheet {
+            margin: 0;
+            box-shadow: none;
+            border: none;
+            padding: $lhi-space-2;
+            width: 100%;
+            max-width: 100%;
+        }
     }
 
     // Field inputs
@@ -180,15 +220,14 @@
     }
 }
 
-// ── List View ─────────────────────────────────────────────────────────────────
-.o_list_view {
+// ── List View & Embedded List Headers ─────────────────────────────────────────
+.o_list_view,
+.o_list_renderer {
     font-family: $lhi-font-family-sans;
     background: var(--lhi-card-bg);
-    border: 1px solid var(--lhi-card-border);
-    border-radius: $lhi-radius-xl;
-    overflow: hidden;
 
-    table {
+    table,
+    .o_list_table {
         font-family: $lhi-font-family-sans;
         width: 100%;
         border-collapse: collapse;
@@ -201,8 +240,12 @@
         text-transform: uppercase;
         color: var(--lhi-text-secondary);
         background: var(--lhi-canvas-bg);
-        padding: $lhi-space-3 $lhi-space-4;
+        padding: $lhi-space-2 $lhi-space-3;
         border-bottom: 1px solid var(--lhi-card-border);
+        vertical-align: middle;
+        line-height: $lhi-line-height-normal;
+        height: auto;
+        overflow: visible;
 
         &.o_column_sortable:hover { color: var(--lhi-primary); }
     }
@@ -219,7 +262,7 @@
     tbody td {
         font-size: $lhi-font-size-sm;
         color: var(--lhi-text-primary);
-        padding: $lhi-space-3 $lhi-space-4;
+        padding: $lhi-space-2 $lhi-space-3;
         vertical-align: middle;
     }
 
@@ -228,6 +271,76 @@
         .o_checkbox input[type=checkbox]:checked + span {
             background: var(--lhi-primary);
             border-color: var(--lhi-primary);
+        }
+    }
+}
+
+// Embedded x2many list views in forms, notebooks, and modals must use static headers
+.o_form_view,
+.o_field_x2many,
+.o_notebook,
+.modal {
+    .o_list_view,
+    .o_list_renderer {
+        overflow: visible !important;
+        border-radius: $lhi-radius-md;
+        border: 1px solid var(--lhi-card-border);
+
+        table,
+        .o_list_table {
+            thead {
+                position: static !important;
+                top: auto !important;
+
+                tr {
+                    position: static !important;
+                }
+
+                th {
+                    position: static !important;
+                    top: auto !important;
+                    margin-top: 0 !important;
+                    overflow: visible !important;
+                    white-space: nowrap !important;
+                    height: auto !important;
+                    line-height: 1.4 !important;
+                    padding: 0.5rem 0.75rem !important;
+                    background: var(--lhi-canvas-bg) !important;
+                }
+            }
+        }
+    }
+}
+
+// Notebook Tab Navigation Headers
+.o_notebook {
+    .nav-tabs {
+        border-bottom: 1px solid var(--lhi-card-border);
+        gap: $lhi-space-1;
+        margin-bottom: $lhi-space-4;
+
+        .nav-link {
+            font-family: $lhi-font-family-sans;
+            font-size: $lhi-font-size-sm;
+            font-weight: $lhi-font-weight-medium;
+            color: var(--lhi-text-secondary);
+            border: none;
+            border-bottom: 2px solid transparent;
+            padding: $lhi-space-2 $lhi-space-4;
+            border-radius: 0;
+            transition: color $lhi-transition-fast, border-color $lhi-transition-fast;
+
+            &:hover {
+                color: var(--lhi-primary);
+                border-bottom-color: var(--lhi-primary-light);
+            }
+
+            &.active {
+                color: var(--lhi-primary);
+                font-weight: $lhi-font-weight-semibold;
+                border-bottom-color: var(--lhi-primary);
+                background: transparent;
+            }
         }
     }
 }

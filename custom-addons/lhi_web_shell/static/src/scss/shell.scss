@@ -91,7 +91,17 @@ body.o_web_client > .lhi-sidebar {
 }
 
 // ── 4. Workspace — Column 2 (topbar + content rows) ─────────────────────────
-// Odoo places the action manager and main content here.
+// Odoo places main components (dialogs, notifications) and navbar/action manager here.
+body.o_web_client > .o_main_components_container,
+body.o_web_client > .o_dialog_container,
+body.o_web_client > .modal-backdrop,
+body.o_web_client > .modal,
+body.o_web_client > .o_dialog,
+body.o_web_client > .o_technical_modal {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 / -1 !important;
+}
+
 body.o_web_client > .o_main_components_container {
     position: fixed !important;
     inset: 0 !important;
@@ -101,6 +111,81 @@ body.o_web_client > .o_main_components_container {
 
 body.o_web_client > .o_main_components_container > * {
     pointer-events: auto !important;
+}
+
+// ── 4b. Modal & Dialog Overlay Stacking Hierarchy ─────────────────────────────
+.modal-backdrop,
+div.modal-backdrop,
+.o_dialog_container > .modal-backdrop {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 / -1 !important;
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 1040 !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    pointer-events: auto !important;
+}
+
+.modal,
+div.modal,
+.o_dialog,
+.o_technical_modal,
+.o_dialog_container {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 / -1 !important;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 1050 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+
+.modal-dialog {
+    position: relative !important;
+    margin: 1.75rem auto !important;
+    pointer-events: auto !important;
+    width: min(900px, calc(100vw - 3.5rem)) !important;
+    max-width: min(1100px, calc(100vw - 3.5rem)) !important;
+
+    &.modal-sm {
+        width: min(450px, calc(100vw - 2rem)) !important;
+        max-width: min(450px, calc(100vw - 2rem)) !important;
+    }
+
+    &.modal-lg {
+        width: min(900px, calc(100vw - 3.5rem)) !important;
+        max-width: min(900px, calc(100vw - 3.5rem)) !important;
+    }
+
+    &.modal-xl {
+        width: min(1200px, calc(100vw - 3.5rem)) !important;
+        max-width: min(1200px, calc(100vw - 3.5rem)) !important;
+    }
+
+    .modal-content {
+        position: relative !important;
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        background-color: var(--lhi-surface, #ffffff) !important;
+        border: 1px solid var(--lhi-border, #e2e8f0) !important;
+        border-radius: var(--lhi-radius-lg, 16px) !important;
+        box-shadow: var(--lhi-shadow-xl) !important;
+        max-height: calc(100vh - 3.5rem) !important;
+        overflow: hidden !important;
+    }
+
+    .modal-body {
+        position: relative !important;
+        flex: 1 1 auto !important;
+        padding: 1.5rem !important;
+        overflow-y: auto !important;
+        max-height: calc(100vh - 9rem) !important;
+    }
 }
 
 // The main topbar sits in row 1 of the content column

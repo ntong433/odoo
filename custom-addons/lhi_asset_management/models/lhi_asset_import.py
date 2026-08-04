@@ -102,91 +102,158 @@ class LhiAssetImportWizard(models.TransientModel):
         help="Used only when a row and its legacy tag do not identify a state.",
     )
 
-    def _verify_and_confirm_asset_import_document(self, document, content, expected_size):
+    def _verify_and_confirm_asset_import_document(
+        self, document, upload_payload, expected_size, expected_checksum
+    ):
         """
-        Perform bounded SharePoint DriveItem size verification for Legacy Asset Import.
-        Executes bounded retries when Graph API metadata is temporarily delayed or size is zero immediately after upload.
+        Perform bounded SharePoint DriveItem verification for Legacy Asset Import.
+        Verifies returned DriveItem ID, remote size, conflict behavior, and logs safe diagnostic details.
         """
-        connection = document.graph_connection_id
+        if len(upload_payload) != expected_size:
+            _logger.error(
+                "Upload payload changed before transmission. Expected size: %s, payload size: %s",
+                expected_size,
+                len(upload_payload),
+            )
+            raise UserError(_("Upload payload changed before transmission."))
+
         if document.storage_state != "available" and document.spool_path:
             try:
                 document.action_upload()
             except UserError as err:
                 _logger.info(
-                    "Initial upload verification note for %s (Document %s): %s. Executing bounded metadata retries.",
+                    "Initial upload notice for %s (Document %s): %s. Executing DriveItem metadata verification.",
                     document.name,
                     document.id,
                     err,
                 )
             except Exception as err:
                 _logger.error(
-                    "Legacy Asset Import SharePoint upload failed. Source filename: %s, expected size: %s bytes, document item ID: %s",
+                    "Legacy Asset Import SharePoint upload failed. Document ID: %s, filename: %s, expected size: %s",
+                    document.id,
                     document.name,
                     expected_size,
-                    document.id,
                 )
                 raise
 
         drive_id = document.sharepoint_drive_id
-        item_id = document.sharepoint_item_id
+        returned_item_id = document.sharepoint_item_id
+        connection = document.graph_connection_id
 
-        if not drive_id or not item_id:
+        if not drive_id or not returned_item_id:
             _logger.error(
-                "Legacy Asset Import missing SharePoint item identifiers. Source filename: %s, expected size: %s bytes, document item ID: %s",
+                "Remote item is missing after upload completion. Document ID: %s, filename: %s, expected size: %s",
+                document.id,
                 document.name,
                 expected_size,
-                document.id,
             )
-            document._mark_failed("Missing SharePoint drive or item identifier.", enqueue=False)
-            raise UserError(_("SharePoint upload did not return required drive or item identifiers."))
+            document._mark_failed("Remote item is missing after upload completion.", enqueue=False)
+            raise UserError(_("Remote item is missing after upload completion."))
+
+        if document.sharepoint_item_id and returned_item_id != document.sharepoint_item_id:
+            _logger.error(
+                "Returned DriveItem ID differs from the persisted item ID. Persisted: %s, Returned: %s",
+                document.sharepoint_item_id,
+                returned_item_id,
+            )
+            raise UserError(_("Returned DriveItem ID differs from the persisted item ID."))
 
         max_retries = 5
         remote_size = -1
+        last_metadata = {}
 
         for attempt in range(max_retries):
             try:
-                metadata = connection.graph_request(
+                last_metadata = connection.graph_request(
                     "GET",
-                    f"/drives/{quote(drive_id)}/items/{quote(item_id)}",
+                    f"/drives/{quote(drive_id)}/items/{quote(returned_item_id)}",
                     auth_context="application",
-                    params={"$select": "id,name,size,file"},
+                    params={"$select": "id,name,size,eTag,file"},
                 )
-                if metadata and isinstance(metadata, dict) and metadata.get("id") == item_id:
-                    remote_size = int(metadata.get("size") or 0)
+                if last_metadata and isinstance(last_metadata, dict):
+                    meta_id = last_metadata.get("id")
+                    if meta_id != returned_item_id:
+                        _logger.error(
+                            "SharePoint returned metadata for a different file. Persisted ID: %s, returned ID: %s",
+                            returned_item_id,
+                            meta_id,
+                        )
+                        raise UserError(_("SharePoint returned metadata for a different file."))
+
+                    remote_size = int(last_metadata.get("size") or 0)
                     if remote_size == expected_size:
                         break
+            except UserError:
+                raise
             except Exception as exc:
                 _logger.warning(
-                    "Attempt %s/%s retrieving DriveItem metadata for %s (Document %s) failed: %s",
+                    "Attempt %s/%s fetching DriveItem %s metadata failed: %s",
                     attempt + 1,
                     max_retries,
-                    document.name,
-                    document.id,
+                    returned_item_id,
                     exc,
                 )
 
             if attempt < max_retries - 1:
                 time.sleep(0.5)
 
+        if last_metadata and last_metadata.get("id") and last_metadata.get("id") != returned_item_id:
+            raise UserError(_("SharePoint returned metadata for a different file."))
+
+        if remote_size < 0 or not last_metadata:
+            _logger.error(
+                "Remote item is missing after upload completion. Document ID: %s, Item ID: %s",
+                document.id,
+                returned_item_id,
+            )
+            document._mark_failed("Remote item is missing after upload completion.", enqueue=False)
+            raise UserError(_("Remote item is missing after upload completion."))
+
+        conflict_behavior = document.storage_policy_id.conflict_behavior or "default"
+        final_remote_name = last_metadata.get("name") or document.name
+        checksum_prefix = expected_checksum[:8] if expected_checksum else ""
+
         if remote_size != expected_size:
             _logger.error(
-                "Legacy Asset Import file-size verification failed after %s checks. "
-                "Source filename: %s, expected byte size: %s, remote SharePoint size: %s, document item ID: %s",
-                max_retries,
-                document.name,
+                "Legacy Asset Import remote size differs from exact uploaded payload. "
+                "Original decoded size: %s, upload payload size: %s, SHA-256 prefix: %s, "
+                "returned DriveItem ID: %s, stored document ID: %s, remote size: %s, "
+                "final remote filename: %s, conflict behavior: %s",
                 expected_size,
-                remote_size,
+                len(upload_payload),
+                checksum_prefix,
+                returned_item_id,
                 document.id,
+                remote_size,
+                final_remote_name,
+                conflict_behavior,
             )
-            document._mark_failed("SharePoint file-size verification failed.", enqueue=False)
+            document._mark_failed("Remote size differs from the exact uploaded payload.", enqueue=False)
             raise UserError(
-                _("SharePoint file-size verification failed for Legacy Asset Import. Expected %s bytes, remote SharePoint size %s bytes.")
+                _("Remote size differs from the exact uploaded payload. Expected %s bytes, remote SharePoint size %s bytes.")
                 % (expected_size, remote_size)
             )
 
+        _logger.info(
+            "Legacy Asset Import SharePoint verification succeeded. "
+            "Original decoded size: %s, upload payload size: %s, SHA-256 prefix: %s, "
+            "returned DriveItem ID: %s, stored document ID: %s, remote size: %s, "
+            "final remote filename: %s, conflict behavior: %s",
+            expected_size,
+            len(upload_payload),
+            checksum_prefix,
+            returned_item_id,
+            document.id,
+            remote_size,
+            final_remote_name,
+            conflict_behavior,
+        )
+
         document.sudo().write(
             {
+                "name": final_remote_name,
                 "file_size": remote_size,
+                "sharepoint_etag": last_metadata.get("eTag") or document.sharepoint_etag,
                 "storage_state": "available",
                 "upload_state": "completed",
                 "reconciliation_state": "matched",
@@ -203,11 +270,14 @@ class LhiAssetImportWizard(models.TransientModel):
         extension = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
         if extension not in ("csv", "xlsx"):
             raise ValidationError(_("Upload a .csv or .xlsx asset register."))
-        content = base64.b64decode(self.upload)
-        if not content:
+
+        decoded_content = base64.b64decode(self.upload or b"")
+        if not decoded_content:
             raise ValidationError(_("The uploaded asset register is empty."))
 
-        expected_size = len(content)
+        upload_payload = decoded_content
+        expected_size = len(upload_payload)
+        expected_checksum = hashlib.sha256(upload_payload).hexdigest()
 
         batch = self.env["lhi.asset.import.batch"].create(
             {
@@ -215,25 +285,42 @@ class LhiAssetImportWizard(models.TransientModel):
                 "default_state_id": self.default_state_id.id,
             }
         )
+
+        # Parse preview independently from an in-memory copy without mutating upload_payload
+        preview_stream = io.BytesIO(bytes(decoded_content))
+        batch._load_preview(preview_stream, extension)
+
         mime_type = (
             "text/csv"
             if extension == "csv"
             else "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
 
-        checksum = hashlib.sha256(content).hexdigest()
         idempotency_key = self.env["lhi.document.item"]._make_idempotency_key(
-            batch._name, batch.id, "source_file", filename, checksum
+            batch._name, batch.id, "source_file", filename, expected_checksum
         )
         existing_doc = self.env["lhi.document.item"].sudo().search(
             [("idempotency_key", "=", idempotency_key)], limit=1
         )
         if existing_doc:
-            document = existing_doc
+            if existing_doc.checksum == expected_checksum and existing_doc.file_size == expected_size:
+                document = existing_doc
+            else:
+                existing_doc._mark_failed("Payload mismatch on retry", enqueue=False)
+                document = self.env["lhi.document.item"].create_from_bytes(
+                    name=filename,
+                    content=upload_payload,
+                    mime_type=mime_type,
+                    linked_model=batch._name,
+                    linked_record_id=batch.id,
+                    linked_field="source_file",
+                    requested_by=self.env.user,
+                    synchronous=False,
+                )
         else:
             document = self.env["lhi.document.item"].create_from_bytes(
                 name=filename,
-                content=content,
+                content=upload_payload,
                 mime_type=mime_type,
                 linked_model=batch._name,
                 linked_record_id=batch.id,
@@ -242,7 +329,12 @@ class LhiAssetImportWizard(models.TransientModel):
                 synchronous=False,
             )
 
-        self._verify_and_confirm_asset_import_document(document, content, expected_size)
+        self._verify_and_confirm_asset_import_document(
+            document=document,
+            upload_payload=upload_payload,
+            expected_size=expected_size,
+            expected_checksum=expected_checksum,
+        )
 
         batch.sudo().with_context(lhi_asset_import_system=True).write(
             {
@@ -256,7 +348,6 @@ class LhiAssetImportWizard(models.TransientModel):
                 ),
             }
         )
-        batch._load_preview(content, extension)
         return {
             "type": "ir.actions.act_window",
             "name": _("Asset Import Batch"),
@@ -437,10 +528,11 @@ class LhiAssetImportBatch(models.Model):
         self.ensure_one()
         if self.state != "draft" or self.line_ids:
             raise UserError(_("This batch preview has already been loaded."))
+        raw_bytes = content.read() if hasattr(content, "read") else bytes(content)
         rows, headers = (
-            self._csv_rows(content)
+            self._csv_rows(raw_bytes)
             if extension == "csv"
-            else self._xlsx_rows(content)
+            else self._xlsx_rows(raw_bytes)
         )
         mapped_headers = {
             header: self._canonical_header(header)

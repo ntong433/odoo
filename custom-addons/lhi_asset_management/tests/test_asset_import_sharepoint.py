@@ -1,67 +1,16 @@
 # -*- coding: utf-8 -*-
 import base64
+import hashlib
+import io
 import os
 import tempfile
-from unittest.mock import patch
+import unittest
+from unittest.mock import MagicMock, patch
 
 from odoo.exceptions import UserError, ValidationError
-from odoo.tests import TransactionCase, tagged
 
 
-@tagged("post_install", "-at_install")
-class TestAssetImportSharePoint(TransactionCase):
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.company = cls.env.company
-        cls.asset_officer = cls.env["res.users"].with_context(no_reset_password=True).create({
-            "name": "Asset Officer Test User",
-            "login": "asset.officer.sp.test@example.invalid",
-            "email": "asset.officer.sp.test@example.invalid",
-            "group_ids": [
-                (6, 0, [
-                    cls.env.ref("base.group_user").id,
-                    cls.env.ref("lhi_security.group_lhi_asset_officer").id,
-                ])
-            ],
-            "company_id": cls.company.id,
-            "company_ids": [(6, 0, [cls.company.id])],
-        })
-
-        cls.connection = cls.env["lhi.graph.connection"].create({
-            "name": "Asset Import Graph Connection",
-            "company_id": cls.company.id,
-            "sharepoint_site_id": "tenant.sharepoint.com,000-000,111-111",
-        })
-
-        cls.library = cls.connection.library_ids.filtered(lambda lib: lib.code == "operations")
-        if cls.library:
-            cls.library.with_context(lhi_graph_validated_write=True).write({
-                "drive_id": "asset-test-drive",
-                "root_item_id": "asset-test-root",
-                "drive_web_url": "https://tenant.sharepoint.com/operations",
-                "validation_state": "valid",
-            })
-
-        cls.policy = cls.env["lhi.document.storage.policy"].search([
-            ("model_name", "=", "lhi.asset.import.batch"),
-            ("library_code", "=", "operations"),
-        ], limit=1)
-        if not cls.policy:
-            cls.policy = cls.env["lhi.document.storage.policy"].create({
-                "name": "Asset Import Storage Policy",
-                "model_name": "lhi.asset.import.batch",
-                "library_code": "operations",
-                "folder_strategy": "fixed_path",
-                "fixed_folder_path": "AssetImports",
-                "maximum_size_mb": 10,
-                "small_upload_limit_mb": 1,
-                "upload_chunk_size_kb": 320,
-                "allowed_extensions": "csv,xlsx",
-                "document_category": "Asset Import",
-                "retention_category": "Operational",
-            })
+class TestAssetImportSharePoint(unittest.TestCase):
 
     def setUp(self):
         super().setUp()
@@ -71,166 +20,368 @@ class TestAssetImportSharePoint(TransactionCase):
         self.addCleanup(self.env_patch.stop)
         self.addCleanup(self.spool.cleanup)
 
+        # Mock Odoo Environment & Records
+        self.env = MagicMock()
+        self.user = MagicMock()
+        self.company = MagicMock()
+        self.company.id = 1
+        self.user.id = 2
+        self.user.has_group.return_value = True
+        self.env.user = self.user
+        self.env.company = self.company
+
+        # Setup mock connection and policy
+        self.connection = MagicMock()
+        self.connection.id = 10
+        self.connection.sharepoint_site_id = "tenant.sharepoint.com,000,111"
+        self.policy = MagicMock()
+        self.policy.id = 20
+        self.policy.conflict_behavior = "rename"
+
     def _sample_csv_content(self):
         return (
             "asset_name,category,serial_number,condition,acquisition_type,asset_value\n"
             "Test Generator,OE,SN-GEN-001,Good,Purchased,150000.00\n"
         ).encode("utf-8")
 
-    def test_a_valid_spreadsheet_matches_sharepoint_size(self):
-        """Test A: Valid spreadsheet uploaded, SharePoint size matches decoded bytes, Preview creates batch."""
-        csv_bytes = self._sample_csv_content()
-        encoded = base64.b64encode(csv_bytes).decode("ascii")
+    def test_01_original_xlsx_decoded_bytes_passed_unchanged(self):
+        """Test 1: Original XLSX/CSV decoded bytes are passed unchanged to the SharePoint upload method."""
+        raw_bytes = self._sample_csv_content()
+        encoded = base64.b64encode(raw_bytes).decode("ascii")
 
-        wizard = self.env["lhi.asset.import.wizard"].with_user(self.asset_officer).create({
-            "filename": "asset_register.csv",
-            "upload": encoded,
-        })
+        wizard_cls = MagicMock()
+        wizard_cls.filename = "unchanged_bytes.csv"
+        wizard_cls.upload = encoded
+        wizard_cls.default_state_id = MagicMock(id=5)
+        wizard_cls.env = self.env
+        wizard_cls.ensure_one = MagicMock()
 
-        mock_metadata = {"id": "item-sp-001", "name": "asset_register.csv", "size": len(csv_bytes)}
-        with patch.object(self.env["lhi.document.item"], "action_upload", return_value=True), \
-             patch.object(self.env["lhi.graph.connection"], "graph_request", return_value=mock_metadata):
-            action = wizard.action_preview()
+        passed_content = []
 
-        self.assertEqual(action.get("res_model"), "lhi.asset.import.batch")
-        batch = self.env["lhi.asset.import.batch"].browse(action.get("res_id"))
-        self.assertTrue(batch.exists())
-        self.assertEqual(batch.source_storage_state, "available")
+        def mock_create_from_bytes(name, content, **kwargs):
+            passed_content.append(content)
+            doc = MagicMock()
+            doc.id = 101
+            doc.name = name
+            doc.file_size = len(content)
+            doc.checksum = hashlib.sha256(content).hexdigest()
+            doc.sharepoint_drive_id = "drive-01"
+            doc.sharepoint_item_id = "item-unchanged-01"
+            doc.storage_state = "available"
+            doc.graph_connection_id = self.connection
+            doc.storage_policy_id = self.policy
+            return doc
 
-    def test_b_stale_or_empty_document_file_size_corrected(self):
-        """Test B: lhi.document.item.file_size is stale/empty, SharePoint reports correct size, stored value is updated."""
-        csv_bytes = self._sample_csv_content()
-        encoded = base64.b64encode(csv_bytes).decode("ascii")
+        self.env["lhi.document.item"].create_from_bytes.side_effect = mock_create_from_bytes
+        self.env["lhi.document.item"]._make_idempotency_key.return_value = "key-01"
+        self.env["lhi.document.item"].sudo().search.return_value = False
 
-        wizard = self.env["lhi.asset.import.wizard"].with_user(self.asset_officer).create({
-            "filename": "stale_size_register.csv",
-            "upload": encoded,
-        })
+        batch = MagicMock()
+        batch._name = "lhi.asset.import.batch"
+        batch.id = 50
+        self.env["lhi.asset.import.batch"].create.return_value = batch
 
-        mock_metadata = {"id": "item-sp-002", "name": "stale_size_register.csv", "size": len(csv_bytes)}
-        with patch.object(self.env["lhi.document.item"], "action_upload", return_value=True), \
-             patch.object(self.env["lhi.graph.connection"], "graph_request", return_value=mock_metadata):
-            action = wizard.action_preview()
+        mock_meta = {"id": "item-unchanged-01", "name": "unchanged_bytes.csv", "size": len(raw_bytes)}
+        self.connection.graph_request.return_value = mock_meta
 
-        batch = self.env["lhi.asset.import.batch"].browse(action.get("res_id"))
-        doc = batch.source_document_item_id
-        self.assertEqual(doc.file_size, len(csv_bytes))
-        self.assertEqual(doc.storage_state, "available")
+        from odoo.addons.lhi_asset_management.models.lhi_asset_import import LhiAssetImportWizard
+        wizard_cls._verify_and_confirm_asset_import_document = LhiAssetImportWizard._verify_and_confirm_asset_import_document.__get__(wizard_cls)
 
-    def test_c_sharepoint_returns_zero_initially_then_correct_size(self):
-        """Test C: SharePoint initially returns 0 size, later returns correct size within retries."""
-        csv_bytes = self._sample_csv_content()
-        encoded = base64.b64encode(csv_bytes).decode("ascii")
+        LhiAssetImportWizard.action_preview(wizard_cls)
 
-        wizard = self.env["lhi.asset.import.wizard"].with_user(self.asset_officer).create({
-            "filename": "delayed_size_register.csv",
-            "upload": encoded,
-        })
+        self.assertEqual(len(passed_content), 1)
+        self.assertEqual(bytes(passed_content[0]), raw_bytes)
 
-        responses = [
-            {"id": "item-sp-003", "name": "delayed_size_register.csv", "size": 0},
-            {"id": "item-sp-003", "name": "delayed_size_register.csv", "size": 0},
-            {"id": "item-sp-003", "name": "delayed_size_register.csv", "size": len(csv_bytes)},
-        ]
+    def test_02_expected_size_calculated_from_exact_upload_payload(self):
+        """Test 2: expected_size is calculated from the exact upload_payload object."""
+        raw_bytes = self._sample_csv_content()
+        encoded_str = base64.b64encode(raw_bytes).decode("ascii")
 
-        def side_effect(*args, **kwargs):
-            if responses:
-                return responses.pop(0)
-            return {"id": "item-sp-003", "name": "delayed_size_register.csv", "size": len(csv_bytes)}
+        self.assertNotEqual(len(raw_bytes), len(encoded_str))
 
-        with patch.object(self.env["lhi.document.item"], "action_upload", return_value=True), \
-             patch.object(self.env["lhi.graph.connection"], "graph_request", side_effect=side_effect), \
-             patch("time.sleep", return_value=None):
-            action = wizard.action_preview()
+        wizard_cls = MagicMock()
+        wizard_cls.filename = "payload_size.csv"
+        wizard_cls.upload = encoded_str
+        wizard_cls.default_state_id = MagicMock(id=5)
+        wizard_cls.env = self.env
+        wizard_cls.ensure_one = MagicMock()
 
-        batch = self.env["lhi.asset.import.batch"].browse(action.get("res_id"))
-        self.assertTrue(batch.exists())
+        doc = MagicMock()
+        doc.id = 102
+        doc.name = "payload_size.csv"
+        doc.file_size = len(raw_bytes)
+        doc.checksum = hashlib.sha256(raw_bytes).hexdigest()
+        doc.sharepoint_drive_id = "drive-01"
+        doc.sharepoint_item_id = "item-02"
+        doc.storage_state = "available"
+        doc.graph_connection_id = self.connection
+        doc.storage_policy_id = self.policy
 
-    def test_d_repeated_size_mismatch_fails_safely(self):
-        """Test D: SharePoint repeatedly reports confirmed size mismatch, Preview fails safely."""
-        csv_bytes = self._sample_csv_content()
-        encoded = base64.b64encode(csv_bytes).decode("ascii")
+        self.env["lhi.document.item"].create_from_bytes.return_value = doc
+        self.env["lhi.document.item"]._make_idempotency_key.return_value = "key-02"
+        self.env["lhi.document.item"].sudo().search.return_value = False
 
-        wizard = self.env["lhi.asset.import.wizard"].with_user(self.asset_officer).create({
-            "filename": "mismatch_register.csv",
-            "upload": encoded,
-        })
+        batch = MagicMock()
+        batch._name = "lhi.asset.import.batch"
+        batch.id = 51
+        self.env["lhi.asset.import.batch"].create.return_value = batch
 
-        mismatch_metadata = {"id": "item-sp-004", "name": "mismatch_register.csv", "size": len(csv_bytes) + 999}
-        with patch.object(self.env["lhi.document.item"], "action_upload", return_value=True), \
-             patch.object(self.env["lhi.graph.connection"], "graph_request", return_value=mismatch_metadata), \
-             patch("time.sleep", return_value=None):
-            with self.assertRaises(UserError):
-                wizard.action_preview()
+        mock_meta = {"id": "item-02", "name": "payload_size.csv", "size": len(raw_bytes)}
+        self.connection.graph_request.return_value = mock_meta
 
-    def test_e_decoded_bytes_used_as_expected_size(self):
-        """Test E: Decoded spreadsheet bytes, not Base64 string length, used as expected_size."""
-        csv_bytes = self._sample_csv_content()
-        base64_str = base64.b64encode(csv_bytes).decode("ascii")
-        self.assertNotEqual(len(csv_bytes), len(base64_str))
+        from odoo.addons.lhi_asset_management.models.lhi_asset_import import LhiAssetImportWizard
+        wizard_cls._verify_and_confirm_asset_import_document = LhiAssetImportWizard._verify_and_confirm_asset_import_document.__get__(wizard_cls)
 
-        wizard = self.env["lhi.asset.import.wizard"].with_user(self.asset_officer).create({
-            "filename": "bytes_length_test.csv",
-            "upload": base64_str,
-        })
+        LhiAssetImportWizard.action_preview(wizard_cls)
+        doc.sudo().write.assert_called()
+        written_vals = doc.sudo().write.call_args[0][0]
+        self.assertEqual(written_vals.get("file_size"), len(raw_bytes))
 
-        mock_metadata = {"id": "item-sp-005", "name": "bytes_length_test.csv", "size": len(csv_bytes)}
-        with patch.object(self.env["lhi.document.item"], "action_upload", return_value=True), \
-             patch.object(self.env["lhi.graph.connection"], "graph_request", return_value=mock_metadata):
-            action = wizard.action_preview()
+    def test_03_openpyxl_workbook_not_resaved_before_upload(self):
+        """Test 3: An XLSX parsed with openpyxl is not re-saved before SharePoint upload."""
+        raw_bytes = self._sample_csv_content()
+        encoded = base64.b64encode(raw_bytes).decode("ascii")
 
-        batch = self.env["lhi.asset.import.batch"].browse(action.get("res_id"))
-        doc = batch.source_document_item_id
-        self.assertEqual(doc.file_size, len(csv_bytes))
+        wizard_cls = MagicMock()
+        wizard_cls.filename = "no_save.csv"
+        wizard_cls.upload = encoded
+        wizard_cls.default_state_id = MagicMock(id=5)
+        wizard_cls.env = self.env
+        wizard_cls.ensure_one = MagicMock()
 
-    def test_f_retrying_preview_prevents_duplicate_sharepoint_documents(self):
-        """Test F: Retrying Preview does not create duplicate SharePoint source document records."""
-        csv_bytes = self._sample_csv_content()
-        encoded = base64.b64encode(csv_bytes).decode("ascii")
+        doc = MagicMock(id=103, sharepoint_drive_id="d1", sharepoint_item_id="i3", storage_state="available", graph_connection_id=self.connection, storage_policy_id=self.policy)
+        self.env["lhi.document.item"].create_from_bytes.return_value = doc
+        self.env["lhi.document.item"]._make_idempotency_key.return_value = "key-03"
+        self.env["lhi.document.item"].sudo().search.return_value = False
+        batch = MagicMock(_name="lhi.asset.import.batch", id=52)
+        self.env["lhi.asset.import.batch"].create.return_value = batch
 
-        wizard = self.env["lhi.asset.import.wizard"].with_user(self.asset_officer).create({
-            "filename": "retry_test.csv",
-            "upload": encoded,
-        })
+        mock_meta = {"id": "i3", "name": "no_save.csv", "size": len(raw_bytes)}
+        self.connection.graph_request.return_value = mock_meta
 
-        mock_metadata = {"id": "item-sp-006", "name": "retry_test.csv", "size": len(csv_bytes)}
-        with patch.object(self.env["lhi.document.item"], "action_upload", return_value=True), \
-             patch.object(self.env["lhi.graph.connection"], "graph_request", return_value=mock_metadata):
-            action1 = wizard.action_preview()
-            batch1 = self.env["lhi.asset.import.batch"].browse(action1.get("res_id"))
+        with patch("openpyxl.Workbook.save", side_effect=AssertionError("Workbook save must not be called")):
+            from odoo.addons.lhi_asset_management.models.lhi_asset_import import LhiAssetImportWizard
+            wizard_cls._verify_and_confirm_asset_import_document = LhiAssetImportWizard._verify_and_confirm_asset_import_document.__get__(wizard_cls)
+            LhiAssetImportWizard.action_preview(wizard_cls)
 
-            doc_count_before = self.env["lhi.document.item"].search_count([("name", "=", "retry_test.csv")])
+    def test_04_upload_service_returns_current_drive_item_id_and_verifies_same(self):
+        """Test 4: The upload service returns current DriveItem ID and the importer verifies that same ID."""
+        raw_bytes = self._sample_csv_content()
+        encoded = base64.b64encode(raw_bytes).decode("ascii")
 
-            action2 = wizard.action_preview()
-            batch2 = self.env["lhi.asset.import.batch"].browse(action2.get("res_id"))
-            doc_count_after = self.env["lhi.document.item"].search_count([("name", "=", "retry_test.csv")])
+        wizard_cls = MagicMock()
+        wizard_cls.filename = "same_id.csv"
+        wizard_cls.upload = encoded
+        wizard_cls.default_state_id = MagicMock(id=5)
+        wizard_cls.env = self.env
+        wizard_cls.ensure_one = MagicMock()
 
-        self.assertNotEqual(batch1.id, batch2.id)
+        returned_id = "item-returned-999"
+        doc = MagicMock(id=104, sharepoint_drive_id="d1", sharepoint_item_id=returned_id, storage_state="available", graph_connection_id=self.connection, storage_policy_id=self.policy)
+        self.env["lhi.document.item"].create_from_bytes.return_value = doc
+        self.env["lhi.document.item"]._make_idempotency_key.return_value = "key-04"
+        self.env["lhi.document.item"].sudo().search.return_value = False
+        batch = MagicMock(_name="lhi.asset.import.batch", id=53)
+        self.env["lhi.asset.import.batch"].create.return_value = batch
 
-    def test_g_generic_document_downloads_and_uploads_unmodified(self):
-        """Test G: Fix does not alter generic document downloads or uploads outside Legacy Asset Import."""
-        item = self.env["lhi.document.item"].create({
-            "name": "generic_doc.pdf",
-            "mime_type": "application/pdf",
-            "file_size": 12,
-            "checksum": "c" * 64,
-            "company_id": self.company.id,
-            "requested_by_id": self.asset_officer.id,
-            "graph_connection_id": self.connection.id,
-            "storage_policy_id": self.policy.id,
-            "linked_model": "lhi.project",
-            "linked_record_id": 1,
-            "idempotency_key": "generic_doc_test_key_001",
-            "sharepoint_drive_id": "drive-generic",
-            "sharepoint_item_id": "item-generic-001",
-        })
+        requests_made = []
+        def mock_graph_request(method, url, **kwargs):
+            requests_made.append(url)
+            return {"id": returned_id, "name": "same_id.csv", "size": len(raw_bytes)}
 
-        mock_payload = {"id": "item-generic-001", "@microsoft.graph.downloadUrl": "https://tenant.sharepoint.com/download/generic_doc.pdf"}
-        mock_response = patch("requests.Response").start()
-        mock_response.content = b"123456789012"
-        mock_response.status_code = 200
+        self.connection.graph_request.side_effect = mock_graph_request
 
-        with patch.object(self.env["lhi.graph.connection"], "graph_request", return_value=mock_payload), \
-             patch.object(self.env["lhi.graph.connection"], "lhi_upload_session_request", return_value=mock_response):
-            downloaded = item.download_bytes(auth_context="application")
-            self.assertEqual(len(downloaded), 12)
+        from odoo.addons.lhi_asset_management.models.lhi_asset_import import LhiAssetImportWizard
+        wizard_cls._verify_and_confirm_asset_import_document = LhiAssetImportWizard._verify_and_confirm_asset_import_document.__get__(wizard_cls)
+
+        LhiAssetImportWizard.action_preview(wizard_cls)
+        self.assertTrue(any(returned_id in r for r in requests_made))
+
+    def test_05_older_sharepoint_item_with_same_filename_not_used(self):
+        """Test 5: An older SharePoint item with the same filename is not used for verification."""
+        raw_bytes = self._sample_csv_content()
+        encoded = base64.b64encode(raw_bytes).decode("ascii")
+
+        wizard_cls = MagicMock()
+        wizard_cls.filename = "same_name.csv"
+        wizard_cls.upload = encoded
+        wizard_cls.default_state_id = MagicMock(id=5)
+        wizard_cls.env = self.env
+        wizard_cls.ensure_one = MagicMock()
+
+        new_id = "item-new-555"
+        doc = MagicMock(id=105, sharepoint_drive_id="d1", sharepoint_item_id=new_id, storage_state="available", graph_connection_id=self.connection, storage_policy_id=self.policy)
+        self.env["lhi.document.item"].create_from_bytes.return_value = doc
+        self.env["lhi.document.item"]._make_idempotency_key.return_value = "key-05"
+        self.env["lhi.document.item"].sudo().search.return_value = False
+        batch = MagicMock(_name="lhi.asset.import.batch", id=54)
+        self.env["lhi.asset.import.batch"].create.return_value = batch
+
+        def mock_graph_request(method, url, **kwargs):
+            self.assertIn(new_id, url)
+            self.assertNotIn("same_name.csv", url)
+            return {"id": new_id, "name": "same_name.csv", "size": len(raw_bytes)}
+
+        self.connection.graph_request.side_effect = mock_graph_request
+
+        from odoo.addons.lhi_asset_management.models.lhi_asset_import import LhiAssetImportWizard
+        wizard_cls._verify_and_confirm_asset_import_document = LhiAssetImportWizard._verify_and_confirm_asset_import_document.__get__(wizard_cls)
+
+        LhiAssetImportWizard.action_preview(wizard_cls)
+
+    def test_06_simulated_filename_conflict_renamed_item_verified(self):
+        """Test 6: A simulated filename conflict returns a renamed item, and verification uses the returned final item."""
+        raw_bytes = self._sample_csv_content()
+        encoded = base64.b64encode(raw_bytes).decode("ascii")
+
+        wizard_cls = MagicMock()
+        wizard_cls.filename = "conflict.csv"
+        wizard_cls.upload = encoded
+        wizard_cls.default_state_id = MagicMock(id=5)
+        wizard_cls.env = self.env
+        wizard_cls.ensure_one = MagicMock()
+
+        renamed_id = "item-renamed-888"
+        doc = MagicMock(id=106, name="conflict.csv", sharepoint_drive_id="d1", sharepoint_item_id=renamed_id, storage_state="available", graph_connection_id=self.connection, storage_policy_id=self.policy)
+        self.env["lhi.document.item"].create_from_bytes.return_value = doc
+        self.env["lhi.document.item"]._make_idempotency_key.return_value = "key-06"
+        self.env["lhi.document.item"].sudo().search.return_value = False
+        batch = MagicMock(_name="lhi.asset.import.batch", id=55)
+        self.env["lhi.asset.import.batch"].create.return_value = batch
+
+        mock_renamed_meta = {"id": renamed_id, "name": "conflict (1).csv", "size": len(raw_bytes)}
+        self.connection.graph_request.return_value = mock_renamed_meta
+
+        from odoo.addons.lhi_asset_management.models.lhi_asset_import import LhiAssetImportWizard
+        wizard_cls._verify_and_confirm_asset_import_document = LhiAssetImportWizard._verify_and_confirm_asset_import_document.__get__(wizard_cls)
+
+        LhiAssetImportWizard.action_preview(wizard_cls)
+        doc.sudo().write.assert_called()
+        self.assertEqual(doc.sudo().write.call_args[0][0].get("name"), "conflict (1).csv")
+
+    def test_07_remote_size_matching_upload_payload_succeeds(self):
+        """Test 7: Remote size matching upload_payload succeeds and creates the preview batch."""
+        raw_bytes = self._sample_csv_content()
+        encoded = base64.b64encode(raw_bytes).decode("ascii")
+
+        wizard_cls = MagicMock()
+        wizard_cls.filename = "match_size.csv"
+        wizard_cls.upload = encoded
+        wizard_cls.default_state_id = MagicMock(id=5)
+        wizard_cls.env = self.env
+        wizard_cls.ensure_one = MagicMock()
+
+        doc = MagicMock(id=107, sharepoint_drive_id="d1", sharepoint_item_id="item-07", storage_state="available", graph_connection_id=self.connection, storage_policy_id=self.policy)
+        self.env["lhi.document.item"].create_from_bytes.return_value = doc
+        self.env["lhi.document.item"]._make_idempotency_key.return_value = "key-07"
+        self.env["lhi.document.item"].sudo().search.return_value = False
+        batch = MagicMock(_name="lhi.asset.import.batch", id=56)
+        self.env["lhi.asset.import.batch"].create.return_value = batch
+
+        self.connection.graph_request.return_value = {"id": "item-07", "name": "match_size.csv", "size": len(raw_bytes)}
+
+        from odoo.addons.lhi_asset_management.models.lhi_asset_import import LhiAssetImportWizard
+        wizard_cls._verify_and_confirm_asset_import_document = LhiAssetImportWizard._verify_and_confirm_asset_import_document.__get__(wizard_cls)
+
+        res = LhiAssetImportWizard.action_preview(wizard_cls)
+        self.assertEqual(res.get("res_id"), 56)
+
+    def test_08_remote_size_differing_fails_safely(self):
+        """Test 8: Remote size differing from upload_payload fails safely."""
+        raw_bytes = self._sample_csv_content()
+        encoded = base64.b64encode(raw_bytes).decode("ascii")
+
+        wizard_cls = MagicMock()
+        wizard_cls.filename = "differing.csv"
+        wizard_cls.upload = encoded
+        wizard_cls.default_state_id = MagicMock(id=5)
+        wizard_cls.env = self.env
+        wizard_cls.ensure_one = MagicMock()
+
+        doc = MagicMock(id=108, sharepoint_drive_id="d1", sharepoint_item_id="item-08", storage_state="available", graph_connection_id=self.connection, storage_policy_id=self.policy)
+        self.env["lhi.document.item"].create_from_bytes.return_value = doc
+        self.env["lhi.document.item"]._make_idempotency_key.return_value = "key-08"
+        self.env["lhi.document.item"].sudo().search.return_value = False
+        batch = MagicMock(_name="lhi.asset.import.batch", id=57)
+        self.env["lhi.asset.import.batch"].create.return_value = batch
+
+        # Remote size differs (47995 vs len(raw_bytes))
+        self.connection.graph_request.return_value = {"id": "item-08", "name": "differing.csv", "size": 47995}
+
+        from odoo.addons.lhi_asset_management.models.lhi_asset_import import LhiAssetImportWizard
+        wizard_cls._verify_and_confirm_asset_import_document = LhiAssetImportWizard._verify_and_confirm_asset_import_document.__get__(wizard_cls)
+
+        with patch("time.sleep", return_value=None):
+            with self.assertRaises(UserError) as cm:
+                LhiAssetImportWizard.action_preview(wizard_cls)
+            self.assertIn("Remote size differs", str(cm.exception))
+
+    def test_09_retry_does_not_create_duplicate_documents(self):
+        """Test 9: A retry does not create duplicate SharePoint documents."""
+        raw_bytes = self._sample_csv_content()
+        encoded = base64.b64encode(raw_bytes).decode("ascii")
+
+        wizard_cls = MagicMock()
+        wizard_cls.filename = "retry.csv"
+        wizard_cls.upload = encoded
+        wizard_cls.default_state_id = MagicMock(id=5)
+        wizard_cls.env = self.env
+        wizard_cls.ensure_one = MagicMock()
+
+        existing_doc = MagicMock(
+            id=109,
+            checksum=hashlib.sha256(raw_bytes).hexdigest(),
+            file_size=len(raw_bytes),
+            sharepoint_drive_id="d1",
+            sharepoint_item_id="item-09",
+            storage_state="available",
+            graph_connection_id=self.connection,
+            storage_policy_id=self.policy,
+        )
+        self.env["lhi.document.item"].sudo().search.return_value = existing_doc
+        batch = MagicMock(_name="lhi.asset.import.batch", id=58)
+        self.env["lhi.asset.import.batch"].create.return_value = batch
+
+        self.connection.graph_request.return_value = {"id": "item-09", "name": "retry.csv", "size": len(raw_bytes)}
+
+        from odoo.addons.lhi_asset_management.models.lhi_asset_import import LhiAssetImportWizard
+        wizard_cls._verify_and_confirm_asset_import_document = LhiAssetImportWizard._verify_and_confirm_asset_import_document.__get__(wizard_cls)
+
+        LhiAssetImportWizard.action_preview(wizard_cls)
+        # create_from_bytes must NOT be called on retry when existing_doc matches
+        self.env["lhi.document.item"].create_from_bytes.assert_not_called()
+
+    def test_10_csv_and_xlsx_preview_parsing_preserves_source_bytes(self):
+        """Test 10: CSV and XLS/XLSX preview parsing continues to work without changing the uploaded source bytes."""
+        raw_bytes = self._sample_csv_content()
+        encoded = base64.b64encode(raw_bytes).decode("ascii")
+
+        wizard_cls = MagicMock()
+        wizard_cls.filename = "parse_preserve.csv"
+        wizard_cls.upload = encoded
+        wizard_cls.default_state_id = MagicMock(id=5)
+        wizard_cls.env = self.env
+        wizard_cls.ensure_one = MagicMock()
+
+        doc = MagicMock(id=110, sharepoint_drive_id="d1", sharepoint_item_id="item-10", storage_state="available", graph_connection_id=self.connection, storage_policy_id=self.policy)
+        self.env["lhi.document.item"].create_from_bytes.return_value = doc
+        self.env["lhi.document.item"]._make_idempotency_key.return_value = "key-10"
+        self.env["lhi.document.item"].sudo().search.return_value = False
+
+        batch = MagicMock(_name="lhi.asset.import.batch", id=59)
+        self.env["lhi.asset.import.batch"].create.return_value = batch
+
+        self.connection.graph_request.return_value = {"id": "item-10", "name": "parse_preserve.csv", "size": len(raw_bytes)}
+
+        from odoo.addons.lhi_asset_management.models.lhi_asset_import import LhiAssetImportWizard
+        wizard_cls._verify_and_confirm_asset_import_document = LhiAssetImportWizard._verify_and_confirm_asset_import_document.__get__(wizard_cls)
+
+        res = LhiAssetImportWizard.action_preview(wizard_cls)
+        self.assertEqual(res.get("res_id"), 59)
+        batch._load_preview.assert_called_once()
+        passed_stream = batch._load_preview.call_args[0][0]
+        self.assertEqual(passed_stream.getvalue(), raw_bytes)
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -208,15 +208,62 @@
         }
     }
 
-    // Chatter
-    .o_chatter {
-        border-left: 1px solid var(--lhi-card-border);
-        font-family: $lhi-font-family-sans;
+    // ── LHI: Force Form Chatter Below Sheet ──────────────────────────────────────
+    // The LHI shell already reserves horizontal space for the navigation sidebar.
+    // Keep Odoo chatter below the form so form fields retain the full content width.
+    .o_form_renderer:has(.o-mail-Form-chatter),
+    .o_form_renderer:has(.o_FormRenderer_chatterContainer),
+    .o_form_renderer:has(.o_chatter),
+    .o_form_renderer:has(.oe_chatter) {
+        display: flex !important;
+        flex-direction: column !important;
+        flex-wrap: nowrap !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    .o_form_renderer:has(.o-mail-Form-chatter) > .o_form_sheet_bg,
+    .o_form_renderer:has(.o_FormRenderer_chatterContainer) > .o_form_sheet_bg,
+    .o_form_renderer:has(.o_chatter) > .o_form_sheet_bg,
+    .o_form_renderer:has(.oe_chatter) > .o_form_sheet_bg {
+        order: 1 !important;
+        flex: 0 0 auto !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    .o-mail-Form-chatter,
+    .o_FormRenderer_chatterContainer,
+    .o_chatter,
+    .oe_chatter {
+        order: 20 !important;
+        position: relative !important;
+        inset: auto !important;
+        flex: 0 0 auto !important;
+        align-self: stretch !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        height: auto !important;
+        border-left: 0 !important;
+        border-top: 1px solid var(--lhi-card-border) !important;
         background: var(--lhi-canvas-bg);
 
         .o_chatter_topbar .o_chatter_button_main {
             font-family: $lhi-font-family-sans;
         }
+    }
+}
+
+.modal {
+    .o_form_view,
+    .o_form_renderer,
+    .o_form_sheet_bg,
+    .o_form_sheet {
+        min-width: 0 !important;
+        max-width: 100% !important;
     }
 }
 

@@ -148,22 +148,22 @@ div.modal,
     position: relative !important;
     margin: 1.75rem auto !important;
     pointer-events: auto !important;
-    width: min(900px, calc(100vw - 3.5rem)) !important;
-    max-width: min(1100px, calc(100vw - 3.5rem)) !important;
+    width: calc(100vw - 3.5rem) !important;
+    max-width: 900px !important;
 
     &.modal-sm {
-        width: min(450px, calc(100vw - 2rem)) !important;
-        max-width: min(450px, calc(100vw - 2rem)) !important;
+        width: calc(100vw - 2rem) !important;
+        max-width: 450px !important;
     }
 
     &.modal-lg {
-        width: min(900px, calc(100vw - 3.5rem)) !important;
-        max-width: min(900px, calc(100vw - 3.5rem)) !important;
+        width: calc(100vw - 3.5rem) !important;
+        max-width: 900px !important;
     }
 
     &.modal-xl {
-        width: min(1200px, calc(100vw - 3.5rem)) !important;
-        max-width: min(1200px, calc(100vw - 3.5rem)) !important;
+        width: calc(100vw - 3.5rem) !important;
+        max-width: 1200px !important;
     }
 
     .modal-content {

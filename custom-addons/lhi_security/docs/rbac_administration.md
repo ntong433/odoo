@@ -48,7 +48,6 @@ application roles.
 | `meal` | MEAL Viewer | MEAL Officer | MEAL Manager |
 | `memo` | LHI Employee | Memo workflow roles | Memo Administrator |
 | `signatures` | Not exposed as a general viewer app | Preparation occurs in business documents | Signature Administrator |
-| `hr_leave` | HR and Leave Viewer | HR Officer | HR and Leave Manager |
 
 ## Intentional inheritance
 

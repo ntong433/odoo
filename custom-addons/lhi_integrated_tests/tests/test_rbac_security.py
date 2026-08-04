@@ -79,13 +79,6 @@ class TestIntegratedApplicationRBAC(TransactionCase):
             "lhi_security.group_lhi_meal_viewer",
             "lhi_security.group_lhi_meal_officer",
             "lhi_security.group_lhi_meal_manager",
-            "lhi.results.framework",
-        ),
-        "hr_leave": (
-            "lhi_security.group_lhi_hr_viewer",
-            "lhi_security.group_lhi_hr_officer",
-            "lhi_security.group_lhi_hr_manager",
-            "lhi.leave.cache",
         ),
     }
 

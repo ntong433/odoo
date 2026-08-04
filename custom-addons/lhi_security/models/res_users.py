@@ -18,7 +18,6 @@ LHI_APP_LABELS = {
     "meal": "MEAL",
     "memo": "Memo Management",
     "signatures": "Signature Administration",
-    "hr_leave": "HR & Leave",
 }
 
 # This is the authoritative application entitlement registry.  Values are XML
@@ -43,7 +42,6 @@ LHI_APP_ACCESS_GROUPS = {
     # preparation officers work through their business documents and must not
     # inherit access to webhook/configuration administration.
     "signatures": "lhi_signature_bridge.group_lhi_signature_admin",
-    "hr_leave": "lhi_security.group_lhi_hr_viewer",
 }
 
 LHI_APP_SELECTION = list(LHI_APP_LABELS.items())

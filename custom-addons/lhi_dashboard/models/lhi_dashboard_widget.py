@@ -84,7 +84,6 @@ class LhiDashboardWidget(models.Model):
         ('meal', 'MEAL', 'lhi_results_framework.menu_lhi_meal_root', '/lhi_web_shell/static/src/img/module_icons/meal.svg'),
         ('memo', 'Memos', 'lhi_memo_management.menu_lhi_memo_root', '/lhi_web_shell/static/src/img/module_icons/memos.svg'),
         ('signatures', 'Signatures', 'lhi_signature_bridge.menu_lhi_opensign', '/lhi_web_shell/static/src/img/module_icons/signatures.svg'),
-        ('hr_leave', 'HR & Leave', 'lhi_leave_bridge.menu_lhi_leave_root', '/lhi_web_shell/static/src/img/module_icons/leave.svg'),
     )
 
     @api.model

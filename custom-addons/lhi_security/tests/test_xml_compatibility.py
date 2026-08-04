@@ -37,7 +37,6 @@ class TestXmlCompatibility(BaseTestCase):
             "meal",
             "memo",
             "signatures",
-            "hr_leave",
         }
 
         errors = []

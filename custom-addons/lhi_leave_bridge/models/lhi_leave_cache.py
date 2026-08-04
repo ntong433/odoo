@@ -20,7 +20,6 @@ class LhiLeaveCache(models.Model):
     
     @api.model
     def sync_leave_data_cron(self):
-        self.env.user.check_lhi_app_access("hr_leave")
         # Fetch delta/balances for all users
         # For idempotency/retry, we log errors and leave `is_stale = True` if failure
         try:

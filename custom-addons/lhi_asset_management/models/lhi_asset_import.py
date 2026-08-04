@@ -1,13 +1,19 @@
 # -*- coding: utf-8 -*-
 import base64
 import csv
+import hashlib
 import io
 import json
+import logging
 import re
+import time
 from datetime import date, datetime
+from urllib.parse import quote
 
 from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, UserError, ValidationError
+
+_logger = logging.getLogger(__name__)
 
 try:
     import openpyxl
@@ -96,6 +102,99 @@ class LhiAssetImportWizard(models.TransientModel):
         help="Used only when a row and its legacy tag do not identify a state.",
     )
 
+    def _verify_and_confirm_asset_import_document(self, document, content, expected_size):
+        """
+        Perform bounded SharePoint DriveItem size verification for Legacy Asset Import.
+        Executes bounded retries when Graph API metadata is temporarily delayed or size is zero immediately after upload.
+        """
+        connection = document.graph_connection_id
+        if document.storage_state != "available" and document.spool_path:
+            try:
+                document.action_upload()
+            except UserError as err:
+                _logger.info(
+                    "Initial upload verification note for %s (Document %s): %s. Executing bounded metadata retries.",
+                    document.name,
+                    document.id,
+                    err,
+                )
+            except Exception as err:
+                _logger.error(
+                    "Legacy Asset Import SharePoint upload failed. Source filename: %s, expected size: %s bytes, document item ID: %s",
+                    document.name,
+                    expected_size,
+                    document.id,
+                )
+                raise
+
+        drive_id = document.sharepoint_drive_id
+        item_id = document.sharepoint_item_id
+
+        if not drive_id or not item_id:
+            _logger.error(
+                "Legacy Asset Import missing SharePoint item identifiers. Source filename: %s, expected size: %s bytes, document item ID: %s",
+                document.name,
+                expected_size,
+                document.id,
+            )
+            document._mark_failed("Missing SharePoint drive or item identifier.", enqueue=False)
+            raise UserError(_("SharePoint upload did not return required drive or item identifiers."))
+
+        max_retries = 5
+        remote_size = -1
+
+        for attempt in range(max_retries):
+            try:
+                metadata = connection.graph_request(
+                    "GET",
+                    f"/drives/{quote(drive_id)}/items/{quote(item_id)}",
+                    auth_context="application",
+                    params={"$select": "id,name,size,file"},
+                )
+                if metadata and isinstance(metadata, dict) and metadata.get("id") == item_id:
+                    remote_size = int(metadata.get("size") or 0)
+                    if remote_size == expected_size:
+                        break
+            except Exception as exc:
+                _logger.warning(
+                    "Attempt %s/%s retrieving DriveItem metadata for %s (Document %s) failed: %s",
+                    attempt + 1,
+                    max_retries,
+                    document.name,
+                    document.id,
+                    exc,
+                )
+
+            if attempt < max_retries - 1:
+                time.sleep(0.5)
+
+        if remote_size != expected_size:
+            _logger.error(
+                "Legacy Asset Import file-size verification failed after %s checks. "
+                "Source filename: %s, expected byte size: %s, remote SharePoint size: %s, document item ID: %s",
+                max_retries,
+                document.name,
+                expected_size,
+                remote_size,
+                document.id,
+            )
+            document._mark_failed("SharePoint file-size verification failed.", enqueue=False)
+            raise UserError(
+                _("SharePoint file-size verification failed for Legacy Asset Import. Expected %s bytes, remote SharePoint size %s bytes.")
+                % (expected_size, remote_size)
+            )
+
+        document.sudo().write(
+            {
+                "file_size": remote_size,
+                "storage_state": "available",
+                "upload_state": "completed",
+                "reconciliation_state": "matched",
+                "last_error": False,
+            }
+        )
+        return True
+
     def action_preview(self):
         self.ensure_one()
         if not self.env.user.has_group("lhi_security.group_lhi_asset_officer"):
@@ -108,6 +207,8 @@ class LhiAssetImportWizard(models.TransientModel):
         if not content:
             raise ValidationError(_("The uploaded asset register is empty."))
 
+        expected_size = len(content)
+
         batch = self.env["lhi.asset.import.batch"].create(
             {
                 "source_filename": filename,
@@ -119,18 +220,30 @@ class LhiAssetImportWizard(models.TransientModel):
             if extension == "csv"
             else "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
-        # SharePoint upload is deliberately fail-closed. If it is not confirmed,
-        # the batch is not represented as a preserved import source.
-        document = self.env["lhi.document.item"].create_from_bytes(
-            name=filename,
-            content=content,
-            mime_type=mime_type,
-            linked_model=batch._name,
-            linked_record_id=batch.id,
-            linked_field="source_file",
-            requested_by=self.env.user,
-            synchronous=True,
+
+        checksum = hashlib.sha256(content).hexdigest()
+        idempotency_key = self.env["lhi.document.item"]._make_idempotency_key(
+            batch._name, batch.id, "source_file", filename, checksum
         )
+        existing_doc = self.env["lhi.document.item"].sudo().search(
+            [("idempotency_key", "=", idempotency_key)], limit=1
+        )
+        if existing_doc:
+            document = existing_doc
+        else:
+            document = self.env["lhi.document.item"].create_from_bytes(
+                name=filename,
+                content=content,
+                mime_type=mime_type,
+                linked_model=batch._name,
+                linked_record_id=batch.id,
+                linked_field="source_file",
+                requested_by=self.env.user,
+                synchronous=False,
+            )
+
+        self._verify_and_confirm_asset_import_document(document, content, expected_size)
+
         batch.sudo().with_context(lhi_asset_import_system=True).write(
             {
                 "source_document_item_id": document.id,

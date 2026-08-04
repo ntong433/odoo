@@ -688,10 +688,12 @@ class LhiAssetImportBatch(models.Model):
                         if partner:
                             reused_part += 1
                         else:
-                            partner = self.env["res.partner"].create({
+                            partner_vals = {
                                 "name": norm_src,
-                                "supplier_rank": 1,
-                            })
+                            }
+                            if "supplier_rank" in self.env["res.partner"]._fields:
+                                partner_vals["supplier_rank"] = 1
+                            partner = self.env["res.partner"].create(partner_vals)
                             created_part += 1
                         part_cache[can_key] = partner
                     row.acquisition_source_id = partner.id

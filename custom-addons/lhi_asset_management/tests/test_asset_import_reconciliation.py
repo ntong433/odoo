@@ -255,3 +255,56 @@ class TestAssetImportReconciliation(TransactionCase):
 
         self.assertEqual(row.registration_state_id, self.sokoto_state)
         self.assertEqual(row.registration_state_id.code, "NG-SO")
+
+    def test_08_supplier_rank_absent_partner_reconciliation(self):
+        """Verify master-data reconciliation succeeds when supplier_rank is absent from res.partner."""
+        test_batch = self.env["lhi.asset.import.batch"].create({
+            "source_filename": "supplier_rank_absent_test.xlsx",
+            "default_state_id": self.sokoto_state.id,
+            "company_id": self.company.id,
+        })
+        self.env["lhi.asset.import.row"].create({
+            "batch_id": test_batch.id,
+            "row_number": 20,
+            "asset_name": "No Supplier Rank Item",
+            "category_text": "OE",
+            "acquisition_source_text": "Vendor Without Supplier Rank",
+            "condition_text": "GOOD",
+            "state_text": "SOK",
+        })
+        from unittest.mock import patch
+        mock_fields = {k: v for k, v in self.env["res.partner"]._fields.items() if k != "supplier_rank"}
+        with patch.object(type(self.env["res.partner"]), "_fields", mock_fields):
+            test_batch.action_validate()
+
+        partner = self.env["res.partner"].search([("name", "=", "Vendor Without Supplier Rank")])
+        self.assertTrue(partner.exists())
+        self.assertEqual(test_batch.created_partner_count, 1)
+
+    def test_09_supplier_rank_present_partner_reconciliation(self):
+        """Verify supplier_rank is set to 1 when supplier_rank is present in res.partner._fields."""
+        test_batch = self.env["lhi.asset.import.batch"].create({
+            "source_filename": "supplier_rank_present_test.xlsx",
+            "default_state_id": self.sokoto_state.id,
+            "company_id": self.company.id,
+        })
+        self.env["lhi.asset.import.row"].create({
+            "batch_id": test_batch.id,
+            "row_number": 21,
+            "asset_name": "With Supplier Rank Item",
+            "category_text": "OE",
+            "acquisition_source_text": "Vendor With Supplier Rank",
+            "condition_text": "GOOD",
+            "state_text": "SOK",
+        })
+        from unittest.mock import patch, PropertyMock
+        mock_fields = dict(self.env["res.partner"]._fields)
+        if "supplier_rank" not in mock_fields:
+            mock_fields["supplier_rank"] = PropertyMock()
+        with patch.object(type(self.env["res.partner"]), "_fields", mock_fields):
+            test_batch.action_validate()
+
+        partner = self.env["res.partner"].search([("name", "=", "Vendor With Supplier Rank")])
+        self.assertTrue(partner.exists())
+        self.assertEqual(test_batch.created_partner_count, 1)
+

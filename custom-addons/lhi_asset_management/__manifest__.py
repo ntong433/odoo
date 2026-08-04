@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'LHI Asset Register',
-    'version': '19.0.2.0.2',
+    'version': '19.0.2.0.3',
     'category': 'Operations',
     'summary': 'Operational Asset Register, tags, imports and lifecycle history',
     'author': 'Life Helpers Initiative',

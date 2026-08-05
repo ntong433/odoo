@@ -236,6 +236,10 @@ class LhiOpenSignConfiguration(models.Model):
             raise UserError(safe_error)
         raise UserError(_("LHI Sign request failed."))
 
+    def api_download(self, endpoint):
+        """Download a signed artefact using relative API endpoint or URL."""
+        return self.download_artifact(endpoint)
+
     def download_artifact(self, url):
         """Download a signed artefact using an explicit SSRF allowlist and size cap."""
         self.ensure_one()

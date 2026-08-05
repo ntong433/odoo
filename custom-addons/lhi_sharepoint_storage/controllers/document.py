@@ -15,13 +15,35 @@ class LhiSharePointDocumentController(http.Controller):
         document = request.env["lhi.document.item"].sudo().search(
             [("uuid", "=", document_uuid)], limit=1
         )
-        if not document:
+        if not document or not document.linked_model or not document.linked_record_id:
+            return request.not_found()
+        linked_record = request.env[document.linked_model].browse(document.linked_record_id).exists()
+        if not linked_record:
             return request.not_found()
         try:
-            url = document.delegated_download_url(request.env.user)
+            linked_record.check_access("read")
+        except AccessError:
+            return request.not_found()
+
+        try:
+            content = document.sudo().download_bytes(auth_context="application")
         except (AccessError, UserError, ValidationError):
             return request.not_found()
-        return request.redirect(url, code=302, local=False)
+
+        filename = document.name or "document"
+        filename = "".join(c for c in filename if c.isalnum() or c in "._- ")
+        mime_type = document.mime_type or "application/octet-stream"
+        is_pdf = mime_type == "application/pdf" or filename.lower().endswith(".pdf")
+        disposition = f"inline; filename=\"{filename}\"" if is_pdf else f"attachment; filename=\"{filename}\""
+
+        headers = [
+            ("Content-Type", mime_type),
+            ("Content-Length", str(len(content))),
+            ("Content-Disposition", disposition),
+            ("Cache-Control", "private, no-store"),
+            ("X-Content-Type-Options", "nosniff"),
+        ]
+        return request.make_response(content, headers=headers)
 
     @http.route(
         "/lhi/sharepoint/upload/session",

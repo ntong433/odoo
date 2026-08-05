@@ -1243,7 +1243,7 @@ class LhiMemo(models.Model):
         if existing:
             self.sudo().write({"signature_request_id": existing.id})
             return existing
-        previous = self.signature_request_ids.sorted("create_date", reverse=True)[:1]
+        previous = self.sudo().signature_request_ids.sorted("create_date", reverse=True)[:1]
         if previous and previous.status not in (
             "completed",
             "cancelled",

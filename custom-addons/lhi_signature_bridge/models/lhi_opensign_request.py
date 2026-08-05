@@ -438,8 +438,7 @@ class LhiOpenSignRequest(models.Model):
             )
             raise
         provider_id = response.get("document_id") or response.get("objectId")
-        preparation_url = response.get("url")
-        if not provider_id or not preparation_url:
+        if not provider_id:
             self.sudo().write(
                 {
                     "status": "failed",
@@ -450,6 +449,8 @@ class LhiOpenSignRequest(models.Model):
                 }
             )
             raise UserError(_("LHI Sign returned an incomplete draft response."))
+        encoded_doc_id = quote(str(provider_id))
+        preparation_url = f"https://sign.lhinigeria.org/draftDocument?docId={encoded_doc_id}"
         configuration._validated_url(preparation_url, purpose="redirect")
         self.sudo().write(
             {
@@ -826,12 +827,12 @@ class LhiOpenSignRequest(models.Model):
                         "sequential participant is explicitly confirmed."
                     )
                 )
-            signed_url = payload.get("file")
-            certificate_url = payload.get("certificate")
+            signed_url = payload.get("file") or f"/signature-requests/{self.provider_document_id}/signed-document"
+            certificate_url = payload.get("certificate") or f"/signature-requests/{self.provider_document_id}/certificate"
             if not signed_url or not certificate_url:
                 raise UserError(_("The completion event omitted signed artefact URLs."))
-            signed_pdf = self.configuration_id.download_artifact(signed_url)
-            certificate = self.configuration_id.download_artifact(certificate_url)
+            signed_pdf = self.configuration_id.api_download(signed_url)
+            certificate = self.configuration_id.api_download(certificate_url)
             if not signed_pdf.startswith(b"%PDF") or not certificate.startswith(
                 b"%PDF"
             ):

@@ -239,12 +239,20 @@ class LhiOpenSignConfiguration(models.Model):
     def download_artifact(self, url):
         """Download a signed artefact using an explicit SSRF allowlist and size cap."""
         self.ensure_one()
+        if url and url.startswith("/"):
+            base = self.api_base_url.rstrip("/")
+            url = f"{base}{url}"
         self._validated_url(url, purpose="download")
         maximum = self.maximum_download_mb * 1024 * 1024
+        headers = {
+            "Accept": "application/pdf",
+            "x-api-token": self.api_token(),
+        }
         for attempt in range(self.maximum_retries + 1):
             try:
                 response = requests.get(
                     url,
+                    headers=headers,
                     timeout=self.timeout_seconds,
                     allow_redirects=False,
                     stream=True,

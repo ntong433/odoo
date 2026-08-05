@@ -453,7 +453,7 @@ class LhiMemoIntegration(models.Model):
     def action_continue_preparation(self):
         self.ensure_one()
         self._ensure_requester_or_preparer()
-        if not self.signature_request_id.provider_preparation_url:
+        if not self.signature_request_id.sudo().provider_preparation_url:
             raise UserError(_("No secure preparation URL is available."))
         return {
             "type": "ir.actions.act_url",

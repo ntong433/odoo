@@ -159,7 +159,7 @@ class LhiApprovalMatrix(models.Model):
         )
         ned = self.env.ref("lhi_security.group_lhi_ned", raise_if_not_found=False)
         for matrix in self.filtered(
-            lambda item: item.document_type == "hub_stock_request"
+            lambda item: getattr(item, "document_type", False) == "hub_stock_request"
         ):
             lines = matrix.line_ids.sorted(lambda line: (line.sequence, line.id))
             seen_sequences = set()
@@ -196,7 +196,7 @@ class LhiApprovalMatrix(models.Model):
 
     def _lhi_matches_hub_request(self, request):
         self.ensure_one()
-        if self.document_type != "hub_stock_request" or not self.active:
+        if getattr(self, "document_type", False) != "hub_stock_request" or not self.active:
             return False
         if self.company_id != request.company_id:
             return False
@@ -305,7 +305,7 @@ class LhiApprovalMatrixLine(models.Model):
     def _lhi_resolve_approver_users(self, request):
         users = super()._lhi_resolve_approver_users(request)
         self.ensure_one()
-        if request.document_type != "hub_stock_request":
+        if getattr(request, "document_type", False) != "hub_stock_request":
             return users
         source = self.env[request.res_model].browse(request.res_id).exists()
         if not source:
@@ -351,7 +351,7 @@ class LhiApprovalRequest(models.Model):
 
     def _lhi_assert_hub_source_decision(self):
         if (
-            self.filtered(lambda request: request.document_type == "hub_stock_request")
+            self.filtered(lambda request: getattr(request, "document_type", False) == "hub_stock_request")
             and self.env.context.get("lhi_hub_approval_system")
             is not LHI_HUB_SYSTEM_TOKEN
         ):
@@ -362,7 +362,7 @@ class LhiApprovalRequest(models.Model):
     def write(self, vals):
         protected = {"state", "matrix_id", "line_ids", "lhi_hub_request_id"}
         hub_requests = self.filtered(
-            lambda request: request.document_type == "hub_stock_request"
+            lambda request: getattr(request, "document_type", False) == "hub_stock_request"
         )
         if (
             hub_requests
@@ -416,7 +416,7 @@ class LhiApprovalRequestLine(models.Model):
         hub_requests = (
             self.env["lhi.approval.request"]
             .browse(request_ids)
-            .filtered(lambda request: request.document_type == "hub_stock_request")
+            .filtered(lambda request: getattr(request, "document_type", False) == "hub_stock_request")
         )
         if (
             hub_requests
@@ -447,7 +447,7 @@ class LhiApprovalRequestLine(models.Model):
             "lhi_provider_status",
         }
         hub_lines = self.filtered(
-            lambda line: line.request_id.document_type == "hub_stock_request"
+            lambda line: getattr(line.request_id, "document_type", False) == "hub_stock_request"
         )
         if (
             hub_lines
@@ -474,7 +474,7 @@ class LhiApprovalHistory(models.Model):
                 self.env["lhi.approval.request.line"]
                 .browse(line_ids)
                 .filtered(
-                    lambda line: line.request_id.document_type == "hub_stock_request"
+                    lambda line: getattr(line.request_id, "document_type", False) == "hub_stock_request"
                 )
             )
             if hub_lines:

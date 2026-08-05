@@ -1655,6 +1655,8 @@ class LhiMemo(models.Model):
             if recipient.participant_role == "requester":
                 if self.requester_signature_completed:
                     return True
+                if self.state == "preparing":
+                    self._transition("requester_signature_pending")
                 self.approval_request_id.with_user(self.requester_id).action_activate()
                 self._transition(
                     "under_approval",

@@ -874,7 +874,7 @@ class LhiDocumentItem(models.Model):
             ),
             auth_context="delegated",
             user=user,
-            params={"$select": "id,@microsoft.graph.downloadUrl"},
+            params={"$select": "id,name,size"},
         )
         if payload.get("id") != self.sharepoint_item_id:
             raise AccessError(_("SharePoint download validation failed."))
@@ -896,7 +896,7 @@ class LhiDocumentItem(models.Model):
             ),
             auth_context=auth_context,
             user=user,
-            params={"$select": "id,@microsoft.graph.downloadUrl"},
+            params={"$select": "id,name,size"},
         )
         if payload.get("id") != self.sharepoint_item_id:
             raise UserError(_("SharePoint download verification failed."))

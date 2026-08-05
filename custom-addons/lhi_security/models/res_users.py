@@ -123,7 +123,7 @@ class ResUsers(models.Model):
     @api.model
     def _lhi_is_protected_administrator(self, user=None):
         """Returns True if the target user is the protected technical root administrator."""
-        target_user = user or self.env.user
+        target_user = user or (self if len(self) == 1 else self.env.user)
         if not target_user or not target_user.id:
             return False
 

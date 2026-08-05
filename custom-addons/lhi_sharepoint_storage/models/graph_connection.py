@@ -1,4 +1,6 @@
+import ipaddress
 import json
+import logging
 import random
 import time
 import uuid
@@ -9,12 +11,25 @@ import requests
 from odoo import models, _
 from odoo.exceptions import UserError, ValidationError
 
+_logger = logging.getLogger(__name__)
 
 RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
 ALLOWED_UPLOAD_HOST_SUFFIXES = (
     ".sharepoint.com",
     ".sharepoint-df.com",
     ".1drv.com",
+)
+ALLOWED_DOWNLOAD_HOST_SUFFIXES = (
+    ".sharepoint.com",
+    ".sharepoint-df.com",
+    ".1drv.com",
+    ".onedrive.com",
+    ".blob.core.windows.net",
+    ".msocdn.com",
+    ".office.net",
+    ".microsoft.com",
+    ".microsoftonline.com",
+    ".office365.com",
 )
 
 
@@ -160,6 +175,39 @@ class LhiGraphConnection(models.Model):
             raise ValidationError(_("Microsoft returned an unsafe upload-session URL."))
         return upload_url
 
+    def _lhi_validate_download_url(self, download_url):
+        if not download_url:
+            raise ValidationError(_("No download URL provided."))
+        parsed = urlparse(download_url)
+        if parsed.scheme != "https":
+            raise ValidationError(_("Pre-authenticated download URL must use HTTPS."))
+        if parsed.username or parsed.password:
+            raise ValidationError(_("Pre-authenticated download URL must not contain user credentials."))
+        if parsed.fragment:
+            raise ValidationError(_("Pre-authenticated download URL must not contain URL fragments."))
+        hostname = (parsed.hostname or "").strip().lower()
+        if not hostname:
+            raise ValidationError(_("Pre-authenticated download URL is missing a hostname."))
+        if hostname == "localhost":
+            raise ValidationError(_("Pre-authenticated download URL cannot target localhost."))
+
+        try:
+            ipaddress.ip_address(hostname)
+            raise ValidationError(_("Pre-authenticated download URL cannot use raw IP addresses."))
+        except ValueError:
+            pass
+
+        valid_host = any(
+            hostname == suffix.lstrip(".") or hostname.endswith(suffix)
+            for suffix in ALLOWED_DOWNLOAD_HOST_SUFFIXES
+        )
+        if not valid_host:
+            _logger.warning("Rejected download hostname: %s (scheme: %s)", hostname, parsed.scheme)
+            raise ValidationError(_("Microsoft returned an untrusted download URL hostname."))
+
+        _logger.info("Validated download URL scheme: %s, hostname: %s", parsed.scheme, hostname)
+        return download_url
+
     def lhi_upload_session_request(
         self,
         method,
@@ -279,6 +327,150 @@ class LhiGraphConnection(models.Model):
                 )
             )
         raise UserError(_("SharePoint upload-session request failed."))
+
+    def lhi_preauthenticated_download_request(
+        self,
+        download_url,
+        *,
+        auth_context="application",
+        user=None,
+        maximum_bytes=None,
+    ):
+        self.ensure_one()
+        self._lhi_validate_download_url(download_url)
+        user = user or self.env.user
+        max_bytes = maximum_bytes or (50 * 1024 * 1024)
+        timeout = max(self.timeout_seconds, 60)
+
+        for attempt in range(self.max_retries + 1):
+            started = time.monotonic()
+            client_request_id = str(uuid.uuid4())
+            try:
+                response = requests.get(
+                    download_url,
+                    headers={"Accept": "*/*"},
+                    timeout=timeout,
+                    stream=True,
+                    allow_redirects=False,
+                )
+            except requests.RequestException as error:
+                should_retry = attempt < self.max_retries
+                self._create_request_log(
+                    auth_context=auth_context,
+                    user_id=user.id if auth_context == "delegated" else False,
+                    method="GET",
+                    resource_path="/sharepoint/preauthenticated-download",
+                    outcome="retry" if should_retry else "failure",
+                    status_code=0,
+                    duration_ms=int((time.monotonic() - started) * 1000),
+                    retry_count=attempt,
+                    client_request_id=client_request_id,
+                    graph_request_id=False,
+                    error_code=error.__class__.__name__,
+                    safe_message=_("SharePoint preauthenticated download failed."),
+                )
+                if not should_retry:
+                    raise UserError(_("SharePoint pre-authenticated download failed.")) from error
+                time.sleep(
+                    min(
+                        self.backoff_base_seconds * (2**attempt) + random.uniform(0, 0.5),
+                        self.maximum_retry_after_seconds,
+                    )
+                )
+                continue
+
+            if response.status_code in (301, 302, 303, 307, 308):
+                redirect_url = response.headers.get("Location")
+                if not redirect_url:
+                    raise UserError(_("Download redirect omitted Location header."))
+                self._lhi_validate_download_url(redirect_url)
+                return self.lhi_preauthenticated_download_request(
+                    redirect_url,
+                    auth_context=auth_context,
+                    user=user,
+                    maximum_bytes=max_bytes,
+                )
+
+            if response.status_code != 200:
+                should_retry = (
+                    response.status_code in RETRYABLE_STATUS_CODES
+                    and attempt < self.max_retries
+                )
+                code, message = self._safe_error_payload(response)
+                self._create_request_log(
+                    auth_context=auth_context,
+                    user_id=user.id if auth_context == "delegated" else False,
+                    method="GET",
+                    resource_path="/sharepoint/preauthenticated-download",
+                    outcome="retry" if should_retry else "failure",
+                    status_code=response.status_code,
+                    duration_ms=int((time.monotonic() - started) * 1000),
+                    retry_count=attempt,
+                    client_request_id=client_request_id,
+                    graph_request_id=response.headers.get("request-id"),
+                    error_code=code,
+                    safe_message=message,
+                )
+                if should_retry:
+                    delay = self._retry_after_seconds(response, self.maximum_retry_after_seconds)
+                    time.sleep(
+                        delay
+                        if delay is not False
+                        else min(
+                            self.backoff_base_seconds * (2**attempt),
+                            self.maximum_retry_after_seconds,
+                        )
+                    )
+                    continue
+                raise UserError(
+                    _("SharePoint download returned HTTP status %s.")
+                    % response.status_code
+                )
+
+            content_length_str = response.headers.get("Content-Length")
+            if content_length_str and content_length_str.isdigit():
+                if int(content_length_str) > max_bytes:
+                    raise UserError(
+                        _("Downloaded file size exceeds maximum permitted limit.")
+                    )
+
+            chunks = []
+            downloaded_size = 0
+            for chunk in response.iter_content(chunk_size=65536):
+                if not chunk:
+                    continue
+                downloaded_size += len(chunk)
+                if downloaded_size > max_bytes:
+                    raise UserError(
+                        _("Downloaded file size exceeds maximum permitted limit.")
+                    )
+                chunks.append(chunk)
+
+            content = b"".join(chunks)
+            if not content:
+                raise UserError(_("Downloaded file is empty."))
+
+            self._create_request_log(
+                auth_context=auth_context,
+                user_id=user.id if auth_context == "delegated" else False,
+                method="GET",
+                resource_path="/sharepoint/preauthenticated-download",
+                outcome="success",
+                status_code=200,
+                duration_ms=int((time.monotonic() - started) * 1000),
+                retry_count=attempt,
+                client_request_id=client_request_id,
+                graph_request_id=response.headers.get("request-id"),
+                error_code=False,
+                safe_message=False,
+            )
+            return content
+
+        raise UserError(_("SharePoint pre-authenticated download failed."))
+
+    def lhi_download_url_request(self, download_url, **kwargs):
+        """Alias for lhi_preauthenticated_download_request."""
+        return self.lhi_preauthenticated_download_request(download_url, **kwargs)
 
     def lhi_get_library(self, code):
         self.ensure_one()

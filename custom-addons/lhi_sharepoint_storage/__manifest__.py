@@ -1,6 +1,6 @@
 {
     "name": "LHI SharePoint Document Storage",
-    "version": "19.0.1.0.1",
+    "version": "19.0.1.0.2",
     "category": "Technical Settings",
     "summary": "Policy-based SharePoint storage for LHI business documents",
     "description": """

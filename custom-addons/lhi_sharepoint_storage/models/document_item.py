@@ -901,15 +901,16 @@ class LhiDocumentItem(models.Model):
         if payload.get("id") != self.sharepoint_item_id:
             raise UserError(_("SharePoint download verification failed."))
         download_url = payload.get("@microsoft.graph.downloadUrl")
-        response = self.graph_connection_id.lhi_upload_session_request(
-            "GET",
+        if not download_url:
+            raise UserError(_("SharePoint did not return a valid download URL."))
+        max_bytes = max(self.file_size * 2, 50 * 1024 * 1024) if self.file_size else (50 * 1024 * 1024)
+        content = self.graph_connection_id.lhi_preauthenticated_download_request(
             download_url,
-            expected_statuses={200},
             auth_context=auth_context,
             user=user,
+            maximum_bytes=max_bytes,
         )
-        content = response.content
-        if len(content) != self.file_size:
+        if self.file_size and len(content) != self.file_size:
             raise UserError(_("Downloaded SharePoint file size does not match metadata."))
         return content
 

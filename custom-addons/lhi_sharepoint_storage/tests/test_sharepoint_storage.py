@@ -268,3 +268,62 @@ class TestSharePointStorage(TransactionCase):
         self.assertEqual(metadata["LhiOdooRecordId"], self.business_record.id)
         self.assertIn("LhiContentSha256", metadata)
         self.assertNotIn("LhiConfidentiality", metadata)
+
+    def test_preauthenticated_download_validation(self):
+        valid_url = "https://tenant.sharepoint.com/download/file.pdf"
+        self.assertEqual(
+            self.connection._lhi_validate_download_url(valid_url), valid_url
+        )
+
+        with self.assertRaises(ValidationError):
+            self.connection._lhi_validate_download_url("http://tenant.sharepoint.com/file.pdf")
+
+        with self.assertRaises(ValidationError):
+            self.connection._lhi_validate_download_url("https://user:pass@tenant.sharepoint.com/file.pdf")
+
+        with self.assertRaises(ValidationError):
+            self.connection._lhi_validate_download_url("https://tenant.sharepoint.com/file.pdf#section")
+
+        with self.assertRaises(ValidationError):
+            self.connection._lhi_validate_download_url("https://localhost/file.pdf")
+
+        with self.assertRaises(ValidationError):
+            self.connection._lhi_validate_download_url("https://127.0.0.1/file.pdf")
+        with self.assertRaises(ValidationError):
+            self.connection._lhi_validate_download_url("https://192.168.1.1/file.pdf")
+        with self.assertRaises(ValidationError):
+            self.connection._lhi_validate_download_url("https://13.107.42.16/file.pdf")
+
+        with self.assertRaises(ValidationError):
+            self.connection._lhi_validate_download_url("https://sharepoint.com.fake-domain.com/file.pdf")
+        with self.assertRaises(ValidationError):
+            self.connection._lhi_validate_download_url("https://malicious-sharepoint.com/file.pdf")
+
+    def test_download_bytes_uses_preauthenticated_download_request(self):
+        item = self._new_item(
+            sharepoint_drive_id="drive-123",
+            sharepoint_item_id="item-18",
+            file_size=14,
+        )
+        fake_payload = {
+            "id": "item-18",
+            "@microsoft.graph.downloadUrl": "https://tenant.sharepoint.com/download/test.pdf",
+        }
+        pdf_bytes = b"%PDF-1.4 test\n"
+        with patch.object(
+            self.env.registry["lhi.graph.connection"],
+            "graph_request",
+            return_value=fake_payload,
+        ), patch.object(
+            self.env.registry["lhi.graph.connection"],
+            "lhi_preauthenticated_download_request",
+            return_value=pdf_bytes,
+        ) as download_mock, patch.object(
+            self.env.registry["lhi.graph.connection"],
+            "lhi_upload_session_request",
+        ) as upload_mock:
+            content = item.download_bytes(auth_context="application")
+            self.assertEqual(content, pdf_bytes)
+            self.assertTrue(content.startswith(b"%PDF"))
+            download_mock.assert_called_once()
+            upload_mock.assert_not_called()

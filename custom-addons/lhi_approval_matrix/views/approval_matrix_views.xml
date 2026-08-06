@@ -99,10 +99,11 @@
         <field name="arch" type="xml">
             <form string="Approval Request Details" create="false">
                 <header>
+                    <field name="can_current_user_act" invisible="1"/>
                     <button name="action_submit" string="Submit" type="object" class="oe_highlight" invisible="state not in ('draft', 'returned')"/>
-                    <button name="action_approve" string="Approve" type="object" class="btn-success" invisible="state != 'under_review'"/>
-                    <button name="action_reject" string="Reject" type="object" class="btn-danger" invisible="state != 'under_review'"/>
-                    <button name="action_return_for_correction" string="Return for Correction" type="object" class="btn-warning" invisible="state != 'under_review'"/>
+                    <button name="action_approve" string="Approve" type="object" class="btn-success" invisible="not can_current_user_act"/>
+                    <button name="action_reject" string="Reject" type="object" class="btn-danger" invisible="not can_current_user_act"/>
+                    <button name="action_return_for_correction" string="Return for Correction" type="object" class="btn-warning" invisible="not can_current_user_act"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,under_review,approved,rejected"/>
                 </header>
                 <sheet>

@@ -71,6 +71,10 @@ class LhiApprovalRequest(models.Model):
         store=True,
     )
 
+    can_current_user_act = fields.Boolean(
+        string="Can Current User Act",
+        compute="_compute_can_current_user_act",
+    )
     # Criteria for matching (passed from source document)
     department_id = fields.Many2one("lhi.department", string="Department")
     office_id = fields.Many2one("lhi.office", string="Office/Location")
@@ -103,6 +107,34 @@ class LhiApprovalRequest(models.Model):
                 lambda request_line: request_line.state == "pending"
             )
             record.current_line_id = current[0] if current else False
+
+    @api.depends(
+        "state",
+        "creator_id",
+        "current_line_id",
+        "current_line_id.approver_group_id",
+        "current_line_id.approver_ids",
+        "current_line_id.approved_user_ids",
+    )
+    def _compute_can_current_user_act(self):
+        """Expose approval decisions only to the authorized current actor."""
+        for request_record in self:
+            allowed = False
+
+            if (
+                request_record.state == "under_review"
+                and request_record.current_line_id
+                and self.env.user
+                not in request_record.current_line_id.approved_user_ids
+            ):
+                try:
+                    request_record._lhi_assert_current_approver()
+                except UserError:
+                    allowed = False
+                else:
+                    allowed = True
+
+            request_record.can_current_user_act = allowed
 
     def action_submit(self):
         self.ensure_one()

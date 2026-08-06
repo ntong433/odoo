@@ -1426,15 +1426,38 @@ class LhiMemo(models.Model):
             "target": "new",
         }
 
-    def action_approve(self):
+    def _action_open_current_signing_url(self):
+        """Open the current actor's secure provider signing link."""
         self.ensure_one()
-        if not self._is_current_approver(self.env.user):
-            raise AccessError(_("It is not your turn to approve this memo."))
+        actor = self.env.user
+        signature_request = self.sudo().signature_request_id
+
+        if not signature_request:
+            raise UserError(
+                _("No LHI Sign request exists for this memo.")
+            )
+
+        url = (
+            signature_request
+            .sudo()
+            .signing_url_for_user(actor)
+        )
+
         return {
             "type": "ir.actions.act_url",
-            "url": f"/lhi/memo/{self.uuid}/participant",
+            "url": url,
             "target": "new",
         }
+
+    def action_approve(self):
+        self.ensure_one()
+
+        if not self._is_current_approver(self.env.user):
+            raise AccessError(
+                _("It is not your turn to approve this memo.")
+            )
+
+        return self._action_open_current_signing_url()
 
     def _is_current_approver(self, user):
         self.ensure_one()
@@ -1496,15 +1519,18 @@ class LhiMemo(models.Model):
 
     def action_reject(self):
         self.ensure_one()
+
         if not self._is_current_approver(self.env.user):
-            raise AccessError(_("It is not your turn to reject this memo."))
+            raise AccessError(
+                _("It is not your turn to reject this memo.")
+            )
+
         if not self.rejection_reason:
-            raise UserError(_("Enter a rejection reason before rejecting the memo."))
-        return {
-            "type": "ir.actions.act_url",
-            "url": f"/lhi/memo/{self.uuid}/participant",
-            "target": "new",
-        }
+            raise UserError(
+                _("Enter a rejection reason before rejecting the memo.")
+            )
+
+        return self._action_open_current_signing_url()
 
     def action_withdraw(self):
         self.ensure_one()

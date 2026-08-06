@@ -43,7 +43,8 @@ class LhiMemoProviderController(http.Controller):
     def open_participant_action(self, memo_uuid, **kwargs):
         memo = self._memo(memo_uuid)
         try:
-            url = memo.signature_request_id.sudo().signing_url_for_user(
+            signature_request = memo.sudo().signature_request_id
+            url = signature_request.sudo().signing_url_for_user(
                 request.env.user
             )
         except Exception as error:

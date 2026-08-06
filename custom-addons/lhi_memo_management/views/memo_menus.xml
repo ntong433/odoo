@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <menuitem id="menu_lhi_memo_root" name="Memos" action="action_lhi_memo" sequence="35" groups="lhi_security.group_lhi_employee" web_icon="lhi_memo_management,static/description/icon.svg"/>
+    <record id="action_lhi_memo_workspace" model="ir.actions.server">
+        <field name="name">Memo Workspace</field>
+        <field name="model_id" ref="model_lhi_memo"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_memo_workspace()</field>
+    </record>
+
+    <menuitem id="menu_lhi_memo_root" name="Memos" action="action_lhi_memo_workspace" sequence="35" groups="lhi_security.group_lhi_employee" web_icon="lhi_memo_management,static/description/icon.svg"/>
     <record id="menu_lhi_memo_root" model="ir.ui.menu">
         <field name="lhi_app_key">memo</field>
     </record>

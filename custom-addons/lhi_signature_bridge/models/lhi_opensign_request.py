@@ -349,13 +349,15 @@ class LhiOpenSignRequest(models.Model):
         self.ensure_one()
         return [
             {
-                "role": recipient.participant_role.replace("_", " ").title(),
-                "email": recipient.email,
                 "name": recipient.name,
-                "signer_role": recipient.provider_role,
-                "widgets": [],
+                "email": recipient.email,
+                "order": index,
+                "role": "signer",
+                "otp_required": not bool(recipient.entra_object_id),
             }
-            for recipient in self.recipient_ids.sorted("sequence")
+            for index, recipient in enumerate(
+                self.recipient_ids.sudo().sorted("sequence"), start=1
+            )
         ]
 
     def action_create_provider_draft(self, redirect_url=False):
@@ -400,31 +402,56 @@ class LhiOpenSignRequest(models.Model):
             "lhi.opensign.configuration"
         ].active_for_company(source_company)
         source = self._lhi_source_pdf_bytes()
-        expiry_days = 15
-        if self.expiry_date:
-            expiry_days = max((self.expiry_date.date() - fields.Date.today()).days, 1)
         payload = {
-            "file": base64.b64encode(source).decode(),
-            "title": self.name,
-            "note": _("LHI controlled memo approval and signature workflow."),
+            "name": self.name,
             "description": self.name,
-            "timeToCompleteDays": expiry_days,
+            "note": _(
+                "LHI controlled memo approval and signature workflow."
+            ),
+            "mode": "draft",
+            "file": {
+                "name": f"{self.name.replace('/', '-')}.pdf",
+                "content_type": "application/pdf",
+                "base64": base64.b64encode(source).decode(),
+            },
             "signers": self._provider_signers(),
-            "sendInOrder": True,
-            "send_in_order_strict": True,
+            "send_in_order": True,
             "send_email": True,
-            "hide_signer_signing_links": True,
-            "allow_modifications": False,
-            "allow_offline_sign": False,
-            "merge_certificate": False,
-            "notify_on_signatures": True,
+            "integration": {
+                "source": "lhi_erp",
+                "model": self._name,
+                "record_id": str(self.id),
+                "reference": self.name,
+            },
         }
+
+        if self.expiry_date:
+            expiry_value = self.expiry_date
+            if hasattr(expiry_value, "date"):
+                expiry_value = expiry_value.date()
+            payload["expiration_date"] = fields.Date.to_string(
+                expiry_value
+            )
+
         if redirect_url:
             payload["redirect_url"] = redirect_url
+
+        idempotency_key = (
+            self.idempotency_key
+            or (
+                f"lhi-erp-signature-{self.id}-"
+                f"{self.source_pdf_hash or 'no-hash'}"
+            )
+        )[:200]
+
         self.sudo().write({"configuration_id": configuration.id, "status": "preparing"})
         try:
             response = configuration.api_request(
-                "POST", "/draftdocument", json_body=payload, retry_safe=False
+                "POST",
+                "/signature-requests",
+                json_body=payload,
+                retry_safe=False,
+                idempotency_key=idempotency_key,
             )
         except UserError as error:
             self.sudo().write(
@@ -505,7 +532,7 @@ class LhiOpenSignRequest(models.Model):
         if not self.provider_request_id or not self.configuration_id:
             raise UserError(_("No provider request is available to refresh."))
         payload = self.configuration_id.api_request(
-            "GET", f"/document/{quote(self.provider_request_id)}", retry_safe=True
+            "GET", f"/signature-requests/{quote(self.provider_request_id)}", retry_safe=True
         )
         if (
             payload.get("objectId")
@@ -610,7 +637,7 @@ class LhiOpenSignRequest(models.Model):
                 _("Your immutable Microsoft Entra identity does not match.")
             )
         payload = self.configuration_id.api_request(
-            "GET", f"/signinglinks/{quote(self.provider_request_id)}", retry_safe=True
+            "GET", f"/signature-requests/{quote(self.provider_request_id)}/signing-links", retry_safe=True
         )
         target = False
         for email, url in self._find_signing_links(payload):
@@ -659,7 +686,7 @@ class LhiOpenSignRequest(models.Model):
             ):
                 signature_request.configuration_id.api_request(
                     "POST",
-                    f"/document/{quote(signature_request.provider_request_id)}",
+                    f"/signature-requests/{quote(signature_request.provider_request_id)}",
                     retry_safe=True,
                 )
             signature_request.sudo().write(
@@ -682,6 +709,37 @@ class LhiOpenSignRequest(models.Model):
         if replacement:
             replacement.sudo().write({"supersedes_request_id": self[:1].id})
         return True
+
+    def action_notify_current_recipient(self):
+        """Request an email for the currently active sequential recipient."""
+        self.ensure_one()
+
+        if (
+            not self.provider_request_id
+            or not self.configuration_id
+            or not self.current_recipient_id
+            or self.status in TERMINAL_STATUSES
+        ):
+            return False
+
+        response = self.configuration_id.sudo().api_request(
+            "POST",
+            (
+                f"/signature-requests/"
+                f"{self.provider_request_id}/remind"
+            ),
+            json_body={},
+            retry_safe=False,
+        )
+
+        self.message_post(
+            body=_(
+                "LHI Sign notification requested for the current "
+                "sequential recipient."
+            )
+        )
+
+        return response
 
     def _recipient_from_payload(self, payload):
         signer = payload.get("signer") or {}
@@ -764,31 +822,110 @@ class LhiOpenSignRequest(models.Model):
 
     def process_provider_event(self, event_record, payload):
         self.ensure_one()
-        event_type = (payload.get("event") or "").strip().lower()
+        raw_event_type = (payload.get("event") or "").strip().lower()
+        event_type = {
+            "document.created": "created",
+            "document.viewed": "viewed",
+            "document.signed": "signed",
+            "document.approved": "approved",
+            "document.declined": "declined",
+            "document.revoked": "revoked",
+            "document.completed": "completed",
+        }.get(raw_event_type, raw_event_type)
         if self.status in TERMINAL_STATUSES and event_type != "completed":
             event_record.sudo().write(
                 {"state": "ignored", "safe_message": _("Terminal request.")}
             )
             return True
+        provider_payload = payload
+        if event_type in ("signed", "approved", "completed") and not (
+            payload.get("signer")
+            or payload.get("signers")
+            or payload.get("recipients")
+        ):
+            # Some integration webhooks contain only the document ID and
+            # event name. Retrieve authoritative signer statuses through the
+            # authenticated LHI Sign integration status endpoint.
+            provider_payload = self.provider_status_payload()
+
         recipient = self._recipient_from_payload(payload)
         event_time = event_record.provider_timestamp or fields.Datetime.now()
         if event_type == "viewed" and recipient and recipient.status == "pending":
             recipient.sudo().write({"status": "viewed", "viewed_at": event_time})
         elif event_type in ("signed", "approved"):
             if not recipient:
-                raise UserError(
-                    _("The provider signer is not in the snapshotted route.")
+                # The webhook did not contain signer identity. Reconcile the
+                # authoritative provider signer list in strict local sequence.
+                completed_before = set(
+                    self.recipient_ids.filtered(
+                        lambda item: item.status == "completed"
+                    ).ids
                 )
-            if recipient != self.current_recipient_id:
+
+                self._reconcile_completed_recipients(provider_payload)
+
+                completed_after = set(
+                    self.recipient_ids.filtered(
+                        lambda item: item.status == "completed"
+                    ).ids
+                )
+
+                if completed_after == completed_before:
+                    raise UserError(
+                        _(
+                            "The provider signed event did not identify "
+                            "a newly completed participant."
+                        )
+                    )
+
+                self.sudo().write(
+                    {
+                        "preparation_completed": True,
+                        "last_sync_at": fields.Datetime.now(),
+                    }
+                )
+
+                # Recipient reconciliation already advanced the local route
+                # and invoked the source signed-event hook.
+                return True
+
+            current_recipient = self.current_recipient_id
+
+            if not current_recipient:
+                current_recipient = self.recipient_ids.filtered(
+                    lambda item: item.status != "completed"
+                ).sorted("sequence")[:1]
+
+                if current_recipient:
+                    self.sudo().write(
+                        {
+                            "status": "in_progress",
+                            "provider_status": "in-progress",
+                            "preparation_completed": True,
+                            "current_recipient_id": current_recipient.id,
+                            "last_sync_at": fields.Datetime.now(),
+                        }
+                    )
+
+            if recipient != current_recipient:
                 raise UserError(_("An out-of-order provider action was rejected."))
-            recipient.sudo().write({"status": "completed", "completed_at": event_time})
+
+            recipient.sudo().write(
+                {
+                    "status": "completed",
+                    "completed_at": event_time,
+                }
+            )
+
             pending = self.recipient_ids.filtered(
                 lambda item: item.status != "completed"
             ).sorted("sequence")
+
             self.sudo().write(
                 {
                     "status": "in_progress",
                     "provider_status": "in-progress",
+                    "preparation_completed": True,
                     "current_recipient_id": pending[:1].id if pending else False,
                     "last_sync_at": fields.Datetime.now(),
                 }
@@ -820,15 +957,15 @@ class LhiOpenSignRequest(models.Model):
                 if source and hasattr(source, "opensign_completed_hook"):
                     source.opensign_completed_hook(self.id)
                 return True
-            if not self._reconcile_completed_recipients(payload):
+            if not self._reconcile_completed_recipients(provider_payload):
                 raise UserError(
                     _(
                         "Provider completion cannot be applied until every "
                         "sequential participant is explicitly confirmed."
                     )
                 )
-            signed_url = payload.get("file") or f"/signature-requests/{self.provider_document_id}/signed-document"
-            certificate_url = payload.get("certificate") or f"/signature-requests/{self.provider_document_id}/certificate"
+            signed_url = payload.get("file") or f"/signature-requests/{self.provider_request_id}/signed-document"
+            certificate_url = payload.get("certificate") or f"/signature-requests/{self.provider_request_id}/certificate"
             if not signed_url or not certificate_url:
                 raise UserError(_("The completion event omitted signed artefact URLs."))
             signed_pdf = self.configuration_id.api_download(signed_url)
@@ -868,6 +1005,8 @@ class LhiOpenSignRequest(models.Model):
         """Backward-compatible completion API used by legacy integrations."""
         self.ensure_one()
         vals = {"status": status}
+        if status == "completed":
+            vals["provider_status"] = "completed"
         log_msg = f"Callback received: Status = {status}\n"
         if signed_pdf:
             signed_content = self.env["lhi.document.item"]._decode_binary_value(

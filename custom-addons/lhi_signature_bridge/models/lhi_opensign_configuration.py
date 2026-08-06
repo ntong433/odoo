@@ -150,6 +150,7 @@ class LhiOpenSignConfiguration(models.Model):
         json_body=None,
         expected_statuses=None,
         retry_safe=True,
+        idempotency_key=None,
     ):
         """Call a documented OpenSign API endpoint without exposing credentials."""
         self.ensure_one()
@@ -167,6 +168,9 @@ class LhiOpenSignConfiguration(models.Model):
         }
         for attempt in range(attempts + 1):
             try:
+                if idempotency_key:
+                    headers = dict(headers or {})
+                    headers["Idempotency-Key"] = str(idempotency_key)
                 response = requests.request(
                     method,
                     url,

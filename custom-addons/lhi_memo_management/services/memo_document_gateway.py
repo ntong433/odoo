@@ -68,16 +68,14 @@ class MemoDocumentGateway:
             return True
         if user in memo.preparation_officer_ids:
             return True
-        # Active approver
+        # Only the currently active approver may access another user's memo.
         sig = memo.sudo().signature_request_id
-        if sig and sig.current_recipient_id and sig.current_recipient_id.user_id == user:
-            return True
-        # Any active approver line
-        active_lines = memo.sudo().approver_line_ids.filtered(
-            lambda line: line.state in ("pending", "approved")
-            and line.approver_user_id == user
-        )
-        if active_lines:
+        if (
+            memo.state in ("under_approval", "final_signature_pending")
+            and sig
+            and sig.current_recipient_id
+            and sig.current_recipient_id.user_id == user
+        ):
             return True
         return False
 

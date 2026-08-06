@@ -41,7 +41,11 @@ class OpenSignController(http.Controller):
                 {"status": "error", "message": "Request not found"}, status=404
             )
         received = request.httprequest.headers.get("x-webhook-signature", "")
-        authenticated = request.env["lhi.opensign.request"]
+        authenticated = (
+            request.env["lhi.opensign.request"]
+            .sudo()
+            .browse()
+        )
         configured = False
         for signature_request in signature_requests.filtered("configuration_id"):
             try:
@@ -62,7 +66,7 @@ class OpenSignController(http.Controller):
             return request.make_json_response(
                 {"status": "error", "message": "Invalid signature"}, status=401
             )
-        signature_request = authenticated
+        signature_request = authenticated.sudo()
         try:
             event, duplicate = (
                 request.env["lhi.opensign.webhook.event"]
@@ -72,6 +76,10 @@ class OpenSignController(http.Controller):
         except Exception:
             return request.make_json_response(
                 {"status": "error", "message": "Event validation failed"}, status=409
+            )
+        if duplicate and not event:
+            return request.make_json_response(
+                {"status": "duplicate"}, status=200
             )
         if event.state == "failed":
             return request.make_json_response(

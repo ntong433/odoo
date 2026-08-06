@@ -1612,6 +1612,28 @@ class LhiMemo(models.Model):
     def action_view_audit_certificate(self):
         return self._document_action("certificate_item_id")
 
+    @api.model
+    def action_open_memo_workspace(self):
+        """Open pending memo actions first, otherwise open the user's memos."""
+        awaiting_domain = [
+            ("current_recipient_user_id", "=", self.env.user.id),
+            (
+                "state",
+                "in",
+                ("under_approval", "final_signature_pending"),
+            ),
+        ]
+
+        action_xmlid = (
+            "lhi_memo_management.action_lhi_memo_awaiting_action"
+            if self.search_count(awaiting_domain)
+            else "lhi_memo_management.action_lhi_memo"
+        )
+
+        return self.env["ir.actions.actions"]._for_xml_id(
+            action_xmlid
+        )
+
     def action_track_approval(self):
         self.ensure_one()
         if not self.approval_request_id:
@@ -1644,6 +1666,28 @@ class LhiMemo(models.Model):
             "requested_by": requested_by,
             "name": filenames[field_name],
         }
+
+    def _notify_current_opensign_recipient(self, signature_request):
+        """Notify the next provider recipient without rolling back workflow."""
+        self.ensure_one()
+
+        try:
+            return (
+                signature_request
+                .sudo()
+                .action_notify_current_recipient()
+            )
+        except Exception as error:
+            self.message_post(
+                body=_(
+                    "The sequential route advanced, but LHI Sign could "
+                    "not send the next signing notification. The request "
+                    "can be resent with the provider reminder action. "
+                    "Safe error: %s"
+                )
+                % str(error)[:500]
+            )
+            return False
 
     def opensign_event_hook(self, request_id, event_type, payload):
         self.ensure_one()
@@ -1682,6 +1726,7 @@ class LhiMemo(models.Model):
                     _("Memo %s is now awaiting your sequential approval.") % self.name,
                     schedule_activity=True,
                 )
+                self._notify_current_opensign_recipient(signature_request)
             else:
                 line = self._active_approver_lines().filtered(
                     lambda item: item.signature_recipient_id == recipient
@@ -1738,6 +1783,7 @@ class LhiMemo(models.Model):
                         % self.name,
                         schedule_activity=True,
                     )
+                    self._notify_current_opensign_recipient(signature_request)
         elif event_type == "declined":
             reason = (
                 payload.get("declineReason")

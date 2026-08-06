@@ -13,7 +13,7 @@
                 <field name="memo_category_id"/>
                 <field name="recipient_user_ids"/>
                 <filter name="my_memos" string="My Memos" domain="[('requester_id', '=', uid)]"/>
-                <filter name="my_action" string="Awaiting My Action" domain="[('current_recipient_id.user_id', '=', uid)]"/>
+                <filter name="my_action" string="Awaiting My Action" domain="[('current_recipient_user_id', '=', uid), ('state', 'in', ('under_approval', 'final_signature_pending'))]"/>
                 <filter name="returned" string="Returned" domain="[('state', '=', 'returned')]"/>
                 <filter name="completed" string="Completed" domain="[('state', '=', 'completed')]"/>
                 <separator/>
@@ -207,6 +207,7 @@
         <field name="res_model">lhi.memo</field>
         <field name="view_mode">list,form</field>
         <field name="search_view_id" ref="view_lhi_memo_search"/>
+        <field name="domain">[('requester_id', '=', uid)]</field>
     </record>
     <record id="action_lhi_memo_raise" model="ir.actions.act_window">
         <field name="name">Raise Memo</field>
@@ -230,7 +231,7 @@
         <field name="name">Awaiting My Action</field>
         <field name="res_model">lhi.memo</field>
         <field name="view_mode">list,form</field>
-        <field name="domain">[('current_recipient_id.user_id', '=', uid), ('state', 'in', ('under_approval', 'final_signature_pending'))]</field>
+        <field name="domain">[('current_recipient_user_id', '=', uid), ('state', 'in', ('under_approval', 'final_signature_pending'))]</field>
     </record>
     <record id="action_lhi_memo_returned" model="ir.actions.act_window">
         <field name="name">Returned for Correction</field>
@@ -242,13 +243,13 @@
         <field name="name">Approved Memos</field>
         <field name="res_model">lhi.memo</field>
         <field name="view_mode">list,form</field>
-        <field name="domain">[('approval_request_id.state', '=', 'approved')]</field>
+        <field name="domain">[('requester_id', '=', uid), ('approval_request_id.state', '=', 'approved')]</field>
     </record>
     <record id="action_lhi_memo_completed" model="ir.actions.act_window">
         <field name="name">Signed and Completed Memos</field>
         <field name="res_model">lhi.memo</field>
         <field name="view_mode">list,form</field>
-        <field name="domain">[('state', '=', 'completed')]</field>
+        <field name="domain">[('requester_id', '=', uid), ('state', '=', 'completed')]</field>
     </record>
     <record id="action_lhi_memo_department" model="ir.actions.act_window">
         <field name="name">Department Memos</field>

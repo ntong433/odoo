@@ -49,24 +49,32 @@
     </record>
 
     <record id="rule_lhi_memo_employee_scope" model="ir.rule">
-        <field name="name">Employees see owned and addressed memos</field>
+        <field name="name">Employees see own memos</field>
         <field name="model_id" ref="model_lhi_memo"/>
-        <field name="domain_force">['|', ('requester_id', '=', user.id), ('recipient_user_ids', 'in', [user.id])]</field>
+        <field name="domain_force">[('requester_id', '=', user.id)]</field>
         <field name="groups" eval="[(4, ref('lhi_security.group_lhi_employee'))]"/>
     </record>
 
     <record id="rule_lhi_memo_approver_scope" model="ir.rule">
-        <field name="name">Approvers see assigned memos</field>
+        <field name="name">Approvers see current assigned memo</field>
         <field name="model_id" ref="model_lhi_memo"/>
-        <field name="domain_force">[('approver_line_ids.approver_user_id', '=', user.id)]</field>
+        <field name="domain_force">[('current_recipient_user_id', '=', user.id), ('state', 'in', ('under_approval', 'final_signature_pending'))]</field>
         <field name="groups" eval="[(4, ref('group_lhi_memo_approver'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
     </record>
 
     <record id="rule_lhi_memo_participant_scope" model="ir.rule">
-        <field name="name">Assigned participants see their memo</field>
+        <field name="name">Current workflow participant sees assigned memo</field>
         <field name="model_id" ref="model_lhi_memo"/>
-        <field name="domain_force">[('approver_line_ids.approver_user_id', '=', user.id)]</field>
+        <field name="domain_force">[('current_recipient_user_id', '=', user.id), ('state', 'in', ('under_approval', 'final_signature_pending'))]</field>
         <field name="groups" eval="[(4, ref('lhi_security.group_lhi_employee'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
     </record>
 
     <record id="rule_lhi_memo_preparation_scope" model="ir.rule">

@@ -156,9 +156,11 @@ class LhiOpenSignWebhookEvent(models.Model):
                     }
                 )
         except IntegrityError:
-            # A concurrent delivery won the unique-key race.  Re-enter the
-            # normal existing-event path after the savepoint rollback.
-            return self.receive(signature_request, payload, raw_payload)
+            # A concurrent delivery won the unique-key race. Do not recurse
+            # using this transaction because its snapshot may not yet expose
+            # the row committed by the winning request. The controller treats
+            # an empty duplicate result as an acknowledged concurrent replay.
+            return self.browse(), True
         try:
             if event_type == "completed":
                 signature_request.process_provider_event(event, payload)

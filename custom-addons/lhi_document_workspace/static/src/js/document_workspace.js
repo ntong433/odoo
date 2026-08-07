@@ -117,6 +117,26 @@ export class LhiDocumentWorkspace extends Component {
         return this.props.record.resModel;
     }
 
+    get categoryOptions() {
+        return [
+            ...new Set(
+                (this.state.documents || [])
+                    .map((value) => value.category)
+                    .filter((value) => value)
+            ),
+        ];
+    }
+
+    get workflowStateOptions() {
+        return [
+            ...new Set(
+                (this.state.documents || [])
+                    .map((value) => value.workflow_state)
+                    .filter((value) => value)
+            ),
+        ];
+    }
+
     async callRecord(method, extraArgs = [], props = this.props) {
         return this.orm.call(props.record.resModel, method, [
             [props.record.resId],

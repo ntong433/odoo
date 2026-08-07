@@ -18,13 +18,13 @@
                     </form>
                     <select t-model="state.category" t-on-change="loadWorkspace" aria-label="Document category">
                         <option value="">All categories</option>
-                        <t t-foreach="[...new Set(state.documents.map((value) => value.category).filter((value) => value))]" t-as="category" t-key="category">
+                        <t t-foreach="categoryOptions" t-as="category" t-key="category">
                             <option t-att-value="category"><t t-esc="category"/></option>
                         </t>
                     </select>
                     <select t-model="state.workflowState" t-on-change="loadWorkspace" aria-label="Workflow state">
                         <option value="">All workflow states</option>
-                        <t t-foreach="[...new Set(state.documents.map((value) => value.workflow_state).filter((value) => value))]" t-as="workflowState" t-key="workflowState">
+                        <t t-foreach="workflowStateOptions" t-as="workflowState" t-key="workflowState">
                             <option t-att-value="workflowState"><t t-esc="workflowState"/></option>
                         </t>
                     </select>

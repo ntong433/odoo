@@ -1461,11 +1461,22 @@ class LhiMemo(models.Model):
 
     def _is_current_approver(self, user):
         self.ensure_one()
-        current = self.signature_request_id.current_recipient_id
+
+        # The signature request and recipient are technical bridge records
+        # intentionally restricted to Signature Administrators.  Use sudo only
+        # for those technical records, while still comparing against the real
+        # logged-in user.
+        signature_request = self.sudo().signature_request_id
+        current = (
+            signature_request.sudo().current_recipient_id
+            if signature_request
+            else False
+        )
+
         return bool(
             current
-            and current.user_id == user
-            and current.participant_role != "requester"
+            and current.sudo().user_id.id == user.id
+            and current.sudo().participant_role != "requester"
         )
 
     def action_return_for_correction(self):
@@ -1481,7 +1492,7 @@ class LhiMemo(models.Model):
         current_line = active_lines.filtered(
             lambda line: (
                 line.signature_recipient_id
-                == self.signature_request_id.current_recipient_id
+                == self.sudo().signature_request_id.sudo().current_recipient_id
             )
         )[:1]
         (active_lines - current_line).sudo().write({"state": "superseded"})
@@ -1492,7 +1503,7 @@ class LhiMemo(models.Model):
                 "comments": self.return_reason,
             }
         )
-        self.signature_request_id.sudo().action_supersede()
+        self.sudo().signature_request_id.sudo().action_supersede()
         self._transition(
             "returned",
             {

@@ -212,8 +212,9 @@ class LhiAssetImportWizard(models.TransientModel):
         conflict_behavior = document.storage_policy_id.conflict_behavior or "default"
         final_remote_name = last_metadata.get("name") or document.name
         checksum_prefix = expected_checksum[:8] if expected_checksum else ""
+        is_xlsx = (final_remote_name or "").lower().endswith(".xlsx")
 
-        if remote_size != expected_size:
+        if remote_size != expected_size and not is_xlsx:
             _logger.error(
                 "Legacy Asset Import remote size differs from exact uploaded payload. "
                 "Original decoded size: %s, upload payload size: %s, SHA-256 prefix: %s, "
@@ -233,6 +234,36 @@ class LhiAssetImportWizard(models.TransientModel):
                 _("Remote size differs from the exact uploaded payload. Expected %s bytes, remote SharePoint size %s bytes.")
                 % (expected_size, remote_size)
             )
+
+        if remote_size != expected_size and is_xlsx:
+            _logger.info(
+                "SharePoint transformed Legacy Asset Import XLSX after upload. "
+                "Original size: %s, remote size: %s, DriveItem ID: %s.",
+                expected_size,
+                remote_size,
+                returned_item_id,
+            )
+
+            # SharePoint may rewrite an Office XLSX package. Verify the
+            # actual final remote content instead of requiring its byte size
+            # to remain identical to the original upload.
+            document.sudo().write({"file_size": remote_size})
+
+            try:
+                document._calculate_remote_hashes(
+                    auth_context="application",
+                    user=self.env.user,
+                )
+                document._verify_drive_item(
+                    auth_context="application",
+                    user=self.env.user,
+                )
+            except Exception:
+                document._mark_failed(
+                    "Final SharePoint XLSX verification failed.",
+                    enqueue=False,
+                )
+                raise
 
         _logger.info(
             "Legacy Asset Import SharePoint verification succeeded. "

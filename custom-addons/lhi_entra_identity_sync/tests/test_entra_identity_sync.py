@@ -221,6 +221,7 @@ class TestLhiEntraIdentitySync(TransactionCase):
         )
         self.assertEqual(len(user), 1)
         self.assertEqual(user.login, "new.user@example.org")
+        self.assertTrue(user.active)
         self.assertTrue(user.has_group("lhi_security.group_lhi_employee"))
         self.assertFalse(user.share)
         self.assertTrue(user.has_group("base.group_user"))
@@ -390,6 +391,63 @@ class TestLhiEntraIdentitySync(TransactionCase):
                     "management_mode": "entra",
                 }
             )
+
+    def test_enabled_entra_identity_reactivates_archived_user(self):
+        self.user.with_context(lhi_entra_rollback=True).write(
+            {
+                "active": False,
+                "entra_login_blocked": True,
+            }
+        )
+
+        self.assertFalse(self.user.active)
+
+        with (
+            patch.object(
+                type(self.connection),
+                "graph_get_all",
+                return_value=[self._remote_user(enabled=True)],
+            ),
+            patch.object(
+                type(self.connection),
+                "graph_request",
+                side_effect=self._graph_request,
+            ),
+        ):
+            run = self.env["lhi.entra.sync.run"].create_and_execute(
+                configuration=self.configuration,
+                apply=False,
+                source="manual",
+            )
+
+        plan = run.plan_ids.filtered(
+            lambda record: record.user_id == self.user
+        )
+        self.assertEqual(len(plan), 1)
+        self.assertTrue(plan.plan_json["user_vals"]["active"])
+        self.assertFalse(
+            plan.plan_json["user_vals"]["entra_login_blocked"]
+        )
+        self.assertTrue(
+            plan.plan_json["user_vals"]["entra_account_enabled"]
+        )
+
+        self.configuration.write(
+            {"approved_dry_run_id": run.id}
+        )
+        self.configuration.with_context(
+            lhi_entra_activation=True
+        ).write(
+            {"sync_mode": "write"}
+        )
+
+        run.action_apply()
+
+        self.user.invalidate_recordset()
+
+        self.assertTrue(self.user.active)
+        self.assertTrue(self.user.entra_account_enabled)
+        self.assertFalse(self.user.entra_login_blocked)
 
     def test_disabled_entra_identity_fails_closed(self):
         self.user.write(

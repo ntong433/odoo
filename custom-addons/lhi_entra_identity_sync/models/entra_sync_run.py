@@ -577,8 +577,36 @@ class LhiEntraSyncRun(models.Model):
                     ],
                 }
             )
+        # Entra is authoritative for the login lifecycle of synchronized users.
+        #
+        # A user created by a previous synchronization may have been archived by
+        # rollback. If that same immutable Entra identity is still enabled and
+        # remains inside the approved synchronization scope, a later approved
+        # synchronization must be able to reactivate the Odoo account.
+        #
+        # Do this in plan generation rather than _apply_plan() so that the
+        # activation is visible in the dry-run plan and remains auditable.
+        if (
+            not create_user
+            and user
+            and account_enabled
+            and not user.active
+        ):
+            user_vals["active"] = True
+            self._finding(
+                category="add",
+                severity="info",
+                user=user,
+                entra_object_id=object_id,
+                entra_upn=remote.get("userPrincipalName"),
+                message=_(
+                    "Enabled Entra identity would reactivate the archived Odoo user."
+                ),
+            )
+
         if self.configuration_id.sync_login_from_upn and remote.get("userPrincipalName"):
             user_vals["login"] = remote["userPrincipalName"].strip().casefold()
+
         if not account_enabled and self.configuration_id.deactivation_policy == "archive":
             user_vals["active"] = False
 

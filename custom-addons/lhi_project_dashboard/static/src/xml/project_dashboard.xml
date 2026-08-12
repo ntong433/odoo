@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="lhi_project_dashboard.ProjectDashboard">
+        <div class="lhi_project_dashboard">
+
+            <div class="lhi_project_dashboard_header">
+                <div>
+                    <div class="lhi_project_dashboard_title">
+                        <t t-esc="state.projectName"/>
+                    </div>
+
+                    <div class="lhi_project_dashboard_metadata">
+                        <t t-foreach="state.metadata"
+                           t-as="item"
+                           t-key="item.label">
+                            <span class="lhi_project_dashboard_meta_item">
+                                <strong>
+                                    <t t-esc="item.label"/>:
+                                </strong>
+                                <t t-esc="item.value"/>
+                            </span>
+                        </t>
+
+                        <span t-if="state.startDate or state.endDate"
+                              class="lhi_project_dashboard_meta_item">
+                            <strong>Period:</strong>
+                            <t t-esc="state.startDate or '—'"/>
+                            –
+                            <t t-esc="state.endDate or '—'"/>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="lhi_project_dashboard_controls">
+
+                    <label>
+                        Year
+                        <select class="form-select form-select-sm"
+                                t-on-change="onYearChange">
+                            <t t-foreach="state.years"
+                               t-as="year"
+                               t-key="year">
+                                <option t-att-value="year"
+                                        t-att-selected="year === state.year">
+                                    <t t-esc="year"/>
+                                </option>
+                            </t>
+                        </select>
+                    </label>
+
+                    <label>
+                        Quarter
+                        <select class="form-select form-select-sm"
+                                t-on-change="onQuarterChange">
+                            <option value="all"
+                                    t-att-selected="state.quarter === 'all'">
+                                All
+                            </option>
+                            <option value="q1"
+                                    t-att-selected="state.quarter === 'q1'">
+                                Q1
+                            </option>
+                            <option value="q2"
+                                    t-att-selected="state.quarter === 'q2'">
+                                Q2
+                            </option>
+                            <option value="q3"
+                                    t-att-selected="state.quarter === 'q3'">
+                                Q3
+                            </option>
+                            <option value="q4"
+                                    t-att-selected="state.quarter === 'q4'">
+                                Q4
+                            </option>
+                        </select>
+                    </label>
+
+                    <button t-if="state.canConfigure"
+                            type="button"
+                            class="btn btn-outline-primary btn-sm"
+                            t-on-click="configureMetrics">
+                        Configure Metrics
+                    </button>
+                </div>
+            </div>
+
+            <div t-if="state.loading"
+                 class="lhi_project_dashboard_loading">
+                Loading project metrics…
+            </div>
+
+            <t t-elif="state.sections.length">
+                <section t-foreach="state.sections"
+                         t-as="section"
+                         t-key="section.name"
+                         class="lhi_project_dashboard_section">
+
+                    <div class="lhi_project_dashboard_section_title">
+                        <t t-esc="section.name"/>
+                    </div>
+
+                    <div class="lhi_project_dashboard_grid">
+                        <article t-foreach="section.metrics"
+                                 t-as="metric"
+                                 t-key="metric.id"
+                                 class="lhi_project_metric_card">
+
+                            <div class="lhi_project_metric_name">
+                                <t t-esc="metric.name"/>
+                            </div>
+
+                            <div class="lhi_project_metric_value">
+                                <t t-esc="formatValue(metric)"/>
+                            </div>
+
+                            <div t-if="metric.target !== null"
+                                 class="lhi_project_metric_target">
+                                Target:
+                                <t t-esc="metric.target"/>
+                            </div>
+
+                            <div t-if="metric.unit === 'percentage'"
+                                 class="progress lhi_project_metric_progress">
+                                <div class="progress-bar"
+                                     role="progressbar"
+                                     t-att-style="'width: ' + progressValue(metric) + '%'"/>
+                            </div>
+
+                        </article>
+                    </div>
+                </section>
+            </t>
+
+            <div t-else=""
+                 class="lhi_project_dashboard_empty">
+                No dashboard metrics are configured for this project.
+            </div>
+
+        </div>
+    </t>
+
+</templates>

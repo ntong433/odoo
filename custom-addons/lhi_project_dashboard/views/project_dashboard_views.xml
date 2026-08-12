@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_lhi_project_form_dashboard" model="ir.ui.view">
+        <field name="name">lhi.project.form.dashboard</field>
+        <field name="model">lhi.project</field>
+        <field name="inherit_id" ref="lhi_base.view_lhi_project_form"/>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+
+            <xpath expr="//sheet/div[contains(concat(' ', normalize-space(@class), ' '), ' oe_title ')][1]" position="after">
+                <div class="lhi_project_dashboard_host">
+                    <field name="project_dashboard_widget"
+                           widget="lhi_project_dashboard"
+                           class="lhi_project_dashboard_field"
+                           nolabel="1"
+                           readonly="1"/>
+                </div>
+            </xpath>
+
+        </field>
+    </record>
+
+
+    <record id="view_project_dashboard_metric_list" model="ir.ui.view">
+        <field name="name">lhi.project.dashboard.metric.list</field>
+        <field name="model">lhi.project.dashboard.metric</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="section"/>
+                <field name="metric_type"/>
+                <field name="automatic_code"
+                       optional="show"/>
+                <field name="unit"/>
+                <field name="default_for_projects"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+
+    <record id="view_project_dashboard_metric_form" model="ir.ui.view">
+        <field name="name">lhi.project.dashboard.metric.form</field>
+        <field name="model">lhi.project.dashboard.metric</field>
+        <field name="arch" type="xml">
+            <form string="Dashboard Metric">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="code"/>
+                            <field name="section"/>
+                            <field name="sequence"/>
+                        </group>
+
+                        <group>
+                            <field name="metric_type"/>
+                            <field name="automatic_code"
+                                   invisible="metric_type != 'automatic'"
+                                   required="metric_type == 'automatic'"/>
+                            <field name="unit"/>
+                            <field name="default_for_projects"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <field name="description"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="action_project_dashboard_metrics" model="ir.actions.act_window">
+        <field name="name">Dashboard Metrics</field>
+        <field name="res_model">lhi.project.dashboard.metric</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+
+    <record id="view_project_dashboard_assignment_list" model="ir.ui.view">
+        <field name="name">lhi.project.dashboard.assignment.list</field>
+        <field name="model">lhi.project.dashboard.assignment</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="project_id"/>
+                <field name="metric_id"/>
+                <field name="target_value"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+
+    <record id="view_project_dashboard_assignment_form" model="ir.ui.view">
+        <field name="name">lhi.project.dashboard.assignment.form</field>
+        <field name="model">lhi.project.dashboard.assignment</field>
+        <field name="arch" type="xml">
+            <form string="Project Dashboard Metric">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="project_id"/>
+                            <field name="metric_id"/>
+                        </group>
+                        <group>
+                            <field name="sequence"/>
+                            <field name="target_value"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Manual Values">
+                            <field name="value_ids">
+                                <list editable="bottom">
+                                    <field name="year"/>
+                                    <field name="period"/>
+                                    <field name="value"/>
+                                    <field name="notes"/>
+                                    <field name="updated_by_id"
+                                           readonly="1"/>
+                                    <field name="updated_at"
+                                           readonly="1"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="action_project_dashboard_assignments" model="ir.actions.act_window">
+        <field name="name">Project Dashboard Configuration</field>
+        <field name="res_model">lhi.project.dashboard.assignment</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

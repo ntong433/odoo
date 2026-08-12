@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- Activities -->
+    <record id="metric_total_activities" model="lhi.project.dashboard.metric">
+        <field name="name">Total Activities</field>
+        <field name="code">activities_total</field>
+        <field name="section">Activities</field>
+        <field name="metric_type">automatic</field>
+        <field name="automatic_code">activities_total</field>
+        <field name="unit">number</field>
+        <field name="sequence">10</field>
+        <field name="default_for_projects">1</field>
+    </record>
+
+    <record id="metric_completed_activities" model="lhi.project.dashboard.metric">
+        <field name="name">Completed Activities</field>
+        <field name="code">activities_completed</field>
+        <field name="section">Activities</field>
+        <field name="metric_type">automatic</field>
+        <field name="automatic_code">activities_completed</field>
+        <field name="unit">number</field>
+        <field name="sequence">20</field>
+        <field name="default_for_projects">1</field>
+    </record>
+
+    <record id="metric_ongoing_activities" model="lhi.project.dashboard.metric">
+        <field name="name">Ongoing Activities</field>
+        <field name="code">activities_in_progress</field>
+        <field name="section">Activities</field>
+        <field name="metric_type">automatic</field>
+        <field name="automatic_code">activities_in_progress</field>
+        <field name="unit">number</field>
+        <field name="sequence">30</field>
+        <field name="default_for_projects">1</field>
+    </record>
+
+    <record id="metric_planned_activities" model="lhi.project.dashboard.metric">
+        <field name="name">Planned Activities</field>
+        <field name="code">activities_planned</field>
+        <field name="section">Activities</field>
+        <field name="metric_type">automatic</field>
+        <field name="automatic_code">activities_planned</field>
+        <field name="unit">number</field>
+        <field name="sequence">40</field>
+        <field name="default_for_projects">1</field>
+    </record>
+
+    <record id="metric_delayed_activities" model="lhi.project.dashboard.metric">
+        <field name="name">Delayed Activities</field>
+        <field name="code">activities_delayed</field>
+        <field name="section">Activities</field>
+        <field name="metric_type">automatic</field>
+        <field name="automatic_code">activities_delayed</field>
+        <field name="unit">number</field>
+        <field name="sequence">50</field>
+        <field name="default_for_projects">1</field>
+    </record>
+
+    <record id="metric_activity_completion" model="lhi.project.dashboard.metric">
+        <field name="name">Activity Completion</field>
+        <field name="code">activities_completion_pct</field>
+        <field name="section">Activities</field>
+        <field name="metric_type">automatic</field>
+        <field name="automatic_code">activities_completion_pct</field>
+        <field name="unit">percentage</field>
+        <field name="sequence">60</field>
+        <field name="default_for_projects">1</field>
+    </record>
+
+    <!-- M&E -->
+    <record id="metric_total_indicators" model="lhi.project.dashboard.metric">
+        <field name="name">Total Indicators</field>
+        <field name="code">indicators_total</field>
+        <field name="section">M&amp;E / Indicators</field>
+        <field name="metric_type">automatic</field>
+        <field name="automatic_code">indicators_total</field>
+        <field name="unit">number</field>
+        <field name="sequence">100</field>
+        <field name="default_for_projects">1</field>
+    </record>
+
+    <record id="metric_indicators_achieved" model="lhi.project.dashboard.metric">
+        <field name="name">Indicators Achieved</field>
+        <field name="code">indicators_achieved</field>
+        <field name="section">M&amp;E / Indicators</field>
+        <field name="metric_type">automatic</field>
+        <field name="automatic_code">indicators_achieved</field>
+        <field name="unit">number</field>
+        <field name="sequence">110</field>
+        <field name="default_for_projects">1</field>
+    </record>
+
+    <record id="metric_indicator_progress" model="lhi.project.dashboard.metric">
+        <field name="name">Average Indicator Progress</field>
+        <field name="code">indicators_progress_pct</field>
+        <field name="section">M&amp;E / Indicators</field>
+        <field name="metric_type">automatic</field>
+        <field name="automatic_code">indicators_progress_pct</field>
+        <field name="unit">percentage</field>
+        <field name="sequence">120</field>
+        <field name="default_for_projects">1</field>
+    </record>
+
+    <!-- Finance -->
+    <record id="metric_approved_budget" model="lhi.project.dashboard.metric">
+        <field name="name">Approved Budget</field>
+        <field name="code">budget_approved</field>
+        <field name="section">Finance</field>
+        <field name="metric_type">automatic</field>
+        <field name="automatic_code">budget_approved</field>
+        <field name="unit">currency</field>
+        <field name="sequence">200</field>
+        <field name="default_for_projects">1</field>
+    </record>
+
+    <record id="metric_committed_budget" model="lhi.project.dashboard.metric">
+        <field name="name">Committed Amount</field>
+        <field name="code">budget_committed</field>
+        <field name="section">Finance</field>
+        <field name="metric_type">automatic</field>
+        <field name="automatic_code">budget_committed</field>
+        <field name="unit">currency</field>
+        <field name="sequence">210</field>
+        <field name="default_for_projects">1</field>
+    </record>
+
+    <record id="metric_paid_budget" model="lhi.project.dashboard.metric">
+        <field name="name">Paid Amount</field>
+        <field name="code">budget_paid</field>
+        <field name="section">Finance</field>
+        <field name="metric_type">automatic</field>
+        <field name="automatic_code">budget_paid</field>
+        <field name="unit">currency</field>
+        <field name="sequence">220</field>
+        <field name="default_for_projects">1</field>
+    </record>
+
+    <record id="metric_available_budget" model="lhi.project.dashboard.metric">
+        <field name="name">Available Budget</field>
+        <field name="code">budget_available</field>
+        <field name="section">Finance</field>
+        <field name="metric_type">automatic</field>
+        <field name="automatic_code">budget_available</field>
+        <field name="unit">currency</field>
+        <field name="sequence">230</field>
+        <field name="default_for_projects">1</field>
+    </record>
+
+    <record id="metric_budget_utilization" model="lhi.project.dashboard.metric">
+        <field name="name">Budget Utilization</field>
+        <field name="code">budget_utilization_pct</field>
+        <field name="section">Finance</field>
+        <field name="metric_type">automatic</field>
+        <field name="automatic_code">budget_utilization_pct</field>
+        <field name="unit">percentage</field>
+        <field name="sequence">240</field>
+        <field name="default_for_projects">1</field>
+    </record>
+
+    <!-- Ready-to-use manual training/reach metrics -->
+    <record id="metric_manual_total_trainings" model="lhi.project.dashboard.metric">
+        <field name="name">Total Trainings</field>
+        <field name="code">manual_total_trainings</field>
+        <field name="section">Training</field>
+        <field name="metric_type">manual</field>
+        <field name="unit">number</field>
+        <field name="sequence">300</field>
+    </record>
+
+    <record id="metric_manual_completed_trainings" model="lhi.project.dashboard.metric">
+        <field name="name">Completed Trainings</field>
+        <field name="code">manual_completed_trainings</field>
+        <field name="section">Training</field>
+        <field name="metric_type">manual</field>
+        <field name="unit">number</field>
+        <field name="sequence">310</field>
+    </record>
+
+    <record id="metric_manual_participants" model="lhi.project.dashboard.metric">
+        <field name="name">Total Participants</field>
+        <field name="code">manual_total_participants</field>
+        <field name="section">Training</field>
+        <field name="metric_type">manual</field>
+        <field name="unit">number</field>
+        <field name="sequence">320</field>
+    </record>
+
+    <record id="metric_manual_female_participants" model="lhi.project.dashboard.metric">
+        <field name="name">Female Participants</field>
+        <field name="code">manual_female_participants</field>
+        <field name="section">Training</field>
+        <field name="metric_type">manual</field>
+        <field name="unit">number</field>
+        <field name="sequence">330</field>
+    </record>
+
+    <record id="metric_manual_male_participants" model="lhi.project.dashboard.metric">
+        <field name="name">Male Participants</field>
+        <field name="code">manual_male_participants</field>
+        <field name="section">Training</field>
+        <field name="metric_type">manual</field>
+        <field name="unit">number</field>
+        <field name="sequence">340</field>
+    </record>
+
+</odoo>

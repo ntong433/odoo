@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem
+        id="menu_project_dashboard_settings_root"
+        name="Programs &amp; Grants"
+        parent="lhi_dashboard.menu_lhi_erp_settings_root"
+        sequence="50"
+        groups="lhi_programme_management.group_lhi_programmes_admin,lhi_security.group_lhi_erp_admin"
+    />
+
+    <menuitem
+        id="menu_project_dashboard_metrics"
+        name="Dashboard Metrics"
+        parent="menu_project_dashboard_settings_root"
+        action="action_project_dashboard_metrics"
+        sequence="10"
+        groups="lhi_programme_management.group_lhi_programmes_admin,lhi_security.group_lhi_erp_admin"
+    />
+
+    <menuitem
+        id="menu_project_dashboard_assignments"
+        name="Project Dashboard Configuration"
+        parent="menu_project_dashboard_settings_root"
+        action="action_project_dashboard_assignments"
+        sequence="20"
+        groups="lhi_programme_management.group_lhi_programmes_admin,lhi_security.group_lhi_erp_admin"
+    />
+
+    <!--
+        Move the existing audit hierarchy away from the operational
+        Programs & Grants application. The audit models/actions are
+        not modified.
+    -->
+    <record id="lhi_audit.menu_lhi_audit_root" model="ir.ui.menu">
+        <field name="parent_id" ref="menu_project_dashboard_settings_root"/>
+        <field name="sequence">90</field>
+    </record>
+
+</odoo>

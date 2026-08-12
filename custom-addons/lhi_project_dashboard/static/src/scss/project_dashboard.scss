@@ -1,0 +1,151 @@
+.lhi_project_dashboard_host {
+    display: block;
+    width: 100%;
+    max-width: none;
+    clear: both;
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.lhi_project_dashboard_host > .o_field_widget,
+.lhi_project_dashboard_host .lhi_project_dashboard_field {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    flex: 1 1 100% !important;
+}
+
+.lhi_project_dashboard {
+    display: block;
+    width: 100%;
+    max-width: none;
+    margin-bottom: 1.5rem;
+}
+
+.lhi_project_dashboard_header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.25rem;
+    align-items: flex-start;
+    padding: 1.1rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color, #dee2e6);
+    border-radius: 0.75rem;
+    background: var(--o-view-background-color, #fff);
+}
+
+.lhi_project_dashboard_title {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.lhi_project_dashboard_metadata {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1rem;
+    margin-top: 0.4rem;
+    opacity: 0.8;
+}
+
+.lhi_project_dashboard_meta_item {
+    font-size: 0.85rem;
+}
+
+.lhi_project_dashboard_controls {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.lhi_project_dashboard_controls label {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.lhi_project_dashboard_controls select {
+    min-width: 6rem;
+    margin-top: 0.2rem;
+}
+
+.lhi_project_dashboard_section {
+    margin-bottom: 1.25rem;
+}
+
+.lhi_project_dashboard_section_title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    padding: 0.55rem 0.75rem;
+    border-bottom: 2px solid var(--border-color, #dee2e6);
+}
+
+.lhi_project_dashboard_grid {
+    display: grid;
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+    gap: 0.85rem;
+    padding-top: 0.85rem;
+}
+
+.lhi_project_metric_card {
+    min-height: 115px;
+    padding: 1rem;
+    border: 1px solid var(--border-color, #dee2e6);
+    border-radius: 0.7rem;
+    background: var(--o-view-background-color, #fff);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.lhi_project_metric_name {
+    font-size: 0.78rem;
+    font-weight: 600;
+    opacity: 0.75;
+}
+
+.lhi_project_metric_value {
+    margin-top: 0.45rem;
+    font-size: 1.65rem;
+    line-height: 1.2;
+    font-weight: 700;
+}
+
+.lhi_project_metric_target {
+    margin-top: 0.4rem;
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+
+.lhi_project_metric_progress {
+    height: 0.35rem;
+    margin-top: 0.75rem;
+}
+
+.lhi_project_dashboard_loading,
+.lhi_project_dashboard_empty {
+    padding: 2rem;
+    text-align: center;
+    opacity: 0.7;
+}
+
+@media (max-width: 1100px) {
+    .lhi_project_dashboard_grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .lhi_project_dashboard_header {
+        flex-direction: column;
+    }
+
+    .lhi_project_dashboard_controls {
+        width: 100%;
+    }
+
+    .lhi_project_dashboard_grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -273,9 +273,12 @@ class LhiAsset(models.Model):
     _asset_tag_unique = models.Constraint(
         "unique(asset_tag)", "Asset tags must be unique across LHI ERP."
     )
-    _serial_company_unique = models.Constraint(
-        "unique(serial_number, company_id)",
-        "A manufacturer serial number can only be used once per company.",
+    _serial_state_unique = models.Constraint(
+        "unique(serial_number, company_id, registration_state_id)",
+        (
+            "A serial number can only be used once per company "
+            "and registration state."
+        ),
     )
 
     @api.depends("state_id", "state_id.code", "state_id.lhi_asset_code")

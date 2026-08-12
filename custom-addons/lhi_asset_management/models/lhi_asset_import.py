@@ -117,10 +117,12 @@ class LhiAssetImportWizard(models.TransientModel):
             )
             raise UserError(_("Upload payload changed before transmission."))
 
+        upload_notice = False
         if document.storage_state != "available" and document.spool_path:
             try:
                 document.action_upload()
             except UserError as err:
+                upload_notice = err
                 _logger.info(
                     "Initial upload notice for %s (Document %s): %s. Executing DriveItem metadata verification.",
                     document.name,
@@ -141,13 +143,27 @@ class LhiAssetImportWizard(models.TransientModel):
         connection = document.graph_connection_id
 
         if not drive_id or not returned_item_id:
+            if upload_notice:
+                _logger.error(
+                    "Legacy Asset Import upload failed before SharePoint returned "
+                    "a DriveItem. Document ID: %s, filename: %s, error: %s",
+                    document.id,
+                    document.name,
+                    upload_notice,
+                )
+                document._mark_failed(str(upload_notice), enqueue=False)
+                raise upload_notice
+
             _logger.error(
                 "Remote item is missing after upload completion. Document ID: %s, filename: %s, expected size: %s",
                 document.id,
                 document.name,
                 expected_size,
             )
-            document._mark_failed("Remote item is missing after upload completion.", enqueue=False)
+            document._mark_failed(
+                "Remote item is missing after upload completion.",
+                enqueue=False,
+            )
             raise UserError(_("Remote item is missing after upload completion."))
 
         if document.sharepoint_item_id and returned_item_id != document.sharepoint_item_id:
@@ -317,6 +333,22 @@ class LhiAssetImportWizard(models.TransientModel):
             }
         )
 
+        # Each legacy import batch must keep its own immutable source file in
+        # SharePoint. The original user filename remains on source_filename,
+        # while the remote document name is made unique per audit batch.
+        if "." in filename:
+            filename_stem, filename_extension = filename.rsplit(".", 1)
+            remote_filename = "%s__%s.%s" % (
+                filename_stem,
+                (batch.name or ("batch-%s" % batch.id)).replace("/", "-"),
+                filename_extension,
+            )
+        else:
+            remote_filename = "%s__%s" % (
+                filename,
+                (batch.name or ("batch-%s" % batch.id)).replace("/", "-"),
+            )
+
         # Parse preview independently from an in-memory copy without mutating upload_payload
         preview_stream = io.BytesIO(bytes(decoded_content))
         batch._load_preview(preview_stream, extension)
@@ -339,7 +371,7 @@ class LhiAssetImportWizard(models.TransientModel):
             else:
                 existing_doc._mark_failed("Payload mismatch on retry", enqueue=False)
                 document = self.env["lhi.document.item"].create_from_bytes(
-                    name=filename,
+                    name=remote_filename,
                     content=upload_payload,
                     mime_type=mime_type,
                     linked_model=batch._name,
@@ -350,7 +382,7 @@ class LhiAssetImportWizard(models.TransientModel):
                 )
         else:
             document = self.env["lhi.document.item"].create_from_bytes(
-                name=filename,
+                name=remote_filename,
                 content=upload_payload,
                 mime_type=mime_type,
                 linked_model=batch._name,
@@ -1155,23 +1187,45 @@ class LhiAssetImportRow(models.Model):
         raw_serial = (self.serial_number or "").strip()
         if raw_serial:
             norm_serial = " ".join(raw_serial.split()).casefold()
-            if norm_serial in seen_serials:
-                first_row = seen_serials[norm_serial]
+            serial_scope = (
+                self.registration_state_id.id or False,
+                norm_serial,
+            )
+
+            if serial_scope in seen_serials:
+                first_row = seen_serials[serial_scope]
                 duplicate = True
                 errors.append(
-                    _("Serial number is duplicated within this batch. First occurrence: row %s.") % first_row
+                    _(
+                        "Serial number is duplicated within this registration "
+                        "state in the current batch. First occurrence: row %s."
+                    )
+                    % first_row
                 )
             else:
-                seen_serials[norm_serial] = self.row_number
+                seen_serials[serial_scope] = self.row_number
 
             if self.env["lhi.asset"].search_count(
                 [
                     ("serial_number", "=ilike", raw_serial),
                     ("company_id", "=", self.batch_id.company_id.id),
+                    (
+                        "registration_state_id",
+                        "=",
+                        self.registration_state_id.id,
+                    ),
                 ]
             ):
                 duplicate = True
-                errors.append(_("Duplicate manufacturer serial number '%s'.") % raw_serial)
+                errors.append(
+                    _(
+                        "Duplicate serial number '%s' in registration state '%s'."
+                    )
+                    % (
+                        raw_serial,
+                        self.registration_state_id.display_name,
+                    )
+                )
 
         self.write(
             {

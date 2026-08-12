@@ -9,7 +9,7 @@ class LhiAsset(models.Model):
         default="standalone_departmental", required=True, tracking=True
     )
     workplan_activity_id = fields.Many2one("lhi.workplan.activity", tracking=True)
-    memo_id = fields.Many2one("lhi.activity.memo", tracking=True)
+    memo_id = fields.Many2one("lhi.memo", tracking=True)
     project_budget_line_id = fields.Many2one("lhi.project.budget.line", tracking=True)
 
 class LhiProject(models.Model):

@@ -10,9 +10,6 @@
                     <page string="Budgets">
                         <field name="programme_budget_ids" readonly="1"/>
                     </page>
-                    <page string="Activity Memos">
-                        <field name="activity_memo_ids" readonly="1"/>
-                    </page>
                     <page string="Execution Requests">
                         <field name="execution_request_ids" readonly="1"/>
                     </page>
@@ -31,9 +28,6 @@
             <xpath expr="//notebook" position="inside">
                 <page string="Budget Allocations">
                     <field name="programme_allocation_ids" readonly="1"/>
-                </page>
-                <page string="Approved Memos">
-                    <field name="activity_memo_ids" readonly="1"/>
                 </page>
                 <page string="Requests">
                     <field name="execution_request_ids" readonly="1"/>

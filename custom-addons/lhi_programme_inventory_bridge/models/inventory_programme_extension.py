@@ -9,7 +9,7 @@ class StockMove(models.Model):
     
     # Redefine mixin fields to disable tracking, since stock.move doesn't support it natively
     work_context = fields.Selection(WORK_CONTEXT, default="standalone_departmental", required=True, tracking=False)
-    memo_id = fields.Many2one("lhi.activity.memo", string="Approved Activity Memo", tracking=False)
+    memo_id = fields.Many2one("lhi.memo", string="Approved Project Memo", tracking=False)
     project_budget_line_id = fields.Many2one("lhi.project.budget.line", string="Project Budget Line", tracking=False)
 
     @api.constrains("work_context", "lhi_project_id", "lhi_activity_id", "memo_id", "project_budget_line_id")

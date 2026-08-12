@@ -10,6 +10,7 @@
         "mail", "lhi_security", "lhi_base", "lhi_grant_award",
         "lhi_funding_opportunity", "lhi_project_workplan", "lhi_approval_matrix",
         "lhi_sharepoint_storage",
+        "lhi_memo_management",
     ],
     "data": [
         "security/programme_security.xml",
@@ -17,6 +18,7 @@
         "data/sequences.xml",
         "views/programme_lifecycle_views.xml",
         "views/project_context_views.xml",
+        "views/central_memo_programme_views.xml",
         "views/programme_menus.xml",
     ],
     "installable": True,

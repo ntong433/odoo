@@ -200,7 +200,7 @@ class LhiExecutionRequest(models.Model):
     project_id = fields.Many2one("lhi.project")
     grant_id = fields.Many2one("lhi.award")
     activity_id = fields.Many2one("lhi.workplan.activity")
-    memo_id = fields.Many2one("lhi.activity.memo")
+    memo_id = fields.Many2one("lhi.memo")
     budget_line_id = fields.Many2one("lhi.project.budget.line")
     requested_amount = fields.Monetary(required=True, currency_field="currency_id")
     approved_amount = fields.Monetary(currency_field="currency_id")

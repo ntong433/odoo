@@ -100,6 +100,96 @@
                         <t t-esc="section.name"/>
                     </div>
 
+                    <div t-if="section.name === 'Finance' &amp;&amp; state.projectFx &amp;&amp; state.projectFx.has_award"
+                         class="lhi_project_fx_summary">
+
+                        <div class="lhi_project_fx_summary_item">
+
+                            <span class="lhi_project_fx_summary_label">
+                                Award Currency
+                            </span>
+
+                            <strong>
+                                <t t-esc="state.projectFx.currency_code"/>
+                            </strong>
+
+                        </div>
+
+                        <div class="lhi_project_fx_summary_item">
+
+                            <span class="lhi_project_fx_summary_label">
+                                Original Award
+                            </span>
+
+                            <strong>
+                                <t t-esc="formatCurrency(
+                                    state.projectFx.original_award,
+                                    state.projectFx.currency_code
+                                )"/>
+                            </strong>
+
+                        </div>
+
+                        <div class="lhi_project_fx_summary_item">
+
+                            <span class="lhi_project_fx_summary_label">
+                                Current Approved Award
+                            </span>
+
+                            <strong>
+                                <t t-esc="formatCurrency(
+                                    state.projectFx.current_award,
+                                    state.projectFx.currency_code
+                                )"/>
+                            </strong>
+
+                        </div>
+
+                        <div t-if="state.projectFx.is_foreign_currency"
+                             class="lhi_project_fx_summary_item">
+
+                            <span class="lhi_project_fx_summary_label">
+                                Current FX Rate
+                            </span>
+
+                            <strong t-if="state.projectFx.rate">
+                                <t t-esc="formatFxRate()"/>
+                            </strong>
+
+                            <strong t-else="">
+                                FX rate not configured
+                            </strong>
+
+                        </div>
+
+                        <div t-if="state.projectFx.rate_date"
+                             class="lhi_project_fx_summary_item">
+
+                            <span class="lhi_project_fx_summary_label">
+                                Effective From
+                            </span>
+
+                            <strong>
+                                <t t-esc="formatFxDate()"/>
+                            </strong>
+
+                        </div>
+
+                        <div t-if="state.projectFx.rate_source"
+                             class="lhi_project_fx_summary_item">
+
+                            <span class="lhi_project_fx_summary_label">
+                                Rate Source
+                            </span>
+
+                            <strong>
+                                <t t-esc="state.projectFx.rate_source"/>
+                            </strong>
+
+                        </div>
+
+                    </div>
+
                     <div class="lhi_project_dashboard_grid">
                         <article t-foreach="section.metrics"
                                  t-as="metric"
@@ -110,8 +200,49 @@
                                 <t t-esc="metric.name"/>
                             </div>
 
-                            <div class="lhi_project_metric_value">
+                            <t t-if="metric.dual_currency">
+
+                                <div class="lhi_project_metric_dual_value">
+
+                                    <div class="lhi_project_metric_currency_block">
+
+                                        <div class="lhi_project_metric_value">
+                                            <t t-esc="formatCurrency(
+                                                metric.project_currency_value,
+                                                metric.project_currency_code
+                                            )"/>
+                                        </div>
+
+                                        <div class="lhi_project_metric_currency_label">
+                                            Current Approved Award
+                                        </div>
+
+                                    </div>
+
+                                    <div class="lhi_project_metric_currency_block">
+
+                                        <div class="lhi_project_metric_value">
+                                            <t t-esc="formatCurrency(
+                                                metric.ngn_value,
+                                                metric.ngn_currency_code
+                                            )"/>
+                                        </div>
+
+                                        <div class="lhi_project_metric_currency_label">
+                                            Current NGN Equivalent
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </t>
+
+                            <div t-else=""
+                                 class="lhi_project_metric_value">
+
                                 <t t-esc="formatValue(metric)"/>
+
                             </div>
 
                             <div t-if="metric.target !== null"

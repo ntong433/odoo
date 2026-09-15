@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lhi_award_amendment_user,Award Amendment User,model_lhi_award_amendment,base.group_user,1,0,0,0
+access_lhi_award_amendment_finance,Award Amendment Finance,model_lhi_award_amendment,lhi_programme_management.group_lhi_programmes_finance_manager,1,1,1,0
+access_lhi_award_amendment_admin,Award Amendment Admin,model_lhi_award_amendment,base.group_system,1,1,1,1
+access_lhi_project_fx_user,Project FX User,model_lhi_project_fx_rate,base.group_user,1,0,0,0
+access_lhi_project_fx_finance,Project FX Finance,model_lhi_project_fx_rate,lhi_programme_management.group_lhi_programmes_finance_manager,1,1,1,0
+access_lhi_project_fx_admin,Project FX Admin,model_lhi_project_fx_rate,base.group_system,1,1,1,1

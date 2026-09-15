@@ -34,6 +34,7 @@ export class LhiProjectDashboard extends Component {
             metadata: [],
             canConfigure: false,
             currencyCode: "NGN",
+            projectFx: null,
         });
 
         onWillStart(
@@ -78,6 +79,9 @@ export class LhiProjectDashboard extends Component {
                 Boolean(result.can_configure);
             this.state.currencyCode =
                 result.currency_code || "NGN";
+
+            this.state.projectFx =
+                result.project_fx || null;
         } catch (error) {
             this.notification.add(
                 error?.message ||
@@ -117,6 +121,90 @@ export class LhiProjectDashboard extends Component {
         );
 
         await this.action.doAction(result);
+    }
+
+    formatCurrency(value, currencyCode) {
+        if (
+            value === null ||
+            value === undefined
+        ) {
+            return "—";
+        }
+
+        const numericValue = Number(value);
+
+        try {
+            return new Intl.NumberFormat(
+                undefined,
+                {
+                    style: "currency",
+                    currency:
+                        currencyCode || "NGN",
+                    maximumFractionDigits:
+                        currencyCode === "NGN"
+                            ? 0
+                            : 2,
+                }
+            ).format(numericValue);
+        } catch {
+            return `${
+                currencyCode || ""
+            } ${numericValue.toLocaleString(
+                undefined,
+                {
+                    maximumFractionDigits: 2,
+                }
+            )}`;
+        }
+    }
+
+    formatFxRate() {
+        const fx = this.state.projectFx;
+
+        if (
+            !fx ||
+            !fx.is_foreign_currency ||
+            !fx.rate
+        ) {
+            return "";
+        }
+
+        return `1 ${fx.currency_code} = ${
+            fx.ngn_code || "NGN"
+        } ${Number(fx.rate).toLocaleString(
+            undefined,
+            {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+            }
+        )}`;
+    }
+
+    formatFxDate() {
+        const value =
+            this.state.projectFx?.rate_date;
+
+        if (!value) {
+            return "";
+        }
+
+        const normalized =
+            value.includes("T")
+                ? value
+                : value.replace(" ", "T");
+
+        const date = new Date(normalized);
+
+        return date.toLocaleString(
+            undefined,
+            {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+            }
+        );
     }
 
     formatValue(metric) {

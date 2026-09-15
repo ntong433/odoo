@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ===================== -->
+    <!-- AWARD AMENDMENTS      -->
+    <!-- ===================== -->
+
+    <record id="view_lhi_award_amendment_list"
+            model="ir.ui.view">
+
+        <field name="name">
+            lhi.award.amendment.list
+        </field>
+
+        <field name="model">lhi.award.amendment</field>
+
+        <field name="arch" type="xml">
+
+            <list>
+                <field name="name"/>
+                <field name="award_id"/>
+                <field name="amendment_type"/>
+                <field name="amount_change"/>
+                <field name="revised_amount"/>
+                <field name="effective_date"/>
+                <field name="revised_end_date"/>
+                <field name="state"
+                       widget="badge"/>
+            </list>
+
+        </field>
+
+    </record>
+
+
+    <record id="view_lhi_award_amendment_form"
+            model="ir.ui.view">
+
+        <field name="name">
+            lhi.award.amendment.form
+        </field>
+
+        <field name="model">lhi.award.amendment</field>
+
+        <field name="arch" type="xml">
+
+            <form string="Award Amendment">
+
+                <header>
+
+                    <button name="action_submit"
+                            string="Submit"
+                            type="object"
+                            class="oe_highlight"
+                            invisible="state != 'draft'"/>
+
+                    <button name="action_approve"
+                            string="Approve"
+                            type="object"
+                            class="oe_highlight"
+                            groups="lhi_programme_management.group_lhi_programmes_finance_manager,base.group_system"
+                            invisible="state != 'submitted'"/>
+
+                    <button name="action_reject"
+                            string="Reject"
+                            type="object"
+                            groups="lhi_programme_management.group_lhi_programmes_finance_manager,base.group_system"
+                            invisible="state != 'submitted'"/>
+
+                    <field name="state"
+                           widget="statusbar"
+                           statusbar_visible="draft,submitted,approved,rejected"/>
+
+                </header>
+
+                <sheet>
+
+                    <div class="oe_title">
+
+                        <h1>
+                            <field name="name"
+                                   readonly="1"/>
+                        </h1>
+
+                    </div>
+
+                    <group>
+
+                        <group string="Amendment">
+
+                            <field name="award_id"
+                                   readonly="state != 'draft'"/>
+
+                            <field name="amendment_type"
+                                   readonly="state != 'draft'"/>
+
+                            <field name="currency_id"
+                                   readonly="1"/>
+
+                            <field name="amount_change"
+                                   readonly="state != 'draft'"/>
+
+                            <field name="effective_date"
+                                   readonly="state != 'draft'"/>
+
+                            <field name="donor_approval_date"
+                                   readonly="state != 'draft'"/>
+
+                        </group>
+
+                        <group string="Award Impact">
+
+                            <field name="previous_amount"
+                                   readonly="1"/>
+
+                            <field name="revised_amount"
+                                   readonly="1"/>
+
+                            <field name="previous_end_date"
+                                   readonly="1"/>
+
+                            <field name="revised_end_date"
+                                   readonly="state != 'draft'"/>
+
+                        </group>
+
+                    </group>
+
+                    <group string="Justification">
+
+                        <field name="reason"
+                               readonly="state != 'draft'"/>
+
+                        <field name="description"
+                               readonly="state != 'draft'"/>
+
+                        <field name="approval_document_id"
+                               readonly="state == 'approved'"/>
+
+                    </group>
+
+                    <group string="Approval Audit">
+
+                        <field name="approved_by_id"
+                               readonly="1"/>
+
+                        <field name="approved_at"
+                               readonly="1"/>
+
+                    </group>
+
+                </sheet>
+
+                <chatter/>
+
+            </form>
+
+        </field>
+
+    </record>
+
+
+    <!-- ===================== -->
+    <!-- FX RATES              -->
+    <!-- ===================== -->
+
+    <record id="view_lhi_project_fx_rate_list"
+            model="ir.ui.view">
+
+        <field name="name">
+            lhi.project.fx.rate.list
+        </field>
+
+        <field name="model">lhi.project.fx.rate</field>
+
+        <field name="arch" type="xml">
+
+            <list>
+
+                <field name="effective_at"/>
+
+                <field name="scope"/>
+
+                <field name="project_id"/>
+
+                <field name="currency_id"/>
+
+                <field name="rate"/>
+
+                <field name="source"/>
+
+                <field name="provider_name"/>
+
+                <field name="entered_by_id"/>
+
+            </list>
+
+        </field>
+
+    </record>
+
+
+    <record id="view_lhi_project_fx_rate_form"
+            model="ir.ui.view">
+
+        <field name="name">
+            lhi.project.fx.rate.form
+        </field>
+
+        <field name="model">lhi.project.fx.rate</field>
+
+        <field name="arch" type="xml">
+
+            <form string="Project Exchange Rate">
+
+                <sheet>
+
+                    <group>
+
+                        <group string="Rate">
+
+                            <field name="scope"/>
+
+                            <field name="project_id"
+                                   invisible="scope != 'project'"/>
+
+                            <field name="currency_id"/>
+
+                            <field name="ngn_currency_id"/>
+
+                            <field name="rate"/>
+
+                        </group>
+
+                        <group string="Source">
+
+                            <field name="effective_at"/>
+
+                            <field name="source"/>
+
+                            <field name="provider_name"/>
+
+                            <field name="source_reference"/>
+
+                            <field name="entered_by_id"
+                                   readonly="1"/>
+
+                        </group>
+
+                    </group>
+
+                    <group string="Reason / Notes">
+
+                        <field name="reason"/>
+
+                    </group>
+
+                </sheet>
+
+                <chatter/>
+
+            </form>
+
+        </field>
+
+    </record>
+
+
+    <!-- ===================== -->
+    <!-- AWARD EXTENSION       -->
+    <!-- ===================== -->
+
+    <record id="view_lhi_award_form_fx"
+            model="ir.ui.view">
+
+        <field name="name">
+            lhi.award.form.fx.amendments
+        </field>
+
+        <field name="model">lhi.award</field>
+
+        <field name="inherit_id"
+               ref="lhi_base.view_lhi_award_form"/>
+
+        <field name="priority">90</field>
+
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='amount']"
+                   position="attributes">
+
+                <attribute name="string">
+                    Original Signed Award Amount
+                </attribute>
+
+            </xpath>
+
+            <xpath expr="//sheet"
+                   position="inside">
+
+                <group string="Award Value &amp; Amendments">
+
+                    <group>
+
+                        <field name="original_award_amount"
+                               readonly="1"/>
+
+                        <field name="approved_amendment_amount"
+                               readonly="1"/>
+
+                        <field name="current_award_amount"
+                               readonly="1"/>
+
+                    </group>
+
+                    <group>
+
+                        <field name="original_start_date"/>
+
+                        <field name="original_end_date"/>
+
+                        <button name="action_open_award_amendments"
+                                string="Award Amendment History"
+                                type="object"
+                                class="btn-secondary"/>
+
+                    </group>
+
+                </group>
+
+                <notebook>
+
+                    <page string="Award Amendments"
+                          name="lhi_award_amendments">
+
+                        <field name="amendment_ids"
+                               readonly="1">
+
+                            <list>
+
+                                <field name="name"/>
+
+                                <field name="amendment_type"/>
+
+                                <field name="amount_change"/>
+
+                                <field name="revised_amount"/>
+
+                                <field name="revised_end_date"/>
+
+                                <field name="state"
+                                       widget="badge"/>
+
+                            </list>
+
+                        </field>
+
+                    </page>
+
+                </notebook>
+
+            </xpath>
+
+        </field>
+
+    </record>
+
+
+    <!-- ===================== -->
+    <!-- PROJECT EXTENSION     -->
+    <!-- ===================== -->
+
+    <record id="view_lhi_project_form_fx"
+            model="ir.ui.view">
+
+        <field name="name">
+            lhi.project.form.fx
+        </field>
+
+        <field name="model">lhi.project</field>
+
+        <field name="inherit_id"
+               ref="lhi_base.view_lhi_project_form"/>
+
+        <field name="priority">95</field>
+
+        <field name="arch" type="xml">
+
+            <xpath expr="//sheet"
+                   position="inside">
+
+                <group string="Award Currency &amp; Current Valuation">
+
+                    <group>
+
+                        <field name="project_currency_id"
+                               readonly="1"/>
+
+                        <field name="original_award_amount"
+                               readonly="1"/>
+
+                        <field name="current_award_amount"
+                               readonly="1"/>
+
+                    </group>
+
+                    <group>
+
+                        <field name="current_fx_rate"
+                               readonly="1"/>
+
+                        <field name="current_fx_date"
+                               readonly="1"/>
+
+                        <field name="current_fx_source"
+                               readonly="1"/>
+
+                        <field name="current_ngn_equivalent"
+                               readonly="1"/>
+
+                        <button name="action_open_fx_history"
+                                string="Exchange Rate History"
+                                type="object"
+                                class="btn-secondary"/>
+
+                    </group>
+
+                </group>
+
+            </xpath>
+
+        </field>
+
+    </record>
+
+</odoo>
